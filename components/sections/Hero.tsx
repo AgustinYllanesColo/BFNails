@@ -48,7 +48,7 @@ export function Hero() {
   const row = [...WORDS, ...WORDS, ...WORDS];
 
   return (
-    <section ref={root} className="relative isolate flex min-h-[100svh] flex-col items-center justify-center overflow-hidden pt-24 pb-16 md:pt-28">
+    <section ref={root} className="relative isolate flex min-h-[100svh] flex-col items-center justify-center overflow-hidden pt-24 pb-24 md:pt-28 md:pb-28">
       {/* Fondo: halo + filas de texto gigante en movimiento */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-20">
         <div className="absolute top-1/2 left-1/2 size-[90vw] max-w-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(242,167,195,0.28)_0%,rgba(201,160,99,0.12)_38%,rgba(254,247,231,0)_66%)] animate-[float_10s_ease-in-out_infinite]" />
@@ -101,7 +101,7 @@ export function Hero() {
         <SpinningBadge text="press-on · soft gel · a tu talle · " size={140} />
       </div>
 
-      <div data-hero-cue aria-hidden className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] font-bold tracking-[0.25em] text-ink-soft uppercase">
+      <div data-hero-cue aria-hidden className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] font-bold tracking-[0.25em] text-ink-soft uppercase">
         deslizá
         <span className="block h-10 w-px overflow-hidden bg-bordo/15">
           <span className="block h-1/2 w-full bg-bordo animate-[cue_1.8s_ease-in-out_infinite]" />
