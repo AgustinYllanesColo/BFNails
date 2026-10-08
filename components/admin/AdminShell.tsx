@@ -48,7 +48,7 @@ export function AdminShell({ children, session, dbReady }: { children: React.Rea
         <div className="mt-6 hidden text-xs text-ink-soft md:block">
           <p className="truncate">{session.email}</p>
           {session.dev && <p className="mt-1 rounded bg-yellow/40 px-2 py-1 text-ink">Modo desarrollo (sin login)</p>}
-          {!dbReady && <p className="mt-1 rounded bg-red/10 px-2 py-1 text-red">Sin base de datos: solo lectura de datos locales</p>}
+          {!dbReady && <p className="mt-1 rounded bg-red/10 px-2 py-1 text-red">Sin base de datos: los pedidos por la web están deshabilitados</p>}
           <Link href="/" className="mt-3 block underline underline-offset-4">
             Ver el sitio →
           </Link>

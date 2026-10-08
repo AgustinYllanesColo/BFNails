@@ -25,9 +25,9 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Props = { transfer: { alias: string; holder: string }; mp: boolean };
+type Props = { transfer: { alias: string; holder: string }; mp: boolean; disabled?: boolean };
 
-export function CheckoutForm({ transfer, mp }: Props) {
+export function CheckoutForm({ transfer, mp, disabled }: Props) {
   const { items, clear } = useCart();
   const mounted = useHydrated();
   const [options, setOptions] = useState<ShippingOption[]>([]);
@@ -266,8 +266,8 @@ export function CheckoutForm({ transfer, mp }: Props) {
           </motion.span>
         </div>
         {serverError && <p className="mt-3 text-sm font-medium text-red">{serverError}</p>}
-        <Button type="submit" size="lg" className="mt-5 w-full" disabled={submitting}>
-          {submitting ? "Creando tu pedido…" : needsConfirmation ? "Enviar pedido" : payment === "mercadopago" ? "Pagar con Mercado Pago" : "Confirmar pedido"}
+        <Button type="submit" size="lg" className="mt-5 w-full" disabled={submitting || disabled}>
+          {disabled ? "Pedidos por la web no disponibles" : submitting ? "Creando tu pedido…" : needsConfirmation ? "Enviar pedido" : payment === "mercadopago" ? "Pagar con Mercado Pago" : "Confirmar pedido"}
         </Button>
         <p className="mt-3 text-center text-xs text-ink-soft">Después de este paso confirmás por WhatsApp con un toque.</p>
       </aside>

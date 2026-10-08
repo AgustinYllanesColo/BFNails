@@ -5,7 +5,7 @@ import { getBuilderConfig, getSettings } from "@/lib/data/settings";
 import { quoteSelection } from "@/lib/pricing";
 import { quoteFromTable } from "@/lib/shipping/table";
 import { quoteShipping } from "@/lib/shipping";
-import { createOrder, newToken, publicOrderUrl, updateOrder, type NewOrder } from "@/lib/data/orders";
+import { createOrder, newToken, ordersEnabled, publicOrderUrl, updateOrder, type NewOrder } from "@/lib/data/orders";
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
 import { designImage } from "@/lib/data/catalog";
 import type { CartItem } from "@/lib/types";
@@ -16,6 +16,9 @@ import type { CartItem } from "@/lib/types";
  * init_point; si es transferencia, devuelve la URL pública del pedido.
  */
 export async function POST(req: Request) {
+  if (!ordersEnabled()) {
+    return NextResponse.json({ error: "Todavía no estamos tomando pedidos por la web. Escribinos por WhatsApp." }, { status: 503 });
+  }
   const parsed = checkoutSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Revisá los datos", issues: parsed.error.flatten() }, { status: 400 });

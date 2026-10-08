@@ -8,9 +8,24 @@ import { orders as ordersTable } from "@/lib/db/schema";
 import type { Order, OrderStatus } from "@/lib/types";
 
 /**
- * Repositorio de pedidos. Con DATABASE_URL usa Postgres. Sin DB (desarrollo
- * local) guarda en .data/orders.json, suficiente para probar el flujo completo.
+ * Repositorio de pedidos. Con DATABASE_URL usa Postgres. Sin DB, SOLO en
+ * desarrollo local, guarda en .data/orders.json para probar el flujo. En
+ * producción sin base de datos los pedidos están deshabilitados: nunca se
+ * acepta un pedido que no quede guardado en un lugar persistente.
  */
+export function ordersEnabled(): boolean {
+  return Boolean(process.env.DATABASE_URL) || process.env.NODE_ENV === "development";
+}
+
+export class OrdersDisabledError extends Error {
+  constructor() {
+    super("Los pedidos están deshabilitados hasta conectar la base de datos.");
+  }
+}
+
+function assertOrdersEnabled() {
+  if (!ordersEnabled()) throw new OrdersDisabledError();
+}
 
 const LOCAL_FILE = path.join(process.cwd(), ".data", "orders.json");
 
@@ -62,6 +77,7 @@ export function formatOrderNumber(seq: number) {
 export type NewOrder = Omit<Order, "id" | "number" | "createdAt" | "updatedAt">;
 
 export async function createOrder(input: NewOrder): Promise<Order> {
+  assertOrdersEnabled();
   const db = getDb();
   const now = new Date();
   if (!db) {
@@ -108,6 +124,7 @@ export async function createOrder(input: NewOrder): Promise<Order> {
 }
 
 export async function updateOrder(id: string, patch: Partial<Omit<Order, "id" | "number" | "createdAt">>): Promise<Order | null> {
+  assertOrdersEnabled();
   const db = getDb();
   if (!db) {
     const list = await readLocal();
@@ -144,6 +161,7 @@ export async function updateOrder(id: string, patch: Partial<Omit<Order, "id" | 
 
 export async function getOrderById(id: string): Promise<Order | null> {
   const db = getDb();
+  if (!db && !ordersEnabled()) return null;
   if (!db) return (await readLocal()).find((o) => o.id === id) ?? null;
   const [row] = await db.select().from(ordersTable).where(eq(ordersTable.id, id)).limit(1);
   return row ? rowToOrder(row) : null;
@@ -151,6 +169,7 @@ export async function getOrderById(id: string): Promise<Order | null> {
 
 export async function getOrderByNumber(number: string): Promise<Order | null> {
   const db = getDb();
+  if (!db && !ordersEnabled()) return null;
   if (!db) return (await readLocal()).find((o) => o.number === number) ?? null;
   const [row] = await db.select().from(ordersTable).where(eq(ordersTable.number, number)).limit(1);
   return row ? rowToOrder(row) : null;
@@ -158,6 +177,7 @@ export async function getOrderByNumber(number: string): Promise<Order | null> {
 
 export async function listOrders(opts: { status?: OrderStatus; limit?: number } = {}): Promise<Order[]> {
   const db = getDb();
+  if (!db && !ordersEnabled()) return [];
   if (!db) {
     const list = (await readLocal()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return (opts.status ? list.filter((o) => o.status === opts.status) : list).slice(0, opts.limit ?? 200);
