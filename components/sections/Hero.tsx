@@ -65,12 +65,14 @@ export function Hero() {
           <div className="absolute inset-[6%] -z-10 rounded-full leopard-bg opacity-40 [mask-image:radial-gradient(circle,black_30%,transparent_70%)]" />
           <div ref={kitty} className="relative will-change-transform">
             <Image
-              src="/brand/logo-kitty.png"
+              src="/brand/logo-kitty.webp"
               alt="BF Studio, Kitty con orejas de leopardo guiñando"
-              width={1000}
-              height={934}
+              width={800}
+              height={747}
               priority
-              className="w-full drop-shadow-[0_30px_40px_rgba(74,14,14,0.25)]"
+              fetchPriority="high"
+              sizes="(min-width: 768px) 40vw, 78vw"
+              className="w-full"
             />
           </div>
         </div>

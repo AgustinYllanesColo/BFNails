@@ -19,7 +19,7 @@ export function Footer() {
       />
       <div className="container-x grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <Image src="/brand/logo-nails.png" alt="BF Nails Studio" width={320} height={193} className="w-64 brightness-0 invert" />
+          <Image src="/brand/logo-nails.webp" alt="BF Nails Studio" width={320} height={193} sizes="256px" className="w-64 brightness-0 invert" />
           <p className="mt-6 max-w-sm text-cream/80">{siteConfig.description}</p>
         </div>
         <div>

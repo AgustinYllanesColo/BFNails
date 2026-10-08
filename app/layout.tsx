@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [{ url: "/brand/logo-nails.png", width: 1400, height: 845 }],
+    images: [{ url: "/brand/logo-nails.webp", width: 960, height: 580 }],
   },
   icons: { icon: "/brand/kitty-icon.png" },
 };

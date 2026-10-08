@@ -48,7 +48,8 @@ export function SplitText({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Comp = Tag as any;
   return (
-    <Comp ref={ref} className={cn("inline-block", className)} aria-label={text}>
+    <Comp ref={ref} className={cn("inline-block", className)}>
+      <span className="sr-only">{text}</span>
       {words.map((word, wi) => (
         <span
           key={wi}

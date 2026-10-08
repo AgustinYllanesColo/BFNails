@@ -26,7 +26,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <Section tone="bordo" className="grain overflow-hidden">
+    <Section tone="bordo" className="overflow-hidden">
       <div className="container-x">
         <Reveal className="mb-14 max-w-2xl">
           <Eyebrow className="text-cream">Cómo funciona</Eyebrow>

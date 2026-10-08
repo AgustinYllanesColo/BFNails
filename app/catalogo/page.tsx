@@ -40,6 +40,7 @@ export default async function CatalogoPage() {
             Diseñá tu set
           </Button>
         </div>
+        <h2 className="sr-only">Diseños</h2>
         <CatalogGrid designs={designs} />
       </div>
     </div>
