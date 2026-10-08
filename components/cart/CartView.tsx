@@ -8,6 +8,7 @@ import { formatARS } from "@/lib/format";
 import { describeSizes } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/Button";
 import type { CartItem } from "@/lib/types";
+import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 
 export function CartView() {
   const { items, remove, setQty } = useCart();
@@ -65,11 +66,17 @@ export function CartView() {
                 </div>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="inline-flex items-center rounded-pill bg-cream-deep">
-                    <button type="button" onClick={() => setQty(item.id, item.qty - 1)} className="size-9 font-bold" aria-label="Menos">
+                    <button type="button" onClick={() => setQty(item.id, item.qty - 1)} className="size-9 font-bold transition-transform active:scale-75" aria-label="Menos">
                       −
                     </button>
-                    <span className="w-6 text-center text-sm font-semibold">{item.qty}</span>
-                    <button type="button" onClick={() => setQty(item.id, item.qty + 1)} className="size-9 font-bold" aria-label="Más">
+                    <span className="relative inline-block h-5 w-6 overflow-hidden text-center text-sm font-semibold">
+                      <AnimatePresence initial={false} mode="popLayout">
+                        <motion.span key={item.qty} initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }} className="absolute inset-0">
+                          {item.qty}
+                        </motion.span>
+                      </AnimatePresence>
+                    </span>
+                    <button type="button" onClick={() => setQty(item.id, item.qty + 1)} className="size-9 font-bold transition-transform active:scale-75" aria-label="Más">
                       +
                     </button>
                   </div>
@@ -84,23 +91,25 @@ export function CartView() {
         </AnimatePresence>
       </ul>
 
-      <aside className="h-fit rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10 lg:sticky lg:top-28">
-        <div className="flex justify-between text-sm">
-          <span className="text-ink-soft">Subtotal</span>
-          <span className="font-semibold">{formatARS(subtotal)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-ink-soft">Envío</span>
-          <span className="text-ink-soft">se calcula al pagar</span>
-        </div>
-        <div className="mt-4 flex items-baseline justify-between border-t border-bordo/10 pt-4">
-          <span className="font-semibold">{needsConfirmation ? "Desde" : "Total"}</span>
-          <span className="font-display text-3xl text-bordo">{formatARS(subtotal)}</span>
-        </div>
-        {needsConfirmation && (
-          <p className="mt-2 text-xs text-ink-soft">Tenés un set con notas: Bren confirma el precio final por WhatsApp.</p>
-        )}
-        <Button href="/checkout" size="lg" className="mt-5 w-full">
+      <aside className="h-fit lg:sticky lg:top-28">
+        <Receipt
+          title="BF Studio · tu carrito"
+          meta={new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
+          lines={[
+            ...items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: `${i.name} ×${i.qty}`, value: formatARS(i.unitPrice * i.qty) })),
+            { kind: "rule", id: "r1" },
+            { kind: "row", id: "sub", label: "subtotal", value: formatARS(subtotal) },
+            { kind: "row", id: "envio", label: "envío", value: "al pagar", tone: "muted" },
+            { kind: "row", id: "total", label: needsConfirmation ? "DESDE" : "TOTAL", value: formatARS(subtotal), tone: "bold" },
+          ]}
+          footer={[
+            { kind: "row", id: "items", label: "sets", value: String(items.reduce((a, i) => a + i.qty, 0)) },
+            { kind: "row", id: "kit", label: "incluye", value: "10 uñas + pegamento + lima" },
+            ...(needsConfirmation ? [{ kind: "text", id: "conf", text: "* precio final a confirmar por WhatsApp", align: "left" } as ReceiptLine] : []),
+            { kind: "text", id: "thanks", text: "✦ gracias por elegir bf studio ✦", align: "center" },
+          ]}
+        />
+        <Button href="/checkout" size="lg" className="mt-6 w-full">
           Ir a pagar
         </Button>
         <Button href="/catalogo" variant="ghost" className="mt-2 w-full">

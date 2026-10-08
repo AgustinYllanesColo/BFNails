@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Shrikhand, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Shrikhand, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
@@ -12,6 +12,13 @@ const display = Shrikhand({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "700"],
 });
 
 const sans = Space_Grotesk({
@@ -46,7 +53,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es-AR" className={`${display.variable} ${sans.variable} h-full antialiased`}>
+    <html lang="es-AR" className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-cream text-ink">
         <SmoothScroll>
           <Cursor />

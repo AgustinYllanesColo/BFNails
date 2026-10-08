@@ -52,7 +52,7 @@ export const checkoutSchema = z.object({
       })
       .optional(),
   }),
-  payment: z.object({ method: z.enum(["mercadopago", "transferencia"]) }),
+  payment: z.object({ method: z.enum(["mercadopago", "transferencia", "efectivo"]) }),
   items: z.array(cartItemSchema).min(1, "El carrito está vacío").max(20),
 });
 

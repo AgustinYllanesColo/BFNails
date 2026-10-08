@@ -52,6 +52,7 @@
 
   --font-display: var(--font-display), "Shrikhand", Georgia, serif;
   --font-sans: var(--font-sans), "Space Grotesk", system-ui, sans-serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius);
@@ -203,6 +204,26 @@ body {
 @keyframes spin-slow {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes print-led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(200%);
   }
 }
 

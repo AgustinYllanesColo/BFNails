@@ -32,23 +32,24 @@ export function Nav() {
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
       <div
         className={cn(
-          "pointer-events-auto mx-auto flex max-w-[1440px] items-center justify-between rounded-pill px-3 py-2 transition-all duration-500 ease-[var(--ease-out-expo)] md:px-4",
+          "pointer-events-auto mx-auto flex max-w-[1440px] items-center justify-between rounded-pill px-3 py-1.5 transition-all duration-500 ease-[var(--ease-out-expo)] md:px-5",
           scrolled || open
             ? "bg-cream/85 shadow-[0_10px_40px_-20px_rgba(74,14,14,0.45)] ring-1 ring-bordo/10 backdrop-blur-xl"
             : "bg-transparent",
         )}
       >
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="group flex items-center gap-2.5">
           <Image
-            src="/brand/kitty-icon.png"
+            src="/brand/kitty.webp"
             alt=""
-            width={40}
-            height={37}
+            width={51}
+            height={60}
             priority
-            className="h-9 w-auto drop-shadow-sm transition-transform duration-500 ease-[var(--ease-bounce)] hover:rotate-[-8deg] hover:scale-110"
+            className="h-12 w-auto transition-transform duration-500 ease-[var(--ease-bounce)] group-hover:rotate-[-8deg] group-hover:scale-110 md:h-14"
           />
-          <span className="font-display text-xl leading-none text-ink md:text-2xl">
-            nails<span className="ml-1 font-sans text-[10px] font-bold tracking-[0.18em] text-bordo uppercase">BF studio</span>
+          <span className="flex flex-col leading-none">
+            <span className="font-display text-[1.9rem] leading-[0.9] text-ink md:text-[2.3rem]">nails</span>
+            <span className="font-sans text-[10px] font-bold tracking-[0.22em] text-bordo uppercase md:text-[11px]">BF Studio</span>
           </span>
         </Link>
 

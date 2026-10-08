@@ -12,6 +12,8 @@ import type { DeliveryMethod, PaymentMethod } from "@/lib/types";
 import type { ShippingOption } from "@/lib/shipping/types";
 import { Field, inputClass, textareaClass } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
+import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
+import { PAYMENT_LABEL } from "@/lib/types";
 
 const formSchema = z.object({
   name: z.string().trim().min(2, "Decinos tu nombre"),
@@ -76,6 +78,10 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
   const needsAddress = delivery !== "retiro";
   const needsFullAddress = delivery.startsWith("correo");
+  const cashAllowed = delivery === "retiro" || delivery === "moto";
+  const motoFrom = chosen?.from === true;
+  // Si la entrega deja de admitir efectivo, el método efectivo cae al siguiente disponible.
+  const effectivePayment: PaymentMethod = !cashAllowed && payment === "efectivo" ? (mp ? "mercadopago" : "transferencia") : payment;
 
   const correoOptions = useMemo(() => options.filter((o) => o.method.startsWith("correo")), [options]);
 
@@ -98,7 +104,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
             method: delivery,
             address: needsAddress ? { street: v.street, city: v.city, province: v.province, postalCode: v.postalCode, notes: v.notes } : undefined,
           },
-          payment: { method: payment },
+          payment: { method: effectivePayment },
           items: items.map((i) =>
             i.kind === "design"
               ? { kind: "design", designSlug: i.designSlug, qty: i.qty, sizes: i.sizes }
@@ -156,7 +162,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
             {options
               .filter((o) => !o.method.startsWith("correo"))
               .map((o) => (
-                <OptionCard key={o.method} selected={delivery === o.method} onClick={() => setDelivery(o.method)} title={o.label} description={o.description} price={o.cost === 0 ? "Gratis" : formatARS(o.cost)} />
+                <OptionCard key={o.method} selected={delivery === o.method} onClick={() => setDelivery(o.method)} title={o.label} description={o.description} price={o.cost === 0 ? "Gratis" : `${o.from ? "Desde " : ""}${formatARS(o.cost)}`} />
               ))}
             <div className={cn("rounded-lg border p-4 transition-colors", delivery.startsWith("correo") ? "border-bordo bg-white" : "border-cream-ink bg-white/60")}>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -225,16 +231,28 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
           <h2 className="mb-4 font-display text-2xl">
             <span className="mr-2 text-bordo">03</span>Pago
           </h2>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-3">
             <OptionCard
-              selected={payment === "mercadopago"}
+              selected={effectivePayment === "mercadopago"}
               onClick={() => setPayment("mercadopago")}
               title="Mercado Pago"
               description={mp ? "Tarjetas, dinero en cuenta, cuotas. Te redirigimos a pagar." : "Todavía no está activo. Elegí transferencia."}
               disabled={!mp}
             />
-            <OptionCard selected={payment === "transferencia"} onClick={() => setPayment("transferencia")} title="Transferencia" description={`Al alias ${transfer.alias} (${transfer.holder}). Mandás el comprobante por WhatsApp.`} />
+            <OptionCard selected={effectivePayment === "transferencia"} onClick={() => setPayment("transferencia")} title="Transferencia" description={`Al alias ${transfer.alias} (${transfer.holder}). Mandás el comprobante por WhatsApp.`} />
+            <OptionCard
+              selected={effectivePayment === "efectivo"}
+              onClick={() => setPayment("efectivo")}
+              title="Efectivo"
+              description={cashAllowed ? "Pagás al recibir, en la estación o cuando te lo llevamos." : "Solo para retiro en estación o moto."}
+              disabled={!cashAllowed}
+            />
           </div>
+          {motoFrom && (
+            <p className="mt-3 rounded-md bg-cream-deep p-3 text-sm text-ink-soft">
+              La moto arranca en {formatARS(chosen?.cost ?? 0)} y el precio final depende de tu barrio. Bren te lo confirma por WhatsApp antes de cobrar.
+            </p>
+          )}
           {needsConfirmation && (
             <p className="mt-3 rounded-md bg-yellow/30 p-3 text-sm">
               Tenés un set con notas: Bren confirma el precio final por WhatsApp y después pagás.
@@ -243,31 +261,25 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
         </section>
       </div>
 
-      <aside className="h-fit rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10 lg:sticky lg:top-28">
-        <p className="text-xs font-bold tracking-wider text-ink-soft uppercase">Resumen</p>
-        <ul className="mt-3 space-y-2 text-sm">
-          {items.map((i) => (
-            <li key={i.id} className="flex justify-between gap-3">
-              <span className="text-ink-soft">
-                {i.name} × {i.qty}
-              </span>
-              <span className="font-semibold">{formatARS(i.unitPrice * i.qty)}</span>
-            </li>
-          ))}
-          <li className="flex justify-between gap-3">
-            <span className="text-ink-soft">Envío{chosen ? `: ${chosen.label}` : ""}</span>
-            <span className="font-semibold">{shippingCost === 0 ? "Gratis" : formatARS(shippingCost)}</span>
-          </li>
-        </ul>
-        <div className="mt-4 flex items-baseline justify-between border-t border-bordo/10 pt-4">
-          <span className="font-semibold">{needsConfirmation ? "Desde" : "Total"}</span>
-          <motion.span key={total} initial={{ scale: 1.1 }} animate={{ scale: 1 }} className="font-display text-3xl text-bordo">
-            {formatARS(total)}
-          </motion.span>
-        </div>
+      <aside className="h-fit lg:sticky lg:top-28">
+        <Receipt
+          title="BF Studio · pedido"
+          meta={new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
+          lines={[
+            ...items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: `${i.name} ×${i.qty}`, value: formatARS(i.unitPrice * i.qty) })),
+            { kind: "rule", id: "r1" },
+            { kind: "row", id: "envio", label: chosen ? chosen.label.toLowerCase() : "envío", value: shippingCost === 0 ? "gratis" : `${motoFrom ? "desde " : ""}${formatARS(shippingCost)}` },
+            { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[effectivePayment].toLowerCase(), tone: "muted" },
+            { kind: "row", id: "total", label: needsConfirmation || motoFrom ? "DESDE" : "TOTAL", value: formatARS(total), tone: "bold" },
+          ]}
+          footer={[
+            ...(needsConfirmation || motoFrom ? [{ kind: "text", id: "conf", text: "* bren confirma el precio final por whatsapp" } as ReceiptLine] : []),
+            { kind: "text", id: "thanks", text: "✦ hecho a mano en lanús ✦", align: "center" },
+          ]}
+        />
         {serverError && <p className="mt-3 text-sm font-medium text-red">{serverError}</p>}
         <Button type="submit" size="lg" className="mt-5 w-full" disabled={submitting || disabled}>
-          {disabled ? "Pedidos por la web no disponibles" : submitting ? "Creando tu pedido…" : needsConfirmation ? "Enviar pedido" : payment === "mercadopago" ? "Pagar con Mercado Pago" : "Confirmar pedido"}
+          {disabled ? "Pedidos por la web no disponibles" : submitting ? "Creando tu pedido…" : needsConfirmation || motoFrom ? "Enviar pedido" : effectivePayment === "mercadopago" ? "Pagar con Mercado Pago" : "Confirmar pedido"}
         </Button>
         <p className="mt-3 text-center text-xs text-ink-soft">Después de este paso confirmás por WhatsApp con un toque.</p>
       </aside>

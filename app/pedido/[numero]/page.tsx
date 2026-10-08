@@ -2,14 +2,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getOrderByNumber, publicOrderUrl } from "@/lib/data/orders";
 import { getSettings } from "@/lib/data/settings";
-import { ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/types";
+import { ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } from "@/lib/types";
 import { formatARS, cn } from "@/lib/format";
-import { describeItem, orderConfirmationMessage, waLink } from "@/lib/whatsapp";
+import { describeItem, describeSizes, orderConfirmationMessage, waLink } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Section";
 import { Stars } from "@/components/motion/Stars";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { ClearCartOnMount } from "@/components/cart/ClearCartOnMount";
+import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 
 export const metadata: Metadata = { title: "Tu pedido", robots: { index: false } };
 
@@ -72,7 +73,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
         {/* Acción principal: WhatsApp */}
         <div className="mt-8 rounded-lg bg-bordo p-6 text-cream md:p-8">
           <h2 className="font-display text-2xl md:text-3xl">
-            {order.status === "a_confirmar" ? "Mandale el pedido a Bren" : order.payment.method === "transferencia" && !isPaid ? "Transferí y confirmá por WhatsApp" : "Confirmá por WhatsApp"}
+            {order.status === "a_confirmar" ? "Mandale el pedido a Bren" : order.payment.method === "transferencia" && !isPaid ? "Transferí y confirmá por WhatsApp" : order.payment.method === "efectivo" ? "Confirmá por WhatsApp y pagás al recibir" : "Confirmá por WhatsApp"}
           </h2>
           {order.payment.method === "transferencia" && !isPaid && order.status !== "a_confirmar" && (
             <div className="mt-4 rounded-md bg-cream/10 p-4 text-sm">
@@ -101,35 +102,30 @@ export default async function PedidoPage({ params, searchParams }: Props) {
           </div>
         </div>
 
-        {/* Detalle */}
-        <div className="mt-8 rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10">
-          <h2 className="font-display text-2xl">Detalle</h2>
-          <pre className="mt-3 font-sans text-sm whitespace-pre-wrap text-ink-soft">{order.items.map(describeItem).join("\n")}</pre>
-          <dl className="mt-4 space-y-1 border-t border-bordo/10 pt-4 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ink-soft">Entrega</dt>
-              <dd>
-                {order.delivery.label} · {order.delivery.cost ? formatARS(order.delivery.cost) : "gratis"}
-              </dd>
-            </div>
-            {order.delivery.address?.street && (
-              <div className="flex justify-between gap-4">
-                <dt className="text-ink-soft">Dirección</dt>
-                <dd className="text-right">
-                  {[order.delivery.address.street, order.delivery.address.city, order.delivery.address.province, order.delivery.address.postalCode].filter(Boolean).join(", ")}
-                </dd>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <dt className="text-ink-soft">Pago</dt>
-              <dd className="capitalize">{order.payment.method === "mercadopago" ? "Mercado Pago" : "Transferencia"}</dd>
-            </div>
-            <div className="flex justify-between text-base font-bold">
-              <dt>{order.needsConfirmation ? "Desde" : "Total"}</dt>
-              <dd className="text-bordo">{formatARS(order.total)}</dd>
-            </div>
-          </dl>
-          <p className="mt-4 text-xs text-ink-soft">Guardá este link para ver el estado de tu pedido cuando quieras.</p>
+        {/* Ticket */}
+        <div className="mt-10 grid gap-8 md:grid-cols-[1fr_1fr] md:items-start">
+          <Receipt
+            title={`BF Studio · ${order.number}`}
+            meta={new Date(order.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
+            lines={[
+              ...order.items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: `${i.name} ×${i.qty} · ${describeSizes(i.sizes).toLowerCase()}`, value: formatARS(i.unitPrice * i.qty) })),
+              { kind: "rule", id: "r1" },
+              { kind: "row", id: "envio", label: order.delivery.label.toLowerCase(), value: order.delivery.cost ? formatARS(order.delivery.cost) : "gratis" },
+              { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[order.payment.method].toLowerCase(), tone: "muted" },
+              { kind: "row", id: "estado", label: "estado", value: ORDER_STATUS_LABEL[order.status].toLowerCase(), tone: "accent" },
+              { kind: "row", id: "total", label: order.needsConfirmation ? "DESDE" : "TOTAL", value: formatARS(order.total), tone: "bold" },
+            ]}
+            footer={[
+              ...(order.delivery.address?.street ? [{ kind: "text", id: "dir", text: [order.delivery.address.street, order.delivery.address.city, order.delivery.address.postalCode].filter(Boolean).join(", ") } as ReceiptLine] : []),
+              { kind: "text", id: "thanks", text: "✦ gracias por elegir bf studio ✦", align: "center" },
+            ]}
+            idleLabel="guardá este link"
+          />
+          <div className="rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10">
+            <h2 className="font-display text-2xl">Detalle de tu set</h2>
+            <pre className="mt-3 font-sans text-sm whitespace-pre-wrap text-ink-soft">{order.items.map(describeItem).join("\n\n")}</pre>
+            <p className="mt-4 text-xs text-ink-soft">Guardá este link para ver el estado de tu pedido cuando quieras.</p>
+          </div>
         </div>
       </div>
     </div>

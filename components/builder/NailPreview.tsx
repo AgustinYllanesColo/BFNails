@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { motion } from "motion/react";
 import type { BuilderSelection } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
@@ -94,6 +95,8 @@ function Pattern({ sel, i, id }: { sel: BuilderSelection; i: number; id: string 
   );
 }
 
+const SKIN = { base: "#ecc3ad", shade: "#d6a28a", light: "#f6dccb", line: "#c9937a" };
+
 export function NailPreview({ sel, config }: { sel: BuilderSelection; config: BuilderConfig }) {
   const base = config.bases.find((b) => b.id === sel.base)?.hex ?? "#e8c4b0";
   const has = (x: string) => sel.extras.includes(x);
@@ -104,64 +107,99 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   const degrade = has("degrade");
   const catEye = has("cat-eye");
   const aurora = has("aurora");
+  // ids únicos: puede haber más de una vista previa en la página (móvil + escritorio)
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const u = (name: string) => `${name}-${uid}`;
+  const NAIL = 1.3; // escala de la uña (ancho 60 → 78 px)
+  const FINGER_W = 98;
 
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-cream-deep ring-1 ring-bordo/10">
       <svg viewBox="0 0 800 600" className="h-full w-full" role="img" aria-label="Vista previa de tu set">
         <defs>
-          <linearGradient id="gloss" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="white" stopOpacity={mate ? 0.08 : 0.45} />
+          <linearGradient id={u("gloss")} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="white" stopOpacity={mate ? 0.06 : 0.42} />
             <stop offset="0.45" stopColor="white" stopOpacity="0" />
-            <stop offset="1" stopColor="black" stopOpacity={mate ? 0.04 : 0.14} />
+            <stop offset="1" stopColor="black" stopOpacity={mate ? 0.05 : 0.16} />
           </linearGradient>
-          <linearGradient id="chrome" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="white" stopOpacity="0.7" />
+          <linearGradient id={u("chrome")} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="white" stopOpacity="0.75" />
             <stop offset="0.3" stopColor="white" stopOpacity="0.05" />
-            <stop offset="0.55" stopColor="white" stopOpacity="0.55" />
-            <stop offset="1" stopColor="black" stopOpacity="0.25" />
+            <stop offset="0.55" stopColor="white" stopOpacity="0.6" />
+            <stop offset="1" stopColor="black" stopOpacity="0.28" />
           </linearGradient>
-          <linearGradient id="degrade" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fff" stopOpacity="0.85" />
+          <linearGradient id={u("degrade")} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fff" stopOpacity="0.9" />
             <stop offset="0.7" stopColor="#fff" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="cateye" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id={u("cateye")} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0.35" stopColor="white" stopOpacity="0" />
             <stop offset="0.5" stopColor="white" stopOpacity="0.55" />
             <stop offset="0.65" stopColor="white" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="aurora" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id={u("aurora")} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#ffd1f0" stopOpacity="0.5" />
             <stop offset="0.5" stopColor="#c7f9ff" stopOpacity="0.5" />
             <stop offset="1" stopColor="#fff2b3" stopOpacity="0.5" />
           </linearGradient>
+          <linearGradient id={u("finger")} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor={SKIN.shade} />
+            <stop offset="0.35" stopColor={SKIN.base} />
+            <stop offset="0.7" stopColor={SKIN.light} />
+            <stop offset="1" stopColor={SKIN.shade} />
+          </linearGradient>
+          <linearGradient id={u("nailDepth")} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="black" stopOpacity="0.18" />
+            <stop offset="0.25" stopColor="black" stopOpacity="0" />
+          </linearGradient>
+          <radialGradient id={u("shadow")} cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stopColor="#4a0e0e" stopOpacity="0.22" />
+            <stop offset="1" stopColor="#4a0e0e" stopOpacity="0" />
+          </radialGradient>
         </defs>
         <rect width="800" height="600" fill="#f5e8c8" />
+        <ellipse cx="400" cy="420" rx="380" ry="120" fill={`url(#${u("shadow")})`} />
+
         {[0, 1, 2, 3, 4].map((n) => {
-          const widthScale = [0.9, 0.96, 1, 0.96, 0.86][n];
-          const x = 110 + n * 140;
-          const y = 330 + [40, 10, 0, 10, 48][n];
+          const widthScale = [0.9, 0.97, 1, 0.97, 0.86][n];
+          const x = 112 + n * 144;
+          const tipY = 150 + [52, 16, 0, 18, 64][n];
           const rot = (n - 2) * 3;
-          const id = `clip-${n}`;
+          const id = `clip-${uid}-${n}`;
+          const fw = FINGER_W * widthScale;
+          const nailH = 160 * NAIL * scaleY;
           return (
-            <motion.g
-              key={n}
-              animate={{ x, y, rotate: rot, scaleX: widthScale * 2.1, scaleY: scaleY * 2.1 }}
-              transition={{ type: "spring", stiffness: 180, damping: 20 }}
-              style={{ transformOrigin: "30px 160px" }}
-            >
-              <g transform="translate(-30 -160)">
-                <motion.path d={SHAPES[sel.shape]} animate={{ fill: base }} transition={{ duration: 0.5 }} stroke="rgba(0,0,0,0.08)" strokeWidth="1" />
-                <g clipPath={`url(#${id})`}>
-                  {degrade && <rect x="0" y="0" width="60" height="160" fill="url(#degrade)" />}
-                  {(has("francesita") || has("francesita-color")) && <path d={TIP[sel.shape]} fill={tipColor} opacity="0.95" />}
-                  <Pattern sel={sel} i={n} id={id} />
-                  {catEye && <rect x="-20" y="0" width="100" height="160" fill="url(#cateye)" />}
-                  {aurora && <rect x="0" y="0" width="60" height="160" fill="url(#aurora)" />}
-                  <path d={SHAPES[sel.shape]} fill={chrome ? "url(#chrome)" : "url(#gloss)"} />
-                  {!mate && <ellipse cx="18" cy="30" rx="6" ry="18" fill="white" opacity={chrome ? 0.8 : 0.4} transform="rotate(-12 18 30)" />}
+            <g key={n} transform={`rotate(${rot} ${x} ${tipY + 260})`}>
+              {/* Dedo: arranca por debajo del borde libre de la uña, que sobresale de la punta */}
+              <rect x={x - fw / 2} y={tipY + nailH * 0.3} width={fw} height={700} rx={fw / 2} fill={`url(#${u("finger")})`} />
+              <path d={`M ${x - fw * 0.42} ${tipY + nailH + 46} q ${fw * 0.42} 26 ${fw * 0.84} 0`} fill="none" stroke={SKIN.line} strokeWidth="2" opacity="0.45" />
+              <path d={`M ${x - fw * 0.36} ${tipY + nailH + 78} q ${fw * 0.36} 22 ${fw * 0.72} 0`} fill="none" stroke={SKIN.line} strokeWidth="1.5" opacity="0.3" />
+              {/* Uña */}
+              <motion.g
+                animate={{ x, y: tipY - 12, scaleX: widthScale * NAIL, scaleY: scaleY * NAIL }}
+                transition={{ type: "spring", stiffness: 170, damping: 22 }}
+                style={{ transformOrigin: "0px 0px" }}
+              >
+                <g transform="translate(-30 0)">
+                  {/* sombra de la uña sobre el dedo */}
+                  <path d={SHAPES[sel.shape]} fill="black" opacity="0.12" transform="translate(1.5 3)" />
+                  <motion.path d={SHAPES[sel.shape]} animate={{ fill: base }} transition={{ duration: 0.5 }} stroke="rgba(0,0,0,0.12)" strokeWidth="0.8" />
+                  <g clipPath={`url(#${id})`}>
+                    {degrade && <rect x="0" y="0" width="60" height="160" fill={`url(#${u("degrade")})`} />}
+                    {(has("francesita") || has("francesita-color")) && <path d={TIP[sel.shape]} fill={tipColor} opacity="0.96" />}
+                    <Pattern sel={sel} i={n} id={id} />
+                    {catEye && <rect x="-20" y="0" width="100" height="160" fill={`url(#${u("cateye")})`} />}
+                    {aurora && <rect x="0" y="0" width="60" height="160" fill={`url(#${u("aurora")})`} />}
+                    <path d={SHAPES[sel.shape]} fill={chrome ? `url(#${u("chrome")})` : `url(#${u("gloss")})`} />
+                    {/* cutícula: curva clara en la base */}
+                    <path d="M4 160 q26 -22 52 0" fill={SKIN.base} opacity="0.9" />
+                    <rect x="0" y="0" width="60" height="160" fill={`url(#${u("nailDepth")})`} />
+                    {!mate && <ellipse cx="17" cy="34" rx="5.5" ry="19" fill="white" opacity={chrome ? 0.85 : 0.45} transform="rotate(-12 17 34)" />}
+                    {!mate && <ellipse cx="44" cy="120" rx="2.5" ry="9" fill="white" opacity="0.25" transform="rotate(-12 44 120)" />}
+                  </g>
                 </g>
-              </g>
-            </motion.g>
+              </motion.g>
+            </g>
           );
         })}
       </svg>

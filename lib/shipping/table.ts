@@ -21,7 +21,7 @@ export const DEFAULT_SHIPPING_TABLE: ShippingTable = {
   moto: {
     enabled: true,
     cost: 2500,
-    description: "Lanús y alrededores. Te lo lleva Tomás en moto, coordinamos por WhatsApp.",
+    description: "Lanús y alrededores. El precio final depende del barrio y te lo confirmamos por WhatsApp.",
   },
   // Valores de referencia (a cargar con los reales desde el admin)
   correo: {
@@ -64,7 +64,7 @@ export function quoteFromTable(table: ShippingTable, postalCode?: string): Shipp
     },
   ];
   if (table.moto.enabled) {
-    options.push({ method: "moto", label: "Moto en zona", description: table.moto.description, cost: table.moto.cost });
+    options.push({ method: "moto", label: "Moto en zona", description: table.moto.description, cost: table.moto.cost, from: true });
   }
   const zone = postalCode ? zoneForPostalCode(postalCode) : null;
   if (zone) {

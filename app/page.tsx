@@ -15,10 +15,13 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <Marquee
-        items={["press-on", "soft gel", "semipermanente", "a tu talle", "reutilizables", "hechas a mano"]}
-        className="border-y border-bordo/10 bg-cream-deep py-3 font-display text-xl text-bordo md:text-2xl"
-      />
+      <div className="relative z-10 -mx-[4vw] -my-3 w-[108vw] -rotate-[1.5deg]">
+        <Marquee
+          items={["press-on en soft gel", "a tu talle", "hechas a mano", "reutilizables", "Lanús", "envíos a todo el país"]}
+          className="bg-bordo py-3 font-display text-xl text-cream md:py-4 md:text-2xl"
+          speed={26}
+        />
+      </div>
       <Featured designs={featured} />
       <HowItWorks />
       <BuilderCta />

@@ -3,6 +3,7 @@ import { CheckoutForm } from "@/components/cart/CheckoutForm";
 import { Eyebrow, Heading } from "@/components/ui/Section";
 import { getSettings } from "@/lib/data/settings";
 import { mpEnabled } from "@/lib/mercadopago";
+import Image from "next/image";
 import { ordersEnabled } from "@/lib/data/orders";
 import { Button } from "@/components/ui/Button";
 import { waLink } from "@/lib/whatsapp";
@@ -24,12 +25,13 @@ export default async function CheckoutPage() {
           </Heading>
         </div>
         {!ordersEnabled() && (
-          <div className="mb-8 rounded-lg bg-bordo p-6 text-cream">
-            <p className="font-display text-2xl">Todavía no tomamos pedidos por la web</p>
-            <p className="mt-2 text-sm text-cream/85">
-              Estamos terminando de conectar la tienda. Mientras tanto, mandale tu pedido a Bren por WhatsApp y lo armamos por ahí.
-            </p>
-            <Button href={waLink("Hola Bren! Quiero hacer un pedido 🐱")} target="_blank" rel="noreferrer" variant="leopard" className="mt-4">
+          <div className="mb-8 flex flex-col items-start gap-5 rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10 md:flex-row md:items-center">
+            <Image src="/brand/kitty.webp" alt="" width={72} height={85} className="h-20 w-auto shrink-0" />
+            <div className="flex-1">
+              <p className="font-display text-2xl">Por ahora, los pedidos van por WhatsApp</p>
+              <p className="mt-1 text-sm text-ink-soft">Armá tu carrito igual: con un toque se lo mandás a Bren con todo el detalle y lo cerrás por ahí.</p>
+            </div>
+            <Button href={waLink("Hola Bren! Quiero hacer un pedido 🐱")} target="_blank" rel="noreferrer" size="md">
               Pedir por WhatsApp
             </Button>
           </div>

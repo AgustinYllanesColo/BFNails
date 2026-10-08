@@ -7,6 +7,7 @@ export type ShippingOption = {
   cost: number;
   etaDays?: [number, number];
   estimated?: boolean; // true si viene de la tabla y no de una cotización en vivo
+  from?: boolean; // precio "desde": el final lo confirma Brenda (moto según barrio)
 };
 
 export type QuoteInput = {

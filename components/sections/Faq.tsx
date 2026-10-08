@@ -8,12 +8,12 @@ import { cn } from "@/lib/format";
 
 export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   {
-    q: "¿Qué son las press-on soft gel?",
-    a: "Uñas hechas en soft gel, un material flexible y liviano que se adapta a tu uña natural. Se pegan con el pegamento del kit y, bien cuidadas, duran entre 1 y 3 semanas. Se pueden despegar y volver a usar.",
+    q: "¿Qué son las press-on en soft gel?",
+    a: "Press-on son uñas ya hechas que se pegan sobre tu uña natural. Las nuestras están fabricadas en soft gel, un material flexible y liviano que se adapta a la curva de tu uña (mucho más cómodo que el plástico de las press-on comunes) y decoradas con esmalte semipermanente. Duran entre 1 y 3 semanas y se pueden despegar y volver a usar.",
   },
   {
     q: "¿Cómo sé mi talle?",
-    a: "Tenés dos caminos: elegir un talle estándar (XS, S, M, L) o medir cada uña en milímetros con una cinta o un papelito. En la página de talles te mostramos cómo, paso a paso. Si dudás, lo resolvemos por WhatsApp.",
+    a: "Tenés dos caminos. El rápido: elegir un talle estándar (XS, S, M, L) con nuestra guía. El exacto: medir el ancho de cada una de tus diez uñas en milímetros y mandárnoslo; con eso Bren hace el set personalizado a tu mano. En la página de talles te mostramos cómo medir paso a paso.",
   },
   {
     q: "¿Cuánto tarda mi pedido?",
@@ -21,11 +21,11 @@ export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "¿Cómo pago?",
-    a: "Con Mercado Pago (tarjetas, dinero en cuenta, cuotas) o por transferencia a un alias. El pedido se confirma por WhatsApp una vez hecho el pago.",
+    a: "Con Mercado Pago (tarjetas, dinero en cuenta, cuotas), por transferencia a un alias o en efectivo al recibir si retirás en la estación o te lo llevamos en moto. El pedido se confirma por WhatsApp.",
   },
   {
-    q: "¿Puedo pedir un diseño que no está en el catálogo?",
-    a: "Sí. En Diseñá tu set armás el tuyo y ves el precio al instante. Si querés algo muy particular, dejanos una nota o una foto de referencia y Bren te cotiza por WhatsApp antes de pagar.",
+    q: "¿Puedo pedir un diseño que vi en internet?",
+    a: "Sí, es de lo que más hacemos. En Diseñá tu set pegá el link de Pinterest, Instagram o TikTok (o describilo en las notas) y Bren te lo cotiza por WhatsApp antes de pagar. Si preferís, armá el tuyo con las opciones y ves el precio al instante.",
   },
   {
     q: "¿Qué viene en el kit?",

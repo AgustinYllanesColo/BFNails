@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { getOrderById, publicOrderUrl } from "@/lib/data/orders";
 import { formatARS } from "@/lib/format";
 import { adminMessages, describeItem, waLink } from "@/lib/whatsapp";
-import { ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/types";
+import { ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } from "@/lib/types";
 import { Card, PageTitle, StatusBadge, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
 import { confirmPrice, setNotes, setOrderStatus, setTracking } from "../actions";
 import { StatusButtons } from "@/components/admin/StatusButtons";
@@ -133,7 +133,7 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
             </div>
           </Card>
           <Card title="Pago">
-            <p className="text-sm capitalize">{order.payment.method === "mercadopago" ? "Mercado Pago" : "Transferencia"}</p>
+            <p className="text-sm">{PAYMENT_LABEL[order.payment.method]}</p>
             {order.payment.mpPaymentId && <p className="text-xs text-ink-soft">Pago MP #{order.payment.mpPaymentId}</p>}
             {order.payment.mpInitPoint && (
               <a href={order.payment.mpInitPoint} target="_blank" rel="noreferrer" className="text-xs text-bordo underline">

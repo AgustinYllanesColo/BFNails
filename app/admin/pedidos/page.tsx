@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { listOrders } from "@/lib/data/orders";
 import { formatARS, cn } from "@/lib/format";
 import { Card, PageTitle, StatusBadge, tableClass } from "@/components/admin/ui";
-import { ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/types";
+import { ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } from "@/lib/types";
 
 export default async function PedidosPage({ searchParams }: { searchParams: Promise<{ estado?: string }> }) {
   await requireAdmin();
@@ -52,7 +52,7 @@ export default async function PedidosPage({ searchParams }: { searchParams: Prom
                   </td>
                   <td className="max-w-[260px] text-xs">{o.items.map((i) => `${i.name} ×${i.qty}`).join(", ")}</td>
                   <td className="text-xs">{o.delivery.label}</td>
-                  <td className="text-xs capitalize">{o.payment.method === "mercadopago" ? "Mercado Pago" : "Transferencia"}</td>
+                  <td className="text-xs">{PAYMENT_LABEL[o.payment.method]}</td>
                   <td>
                     <StatusBadge status={o.status} />
                   </td>

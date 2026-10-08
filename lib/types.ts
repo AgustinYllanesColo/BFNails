@@ -71,7 +71,13 @@ export type CartItem =
     };
 
 export type DeliveryMethod = "retiro" | "moto" | "correo_domicilio" | "correo_sucursal";
-export type PaymentMethod = "mercadopago" | "transferencia";
+export type PaymentMethod = "mercadopago" | "transferencia" | "efectivo";
+
+export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
+  mercadopago: "Mercado Pago",
+  transferencia: "Transferencia",
+  efectivo: "Efectivo al recibir",
+};
 
 export type OrderStatus =
   | "a_confirmar"

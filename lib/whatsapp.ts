@@ -33,9 +33,11 @@ export function orderConfirmationMessage(order: Order, orderUrl: string): string
   const pay =
     order.payment.method === "transferencia"
       ? `Pago: transferencia al alias ${siteConfig.transfer.alias}. Te mando el comprobante por acá.`
-      : order.payment.mpPaymentId
-        ? `Pago: Mercado Pago (pago #${order.payment.mpPaymentId}).`
-        : "Pago: Mercado Pago.";
+      : order.payment.method === "efectivo"
+        ? "Pago: en efectivo cuando lo reciba."
+        : order.payment.mpPaymentId
+          ? `Pago: Mercado Pago (pago #${order.payment.mpPaymentId}).`
+          : "Pago: Mercado Pago.";
   const confirm = order.needsConfirmation
     ? "\n\nHay detalles a cotizar, ¿me confirmás el precio final?"
     : "";

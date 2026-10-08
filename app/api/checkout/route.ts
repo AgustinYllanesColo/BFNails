@@ -56,6 +56,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Necesitamos tu dirección para la moto" }, { status: 400 });
   }
 
+  if (input.payment.method === "efectivo" && !(chosen.method === "retiro" || chosen.method === "moto")) {
+    return NextResponse.json({ error: "El pago en efectivo es solo para retiro en estación o moto" }, { status: 400 });
+  }
+  // La moto tiene precio "desde": Brenda confirma el costo final por WhatsApp antes del pago.
+  if (chosen.from) needsConfirmation = true;
+
   const total = subtotal + chosen.cost;
   const useMp = input.payment.method === "mercadopago" && mpEnabled() && !needsConfirmation;
 
@@ -69,7 +75,7 @@ export async function POST(req: Request) {
     },
     items,
     subtotal,
-    delivery: { method: chosen.method, cost: chosen.cost, label: chosen.label, address: input.delivery.address },
+    delivery: { method: chosen.method, cost: chosen.cost, label: chosen.from ? `${chosen.label} (desde)` : chosen.label, address: input.delivery.address },
     payment: { method: input.payment.method },
     total,
     needsConfirmation,
