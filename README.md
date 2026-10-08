@@ -26,8 +26,10 @@ pnpm build                                  # build de producción
 
 ## Puesta en producción (checklist)
 
-1. **Supabase**: crear proyecto → copiar `DATABASE_URL` (connection string, modo transaction), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-   - `pnpm db:migrate` aplica `drizzle/*.sql`. `pnpm db:seed` carga catálogo, opciones del armador, configuración e insumos de ejemplo.
+1. **Supabase**: la base vive en el esquema `bfnails` del proyecto `gpjmnjlronubqrnfolih` (sa-east-1). La migración y el seed ya están aplicados.
+   - `NEXT_PUBLIC_SUPABASE_URL=https://gpjmnjlronubqrnfolih.supabase.co` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Project Settings → API Keys → anon).
+   - `DATABASE_URL`: Dashboard → Connect → Transaction pooler (puerto 6543), con la contraseña de la base. `SUPABASE_SERVICE_ROLE_KEY`: Project Settings → API Keys → service_role (solo en Vercel, nunca en el cliente).
+   - Para una base nueva: `pnpm db:migrate` aplica `drizzle/*.sql` y `pnpm db:seed` (o `pnpm db:seed:sql` para generar el SQL) carga catálogo, opciones del armador, configuración e insumos de ejemplo.
    - En Authentication → Providers activar **Email** (magic link). En Authentication → URL configuration agregar `https://<dominio>/admin/auth/callback`.
    - `ADMIN_EMAILS=bren@...,tomas@...` define quién entra al panel.
 2. **Mercado Pago**: desde la cuenta personal de Brenda en [mercadopago.com.ar/developers](https://www.mercadopago.com.ar/developers) → "Tus integraciones" → crear aplicación (Checkout Pro). Copiar `MP_ACCESS_TOKEN` (primero el de prueba, después el de producción). En Webhooks configurar `https://<dominio>/api/webhooks/mercadopago` con el evento **Pagos** y copiar la clave en `MP_WEBHOOK_SECRET`.
