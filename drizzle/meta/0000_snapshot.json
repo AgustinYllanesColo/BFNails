@@ -1,12 +1,12 @@
 {
-  "id": "565a1985-5225-412d-982b-c21224024082",
+  "id": "54ae8b6d-1767-4d80-95a3-88301e91bdef",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.admin_users": {
+    "bfnails.admin_users": {
       "name": "admin_users",
-      "schema": "",
+      "schema": "bfnails",
       "columns": {
         "email": {
           "name": "email",
@@ -36,9 +36,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.builder_options": {
+    "bfnails.builder_options": {
       "name": "builder_options",
-      "schema": "",
+      "schema": "bfnails",
       "columns": {
         "id": {
           "name": "id",
@@ -113,9 +113,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.designs": {
+    "bfnails.designs": {
       "name": "designs",
-      "schema": "",
+      "schema": "bfnails",
       "columns": {
         "id": {
           "name": "id",
@@ -247,9 +247,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.orders": {
+    "bfnails.orders": {
       "name": "orders",
-      "schema": "",
+      "schema": "bfnails",
       "columns": {
         "id": {
           "name": "id",
@@ -279,7 +279,7 @@
         "status": {
           "name": "status",
           "type": "order_status",
-          "typeSchema": "public",
+          "typeSchema": "bfnails",
           "primaryKey": false,
           "notNull": true,
           "default": "'pendiente_pago'"
@@ -407,9 +407,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.recipes": {
+    "bfnails.recipes": {
       "name": "recipes",
-      "schema": "",
+      "schema": "bfnails",
       "columns": {
         "id": {
           "name": "id",
@@ -468,9 +468,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.settings": {
+    "bfnails.settings": {
       "name": "settings",
-      "schema": "",
+      "schema": "bfnails",
       "columns": {
         "key": {
           "name": "key",
@@ -500,9 +500,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.supplies": {
+    "bfnails.supplies": {
       "name": "supplies",
-      "schema": "",
+      "schema": "bfnails",
       "columns": {
         "id": {
           "name": "id",
@@ -578,9 +578,9 @@
     }
   },
   "enums": {
-    "public.order_status": {
+    "bfnails.order_status": {
       "name": "order_status",
-      "schema": "public",
+      "schema": "bfnails",
       "values": [
         "a_confirmar",
         "pendiente_pago",
@@ -593,7 +593,9 @@
       ]
     }
   },
-  "schemas": {},
+  "schemas": {
+    "bfnails": "bfnails"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

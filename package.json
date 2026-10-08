@@ -15,7 +15,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx scripts/seed.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:seed:sql": "tsx scripts/seed-sql.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

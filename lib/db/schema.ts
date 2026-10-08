@@ -1,18 +1,14 @@
-import {
-  boolean,
-  integer,
-  jsonb,
-  numeric,
-  pgEnum,
-  pgTable,
-  serial,
-  text,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, numeric, pgSchema, serial, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import type { Address, CartItem, Customer, DeliveryMethod, PaymentMethod } from "@/lib/types";
 
-export const orderStatus = pgEnum("order_status", [
+/**
+ * Todas las tablas viven en el esquema `bfnails`, aislado del resto del proyecto
+ * de Supabase que comparte la base. Para mudar a un proyecto propio alcanza con
+ * un dump de este esquema.
+ */
+export const bf = pgSchema("bfnails");
+
+export const orderStatus = bf.enum("order_status", [
   "a_confirmar",
   "pendiente_pago",
   "pagado",
@@ -23,7 +19,7 @@ export const orderStatus = pgEnum("order_status", [
   "cancelado",
 ]);
 
-export const designs = pgTable("designs", {
+export const designs = bf.table("designs", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
@@ -44,7 +40,7 @@ export const designs = pgTable("designs", {
 });
 
 /** Opciones del armador (forma, largo, acabado, base, extras) con su delta de precio. */
-export const builderOptions = pgTable("builder_options", {
+export const builderOptions = bf.table("builder_options", {
   id: text("id").primaryKey(),
   kind: text("kind").notNull(), // shape | length | finish | base | extra
   group: text("group"),
@@ -57,7 +53,7 @@ export const builderOptions = pgTable("builder_options", {
   sort: integer("sort").notNull().default(0),
 });
 
-export const orders = pgTable("orders", {
+export const orders = bf.table("orders", {
   id: uuid("id").defaultRandom().primaryKey(),
   seq: serial("seq").notNull(),
   number: text("number").notNull().unique(),
@@ -83,7 +79,7 @@ export const orders = pgTable("orders", {
 });
 
 /** Insumos: lo que Brenda compra. El costo unitario se deriva del pack. */
-export const supplies = pgTable("supplies", {
+export const supplies = bf.table("supplies", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   unit: text("unit").notNull(), // "u", "g", "ml", "set"
@@ -100,7 +96,7 @@ export const supplies = pgTable("supplies", {
  * Recetas de costo: qué insumos y cuánto tiempo lleva una técnica o un diseño.
  * target: "base" (set base), "extra:<id>" (técnica del armador) o "design:<slug>".
  */
-export const recipes = pgTable("recipes", {
+export const recipes = bf.table("recipes", {
   id: uuid("id").defaultRandom().primaryKey(),
   target: text("target").notNull().unique(),
   label: text("label").notNull(),
@@ -110,13 +106,13 @@ export const recipes = pgTable("recipes", {
 });
 
 /** Configuración general, clave → JSON. */
-export const settings = pgTable("settings", {
+export const settings = bf.table("settings", {
   key: text("key").primaryKey(),
   value: jsonb("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const adminUsers = pgTable("admin_users", {
+export const adminUsers = bf.table("admin_users", {
   email: text("email").primaryKey(),
   name: text("name"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

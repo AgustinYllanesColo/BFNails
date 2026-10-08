@@ -1,11 +1,13 @@
-CREATE TYPE "public"."order_status" AS ENUM('a_confirmar', 'pendiente_pago', 'pagado', 'en_produccion', 'listo', 'enviado', 'entregado', 'cancelado');--> statement-breakpoint
-CREATE TABLE "admin_users" (
+CREATE SCHEMA "bfnails";
+--> statement-breakpoint
+CREATE TYPE "bfnails"."order_status" AS ENUM('a_confirmar', 'pendiente_pago', 'pagado', 'en_produccion', 'listo', 'enviado', 'entregado', 'cancelado');--> statement-breakpoint
+CREATE TABLE "bfnails"."admin_users" (
 	"email" text PRIMARY KEY NOT NULL,
 	"name" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "builder_options" (
+CREATE TABLE "bfnails"."builder_options" (
 	"id" text PRIMARY KEY NOT NULL,
 	"kind" text NOT NULL,
 	"group" text,
@@ -18,7 +20,7 @@ CREATE TABLE "builder_options" (
 	"sort" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "designs" (
+CREATE TABLE "bfnails"."designs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"slug" text NOT NULL,
 	"name" text NOT NULL,
@@ -39,12 +41,12 @@ CREATE TABLE "designs" (
 	CONSTRAINT "designs_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
-CREATE TABLE "orders" (
+CREATE TABLE "bfnails"."orders" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"seq" serial NOT NULL,
 	"number" text NOT NULL,
 	"token" text NOT NULL,
-	"status" "order_status" DEFAULT 'pendiente_pago' NOT NULL,
+	"status" "bfnails"."order_status" DEFAULT 'pendiente_pago' NOT NULL,
 	"customer" jsonb NOT NULL,
 	"items" jsonb NOT NULL,
 	"subtotal" integer NOT NULL,
@@ -65,7 +67,7 @@ CREATE TABLE "orders" (
 	CONSTRAINT "orders_number_unique" UNIQUE("number")
 );
 --> statement-breakpoint
-CREATE TABLE "recipes" (
+CREATE TABLE "bfnails"."recipes" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"target" text NOT NULL,
 	"label" text NOT NULL,
@@ -75,13 +77,13 @@ CREATE TABLE "recipes" (
 	CONSTRAINT "recipes_target_unique" UNIQUE("target")
 );
 --> statement-breakpoint
-CREATE TABLE "settings" (
+CREATE TABLE "bfnails"."settings" (
 	"key" text PRIMARY KEY NOT NULL,
 	"value" jsonb NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "supplies" (
+CREATE TABLE "bfnails"."supplies" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"unit" text NOT NULL,
