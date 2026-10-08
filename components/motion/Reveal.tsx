@@ -33,7 +33,7 @@ export function Reveal({
     const el = ref.current;
     if (!el) return;
     const mm = gsap.matchMedia();
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    mm.add("all", () => {
       const targets = stagger != null ? Array.from(el.children) : el;
       gsap.set(targets, { autoAlpha: 0, y });
       const tween = gsap.to(targets, {

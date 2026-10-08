@@ -103,7 +103,7 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   const scaleY = LENGTH_SCALE[sel.length];
   const chrome = sel.finish === "cromado";
   const mate = sel.finish === "mate";
-  const tipColor = has("francesita-color") ? "#4a0e0e" : "#ffffff";
+  const tipColor = has("francesita-color") ? (config.bases.find((b) => b.id === sel.tipColor)?.hex ?? "#4a0e0e") : "#ffffff";
   const degrade = has("degrade");
   const catEye = has("cat-eye");
   const aurora = has("aurora");

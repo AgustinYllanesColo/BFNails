@@ -1,0 +1,12 @@
+import { chromium } from "@playwright/test";
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
+const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await page.goto("http://localhost:3000/disena", { waitUntil: "networkidle" });
+await page.getByRole("button", { name: /^Francesita de color/ }).click();
+await page.waitForTimeout(500);
+await page.getByRole("button", { name: /^Rojo/ }).nth(1).click();
+await page.waitForTimeout(800);
+await page.locator("aside svg").first().screenshot({ path: "/tmp/claude-0/-home-user-BFNails/140ab651-3cc9-5ac3-84c6-94d81aa9da2e/scratchpad/shots/tip-red.png" });
+await page.locator("text=Color de la punta").screenshot({ path: "/tmp/claude-0/-home-user-BFNails/140ab651-3cc9-5ac3-84c6-94d81aa9da2e/scratchpad/shots/tip-ui.png" }).catch(() => {});
+console.log("tip ok");
+await browser.close();

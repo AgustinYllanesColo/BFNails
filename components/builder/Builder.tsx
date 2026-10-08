@@ -101,6 +101,22 @@ export function Builder({ config }: { config: BuilderConfig }) {
                     </Chip>
                   ))}
                 </div>
+                <AnimatePresence initial={false}>
+                  {group === "Clásicos" && sel.extras.includes("francesita-color") && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden">
+                      <div className="mt-3 rounded-lg bg-white/70 p-3 ring-1 ring-bordo/10">
+                        <p className="mb-2 text-xs font-semibold text-ink-soft">Color de la punta</p>
+                        <div className="flex flex-wrap gap-2">
+                          {config.bases.map((b) => (
+                            <Chip key={b.id} selected={(sel.tipColor ?? "bordo") === b.id} onClick={() => setSel({ ...sel, tipColor: b.id })} swatch={b.hex}>
+                              {b.label}
+                            </Chip>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>

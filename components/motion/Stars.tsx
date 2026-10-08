@@ -25,7 +25,7 @@ export function Stars({ stars = DEFAULT, className }: { stars?: StarSpec[]; clas
     const el = ref.current;
     if (!el) return;
     const mm = gsap.matchMedia();
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    mm.add("all", () => {
       const nodes = el.querySelectorAll<HTMLElement>("[data-star]");
       nodes.forEach((node, i) => {
         const speed = Number(node.dataset.speed ?? 1);

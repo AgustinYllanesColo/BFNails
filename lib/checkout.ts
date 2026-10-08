@@ -12,6 +12,7 @@ export const selectionSchema = z.object({
   finish: z.enum(["glossy", "mate", "cromado"]),
   base: z.string().min(1).max(40),
   extras: z.array(z.string().max(40)).max(20),
+  tipColor: z.string().max(40).optional(),
   notes: z.string().max(600).optional(),
   referenceUrl: z.string().max(500).optional(),
 });

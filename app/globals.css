@@ -191,6 +191,18 @@ body {
   }
 }
 
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translate3d(var(--dx, 20px), var(--dy, -30px), 0) rotate(calc(var(--r, 0deg) + 8deg));
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--r, 0deg));
+  }
+}
+
 @keyframes float {
   0%,
   100% {
@@ -239,15 +251,6 @@ body {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
-}
 
 /* ---------- Form reset (en @layer base para no pisar utilidades) ---------- */
 @layer base {

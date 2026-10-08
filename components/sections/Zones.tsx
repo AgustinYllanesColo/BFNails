@@ -53,7 +53,7 @@ export function Zones() {
     const el = root.current;
     if (!el) return;
     const mm = gsap.matchMedia();
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    mm.add("all", () => {
       const path = el.querySelector<SVGPathElement>("[data-route]");
       if (path) {
         const len = path.getTotalLength();

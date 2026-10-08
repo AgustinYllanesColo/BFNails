@@ -32,6 +32,7 @@ export type BuilderSelection = {
   finish: Finish;
   base: string; // id de color base
   extras: string[]; // ids de técnicas/extras
+  tipColor?: string; // id de color base para la francesita de color
   notes?: string;
   referenceUrl?: string;
 };

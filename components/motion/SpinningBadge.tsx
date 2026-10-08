@@ -6,7 +6,7 @@ export function SpinningBadge({ text, size = 140, className }: { text: string; s
   const id = `badge-${text.replace(/\W/g, "").slice(0, 10)}`;
   return (
     <div className={cn("relative grid place-items-center", className)} style={{ width: size, height: size }} aria-hidden>
-      <svg viewBox="0 0 100 100" className="absolute inset-0 animate-[spin-slow_14s_linear_infinite] motion-reduce:animate-none" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 100 100" className="absolute inset-0 animate-[spin-slow_14s_linear_infinite]" style={{ width: size, height: size }}>
         <defs>
           <path id={id} d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" />
         </defs>

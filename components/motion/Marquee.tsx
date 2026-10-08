@@ -16,7 +16,7 @@ export function Marquee({ items, className, speed = 28, reverse, separator }: Pr
       aria-hidden
     >
       <div
-        className="flex min-w-full shrink-0 items-center gap-8 pr-8 animate-[marquee_var(--speed)_linear_infinite] motion-reduce:animate-none"
+        className="flex min-w-full shrink-0 items-center gap-8 pr-8 animate-[marquee_var(--speed)_linear_infinite]"
         style={
           {
             "--speed": `${speed}s`,

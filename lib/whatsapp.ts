@@ -21,7 +21,7 @@ export function describeItem(item: CartItem): string {
     return `• ${item.name} x${item.qty} (${sizes}) – ${formatARS(item.unitPrice * item.qty)}`;
   }
   const s = item.selection;
-  const extras = s.extras.length ? `, extras: ${s.extras.join(", ")}` : "";
+  const extras = s.extras.length ? `, extras: ${s.extras.join(", ")}${s.tipColor ? ` (punta ${s.tipColor})` : ""}` : "";
   const notes = s.notes ? `\n  Nota: ${s.notes}` : "";
   const ref = s.referenceUrl ? `\n  Referencia: ${s.referenceUrl}` : "";
   return `• Diseño propio x${item.qty} (${sizes})\n  ${s.shape}, ${s.length}, ${s.finish}, base ${s.base}${extras}${notes}${ref}\n  ${formatARS(item.unitPrice * item.qty)}${item.quote.needsConfirmation ? " (a confirmar)" : ""}`;

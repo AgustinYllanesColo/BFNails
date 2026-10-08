@@ -31,7 +31,7 @@ export function SplitText({
     if (!el) return;
     const units = el.querySelectorAll<HTMLElement>("[data-unit]");
     const mm = gsap.matchMedia();
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    mm.add("all", () => {
       gsap.set(units, { yPercent: 110, rotate: 4 });
       gsap.to(units, {
         yPercent: 0,
