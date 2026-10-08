@@ -1,0 +1,52 @@
+import { chromium } from "@playwright/test";
+const out = "/tmp/claude-0/-home-user-BFNails/140ab651-3cc9-5ac3-84c6-94d81aa9da2e/scratchpad/shots";
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
+const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
+const page = await ctx.newPage();
+const errors = [];
+page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
+page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + m.text()); });
+
+await page.goto("http://localhost:3000/disena", { waitUntil: "networkidle" });
+await page.getByRole("button", { name: /^Coffin/ }).click();
+await page.getByRole("button", { name: /^Largo/ }).click();
+await page.getByRole("button", { name: /Cromado/ }).click();
+await page.getByRole("button", { name: /Bordó/ }).first().click();
+await page.getByRole("button", { name: /^Francesita \+/ }).click();
+await page.getByRole("button", { name: /Strass \(hasta/ }).click();
+await page.getByRole("button", { name: /Personajes/ }).click();
+await page.waitForTimeout(500);
+await page.screenshot({ path: `${out}/builder-mobile.png`, fullPage: true });
+const total = await page.locator("aside span.font-display").first().innerText();
+console.log("builder total:", total);
+await page.getByRole("button", { name: "Agregar al carrito" }).click();
+await page.waitForTimeout(400);
+
+await page.goto("http://localhost:3000/catalogo/cherry-red", { waitUntil: "networkidle" });
+await page.getByRole("button", { name: /^M Manos medianas/ }).click();
+await page.getByRole("button", { name: "Agregar al carrito" }).click();
+await page.waitForTimeout(400);
+
+await page.goto("http://localhost:3000/carrito", { waitUntil: "networkidle" });
+await page.screenshot({ path: `${out}/cart-mobile.png`, fullPage: true });
+
+await page.goto("http://localhost:3000/checkout", { waitUntil: "networkidle" });
+await page.fill("#name", "Mica Test");
+await page.fill("#whatsapp", "11 5555 1234");
+await page.getByLabel("Código postal").fill("1824");
+await page.waitForTimeout(900);
+await page.getByRole("button", { name: /Correo Argentino a sucursal/ }).click();
+await page.fill("#street", "Av. Hipólito Yrigoyen 1234");
+await page.fill("#city", "Lanús");
+await page.fill("#province", "Buenos Aires");
+await page.getByRole("button", { name: /^Transferencia/ }).click();
+await page.screenshot({ path: `${out}/checkout-mobile.png`, fullPage: true });
+await page.getByRole("button", { name: "Confirmar pedido" }).click();
+await page.waitForURL(/\/pedido\//, { timeout: 20000 });
+await page.waitForLoadState("networkidle");
+console.log("order url:", page.url());
+await page.screenshot({ path: `${out}/order-mobile.png`, fullPage: true });
+const wa = await page.getByRole("link", { name: "Abrir WhatsApp" }).getAttribute("href");
+console.log("wa link:", decodeURIComponent(wa).slice(0, 600));
+console.log("errors:", errors.length); errors.slice(0, 8).forEach((e) => console.log("  ", e));
+await browser.close();

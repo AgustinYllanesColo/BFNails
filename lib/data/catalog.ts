@@ -1,0 +1,203 @@
+import type { Design } from "@/lib/types";
+
+/**
+ * Seed del catálogo. Las imágenes son placeholders generados en /api/placeholder
+ * hasta que tengamos las fotos reales de Brenda. Cuando haya DB, esto es el seed
+ * inicial y la fuente de verdad pasa a ser la tabla `designs`.
+ */
+export const SEED_DESIGNS: Design[] = [
+  {
+    slug: "kitty-leopard",
+    name: "Kitty Leopard",
+    description: "Animal print en tonos leopardo con Kitty en el anular. El set de la casa.",
+    images: [],
+    shape: "almendra",
+    length: "medio",
+    finish: "glossy",
+    complexity: 4,
+    price: 22000,
+    tags: ["animal print", "personajes", "signature"],
+    featured: true,
+    colors: ["#c9a063", "#4a0e0e", "#fffdf8"],
+  },
+  {
+    slug: "francesita-clasica",
+    name: "Francesita clásica",
+    description: "Base nude con punta blanca fina. Minimal, para todos los días.",
+    images: [],
+    shape: "almendra",
+    length: "corto",
+    finish: "glossy",
+    complexity: 1,
+    price: 13500,
+    tags: ["francesita", "minimal"],
+    featured: true,
+    colors: ["#e8c4b0", "#ffffff"],
+  },
+  {
+    slug: "cherry-red",
+    name: "Cherry Red",
+    description: "Rojo cereza full glossy. Un clásico que no falla.",
+    images: [],
+    shape: "ovalada",
+    length: "medio",
+    finish: "glossy",
+    complexity: 1,
+    price: 12000,
+    tags: ["liso", "rojo"],
+    featured: true,
+    colors: ["#b51c1c"],
+  },
+  {
+    slug: "bordo-cromado",
+    name: "Bordó cromado",
+    description: "Bordó profundo con efecto espejo. Elegante y con mucha presencia.",
+    images: [],
+    shape: "coffin",
+    length: "largo",
+    finish: "cromado",
+    complexity: 2,
+    price: 17500,
+    tags: ["cromado", "bordó"],
+    featured: true,
+    colors: ["#4a0e0e", "#8a2b2b"],
+  },
+  {
+    slug: "milky-strass",
+    name: "Milky & strass",
+    description: "Base milky con strass en cada uña. Delicado y brillante.",
+    images: [],
+    shape: "almendra",
+    length: "medio",
+    finish: "glossy",
+    complexity: 2,
+    price: 16000,
+    tags: ["strass", "milky", "novias"],
+    colors: ["#f6efe6", "#e5e5e5"],
+  },
+  {
+    slug: "aurora-lila",
+    name: "Aurora lila",
+    description: "Lila pastel con efecto aurora. Cambia con la luz.",
+    images: [],
+    shape: "ovalada",
+    length: "corto",
+    finish: "glossy",
+    complexity: 2,
+    price: 15500,
+    tags: ["aurora", "pastel"],
+    colors: ["#c6a4e6", "#e8d8f7"],
+  },
+  {
+    slug: "cat-eye-negro",
+    name: "Cat eye negro",
+    description: "Negro con efecto cat eye magnético. Profundo y misterioso.",
+    images: [],
+    shape: "stiletto",
+    length: "largo",
+    finish: "glossy",
+    complexity: 2,
+    price: 16500,
+    tags: ["cat eye", "negro"],
+    colors: ["#1d1d1d", "#5a5a7a"],
+  },
+  {
+    slug: "flores-de-primavera",
+    name: "Flores de primavera",
+    description: "Florcitas pintadas a mano sobre base nude. Cada uña es distinta.",
+    images: [],
+    shape: "almendra",
+    length: "medio",
+    finish: "mate",
+    complexity: 3,
+    price: 19000,
+    tags: ["flores", "a mano"],
+    colors: ["#e8c4b0", "#f2a7c3", "#6f9a6b"],
+  },
+  {
+    slug: "moños-3d",
+    name: "Moños 3D",
+    description: "Rosa bebé con moños en relieve. Muy coquette.",
+    images: [],
+    shape: "cuadrada",
+    length: "corto",
+    finish: "glossy",
+    complexity: 3,
+    price: 18500,
+    tags: ["3d", "coquette", "rosa"],
+    colors: ["#f2a7c3", "#ffffff"],
+  },
+  {
+    slug: "chocolate-mate",
+    name: "Chocolate mate",
+    description: "Marrón chocolate acabado mate. Sobrio y moderno.",
+    images: [],
+    shape: "coffin",
+    length: "medio",
+    finish: "mate",
+    complexity: 1,
+    price: 12500,
+    tags: ["liso", "mate"],
+    colors: ["#5a3a2a"],
+  },
+  {
+    slug: "francesita-bordo",
+    name: "Francesita bordó",
+    description: "Francesita invertida con punta bordó y base transparente.",
+    images: [],
+    shape: "almendra",
+    length: "largo",
+    finish: "glossy",
+    complexity: 2,
+    price: 15000,
+    tags: ["francesita", "bordó"],
+    colors: ["#f8f5ef", "#4a0e0e"],
+  },
+  {
+    slug: "glitter-party",
+    name: "Glitter party",
+    description: "Degradé de glitter dorado sobre nude. Para salir.",
+    images: [],
+    shape: "ovalada",
+    length: "medio",
+    finish: "glossy",
+    complexity: 2,
+    price: 15500,
+    tags: ["glitter", "fiesta"],
+    colors: ["#e8c4b0", "#d4af37"],
+  },
+];
+
+export const SHAPE_LABEL: Record<Design["shape"], string> = {
+  almendra: "Almendra",
+  coffin: "Coffin",
+  cuadrada: "Cuadrada",
+  ovalada: "Ovalada",
+  stiletto: "Stiletto",
+};
+
+export const LENGTH_LABEL: Record<Design["length"], string> = {
+  corto: "Corto",
+  medio: "Medio",
+  largo: "Largo",
+  xl: "XL",
+};
+
+export const FINISH_LABEL: Record<Design["finish"], string> = {
+  glossy: "Glossy",
+  mate: "Mate",
+  cromado: "Cromado",
+};
+
+export const COMPLEXITY_LABEL: Record<Design["complexity"], string> = {
+  1: "Simple",
+  2: "Intermedio",
+  3: "Elaborado",
+  4: "Premium",
+};
+
+export function designImage(design: Design, index = 0): string {
+  if (design.images[index]) return design.images[index];
+  const colors = (design.colors ?? ["#e8c4b0"]).map((c) => c.replace("#", "")).join(",");
+  return `/api/placeholder?seed=${encodeURIComponent(design.slug)}&shape=${design.shape}&colors=${colors}&i=${index}`;
+}
