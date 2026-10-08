@@ -4,6 +4,8 @@ import { getAdminSession } from "@/lib/admin/auth";
 import { hasDb } from "@/lib/db/client";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
+// El admin siempre se renderiza por request (sesión + datos frescos).
+export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getAdminSession();

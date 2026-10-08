@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: "Armá tus uñas press-on a medida: forma, largo, color y técnicas con precio en vivo.",
 };
 
+// Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
+export const revalidate = 300;
+
 export default async function DisenaPage() {
   const config = await getBuilderConfig();
   return (

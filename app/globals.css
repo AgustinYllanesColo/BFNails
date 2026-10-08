@@ -98,7 +98,13 @@ body {
 }
 
 /* Cursor custom solo con puntero fino */
+.cursor-root {
+  display: none;
+}
 @media (pointer: fine) {
+  .cursor-root {
+    display: block;
+  }
   html.has-cursor,
   html.has-cursor * {
     cursor: none !important;

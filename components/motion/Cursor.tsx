@@ -61,7 +61,7 @@ export function Cursor() {
       ref={ref}
       aria-hidden
       data-state="idle"
-      className="group pointer-events-none fixed top-0 left-0 z-[100] hidden [pointer:fine]:block"
+      className="group cursor-root pointer-events-none fixed top-0 left-0 z-[100]"
       style={{ willChange: "transform" }}
     >
       <div className="relative grid place-items-center transition-transform duration-300 ease-[var(--ease-bounce)] group-data-[state=hover]:scale-[2.2] group-data-[state=label]:scale-[3.2]">

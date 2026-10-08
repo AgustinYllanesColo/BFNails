@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description: "Todos los sets de uñas press-on soft gel de BF Nails Studio con su precio.",
 };
 
+// Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
+export const revalidate = 300;
+
 export default async function CatalogoPage() {
   const designs = await getDesigns();
   return (

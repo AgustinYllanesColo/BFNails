@@ -12,6 +12,9 @@ import { Reveal } from "@/components/motion/Reveal";
 
 type Props = { params: Promise<{ slug: string }> };
 
+// Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
+export const revalidate = 300;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const design = await getDesign(slug);

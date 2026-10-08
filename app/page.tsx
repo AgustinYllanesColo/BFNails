@@ -7,6 +7,9 @@ import { Faq } from "@/components/sections/Faq";
 import { Marquee } from "@/components/motion/Marquee";
 import { getFeaturedDesigns } from "@/lib/data/repo";
 
+// Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
+export const revalidate = 300;
+
 export default async function HomePage() {
   const featured = await getFeaturedDesigns(4);
   return (

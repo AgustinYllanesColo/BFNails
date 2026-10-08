@@ -6,6 +6,9 @@ import { mpEnabled } from "@/lib/mercadopago";
 
 export const metadata: Metadata = { title: "Pagar" };
 
+// Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
+export const revalidate = 300;
+
 export default async function CheckoutPage() {
   const s = await getSettings();
   return (
