@@ -15,12 +15,22 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <div className="relative z-10 -mx-[4vw] -my-3 w-[108vw] -rotate-[1.5deg]">
-        <Marquee
-          items={["press-on en soft gel", "a tu talle", "hechas a mano", "reutilizables", "Lanús", "envíos a todo el país"]}
-          className="bg-bordo py-3 font-display text-xl text-cream md:py-4 md:text-2xl"
-          speed={26}
-        />
+      {/* La banda rotada es más ancha que la pantalla: el contenedor la recorta para que no haya scroll horizontal */}
+      <div className="relative z-10 -my-3 overflow-x-clip py-3">
+        <div className="-mx-[4vw] w-[108vw] -rotate-[1.5deg]">
+          <Marquee
+            items={[
+              "press-on en soft gel",
+              "a tu talle",
+              "hechas a mano",
+              "reutilizables",
+              "Lanús",
+              "envíos a todo el país",
+            ]}
+            className="bg-bordo font-display text-cream py-3 text-xl md:py-4 md:text-2xl"
+            speed={26}
+          />
+        </div>
       </div>
       <Featured designs={featured} />
       <HowItWorks />

@@ -22,7 +22,8 @@ test("404 propio", async ({ page }) => {
 test("la cinta de texto de la home está en movimiento", async ({ page }) => {
   await page.goto("/", { waitUntil: "networkidle" });
   const marquee = page.locator('[style*="--speed"]').first();
-  await marquee.scrollIntoViewIfNeeded();
+  // Sin scrollIntoViewIfNeeded: Playwright espera a que el elemento esté quieto y una animación infinita nunca lo está.
+  await marquee.evaluate((el) => el.scrollIntoView({ block: "center" }));
   const a = await marquee.evaluate((el) => getComputedStyle(el).transform);
   await page.waitForTimeout(700);
   const b = await marquee.evaluate((el) => getComputedStyle(el).transform);
