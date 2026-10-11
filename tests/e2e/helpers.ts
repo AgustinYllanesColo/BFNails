@@ -1,5 +1,8 @@
 import { expect, type Page } from "@playwright/test";
 
+/** Versión estricta (anula el overflow-x: clip de html/body antes de medir). La usan todos los specs nuevos. */
+export { expectNoOverflowStrict } from "./lib/overflow";
+
 export const PUBLIC_ROUTES = [
   { path: "/", name: "home" },
   { path: "/catalogo", name: "catálogo" },

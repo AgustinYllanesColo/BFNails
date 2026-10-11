@@ -19,7 +19,20 @@ export function Footer() {
       />
       <div className="container-x grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <Image src="/brand/logo-nails.webp" alt="BF Nails Studio" width={320} height={193} sizes="256px" className="w-64 brightness-0 invert" />
+          {/* W1: el logo corregido (cara y borde crema opacos) ya no admite brightness-0 invert; va a color sobre placa
+              crema (DESIGN §2.1). La inclinación vive en el wrapper. W2-F rehace el footer. */}
+          <span className="inline-block -rotate-2">
+            <span className="block w-60 rounded-[28px] bg-cream px-5 py-4 shadow-sticker md:w-[280px]">
+              <Image
+                src="/brand/logo-nails.webp"
+                alt="BF Nails Studio"
+                width={960}
+                height={582}
+                sizes="(min-width: 768px) 240px, 200px"
+                className="h-auto w-full"
+              />
+            </span>
+          </span>
           <p className="mt-6 max-w-sm text-cream/80">{siteConfig.description}</p>
         </div>
         <div>

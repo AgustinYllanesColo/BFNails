@@ -1,77 +1,422 @@
 @import "tailwindcss";
 
-/* ---------- Tokens de marca (desde los logos) ---------- */
-:root {
-  --cream: #fef7e7;
-  --cream-deep: #f5e8c8;
-  --cream-ink: #e7d6ad;
-  --bordo: #4a0e0e;
-  --bordo-soft: #6b1a1a;
-  --ink: #3c3c3c;
-  --ink-soft: #6b6b6b;
-  --red: #b51c1c;
-  --yellow: #f5c400;
-  --leopard: #c9a063;
-  --leopard-dark: #8a5a2b;
-  --white: #fffdf8;
+/*
+ * BF Nails Studio · tokens y capa base (PLAN §2, DESIGN §10 sin su regla :focus-visible).
+ * "Sticker 70s pegado en papel crema, recién impreso": todo sale del logo real.
+ */
 
+/* =========================================================================================
+   1. Tokens
+   ========================================================================================= */
+:root {
+  /* ---- Primitivos (muestreados del logo) ---- */
+  --cream-50: #fffdf8;
+  --cream-100: #fef7e7;
+  --cream-200: #f5e8c8;
+  --cream-300: #e7d6ad;
+  --sand-500: #a58a62;
+  --bordo-950: #3a0a0a;
+  --bordo-900: #4a0e0e;
+  --bordo-800: #6b1a1a;
+  --bordo-star: #530a03;
+  --ink-900: #3c3c3c;
+  --ink-600: #6b5048;
+  --ink-500: #7a645b;
+  --red-600: #b51c1c;
+  --red-800: #8c1610;
+  --yellow-400: #f5c400;
+  --green-700: #1f6b45;
+  --leo-base: #e2c29b;
+  --leo-rosette: #2a2321;
+  --leo-core: #8e1b12;
+  --on-bordo-100: #fef7e7;
+  --on-bordo-300: #e8c9bd;
+  --on-bordo-500: #bf9386;
+  --printer: #2b2624;
+  --paper: #f6f1e4;
+
+  /* ---- Roles ---- */
+  --surface-page: var(--cream-100);
+  --surface-raised: var(--cream-50);
+  --surface-sunken: var(--cream-200);
+  --surface-inverse: var(--bordo-900);
+  --surface-inverse-raised: #58211f;
+  --text-strong: var(--ink-900);
+  --text-muted: var(--ink-600);
+  --text-faint: var(--ink-500);
+  --text-brand: var(--bordo-900);
+  --text-on-inverse: var(--on-bordo-100);
+  --text-on-inverse-muted: var(--on-bordo-300);
+  --text-on-inverse-faint: var(--on-bordo-500);
+  --text-accent-inverse: var(--yellow-400);
+  --border-subtle: #e8dbcd;
+  --border-inverse: #673331;
+  --border-input: var(--sand-500);
+  --action: var(--bordo-900);
+  --action-hover: var(--bordo-800);
+  --action-pressed: var(--bordo-950);
+  --action-text: var(--cream-100);
+  --danger: var(--red-600);
+  --danger-surface: #f7e1d3;
+  --success: var(--green-700);
+  --success-surface: #e8e9d7;
+  --warning-surface: #fbe9a6;
+  --notify: var(--red-600);
+  --badge-hot: var(--yellow-400);
+  --icon-accent: var(--red-600);
+  --focus: var(--bordo-900);
+
+  /* ---- Tipografía: único punto de cambio de la display (PLAN §1, F0) ----
+     Imbue (propuesta, eje opsz). Para volver a Shrikhand o pasar a Rakkas: cambiar la fuente en app/layout.tsx y
+     descomentar el bloque "Escala alternativa" de abajo. */
+  --font-display: var(--font-imbue), "Imbue", Georgia, serif;
+  --font-sans: var(--font-figtree), "Figtree", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, monospace;
+  --display-weight: 700;
+  --display-tracking: -0.005em;
+  --fs-display: clamp(4rem, 3.257rem + 3.048vw, 6rem); /* 64 → 96 */
+  --fs-h1: clamp(3.25rem, 2.414rem + 3.429vw, 5.5rem); /* 52 → 88 */
+  --fs-h2: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem); /* 44 → 72 */
+  --fs-h3: clamp(1.75rem, 1.471rem + 1.143vw, 2.5rem); /* 28 → 40 */
+
+  /* ---- Forma ---- */
+  --radius-xs: 6px;
   --radius-sm: 10px;
-  --radius: 18px;
-  --radius-lg: 28px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-pill: 999px;
 
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ---- Ritmo ---- */
+  --gutter: clamp(16px, 4vw, 48px);
+  --section-y: clamp(4rem, 2.5rem + 6.1vw, 8rem); /* 64 → 128 */
+  --section-y-tight: clamp(2.5rem, 1.75rem + 3vw, 4.5rem); /* 40 → 72 */
+  --section-y-peak: clamp(6rem, 4.6rem + 5.7vw, 10rem); /* 96 → 160 */
+  --stack-heading: clamp(2rem, 1.5rem + 2vw, 3.5rem);
 
-  --leopard-image:
-    radial-gradient(ellipse 9px 7px at 12px 10px, var(--bordo) 55%, transparent 58%),
-    radial-gradient(ellipse 7px 9px at 40px 32px, var(--bordo) 55%, transparent 58%),
-    radial-gradient(ellipse 8px 6px at 62px 8px, var(--bordo) 55%, transparent 58%),
-    radial-gradient(ellipse 6px 8px at 24px 52px, var(--bordo) 55%, transparent 58%),
-    radial-gradient(ellipse 10px 7px at 56px 58px, var(--bordo) 55%, transparent 58%),
-    radial-gradient(ellipse 13px 11px at 12px 10px, var(--leopard-dark) 60%, transparent 64%),
-    radial-gradient(ellipse 11px 13px at 40px 32px, var(--leopard-dark) 60%, transparent 64%),
-    radial-gradient(ellipse 12px 10px at 62px 8px, var(--leopard-dark) 60%, transparent 64%),
-    radial-gradient(ellipse 10px 12px at 24px 52px, var(--leopard-dark) 60%, transparent 64%),
-    radial-gradient(ellipse 14px 11px at 56px 58px, var(--leopard-dark) 60%, transparent 64%);
+  /* ---- Medidas fijas y capas (PLAN §2.7) ---- */
+  --nav-h: 72px; /* pt-3 + py-1.5 + Kitty h-12 + py-1.5 */
+  --sticky-top: calc(var(--nav-h) + 10px);
+  --sticky-bar-h: 0px; /* lo publica StickyActionBar mientras está visible */
+
+  /* ---- Movimiento ---- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); /* entradas de marketing */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); /* solo badges, sellos, pops */
+  --ease-ui: cubic-bezier(0.23, 1, 0.32, 1); /* UI: entradas/salidas */
+  --ease-move: cubic-bezier(0.77, 0, 0.175, 1); /* movimiento en pantalla, barridos */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* barras sticky, hojas */
+  --dur-press: 120ms;
+  --dur-ui: 200ms;
+  --dur-panel: 260ms;
+  --dur-reveal: 800ms;
+  --dur-hero: 900ms;
+
+  /* ---- Atenuación del ambiente (reduced-motion las cambia; nunca congela) ---- */
+  --amb-k: 1;
+  --marquee-k: 1;
+  --float-y: -12px;
+  --float-r: 1.2deg;
+  --pend: 10deg;
+  --tw-s: 0.86;
+  --tw-r: 8deg;
+  --tw-o: 1;
+  --br-s: 1.08;
+  --bounce: 6px;
+  --drift-k: 1;
+
+  /* ---- Texturas (sin blend: pre-teñidas) ---- */
+  --leopard-image: url("/brand/leopard-tile.svg");
+  --noise-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --noise-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.227 0 0 0 0 0.039 0 0 0 0 0.039 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --ink-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='i'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -7 5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23i)'/%3E%3C/svg%3E");
+  --filter-paper: drop-shadow(0 10px 12px rgb(74 14 14 / 0.16))
+    drop-shadow(0 2px 2px rgb(74 14 14 / 0.1));
+
+  /* ---- Compatibilidad: nombres viejos que todavía leen componentes de la ola 2 (W3 los borra) ---- */
+  --cream: var(--cream-100);
+  --cream-deep: var(--cream-200);
+  --cream-ink: var(--cream-300);
+  --bordo: var(--bordo-900);
+  --bordo-soft: var(--bordo-800);
+  --ink: var(--ink-900);
+  --ink-soft: var(--ink-600);
+  --red: var(--red-600);
+  --yellow: var(--yellow-400);
+  --leopard: var(--leo-base);
+  --leopard-dark: #8a5a2b;
+  --white: var(--cream-50);
+  --radius: var(--radius-md);
+}
+
+/* Escala alternativa si el dueño elige Shrikhand o Rakkas (fuentes de un solo peso, 1,3–1,7× más anchas):
+:root {
+  --font-display: var(--font-shrikhand), "Shrikhand", Georgia, serif;
+  --display-weight: 400;
+  --display-tracking: 0em;
+  --fs-display: clamp(3.25rem, 2.6rem + 2.6vw, 5rem);
+  --fs-h1: clamp(2.6rem, 2rem + 2.5vw, 4.4rem);
+  --fs-h2: clamp(2.25rem, 1.75rem + 2vw, 3.75rem);
+  --fs-h3: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+}
+*/
+
+@media (min-width: 768px) {
+  :root {
+    --nav-h: 84px; /* pt-4 + py-1.5 + Kitty h-14 + py-1.5 */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --amb-k: 2;
+    --marquee-k: 3;
+    --float-y: -4px;
+    --float-r: 0.3deg;
+    --pend: 3deg;
+    --tw-s: 1;
+    --tw-r: 0deg;
+    --tw-o: 0.6;
+    --br-s: 1.03;
+    --bounce: 2px;
+  }
+}
+
+/* Superficie bordó: foco, acento de íconos y selección pasan a amarillo (DESIGN §3.3). */
+[data-surface="inverse"] {
+  --focus: var(--yellow-400);
+  --icon-accent: var(--yellow-400);
 }
 
 @theme inline {
-  --color-cream: var(--cream);
-  --color-cream-deep: var(--cream-deep);
-  --color-cream-ink: var(--cream-ink);
-  --color-bordo: var(--bordo);
-  --color-bordo-soft: var(--bordo-soft);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-red: var(--red);
-  --color-yellow: var(--yellow);
-  --color-leopard: var(--leopard);
-  --color-leopard-dark: var(--leopard-dark);
-  --color-white: var(--white);
+  /* Colores */
+  --color-cream: var(--cream-100);
+  --color-cream-deep: var(--cream-200);
+  --color-cream-ink: var(--cream-300);
+  --color-white: var(--cream-50);
+  --color-sand: var(--sand-500);
+  --color-bordo: var(--bordo-900);
+  --color-bordo-soft: var(--bordo-800);
+  --color-bordo-deep: var(--bordo-950);
+  --color-bordo-star: var(--bordo-star);
+  --color-ink: var(--ink-900);
+  --color-ink-soft: var(--ink-600);
+  --color-ink-faint: var(--ink-500);
+  --color-red: var(--red-600);
+  --color-red-deep: var(--red-800);
+  --color-yellow: var(--yellow-400);
+  --color-success: var(--green-700);
+  --color-leopard: var(--leo-base);
+  --color-leopard-dark: #8a5a2b; /* solo colores de uñas */
+  --color-on-bordo: var(--on-bordo-100);
+  --color-on-bordo-muted: var(--on-bordo-300);
+  --color-on-bordo-faint: var(--on-bordo-500);
+  --color-line: var(--border-subtle);
+  --color-line-inverse: var(--border-inverse);
+  --color-surface: var(--surface-raised);
+  --color-surface-inverse-raised: var(--surface-inverse-raised);
+  --color-printer: var(--printer);
+  --color-paper: var(--paper);
+  --color-danger-surface: var(--danger-surface);
+  --color-success-surface: var(--success-surface);
+  --color-warning-surface: var(--warning-surface);
 
-  --font-display: var(--font-display), "Shrikhand", Georgia, serif;
-  --font-sans: var(--font-sans), "Space Grotesk", system-ui, sans-serif;
-  --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+  /* Familias (los valores viven en :root para poder cambiarlos sin recompilar utilidades) */
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 
+  /* Escala tipográfica (DESIGN §4.2): Imbue para titulares ≤ 7 palabras, Figtree para todo lo demás */
+  --text-display: var(--fs-display);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: calc(var(--display-tracking) * 2);
+  --text-display--font-weight: var(--display-weight);
+  --text-h1: var(--fs-h1);
+  --text-h1--line-height: 0.92;
+  --text-h1--letter-spacing: var(--display-tracking);
+  --text-h1--font-weight: var(--display-weight);
+  --text-h2: var(--fs-h2);
+  --text-h2--line-height: 0.95;
+  --text-h2--letter-spacing: var(--display-tracking);
+  --text-h2--font-weight: var(--display-weight);
+  --text-h3: var(--fs-h3);
+  --text-h3--line-height: 1;
+  --text-h3--letter-spacing: 0em;
+  --text-h3--font-weight: var(--display-weight);
+  --text-title: 1.0625rem;
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.005em;
+  --text-title--font-weight: 600;
+  --text-lead: clamp(1.125rem, 1.055rem + 0.286vw, 1.3125rem);
+  --text-lead--line-height: 1.5;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.4;
+  --text-meta--letter-spacing: 0.005em;
+  --text-meta--font-weight: 500;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.08em;
+  --text-label--font-weight: 600;
+  --text-price: clamp(2.125rem, 1.893rem + 0.952vw, 2.75rem);
+  --text-price--line-height: 1;
+  --text-price--letter-spacing: -0.01em;
+  --text-price--font-weight: 700;
+
+  /* Radios */
+  --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius);
+  --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
   --radius-pill: var(--radius-pill);
 
+  /* Sombras cálidas, con desplazamiento y desenfoque reales */
+  --shadow-xs: 0 1px 2px rgb(74 14 14 / 0.08), 0 1px 1px rgb(74 14 14 / 0.04);
+  --shadow-sm: 0 2px 6px -1px rgb(74 14 14 / 0.1), 0 1px 2px rgb(74 14 14 / 0.06);
+  --shadow-md: 0 10px 24px -10px rgb(74 14 14 / 0.3), 0 2px 6px -2px rgb(74 14 14 / 0.1);
+  --shadow-lg: 0 24px 48px -20px rgb(74 14 14 / 0.36), 0 6px 14px -6px rgb(74 14 14 / 0.14);
+  --shadow-xl: 0 40px 80px -36px rgb(74 14 14 / 0.45), 0 10px 24px -12px rgb(74 14 14 / 0.18);
+  --shadow-sticker: 0 2px 0 rgb(74 14 14 / 0.1), 0 8px 16px -6px rgb(74 14 14 / 0.26);
+  --shadow-press: inset 0 2px 4px rgb(58 10 10 / 0.35);
+  --shadow-device: 0 18px 30px -18px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --shadow-bar-inverse: 0 18px 40px -14px rgb(74 14 14 / 0.7);
+  --shadow-drop: 0 6px 12px -6px rgb(74 14 14 / 0.45);
+  --drop-shadow-logo: 0 18px 28px rgb(74 14 14 / 0.22);
+
+  /* Curvas */
   --ease-out-expo: var(--ease-out-expo);
   --ease-bounce: var(--ease-bounce);
+  --ease-ui: var(--ease-ui);
+  --ease-move: var(--ease-move);
+  --ease-drawer: var(--ease-drawer);
+
+  /* Animaciones compartidas (keyframes en §5) */
+  --animate-rise-in: rise-in 600ms var(--ease-out-expo) backwards;
+  --animate-fade-in: fade-in 300ms ease-out backwards;
+  --animate-pop-in: pop-in 700ms var(--ease-bounce) backwards;
+  --animate-twinkle: twinkle calc(3.2s * var(--amb-k)) ease-in-out infinite;
+  --animate-logo-float: logo-float calc(7.2s * var(--amb-k)) ease-in-out infinite;
+  --animate-pendulum: pendulum calc(2.2s * var(--amb-k)) ease-in-out infinite alternate;
+  --animate-bounce-y: bounce-y calc(1.6s * var(--amb-k)) ease-in-out infinite;
+  --animate-peek-idle: peek-idle calc(3.2s * var(--amb-k)) ease-in-out infinite alternate;
+  --animate-spin-slow: spin-slow calc(20s * var(--amb-k)) linear infinite;
 
   --breakpoint-xs: 420px;
 }
 
-/* ---------- Base ---------- */
-html {
-  background: var(--cream);
-  color: var(--ink);
-  scroll-behavior: auto;
+/* =========================================================================================
+   2. Base y superficies del navegador (PLAN §2.2, craft-floor)
+   ========================================================================================= */
+@layer base {
+  html {
+    color-scheme: light;
+    background: var(--surface-page);
+    color: var(--text-strong);
+    caret-color: var(--red-600);
+    accent-color: var(--bordo-900);
+    scrollbar-color: #d8c29a var(--cream-100);
+    scrollbar-width: thin;
+    scroll-behavior: auto;
+    scroll-padding-top: calc(var(--nav-h) + 24px);
+    scroll-padding-bottom: calc(var(--sticky-bar-h) + 24px);
+    overflow-x: clip; /* red de seguridad; los tests miden sin ella (tests/e2e/lib/overflow.ts) */
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1.5px;
+  }
+
+  ::selection {
+    background: var(--bordo-900);
+    color: var(--cream-100);
+  }
+  [data-surface="inverse"] ::selection {
+    background: var(--yellow-400);
+    color: var(--bordo-900);
+  }
+
+  ::placeholder {
+    color: var(--ink-500);
+    opacity: 1;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 100px var(--cream-50) inset;
+    -webkit-text-fill-color: var(--ink-900);
+    caret-color: var(--red-600);
+  }
+
+  button:not(:disabled),
+  [role="button"],
+  [role="radio"],
+  summary,
+  label[for],
+  select {
+    cursor: pointer;
+  }
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  /* Foco: una sola regla. Bordó sobre crema; amarillo dentro de [data-surface="inverse"] (var(--focus)). */
+  :where(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex],
+    [role="button"],
+    [role="radio"]
+  ):focus-visible {
+    outline: 2px solid var(--focus, var(--bordo-900));
+    outline-offset: 3px;
+  }
+
+  /* Form reset (en la capa base para no pisar utilidades) */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
 }
 
+/* Lenis */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -86,43 +431,20 @@ html.lenis body {
   overflow: hidden;
 }
 
-body {
-  font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv11";
-  -webkit-font-smoothing: antialiased;
-  overflow-x: clip;
-}
-
-::selection {
-  background: var(--bordo);
-  color: var(--cream);
-}
-
-/* Cursor custom solo con puntero fino */
-.cursor-root {
-  display: none;
-}
-@media (pointer: fine) {
-  .cursor-root {
-    display: block;
-  }
-  html.has-cursor,
-  html.has-cursor * {
-    cursor: none !important;
-  }
-}
-
-/* ---------- Utilidades ---------- */
+/* =========================================================================================
+   3. Utilidades
+   ========================================================================================= */
 @utility font-display {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-weight: var(--display-weight, 700);
+  font-optical-sizing: auto;
+  letter-spacing: var(--display-tracking, -0.005em);
 }
 
 @utility container-x {
   width: 100%;
   margin-inline: auto;
-  padding-inline: clamp(16px, 4vw, 48px);
+  padding-inline: var(--gutter);
   max-width: 1440px;
 }
 
@@ -130,17 +452,80 @@ body {
   text-wrap: balance;
 }
 
-@utility leopard-bg {
-  background-color: var(--leopard);
-  background-image: var(--leopard-image);
-  background-size: 72px 72px;
+@utility measure {
+  max-width: 62ch;
 }
 
-/* Botón bordó con borde leopardo: dos pseudo-elementos detrás del contenido */
+@utility measure-lead {
+  max-width: 44ch;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Leopardo de la Kitty (DESIGN §6.4): un uso por viewport, nunca detrás de texto ni como fondo de sección */
+@utility leopard-bg {
+  background-color: var(--leo-base);
+  background-image: var(--leopard-image);
+  background-size: 120px 120px;
+}
+
+@utility leopard-trim {
+  background-color: var(--leo-base);
+  background-image: var(--leopard-image);
+  background-size: 56px 56px;
+}
+
+/* Superficie de sticker crema. La inclinación va en un wrapper (PLAN §1 c), nunca en este nodo. */
+@utility sticker {
+  background-color: var(--cream-50);
+  border: 3px solid var(--cream-100);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sticker);
+}
+
+/* Borde crema troquelado alrededor de una palabra display (≥ 32 px), como el "nails" del logo */
+@utility sticker-text {
+  paint-order: stroke fill;
+  -webkit-text-stroke: 0.14em var(--cream-100);
+  filter: drop-shadow(0 6px 10px rgb(74 14 14 / 0.18));
+}
+
+/* Texto claro sobre bordó: +interlineado y +tracking (typeset §Apply) */
+@utility on-bordo-text {
+  color: var(--on-bordo-100);
+  line-height: 1.65;
+  letter-spacing: 0.005em;
+}
+
+@utility outline-text {
+  -webkit-text-stroke: 1.25px var(--bordo-900);
+  color: transparent;
+}
+
+/* Grano de impresión sin blend, solo en el nodo ESTÁTICO de los campos bordó (nunca sobre un nodo que se anima) */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  contain: strict;
+  background-image: var(--noise-ink);
+  background-size: 160px;
+  opacity: 0.1;
+}
+
+/* Botón bordó con borde leopardo de 6 px (mínimo para que se lea el patrón) */
 .btn-leopard {
   position: relative;
   isolation: isolate;
-  border: 4px solid transparent;
+  border: 6px solid transparent;
   background: transparent;
 }
 .btn-leopard::before,
@@ -151,37 +536,48 @@ body {
   pointer-events: none;
 }
 .btn-leopard::before {
-  inset: -4px;
+  inset: -6px;
   z-index: -2;
-  background-color: var(--leopard);
+  background-color: var(--leo-base);
   background-image: var(--leopard-image);
-  background-size: 48px 48px;
+  background-size: 56px 56px;
 }
 .btn-leopard::after {
   inset: 0;
   z-index: -1;
-  background: var(--bordo);
+  background: var(--bordo-900);
 }
 
-@utility grain {
-  position: relative;
-}
-.grain::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  opacity: 0.08;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-@utility outline-text {
-  -webkit-text-stroke: 1.5px var(--bordo);
-  color: transparent;
+/* =========================================================================================
+   4. Capa de movimiento (PLAN §2.5)
+   Toda animación infinite lleva data-ambient en su propio nodo: move | drift | marquee.
+   ========================================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  /* atenuación por variables (§1); solo la deriva grande se pausa */
+  [data-ambient="drift"] {
+    animation-play-state: paused !important;
+  }
+  .animate-rise-in {
+    animation-name: fade-in !important;
+    animation-duration: 300ms !important;
+  }
 }
 
-/* ---------- Animaciones CSS ---------- */
+/* fuera de vista (AmbientZone / useAmbientPause) */
+[data-offscreen] [data-ambient],
+[data-offscreen][data-ambient] {
+  animation-play-state: paused !important;
+}
+
+/* pausa manual (WCAG 2.2.2): solo movimiento automático; nunca oculta contenido ni pausa GSAP */
+html[data-motion="paused"] [data-ambient] {
+  animation-play-state: paused !important;
+}
+
+/* =========================================================================================
+   5. Keyframes compartidos (los propios de un paquete van en su CSS Module)
+   Los de ambiente animan propiedades individuales (translate/rotate/scale) para no pisar el transform del nodo.
+   ========================================================================================= */
 @keyframes marquee {
   from {
     transform: translate3d(0, 0, 0);
@@ -196,7 +592,12 @@ body {
     transform: translate3d(0, 0, 0) rotate(var(--r, 0deg));
   }
   50% {
-    transform: translate3d(var(--dx, 20px), var(--dy, -30px), 0) rotate(calc(var(--r, 0deg) + 8deg));
+    transform: translate3d(
+        calc(var(--dx, 20px) * var(--drift-k)),
+        calc(var(--dy, -30px) * var(--drift-k)),
+        0
+      )
+      rotate(calc(var(--r, 0deg) + 8deg));
   }
   100% {
     transform: translate3d(0, 0, 0) rotate(var(--r, 0deg));
@@ -210,12 +611,6 @@ body {
   }
   50% {
     transform: translate3d(0, -10px, 0) rotate(2deg);
-  }
-}
-
-@keyframes spin-slow {
-  to {
-    transform: rotate(360deg);
   }
 }
 
@@ -251,18 +646,168 @@ body {
   }
 }
 
-
-/* ---------- Form reset (en @layer base para no pisar utilidades) ---------- */
-@layer base {
-  input,
-  select,
-  textarea,
-  button {
-    font: inherit;
-    color: inherit;
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
   }
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+  }
+  12%,
+  100% {
+    transform: translateX(420%) skewX(-12deg);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    scale: 1;
+    rotate: 0deg;
+    opacity: 1;
+  }
+  50% {
+    scale: var(--tw-s);
+    rotate: var(--tw-r);
+    opacity: var(--tw-o);
+  }
+}
+
+@keyframes breathe {
+  to {
+    scale: var(--br-s);
+  }
+}
+
+@keyframes logo-float {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  50% {
+    translate: 0 var(--float-y);
+    rotate: var(--float-r);
+  }
+}
+
+@keyframes pendulum {
+  from {
+    rotate: calc(var(--pend) * -1);
+  }
+  to {
+    rotate: var(--pend);
+  }
+}
+
+@keyframes bounce-y {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 var(--bounce);
+  }
+}
+
+@keyframes peek-idle {
+  from {
+    translate: 0 28%;
+  }
+  to {
+    translate: 0 24%;
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes brush-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.8) rotate(-14deg);
+  }
+  60% {
+    opacity: 0.92;
+    transform: scale(0.96) rotate(-8deg);
+  }
+  100% {
+    opacity: 0.92;
+    transform: scale(1) rotate(-8deg);
+  }
+}
+
+@keyframes shake-x {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: -2px 0;
+  }
+  50% {
+    translate: 2px 0;
+  }
+  75% {
+    translate: -1px 0;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/* 10 tiles exactos de 56 px: la cinta leopardo vuelve al inicio sin salto */
+@keyframes leo-slide {
+  to {
+    transform: translate3d(-560px, 0, 0);
   }
 }
