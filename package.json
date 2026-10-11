@@ -16,7 +16,9 @@
     "db:push": "drizzle-kit push",
     "db:seed": "tsx scripts/seed.ts",
     "format": "prettier --write .",
-    "db:seed:sql": "tsx scripts/seed-sql.ts"
+    "db:seed:sql": "tsx scripts/seed-sql.ts",
+    "test:e2e:prod": "PW_BASE_URL=https://bf-nails.vercel.app playwright test",
+    "visual:capture": "node scripts/visual/capture.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -38,6 +40,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/turbopack": "^4",
     "@testing-library/react": "^16.3.3",

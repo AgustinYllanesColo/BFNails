@@ -3,7 +3,7 @@ import { chromium } from "@playwright/test";
 import fs from "node:fs";
 const BASE = process.argv[2] ?? "http://localhost:3000";
 const OUT = process.argv[3];
-const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome" });
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined });
 const manifest = [];
 const DEVICES = [
   { tag: "mobile", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
