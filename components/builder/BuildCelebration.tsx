@@ -26,7 +26,10 @@ function sizeLabel(sizes: SizeSelection): string {
   return "Por WhatsApp";
 }
 
-/** Las filas de la receta: el set tal como le llega a Bren. */
+/**
+ * Las filas de la receta: primero el diseño (cómo es el set y su talle), después el precio línea por línea (las mismas
+ * líneas del panel "Tu set": base, recargos, técnicas y nivel) y el total. Las líneas suman el total.
+ */
 export function recipeLines(
   sel: BuilderSelection,
   sizes: SizeSelection,
@@ -35,9 +38,6 @@ export function recipeLines(
 ): ReceiptLine[] {
   const name = <T extends { id: string; label: string }>(list: T[], id?: string) =>
     list.find((o) => o.id === id)?.label ?? "Sin elegir";
-  const extras = sel.extras
-    .map((id) => config.extras.find((e) => e.id === id))
-    .filter((e): e is BuilderConfig["extras"][number] => Boolean(e));
   const lines: ReceiptLine[] = [
     { kind: "row", id: "forma", label: "Forma", value: name(config.shapes, sel.shape) },
     { kind: "row", id: "largo", label: "Largo", value: name(config.lengths, sel.length) },
@@ -47,16 +47,18 @@ export function recipeLines(
   if (sel.extras.includes("francesita-color")) {
     lines.push({ kind: "row", id: "punta", label: "Punta", value: name(config.bases, sel.tipColor ?? "bordo") });
   }
-  lines.push({
-    kind: "row",
-    id: "tecnicas",
-    label: "Técnicas",
-    value: extras.length ? String(extras.length) : "Ninguna",
-  });
-  for (const e of extras) {
-    lines.push({ kind: "row", id: `t-${e.id}`, label: `+ ${e.label}`, value: formatARS(e.delta), tone: "muted" });
-  }
   lines.push({ kind: "row", id: "talle", label: "Talle", value: sizeLabel(sizes) });
+  if (sel.notes?.trim()) lines.push({ kind: "row", id: "notas", label: "Notas", value: "para Bren", tone: "muted" });
+  lines.push({ kind: "rule", id: "r-precio" });
+  for (const l of quote.lines) {
+    lines.push({
+      kind: "row",
+      id: `p-${l.id}`,
+      label: l.id === "base" ? "Set base (10 uñas)" : l.label,
+      value: formatARS(l.amount),
+      tone: l.id === "base" ? "normal" : "muted",
+    });
+  }
   lines.push({ kind: "rule", id: "r-total" });
   lines.push({
     kind: "row",

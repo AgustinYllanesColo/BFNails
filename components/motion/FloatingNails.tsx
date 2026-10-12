@@ -1,6 +1,7 @@
 import { useId, type CSSProperties } from "react";
 import { cn } from "@/lib/format";
-import s from "./FloatingNails.module.css";
+// Global a propósito (los .module.css de este proyecto no tienen alcance local): clases con prefijo `bfn-`.
+import "./FloatingNails.module.css";
 
 /**
  * Uñas press-on de fondo del hero (PLAN W2-A.4, DESIGN §6.7): tres en el celular (arriba del 52 % del alto, lejos
@@ -59,19 +60,117 @@ const GLITTER: Array<[number, number, number, number]> = [
   [46, 112, 0.9, 0.7],
 ];
 
-/** Celular: x y % del hero; todas con el borde de arriba por debajo del nav y por arriba del 52 %. */
+/**
+ * Celular: x y % del hero (PLAN), con dos topes para los teléfonos bajos: nunca debajo del nav y la de abajo siempre
+ * por arriba del copy (que en el celular queda anclado abajo: el h1 empieza 313 px antes del final del hero).
+ */
 const MOBILE: Spec[] = [
-  { x: "3%", y: "16%", size: 80, shape: "almendra", color: "#4a0e0e", r: -16, dx: 10, dy: -14, dur: 11, delay: 0, fx: 48, fy: 28 },
-  { x: "84%", y: "12%", size: 64, shape: "ovalada", color: "#e8c4b0", finish: "french", r: 18, dx: -8, dy: -12, dur: 12, delay: -3, fx: -48, fy: 28 },
-  { x: "86%", y: "46%", size: 56, shape: "almendra", color: "#f6efe6", finish: "glitter", r: 26, dx: 8, dy: -12, dur: 10, delay: -6, fx: -44, fy: -24 },
+  {
+    x: "3%",
+    y: "max(16%, calc(var(--nav-h) + 40px))",
+    size: 80,
+    shape: "almendra",
+    color: "#4a0e0e",
+    r: -16,
+    dx: 10,
+    dy: -14,
+    dur: 11,
+    delay: 0,
+    fx: 48,
+    fy: 28,
+  },
+  {
+    x: "84%",
+    y: "max(12%, calc(var(--nav-h) + 26px))",
+    size: 64,
+    shape: "ovalada",
+    color: "#e8c4b0",
+    finish: "french",
+    r: 18,
+    dx: -8,
+    dy: -12,
+    dur: 12,
+    delay: -3,
+    fx: -48,
+    fy: 28,
+  },
+  {
+    x: "86%",
+    y: "min(46%, calc(100% - 392px))",
+    size: 56,
+    shape: "almendra",
+    color: "#f6efe6",
+    finish: "glitter",
+    r: 26,
+    dx: 8,
+    dy: -12,
+    dur: 10,
+    delay: -6,
+    fx: -44,
+    fy: -24,
+  },
 ];
 
 /** Desde md: las cuatro esquinas del logo. */
 const DESKTOP: Spec[] = [
-  { x: "4%", y: "24%", size: 110, shape: "almendra", color: "#4a0e0e", r: -18, dx: 22, dy: -34, dur: 11, delay: 0, fx: 60, fy: 40 },
-  { x: "88%", y: "18%", size: 90, shape: "ovalada", color: "#e8c4b0", finish: "french", r: 20, dx: -24, dy: -30, dur: 12, delay: -2, fx: -60, fy: 40 },
-  { x: "7%", y: "66%", size: 64, shape: "almendra", color: "#f6efe6", finish: "glitter", r: 28, dx: 16, dy: -22, dur: 9.5, delay: -5, fx: 60, fy: -40 },
-  { x: "90%", y: "62%", size: 88, shape: "coffin", color: "#b51c1c", r: -12, dx: -18, dy: -32, dur: 13, delay: -7, fx: -60, fy: -40 },
+  {
+    x: "4%",
+    y: "24%",
+    size: 110,
+    shape: "almendra",
+    color: "#4a0e0e",
+    r: -18,
+    dx: 22,
+    dy: -34,
+    dur: 11,
+    delay: 0,
+    fx: 60,
+    fy: 40,
+  },
+  {
+    x: "88%",
+    y: "18%",
+    size: 90,
+    shape: "ovalada",
+    color: "#e8c4b0",
+    finish: "french",
+    r: 20,
+    dx: -24,
+    dy: -30,
+    dur: 12,
+    delay: -2,
+    fx: -60,
+    fy: 40,
+  },
+  {
+    x: "7%",
+    y: "66%",
+    size: 64,
+    shape: "almendra",
+    color: "#f6efe6",
+    finish: "glitter",
+    r: 28,
+    dx: 16,
+    dy: -22,
+    dur: 9.5,
+    delay: -5,
+    fx: 60,
+    fy: -40,
+  },
+  {
+    x: "90%",
+    y: "62%",
+    size: 88,
+    shape: "coffin",
+    color: "#b51c1c",
+    r: -12,
+    dx: -18,
+    dy: -32,
+    dur: 13,
+    delay: -7,
+    fx: -60,
+    fy: -40,
+  },
 ];
 
 export function FloatingNails({ className }: { className?: string }) {
@@ -99,7 +198,7 @@ function FloatingNail({ spec: n, index }: { spec: Spec; index: number }) {
 
   return (
     <div
-      className={s.nail}
+      className="bfn-nail"
       style={
         {
           left: n.x,
@@ -146,12 +245,27 @@ function FloatingNail({ spec: n, index }: { spec: Spec; index: number }) {
             {n.finish === "french" ? <path d={FRENCH} fill="#fef7e7" /> : null}
             {n.finish === "glitter"
               ? GLITTER.map(([cx, cy, r, o], k) => (
-                  <circle key={k} cx={cx} cy={cy} r={r} fill={k % 3 ? "#fff6c8" : "#e6cf8f"} opacity={o} />
+                  <circle
+                    key={k}
+                    cx={cx}
+                    cy={cy}
+                    r={r}
+                    fill={k % 3 ? "#fff6c8" : "#e6cf8f"}
+                    opacity={o}
+                  />
                 ))
               : null}
             <rect width="60" height="160" fill={`url(#${vol})`} />
             {/* reflejo del top coat */}
-            <ellipse cx="19" cy="46" rx="4.5" ry="22" fill="#fff" opacity="0.5" transform="rotate(-8 19 46)" />
+            <ellipse
+              cx="19"
+              cy="46"
+              rx="4.5"
+              ry="22"
+              fill="#fff"
+              opacity="0.5"
+              transform="rotate(-8 19 46)"
+            />
           </g>
         </svg>
       </div>

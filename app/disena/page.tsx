@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Builder } from "@/components/builder/Builder";
-import { Eyebrow, Heading } from "@/components/ui/Section";
+import { Heading } from "@/components/ui/Section";
+import { Brush } from "@/components/motion/Brush";
 import { getBuilderConfig } from "@/lib/data/settings";
 
 export const metadata: Metadata = {
@@ -14,18 +15,21 @@ export const revalidate = 300;
 export default async function DisenaPage() {
   const config = await getBuilderConfig();
   return (
-    <div className="pt-28 pb-24 md:pt-36">
+    <div className="pt-[calc(var(--nav-h)+24px)] pb-[var(--section-y-tight)] lg:pt-[calc(var(--nav-h)+32px)] lg:pb-0">
       <div className="container-x">
-        <div className="mb-10 max-w-2xl">
-          <Eyebrow>Armador</Eyebrow>
-          <Heading as="h1">
-            Diseñá <span className="text-bordo">tu set</span>
-          </Heading>
-          <p className="mt-4 text-ink-soft">
-            Elegí y mirá cómo cambia el precio. El set base incluye 10 uñas a tu talle, pegamento y lima.
-          </p>
-        </div>
-        <Builder config={config} />
+        <Builder
+          config={config}
+          intro={
+            <header className="mb-7 max-w-2xl lg:mb-0">
+              <Heading as="h1">
+                Diseñá <Brush mode="load">tu set</Brush>
+              </Heading>
+              <p className="text-lead text-ink-soft measure-lead mt-4">
+                Elegí y mirá cómo cambia el precio. El set base incluye 10 uñas a tu talle, pegamento y lima.
+              </p>
+            </header>
+          }
+        />
       </div>
     </div>
   );

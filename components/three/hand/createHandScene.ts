@@ -1,14 +1,13 @@
 import * as THREE from "three";
 import type { BuilderSelection, Length, Shape } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
-import { FINGERS, FingerModel, SKIN_BASE, paintSkin } from "./anatomy";
+import { FINGERS, FingerModel, SKIN_BASE, mulberry32, paintSkin } from "./anatomy";
 import { DECAL_H, DECAL_W, decorKey, paintDecor } from "./decor";
-import { createCuticleGeometry, computeNail, createNailGeometry, halfWidth, nailContext, nailDims, sampleTop, type NailBuffers, type NailDims } from "./nail";
+import { computeNail, createNailGeometry, halfWidth, nailContext, nailDims, sampleTop, type NailBuffers, type NailDims } from "./nail";
 import {
   FINISH_KEYS,
   applyFinish,
   createBowMaterial,
-  createCuticleMaterial,
   createFlakeTexture,
   createGemMaterial,
   createGoldMaterial,
@@ -17,7 +16,7 @@ import {
   finishParams,
   type NailUniforms,
 } from "./materials";
-import { createBowGeometry, createGemGeometry, createHeartGeometry } from "./accessories";
+import { createBowGeometry, createGemGeometry, createGemShadow, createHeartGeometry } from "./accessories";
 import { createGemEnvironment, createStudioEnvironment } from "./environment";
 
 /**
@@ -59,10 +58,10 @@ const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
 
 /** encuadre según el largo: las uñas (el producto) llenan el cuadro; el corte cae en la falange proximal */
 const FRAMING: Record<Length, { cx: number; cy: number; h: number }> = {
-  corto: { cx: -1.0, cy: 6.5, h: 10.0 },
-  medio: { cx: -0.6, cy: 7.0, h: 10.0 },
-  largo: { cx: -0.7, cy: 7.4, h: 10.7 },
-  xl: { cx: -0.8, cy: 7.9, h: 11.5 },
+  corto: { cx: -1.3, cy: 6.0, h: 9.8 },
+  medio: { cx: -1.25, cy: 6.3, h: 10.2 },
+  largo: { cx: -1.3, cy: 6.65, h: 10.8 },
+  xl: { cx: -1.35, cy: 7.0, h: 11.4 },
 };
 const PIVOT = new THREE.Vector3(-1.2, 6.0, 0);
 /** leve diagonal de la mano en el cuadro */
@@ -131,7 +130,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   camera.up.set(0, 1, 0);
 
   /* ---------- luz ---------- */
-  const key = new THREE.DirectionalLight("#ffeedb", 2.2);
+  const key = new THREE.DirectionalLight("#ffeedb", 2.5);
   key.position.set(-9, 6, 11).add(PIVOT);
   key.target.position.copy(PIVOT);
   key.castShadow = true;
@@ -146,13 +145,16 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   sc.bottom = -10;
   sc.near = 1;
   sc.far = 45;
-  const fill = new THREE.DirectionalLight("#d6e2ff", 0.42);
+  const fill = new THREE.DirectionalLight("#d6e2ff", 0.32);
   fill.position.set(10, -3, 7).add(PIVOT);
   fill.target.position.copy(PIVOT);
   const rim = new THREE.DirectionalLight("#fff6ee", 0.7);
   rim.position.set(3, 22, 3).add(PIVOT);
   rim.target.position.copy(PIVOT);
-  scene.add(key, key.target, fill, fill.target, rim, rim.target);
+  // rebote cálido de la mesa crema: levanta los costados y la cara de abajo de los dedos (sombras cálidas, no grises)
+  const bounce = new THREE.HemisphereLight("#fff6ee", "#e9c7a2", 0.32);
+  bounce.position.set(0, 0, 1);
+  scene.add(key, key.target, fill, fill.target, rim, rim.target, bounce);
 
   /* ---------- grupo que rota (mano + mesa) ---------- */
   const pivot = new THREE.Group();
@@ -164,7 +166,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   pivot.add(hand);
 
   // sombra proyectada suave (solo sombra, el fondo es el crema del contenedor)
-  const shadowMat = track(new THREE.ShadowMaterial({ color: new THREE.Color("#5b2618"), opacity: 0.2 }));
+  const shadowMat = track(new THREE.ShadowMaterial({ color: new THREE.Color("#5b2618"), opacity: 0.24 }));
   const floorGeo = track(new THREE.PlaneGeometry(40, 40));
   const floor = new THREE.Mesh(floorGeo, shadowMat);
   floor.position.set(PIVOT.x, PIVOT.y, 0);
@@ -177,10 +179,9 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   const skinPlaceholder = track(solidTexture(SKIN_BASE));
   const flatNormal = track(new THREE.DataTexture(new Uint8Array([128, 128, 255, 255]), 1, 1));
   flatNormal.needsUpdate = true;
-  const cuticleMat = track(withEnv(createCuticleMaterial()));
   const skinMats = models.map((model) => {
     const geo = track(model.buildGeometry());
-    const mat = track(withEnv(createSkinMaterial(skinPlaceholder, flatNormal)));
+    const mat = track(withEnv(createSkinMaterial(skinPlaceholder, flatNormal, model.joints)));
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -217,10 +218,6 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     hand.add(mesh);
-    const cut = new THREE.Mesh(track(createCuticleGeometry(ctx, d)), cuticleMat);
-    cut.castShadow = true;
-    cut.receiveShadow = true;
-    hand.add(cut);
     const b = computeNail(geom.getIndex()!, ctx, "almendra", d);
     return { model, ctx, dims, geom, mesh, material, uniforms, from: b, to: b, cur: cloneBuffers(b), canvases, textures, decorKey: "none" };
   });
@@ -228,12 +225,23 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   /* ---------- apliques ---------- */
   const gemGeo = track(createGemGeometry());
   const gemMat = track(createGemMaterial());
-  const MAX_GEMS = 80;
+  const MAX_GEMS = 320;
   const gems = new THREE.InstancedMesh(gemGeo, gemMat, MAX_GEMS);
-  gems.castShadow = true;
+  // la sombra de cada piedra la pone su disco de contacto (no pasan por el mapa de sombras: hasta 300 piedras)
+  gems.castShadow = false;
   gems.frustumCulled = false;
   gems.count = 0;
   hand.add(gems);
+  // sombra de contacto de cada piedra (se dibuja después de las uñas, que son transparentes)
+  const gemShadow = createGemShadow();
+  track(gemShadow.geometry);
+  track(gemShadow.material);
+  track(gemShadow.texture);
+  const gemShadows = new THREE.InstancedMesh(gemShadow.geometry, gemShadow.material, MAX_GEMS);
+  gemShadows.frustumCulled = false;
+  gemShadows.count = 0;
+  gemShadows.renderOrder = 2;
+  hand.add(gemShadows);
   const gemSlots: Accessory[] = [];
   const heart = new THREE.Mesh(track(createHeartGeometry()), track(withEnv(createGoldMaterial())));
   heart.castShadow = true;
@@ -639,10 +647,16 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       _S.set(sc, sc, sc);
       _M.scale(_S);
       _M.setPosition(_P.addScaledVector(_N, -0.004));
-      gems.setMatrixAt(count++, _M);
+      gems.setMatrixAt(count, _M);
+      // la sombra cae del lado contrario a la luz clave (que viene de arriba a la izquierda)
+      _M.setPosition(_P.addScaledVector(_N, 0.01).addScaledVector(_X, 0.12 * sc).addScaledVector(_T, -0.08 * sc));
+      gemShadows.setMatrixAt(count, _M);
+      count++;
     }
     gems.count = count;
     gems.instanceMatrix.needsUpdate = true;
+    gemShadows.count = count;
+    gemShadows.instanceMatrix.needsUpdate = true;
     for (const a of [heartAcc, bowAcc]) {
       const o = a.object;
       o.visible = a.scale > 0.001;
@@ -656,43 +670,60 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     }
   }
 
-  const FULL_PATTERN: Array<[number, number, number]> = [
-    [0, 0.0, 0.13],
-    [-0.55, 0.09, 0.09],
-    [0.55, 0.09, 0.09],
-    [0, 0.2, 0.11],
-    [-0.56, 0.3, 0.1],
-    [0.56, 0.3, 0.1],
-    [0, 0.41, 0.12],
-    [-0.5, 0.52, 0.085],
-    [0.5, 0.52, 0.085],
-    [0, 0.63, 0.1],
-    [-0.4, 0.74, 0.075],
-    [0.4, 0.74, 0.075],
-    [0, 0.85, 0.08],
-    [-0.3, 0.94, 0.06],
-    [0.3, 0.94, 0.06],
-  ];
+  type GemSpot = { key: string; nail: number; u: number; y: number; size: number };
+  const layoutCache = new Map<string, GemSpot[]>();
 
-  function gemLayout(extras: string[], shp: Shape, len: Length) {
-    const out: Array<{ key: string; nail: number; u: number; y: number; size: number }> = [];
+  /**
+   * Strass full: mosaico denso de piedras de varios tamaños (como se pegan de verdad: primero las
+   * grandes, después las medianas y las chicas en los huecos), sin salirse del contorno de la uña.
+   */
+  function packNail(i: number, shp: Shape, len: Length, out: GemSpot[]) {
+    const d = nails[i].dims[len];
+    const k = d.W / 1.1;
+    const rand = mulberry32(500 + i * 31);
+    const placed: Array<{ x: number; y: number; r: number }> = [];
+    const gap = 0.007 * k;
+    const hwAt = (y: number, r: number) => Math.min(halfWidth(shp, Math.max(0, y - r * 0.6), d), halfWidth(shp, Math.min(d.L, y + r * 0.6), d));
+    for (const R of [0.13, 0.095, 0.068, 0.048]) {
+      const r = R * k;
+      const step = r * 0.95;
+      const cands: Array<[number, number, number]> = [];
+      for (let y = 0.03 + r; y < d.L; y += step * 0.87) {
+        for (let x = -d.W / 2; x <= d.W / 2; x += step) cands.push([x + (rand() - 0.5) * step * 0.6, y + (rand() - 0.5) * step * 0.5, rand()]);
+      }
+      cands.sort((a, b) => a[2] - b[2]);
+      for (const [x, y] of cands) {
+        if (y - r < 0.02 || y + r * 0.85 > d.L) continue;
+        const hw = hwAt(y, r);
+        if (Math.abs(x) + r * 0.9 > hw) continue;
+        let ok = true;
+        for (const p of placed) {
+          const m = r + p.r + gap;
+          if ((p.x - x) ** 2 + (p.y - y) ** 2 < m * m) {
+            ok = false;
+            break;
+          }
+        }
+        if (!ok) continue;
+        placed.push({ x, y, r });
+      }
+    }
+    placed.forEach((p, n) => out.push({ key: `f${shp}${len}${i}:${n}`, nail: i, u: p.x / Math.max(1e-3, halfWidth(shp, p.y, d)), y: p.y, size: p.r }));
+  }
+
+  function gemLayout(extras: string[], shp: Shape, len: Length): GemSpot[] {
     const full = extras.includes("strass-full");
     const some = extras.includes("strass");
-    if (!full && !some) return out;
+    if (!full && !some) return [];
+    const cacheKey = `${full ? "f" : "s"}|${shp}|${len}`;
+    const hit = layoutCache.get(cacheKey);
+    if (hit) return hit;
+    const out: GemSpot[] = [];
     nails.forEach((n, i) => {
-      const d = n.dims[len];
-      const { W, bed } = d;
-      if (full) {
-        // cubre todo el largo real de la uña, sin sobresalir de los bordes (stiletto, almendra)
-        const span = Math.min(d.L * 0.9, d.bed + 0.9 * (d.L - d.bed));
-        FULL_PATTERN.forEach(([u, s, r], k) => {
-          const y = 0.06 + 0.11 * W + s * (span - 0.11 * W);
-          const size = r * W * 1.05;
-          if ((1 - Math.abs(u)) * halfWidth(shp, y, d) < size * 0.9 && u !== 0) return;
-          if (halfWidth(shp, y, d) < size * 1.05) return;
-          out.push({ key: `f${i}:${k}`, nail: i, u, y, size });
-        });
-      } else if (i % 2 === 1) {
+      const { W, bed } = n.dims[len];
+      if (full) packNail(i, shp, len, out);
+      else if (i % 2 === 1) {
+        // índice y anular: tres piedras en degradé desde la cutícula
         out.push({ key: `s${i}:0`, nail: i, u: 0, y: bed * 0.26, size: 0.17 * W });
         out.push({ key: `s${i}:1`, nail: i, u: 0, y: bed * 0.5, size: 0.125 * W });
         out.push({ key: `s${i}:2`, nail: i, u: 0, y: bed * 0.69, size: 0.095 * W });
@@ -700,6 +731,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
         out.push({ key: `s${i}:0`, nail: i, u: 0, y: bed * 0.3, size: 0.18 * W });
       }
     });
+    layoutCache.set(cacheKey, out);
     return out;
   }
 
@@ -965,6 +997,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       io?.disconnect();
       img.onload = null;
       gems.dispose();
+      gemShadows.dispose();
       for (const d of disposables) d.dispose();
       renderer.renderLists.dispose();
       renderer.dispose();
@@ -986,8 +1019,9 @@ function catEyeColor(base: THREE.Color) {
     if (hsl.l < 0.35) c.setHSL(0.08, 0.22, 0.5, THREE.SRGBColorSpace).multiplyScalar(0.75);
     else c.setHSL(0.11, 0.38, 0.78, THREE.SRGBColorSpace);
   } else {
-    const l = hsl.l > 0.6 ? Math.min(0.9, hsl.l + 0.1) : THREE.MathUtils.clamp(hsl.l * 0.55 + 0.42, 0.48, 0.74);
-    c.setHSL(hsl.h, Math.min(1, hsl.s * 1.25 + 0.14), l, THREE.SRGBColorSpace);
+    // en las bases claras la banda es un nácar casi blanco (si no, no se distingue del color)
+    if (hsl.l > 0.6) return c.setHSL(hsl.h, Math.min(1, hsl.s * 0.8), 0.92, THREE.SRGBColorSpace).multiplyScalar(1.7);
+    c.setHSL(hsl.h, Math.min(1, hsl.s * 1.25 + 0.14), THREE.MathUtils.clamp(hsl.l * 0.55 + 0.42, 0.48, 0.74), THREE.SRGBColorSpace);
   }
   return c.multiplyScalar(1.35);
 }

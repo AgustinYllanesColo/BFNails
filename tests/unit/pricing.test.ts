@@ -116,7 +116,10 @@ describe("técnicas excluyentes", () => {
   });
 
   it("las configs del admin sin el campo igual respetan los pares conocidos por id", () => {
-    const fromDb: BuilderConfig = { ...cfg, extras: cfg.extras.map(({ exclusive: _drop, ...e }) => e) };
+    const fromDb: BuilderConfig = {
+      ...cfg,
+      extras: cfg.extras.map((e) => ({ id: e.id, group: e.group, label: e.label, delta: e.delta, complexity: e.complexity })),
+    };
     expect(toggleExtra(["strass"], "strass-full", fromDb).extras).toEqual(["strass-full"]);
   });
 

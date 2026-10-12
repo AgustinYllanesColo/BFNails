@@ -28,6 +28,28 @@ type Props = {
 };
 
 const COLS = 6;
+const BORDO_L = 0.0118; // #4a0e0e
+const CREAM_L = 0.935; // #fef7e7
+
+/** Brillo de laca: un reflejo duro arriba a la izquierda que se apaga rápido (sin borde). */
+const LACQUER = "radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.6) 0 8%, rgb(255 255 255 / 0) 34%)";
+
+/**
+ * "Transparente" es gel incoloro: la gota se dibuja como vidrio (deja ver el crema de atrás, con reflejo y un filo de
+ * luz) para que no se confunda con el blanco y el milky, que en el celular van sin nombre.
+ */
+const CLEAR_STYLE = {
+  backgroundColor: "rgb(255 253 248 / 0.25)",
+  backgroundImage: [
+    "radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.95) 0 9%, rgb(255 255 255 / 0) 30%)",
+    "linear-gradient(135deg, rgb(255 255 255 / 0) 52%, rgb(255 255 255 / 0.75) 58%, rgb(255 255 255 / 0) 64%)",
+    "radial-gradient(circle at 68% 78%, rgb(74 14 14 / 0.12), rgb(74 14 14 / 0) 55%)",
+  ].join(", "),
+};
+
+function isClear(o: ColorOption): boolean {
+  return /transparen|clear/i.test(`${o.id} ${o.label}`);
+}
 
 /** Luminancia relativa (WCAG) de un hex `#rrggbb` o `#rgb`. */
 export function luminance(hex: string): number {
@@ -86,13 +108,16 @@ export function ColorDrops({ options, value, onChange, label, labelledBy, classN
       aria-label={labelledBy ? undefined : label}
       aria-labelledby={labelledBy}
       className={cn(
-        "grid grid-cols-[repeat(6,44px)] justify-between gap-y-3 lg:grid-cols-6 lg:justify-normal lg:gap-x-2 lg:gap-y-4",
+        "grid grid-cols-[repeat(6,44px)] justify-between gap-y-3 sm:justify-start sm:gap-x-5 lg:max-w-xl lg:grid-cols-6 lg:justify-normal lg:gap-x-2 lg:gap-y-4",
         className,
       )}
     >
       {options.map((o, i) => {
         const selected = o.id === value;
-        const light = luminance(o.hex) > 0.6;
+        // check bordó o crema: el que más contraste haga con el color (WCAG)
+        const L = luminance(o.hex);
+        const darkCheck = (L + 0.05) / (BORDO_L + 0.05) >= (CREAM_L + 0.05) / (L + 0.05);
+        const clear = isClear(o);
         return (
           <button
             key={o.id}
@@ -114,23 +139,20 @@ export function ColorDrops({ options, value, onChange, label, labelledBy, classN
               className={cn(
                 "relative grid size-11 shrink-0 place-items-center rounded-full shadow-drop transition-[box-shadow,scale] duration-150 ease-[var(--ease-ui)] group-active/drop:scale-[0.94] lg:size-12",
                 // aro interior: que el blanco, el milky y el transparente se lean sobre el crema
-                "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-ink/15 after:ring-inset",
+                "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset",
+                clear ? "after:ring-ink/25" : "after:ring-ink/15",
                 selected
                   ? "ring-2 ring-bordo ring-offset-2 ring-offset-cream"
                   : "[@media(hover:hover)]:group-hover/drop:ring-2 [@media(hover:hover)]:group-hover/drop:ring-bordo/25 [@media(hover:hover)]:group-hover/drop:ring-offset-2 [@media(hover:hover)]:group-hover/drop:ring-offset-cream",
               )}
-              style={{
-                backgroundColor: o.hex,
-                backgroundImage:
-                  "radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.6) 0 8%, rgb(255 255 255 / 0) 34%)",
-              }}
+              style={clear ? CLEAR_STYLE : { backgroundColor: o.hex, backgroundImage: LACQUER }}
             >
               <Icon
                 name="check"
-                size={16}
+                size={18}
                 className={cn(
                   "transition-[opacity,scale] duration-150 ease-[var(--ease-ui)]",
-                  light ? "text-bordo" : "text-cream",
+                  darkCheck || clear ? "text-bordo" : "text-cream",
                   selected ? "scale-100 opacity-100" : "scale-75 opacity-0",
                 )}
               />

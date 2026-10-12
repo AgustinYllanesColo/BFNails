@@ -8,7 +8,8 @@ import { Outro } from "@/components/sections/Outro";
 import { Marquee } from "@/components/motion/Marquee";
 import { AmbientZone } from "@/components/motion/AmbientZone";
 import { getFeaturedDesigns } from "@/lib/data/repo";
-import styles from "@/components/sections/home.module.css";
+// Global a propósito (los .module.css de este proyecto no tienen alcance local): clases con prefijo `bfhs-`.
+import "@/components/sections/home.module.css";
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
 export const revalidate = 300;
@@ -53,11 +54,11 @@ function Tapes() {
     <AmbientZone className="relative z-10 -my-3 overflow-x-clip py-3">
       <div
         aria-hidden
-        className="absolute top-1/2 left-1/2 h-7 w-[108vw] -translate-x-1/2 -translate-y-1/2 rotate-[3deg] overflow-hidden shadow-sm md:rotate-[1.2deg]"
+        className="absolute top-[calc(50%+16px)] left-1/2 h-7 w-[108vw] -translate-x-1/2 -translate-y-1/2 rotate-[5deg] overflow-hidden shadow-sm md:top-[calc(50%+14px)] md:rotate-[2deg]"
       >
         <div
           data-ambient="marquee"
-          className={`leopard-trim h-full w-[calc(100%+560px)] ${styles.leoTrack}`}
+          className="leopard-trim bfhs-leo h-full w-[calc(100%+560px)]"
         />
       </div>
       <div className="bg-bordo grain shadow-md relative left-1/2 w-[108vw] -translate-x-1/2 -rotate-[1.5deg]">
