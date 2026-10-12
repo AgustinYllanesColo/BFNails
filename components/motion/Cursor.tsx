@@ -2,79 +2,157 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { MQ } from "@/lib/motion-core";
+import { LogoStar } from "@/components/brand/LogoStar";
+
+/** Etiquetas de los `data-cursor` del sitio (cualquier otro valor se muestra tal cual). */
+const LABELS: Record<string, string> = {
+  ver: "Ver",
+  armar: "Armar",
+  sumar: "Sumar",
+  wsp: "WhatsApp",
+};
+
+/** Distancia (px) de la píldora al puntero, y aire mínimo con los bordes de la ventana. */
+const OFFSET = 16;
+const EDGE = 8;
+/** Sobre un campo de texto nunca aparece (estorba al escribir y tapa la selección). */
+const FIELDS = "input, textarea, select, [contenteditable='true'], [contenteditable='']";
+
+type State = "off" | "on" | "press";
 
 /**
- * Cursor estrella: sigue al mouse con lerp, crece sobre elementos interactivos
- * y muestra un texto cuando el elemento tiene data-cursor="texto".
- * Solo se activa con puntero fino y sin prefers-reduced-motion.
+ * Cursor acompañante (PLAN W2-A.7). El cursor nativo se ve siempre: esto NO lo reemplaza. Una píldora amarilla con la
+ * estrella del logo y la acción en MAYÚSCULAS ("VER", "ARMAR", "SUMAR") que acompaña al puntero a 16 px, solo
+ * sobre elementos con `data-cursor`. Del lado de la pantalla que tenga lugar (nunca se corta contra un borde).
+ *
+ * - Sigue con `quickTo` de .12 s `power3.out` (con reduced-motion, pegada al puntero y solo funde).
+ * - Aparece con escala .6 → 1 + opacidad en 200 ms `--ease-ui`; en `pointerdown` se va en 120 ms y no vuelve hasta
+ *   que el puntero sale de ese elemento (no tapa el click ni lo que el click abre).
+ * - Solo mouse/lápiz (con touch no hace nada). Al scrollear se recalcula qué hay debajo del puntero.
+ *
+ * Contrato con Providers (import dinámico): export `Cursor`, sin props.
  */
 export function Cursor() {
-  const ref = useRef<HTMLDivElement>(null);
+  const outer = useRef<HTMLDivElement>(null);
+  const pill = useRef<HTMLDivElement>(null);
   const label = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const fine = window.matchMedia("(pointer: fine)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const el = ref.current;
-    if (!fine || reduced || !el) return;
+    const o = outer.current;
+    const p = pill.current;
+    const l = label.current;
+    if (!o || !p || !l) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    const reduced = window.matchMedia(MQ.reduced).matches;
 
-    document.documentElement.classList.add("has-cursor");
-    const xTo = gsap.quickTo(el, "x", { duration: 0.35, ease: "power3.out" });
-    const yTo = gsap.quickTo(el, "y", { duration: 0.35, ease: "power3.out" });
-    gsap.set(el, { xPercent: -50, yPercent: -50, scale: 0, opacity: 0 });
+    const xTo = reduced
+      ? (v: number) => gsap.set(o, { x: v })
+      : gsap.quickTo(o, "x", { duration: 0.12, ease: "power3.out" });
+    const yTo = reduced
+      ? (v: number) => gsap.set(o, { y: v })
+      : gsap.quickTo(o, "y", { duration: 0.12, ease: "power3.out" });
 
-    let shown = false;
-    const move = (e: PointerEvent) => {
-      xTo(e.clientX);
-      yTo(e.clientY);
-      if (!shown) {
-        shown = true;
-        gsap.to(el, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" });
+    let pointer: { x: number; y: number } | null = null;
+    let placed = false;
+    let host: HTMLElement | null = null;
+    let pressed: HTMLElement | null = null;
+    let size = { w: 0, h: 0 };
+    let raf = 0;
+
+    const setState = (state: State) => {
+      if (p.dataset.state !== state) p.dataset.state = state;
+    };
+
+    /** ¿Qué hay debajo del puntero? Decide si la píldora se ve y con qué texto. */
+    const resolve = (target: Element | null) => {
+      const next = target?.closest<HTMLElement>("[data-cursor]") ?? null;
+      if (pressed && next !== pressed) pressed = null; // salió del elemento que se clickeó
+      if (!next || !next.dataset.cursor || target?.closest(FIELDS) || next === pressed) {
+        host = next;
+        setState(pressed ? "press" : "off");
+        return;
+      }
+      if (next !== host) {
+        host = next;
+        const key = next.dataset.cursor;
+        l.textContent = LABELS[key] ?? key;
+        size = { w: p.offsetWidth, h: p.offsetHeight }; // una lectura de layout por elemento, no por movimiento
+      }
+      setState("on");
+    };
+
+    /** A 16 px abajo a la derecha; si no entra, del otro lado (y la escala sale desde la esquina del puntero). */
+    const place = (cx: number, cy: number) => {
+      const flipX = cx + OFFSET + size.w > window.innerWidth - EDGE;
+      const flipY = cy + OFFSET + size.h > window.innerHeight - EDGE;
+      const x = flipX ? cx - OFFSET - size.w : cx + OFFSET;
+      const y = flipY ? cy - OFFSET - size.h : cy + OFFSET;
+      p.style.transformOrigin = `${flipX ? "right" : "left"} ${flipY ? "bottom" : "top"}`;
+      if (!placed) {
+        gsap.set(o, { x, y }); // la primera vez aparece donde está el puntero, sin viajar desde la esquina
+        placed = true;
+      } else {
+        xTo(x);
+        yTo(y);
       }
     };
-    const over = (e: PointerEvent) => {
-      const target = (e.target as HTMLElement).closest<HTMLElement>(
-        "a, button, [role=button], input, select, textarea, label, [data-cursor]",
-      );
-      const text = target?.dataset.cursor;
-      if (label.current) label.current.textContent = text ?? "";
-      el.dataset.state = text ? "label" : target ? "hover" : "idle";
-    };
-    const leave = () => gsap.to(el, { scale: 0, opacity: 0, duration: 0.3 });
-    const enter = () => gsap.to(el, { scale: 1, opacity: 1, duration: 0.3 });
 
-    window.addEventListener("pointermove", move, { passive: true });
-    window.addEventListener("pointerover", over, { passive: true });
-    document.documentElement.addEventListener("mouseleave", leave);
-    document.documentElement.addEventListener("mouseenter", enter);
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      pointer = { x: e.clientX, y: e.clientY };
+      resolve(e.target as Element | null);
+      place(e.clientX, e.clientY);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType === "touch" || !host) return;
+      pressed = host;
+      setState("press");
+    };
+    const onLeave = () => {
+      host = null;
+      pressed = null;
+      setState("off");
+    };
+    // Lenis mueve la página debajo de un puntero quieto: recalcular qué quedó debajo (una vez por frame).
+    const onScroll = () => {
+      if (!pointer || raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        if (pointer) resolve(document.elementFromPoint(pointer.x, pointer.y));
+      });
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("blur", onLeave);
+    document.documentElement.addEventListener("pointerleave", onLeave);
     return () => {
-      document.documentElement.classList.remove("has-cursor");
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerover", over);
-      document.documentElement.removeEventListener("mouseleave", leave);
-      document.documentElement.removeEventListener("mouseenter", enter);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("blur", onLeave);
+      document.documentElement.removeEventListener("pointerleave", onLeave);
+      cancelAnimationFrame(raf);
+      gsap.killTweensOf(o);
     };
   }, []);
 
   return (
     <div
-      ref={ref}
+      ref={outer}
       aria-hidden
-      data-state="idle"
-      className="group cursor-root pointer-events-none fixed top-0 left-0 z-[100]"
-      style={{ willChange: "transform" }}
+      data-cursor-companion=""
+      className="pointer-events-none fixed top-0 left-0 z-[100]"
     >
-      <div className="relative grid place-items-center transition-transform duration-300 ease-[var(--ease-bounce)] group-data-[state=hover]:scale-[2.2] group-data-[state=label]:scale-[3.2]">
-        <svg width="22" height="22" viewBox="0 0 24 24" className="animate-[spin-slow_9s_linear_infinite] drop-shadow">
-          <path
-            d="M12 1.5l2.9 7.1 7.6.5-5.9 4.9 1.9 7.4L12 17.3 5.5 21.4l1.9-7.4L1.5 9.1l7.6-.5z"
-            fill="var(--bordo)"
-          />
-        </svg>
-        <span
-          ref={label}
-          className="absolute text-[4px] font-semibold tracking-wide text-cream uppercase opacity-0 transition-opacity group-data-[state=label]:opacity-100"
-        />
+      <div
+        ref={pill}
+        data-state="off"
+        className="bg-yellow rounded-pill text-ink flex scale-[0.6] items-center gap-1.5 px-2.5 py-1 text-[12px] leading-4 font-bold tracking-[0.08em] whitespace-nowrap uppercase opacity-0 shadow-sm transition-[opacity,scale] duration-[120ms] ease-[var(--ease-ui)] data-[state=on]:scale-100 data-[state=on]:opacity-100 data-[state=on]:duration-200 motion-reduce:scale-100"
+      >
+        <LogoStar size={10} tilt />
+        <span ref={label} />
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { BuilderSelection, Length, Shape } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
 import { FINGERS, FingerModel, SKIN_BASE, paintSkin } from "./anatomy";
@@ -19,6 +18,7 @@ import {
   type NailUniforms,
 } from "./materials";
 import { createBowGeometry, createGemGeometry, createHeartGeometry } from "./accessories";
+import { createGemEnvironment, createStudioEnvironment } from "./environment";
 
 /**
  * Escena procedural de la mano con uñas (estilo img2threejs: todo en código, sin modelos).
@@ -212,6 +212,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     const d = dims.medio;
     uniforms.uFlakeScale.value.set(d.W / 1.9, d.Lref / 1.9);
     uniforms.uBedV.value = d.bed / d.Lref;
+    uniforms.uSmile.value = (0.15 * d.W) / d.Lref;
     const mesh = new THREE.Mesh(geom, material);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -594,6 +595,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     for (let i = 0; i < cur.top.length; i++) cur.top[i] = from.top[i] + (to.top[i] - from.top[i]) * e;
     for (let i = 0; i < cur.uv.length; i++) cur.uv[i] = from.uv[i] + (to.uv[i] - from.uv[i]) * e;
     cur.L = from.L + (to.L - from.L) * e;
+    n.uniforms.uLenV.value = cur.L / n.dims.medio.Lref;
     writeNail(n);
   }
 
@@ -778,13 +780,13 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       );
     }
     if (sel.extras.includes("aurora")) target.lerp(new THREE.Color("#ffffff"), 0.06);
-    const cat = base.clone().lerp(new THREE.Color("#fff1d6"), CAT_LERP).multiplyScalar(CAT_GAIN);
+    const cat = catEyeColor(base);
     const fin = finishParams(sel.finish, sel.extras);
     if (fin.catEye > 0) {
       // sobre bases oscuras el negro tiene que leerse negro (no metal gris)
       const hsl = { h: 0, s: 0, l: 0 };
       base.getHSL(hsl, THREE.SRGBColorSpace);
-      if (hsl.l < 0.15) fin.envMapIntensity = Math.min(fin.envMapIntensity, 0.18);
+      if (hsl.l < 0.15) fin.envMapIntensity = Math.min(fin.envMapIntensity, 0.3);
     }
     const sheerTo = sel.finish === "cromado" ? 0 : (SHEER[sel.base] ?? 0);
     const changed = !target.equals(color.to) || FINISH_KEYS.some((k) => fin[k] !== finTo[k]) || !cat.equals(catColor.to) || sheerTo !== sheer.to;
@@ -929,62 +931,13 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
 
   function buildEnvironment() {
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const room = new RoomEnvironment();
-    // softboxes alargados en el techo: la "ventana" larga que recorre toda la uña glossy
-    const stripGeo = new THREE.BoxGeometry(1, 1, 1);
-    const stripMats: THREE.Material[] = [];
-    const strip = (x: number, z: number, sx: number, sz: number, intensity: number) => {
-      const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.97, 0.93).multiplyScalar(intensity) });
-      stripMats.push(mat);
-      const m = new THREE.Mesh(stripGeo, mat);
-      m.position.set(x, 19, z);
-      m.scale.set(sx, 0.1, sz);
-      room.add(m);
-    };
-    strip(-3.2, -6, 1.6, 26, 36);
-    // brillo secundario ancho y suave (sin una segunda raya fina)
-    strip(3.0, -5, 2.6, 20, 5);
-    const envRT = track(pmrem.fromScene(room, 0.03));
-    room.dispose();
-    stripGeo.dispose();
-    stripMats.forEach((m) => m.dispose());
-    // entorno propio de los strass: fondo negro con paneles muy brillantes → facetas que destellan
-    const gemRoom = new THREE.Scene();
-    // gris medio en lineal (un hex se convierte de sRGB y quedaría casi negro)
-    gemRoom.background = new THREE.Color().setRGB(0.32, 0.32, 0.34, THREE.LinearSRGBColorSpace);
-    const panelGeo = new THREE.PlaneGeometry(2.6, 2.6);
-    const panelMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(30, 30, 30), side: THREE.DoubleSide });
-    for (const [x, y, z] of [
-      [3, 8, 2],
-      [-4, 7, -3],
-      [0, 9, -5],
-      [5, 4, -1],
-      [-6, 5, 3],
-      [2, 6, 6],
-      [-2, 3, 7],
-      [6, 7, 4],
-      [-5, 8, 0],
-      [1, 4, -7],
-      [-3, 9, 4],
-      [4, 9, -4],
-    ]) {
-      const m = new THREE.Mesh(panelGeo, panelMat);
-      m.position.set(x, y, z);
-      m.lookAt(0, 0, 0);
-      gemRoom.add(m);
-    }
-    const gemEnvRT = track(pmrem.fromScene(gemRoom, 0));
-    panelGeo.dispose();
-    panelMat.dispose();
+    // estudio crema de baja frecuencia (sin rayas en el cromado) y un entorno de alto contraste para los strass
+    const envRT = track(createStudioEnvironment(pmrem));
+    const gemEnvRT = track(createGemEnvironment(pmrem));
     pmrem.dispose();
     // envMap por material (no scene.environment): así cada material conserva su envMapIntensity
-    for (const m of envMaterials) {
-      m.envMap = envRT.texture;
-      // el "techo" de la habitación queda arriba de la mano (el dorso mira a +Z)
-      m.envMapRotation.set(Math.PI / 2, 0, 0);
-    }
+    for (const m of envMaterials) m.envMap = envRT.texture;
     gemMat.envMap = gemEnvRT.texture;
-    gemMat.envMapRotation.set(Math.PI / 2, 0, 0);
   }
 
   return {
@@ -1021,9 +974,23 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   };
 }
 
-/** color del cat eye: la base aclarada hacia un crema cálido */
-const CAT_LERP = 0.6;
-const CAT_GAIN = 1.25;
+/**
+ * Color de la banda del cat eye: el brillo de las partículas teñido por el gel de la base
+ * (más saturado y luminoso que la base, nunca plateado). En el negro, un humo champaña tenue.
+ */
+function catEyeColor(base: THREE.Color) {
+  const hsl = { h: 0, s: 0, l: 0 };
+  base.getHSL(hsl, THREE.SRGBColorSpace);
+  const c = new THREE.Color();
+  if (hsl.s < 0.12) {
+    if (hsl.l < 0.35) c.setHSL(0.08, 0.22, 0.5, THREE.SRGBColorSpace).multiplyScalar(0.75);
+    else c.setHSL(0.11, 0.38, 0.78, THREE.SRGBColorSpace);
+  } else {
+    const l = hsl.l > 0.6 ? Math.min(0.9, hsl.l + 0.1) : THREE.MathUtils.clamp(hsl.l * 0.55 + 0.42, 0.48, 0.74);
+    c.setHSL(hsl.h, Math.min(1, hsl.s * 1.25 + 0.14), l, THREE.SRGBColorSpace);
+  }
+  return c.multiplyScalar(1.35);
+}
 
 function solidTexture(hex: string) {
   const c = new THREE.Color(hex);

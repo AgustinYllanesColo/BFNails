@@ -20,13 +20,19 @@ export type Option<T extends string = string> = {
 
 export type ComplexityTier = { level: Complexity; label: string; minPoints: number; surcharge: number };
 
+/**
+ * Técnica del armador. `exclusive` (opcional) agrupa las que no pueden ir juntas en la misma uña: elegir una saca
+ * a la otra del mismo grupo (francesita / francesita de color van en la punta; strass / strass full).
+ */
+export type ExtraOption = Option & { group: string; exclusive?: string };
+
 export type BuilderConfig = {
   basePrice: number;
   shapes: Option<Shape>[];
   lengths: Option<Length>[];
   finishes: Option<Finish>[];
   bases: Array<Option & { hex: string }>;
-  extras: Array<Option & { group: string }>;
+  extras: ExtraOption[];
   tiers: ComplexityTier[];
 };
 
@@ -65,14 +71,21 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "transparente", label: "Transparente", delta: 0, hex: "#f8f5ef" },
   ],
   extras: [
-    { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, complexity: 1 },
-    { id: "francesita-color", group: "Clásicos", label: "Francesita de color", delta: 2000, complexity: 1 },
+    { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, complexity: 1, exclusive: "punta" },
+    {
+      id: "francesita-color",
+      group: "Clásicos",
+      label: "Francesita de color",
+      delta: 2000,
+      complexity: 1,
+      exclusive: "punta",
+    },
     { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, complexity: 1 },
     { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, complexity: 1 },
     { id: "cat-eye", group: "Brillos", label: "Cat eye", delta: 1800, complexity: 1 },
     { id: "aurora", group: "Brillos", label: "Efecto aurora / espejo", delta: 2200, complexity: 1 },
-    { id: "strass", group: "3D y apliques", label: "Strass (hasta 10)", delta: 2000, complexity: 1 },
-    { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, complexity: 2 },
+    { id: "strass", group: "3D y apliques", label: "Strass (hasta 10)", delta: 2000, complexity: 1, exclusive: "strass" },
+    { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, complexity: 2, exclusive: "strass" },
     { id: "charms", group: "3D y apliques", label: "Charms / dijes", delta: 2500, complexity: 2 },
     { id: "3d", group: "3D y apliques", label: "Relieve 3D (moños, flores)", delta: 3500, complexity: 2 },
     { id: "animal-print", group: "Diseños", label: "Animal print", delta: 2500, complexity: 2 },
@@ -146,3 +159,58 @@ export const DEFAULT_SELECTION: BuilderSelection = {
   base: "nude",
   extras: [],
 };
+
+/* ---------- Técnicas excluyentes ---------- */
+
+/**
+ * Grupos conocidos por id, para configs que llegan sin el campo `exclusive` (las opciones guardadas desde el admin
+ * todavía no lo tienen): una uña no puede llevar dos puntas ni dos tipos de strass a la vez. Una técnica nueva con
+ * otro id, sin `exclusive`, se comporta como siempre (se suma o se saca sin tocar a las demás).
+ */
+const KNOWN_EXCLUSIVE: Record<string, string> = {
+  francesita: "punta",
+  "francesita-color": "punta",
+  strass: "strass",
+  "strass-full": "strass",
+};
+
+/** Grupo excluyente de una técnica (o `undefined` si se combina con todo). */
+export function exclusiveGroup(extra: Pick<ExtraOption, "id" | "exclusive">): string | undefined {
+  return extra.exclusive ?? KNOWN_EXCLUSIVE[extra.id];
+}
+
+export type ExtraToggle = {
+  /** Las técnicas elegidas después del toque, en el orden en que se eligieron. */
+  extras: string[];
+  /** Las que salieron porque no van con la nueva (para avisar "Cambiamos X por Y"). */
+  removed: string[];
+};
+
+/**
+ * Suma o saca una técnica. Si la nueva comparte grupo excluyente con alguna elegida, esa sale en el mismo toque.
+ * Función pura: no cambia `extras`.
+ */
+export function toggleExtra(extras: string[], id: string, config: BuilderConfig = DEFAULT_BUILDER_CONFIG): ExtraToggle {
+  if (extras.includes(id)) return { extras: extras.filter((e) => e !== id), removed: [] };
+  const extra = config.extras.find((e) => e.id === id);
+  const group = extra ? exclusiveGroup(extra) : undefined;
+  if (!group) return { extras: [...extras, id], removed: [] };
+  const removed = extras.filter((e) => {
+    const other = config.extras.find((x) => x.id === e);
+    return other ? exclusiveGroup(other) === group : false;
+  });
+  return { extras: [...extras.filter((e) => !removed.includes(e)), id], removed };
+}
+
+/**
+ * Deja una lista de técnicas válida para la config: sin ids desconocidos ni repetidos y, si dos comparten grupo
+ * excluyente, gana la última elegida. Para selecciones que vuelven guardadas (sessionStorage).
+ */
+export function normalizeExtras(extras: string[], config: BuilderConfig = DEFAULT_BUILDER_CONFIG): string[] {
+  let out: string[] = [];
+  for (const id of extras) {
+    if (out.includes(id) || !config.extras.some((e) => e.id === id)) continue;
+    out = toggleExtra(out, id, config).extras;
+  }
+  return out;
+}
