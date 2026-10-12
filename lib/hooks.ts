@@ -8,7 +8,7 @@ import {
   useSyncExternalStore,
   type RefObject,
 } from "react";
-import { MOTION_EVENT, MQ, isMotionPaused } from "@/lib/motion";
+import { MOTION_EVENT, MQ, isMotionPaused } from "@/lib/motion-core";
 
 const noop = () => () => {};
 

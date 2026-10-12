@@ -8,6 +8,15 @@
 /* =========================================================================================
    1. Tokens
    ========================================================================================= */
+
+/* --nav-h registrada como longitud: aunque sume el área segura (calc + env), getComputedStyle la devuelve resuelta en
+   px para navH() de lib/motion y para los tests. */
+@property --nav-h {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 72px;
+}
+
 :root {
   /* ---- Primitivos (muestreados del logo) ---- */
   --cream-50: #fffdf8;
@@ -78,6 +87,7 @@
   --fs-h1: clamp(3.25rem, 2.414rem + 3.429vw, 5.5rem); /* 52 → 88 */
   --fs-h2: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem); /* 44 → 72 */
   --fs-h3: clamp(1.75rem, 1.471rem + 1.143vw, 2.5rem); /* 28 → 40 */
+  --fs-title: 1.0625rem; /* 17; 18 desde md (nombres de producto, preguntas) */
 
   /* ---- Forma ---- */
   --radius-xs: 6px;
@@ -87,15 +97,26 @@
   --radius-xl: 32px;
   --radius-pill: 999px;
 
+  /* ---- Áreas seguras (viewport-fit=cover): notch y esquinas redondeadas en horizontal, barra de estado en modo
+     app. En vertical y en desktop valen 0. Los costados van simétricos para que la composición quede centrada. ---- */
+  --safe-top: env(safe-area-inset-top, 0px);
+  /* barras inferiores: bottom-[max(12px,var(--safe-bottom))] */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-x: max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+
   /* ---- Ritmo ---- */
-  --gutter: clamp(16px, 4vw, 48px);
+  /* container-x y las sangrías de carruseles (-mx/px-[var(--gutter)]): nunca bajo el notch */
+  --gutter: max(clamp(16px, 4vw, 48px), var(--safe-x));
   --section-y: clamp(4rem, 2.5rem + 6.1vw, 8rem); /* 64 → 128 */
   --section-y-tight: clamp(2.5rem, 1.75rem + 3vw, 4.5rem); /* 40 → 72 */
   --section-y-peak: clamp(6rem, 4.6rem + 5.7vw, 10rem); /* 96 → 160 */
   --stack-heading: clamp(2rem, 1.5rem + 2vw, 3.5rem);
 
   /* ---- Medidas fijas y capas (PLAN §2.7) ---- */
-  --nav-h: 72px; /* pt-3 + py-1.5 + Kitty h-12 + py-1.5 */
+  /* Cabecera fija: pt-[var(--nav-pad-top)] px-[var(--nav-pad-x)] (12 px, o el área segura si es mayor) */
+  --nav-pad-top: max(12px, var(--safe-top));
+  --nav-pad-x: max(12px, var(--safe-x));
+  --nav-h: calc(var(--nav-pad-top) + 60px); /* 72 = pt + py-1.5 + Kitty h-12 + py-1.5 */
   --sticky-top: calc(var(--nav-h) + 10px);
   --sticky-bar-h: 0px; /* lo publica StickyActionBar mientras está visible */
 
@@ -162,7 +183,10 @@
 
 @media (min-width: 768px) {
   :root {
-    --nav-h: 84px; /* pt-4 + py-1.5 + Kitty h-14 + py-1.5 */
+    --nav-pad-top: max(16px, var(--safe-top));
+    --nav-pad-x: max(20px, var(--safe-x));
+    --nav-h: calc(var(--nav-pad-top) + 68px); /* 84 = pt + py-1.5 + Kitty h-14 + py-1.5 */
+    --fs-title: 1.125rem;
   }
 }
 
@@ -242,7 +266,7 @@
   --text-h3--line-height: 1;
   --text-h3--letter-spacing: 0em;
   --text-h3--font-weight: var(--display-weight);
-  --text-title: 1.0625rem;
+  --text-title: var(--fs-title);
   --text-title--line-height: 1.25;
   --text-title--letter-spacing: -0.005em;
   --text-title--font-weight: 600;
@@ -330,7 +354,6 @@
     font-synthesis: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
     overflow-x: clip;
   }
 
@@ -811,3 +834,27 @@ html[data-motion="paused"] [data-ambient] {
     transform: translate3d(-560px, 0, 0);
   }
 }
+
+/* W1-F2 · keyframes propios de components/ui (Stamp, ticket) ------------------------------ */
+/* Sello con reduced-motion: aparece hasta la opacidad de reposo (.92), sin escala ni giro extra. */
+@keyframes stamp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.92;
+  }
+}
+
+/* LED del cabezal: parpadea (imprimiendo) o respira (esperando) sin apagarse nunca del todo.
+   `--led-low` es el piso de la opacidad (.45 por defecto; la respiración lenta usa uno más alto). */
+@keyframes led-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--led-low, 0.45);
+  }
+}
+/* /W1-F2 */
