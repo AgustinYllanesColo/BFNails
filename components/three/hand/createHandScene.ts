@@ -561,12 +561,11 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     }
   }
 
-  /** el dispositivo no llega: menos píxeles y sin balanceo */
+  /** el dispositivo no llega: se apaga el balanceo y el parallax, pero la resolución se mantiene (la mano
+   *  a 1x se veía borrosa y parecía "otra mano"; se prefiere menos movimiento antes que menos nitidez) */
   function degrade() {
     lowPower = true;
     parallax.tx = parallax.ty = 0;
-    renderer.setPixelRatio(1);
-    resize(true);
   }
 
   function placeCamera() {
