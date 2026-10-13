@@ -20,8 +20,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   hourlyRate: 6000,
   targetMargin: 0.55,
   shipping: DEFAULT_SHIPPING_TABLE,
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5491100000000",
-  transferAlias: process.env.NEXT_PUBLIC_TRANSFER_ALIAS ?? "bfnails.studio",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5491128253431",
+  transferAlias: process.env.NEXT_PUBLIC_TRANSFER_ALIAS ?? "brenda.f00",
   transferHolder: process.env.NEXT_PUBLIC_TRANSFER_HOLDER ?? "Brenda",
 };
 

@@ -13,7 +13,7 @@ export function Footer() {
   return (
     <footer className="relative overflow-hidden bg-bordo text-cream">
       <Marquee
-        items={["press-on", "soft gel", "semipermanente", "a tu talle", "Lanús", "envíos a todo el país"]}
+        items={["press-on", "a tu talle", "hechas a mano", "soft gel en el estudio", "Remedios de Escalada", "envíos a todo el país"]}
         className="border-b border-cream/15 py-4 font-display text-2xl md:text-3xl"
         speed={34}
       />
@@ -58,18 +58,18 @@ export function Footer() {
               </a>
             </li>
             <li>
-              <a href={siteConfig.facebook} target="_blank" rel="noreferrer" className="hover:underline underline-offset-4">
-                Facebook
+              <a href={waLink("Hola Bren! Quiero pedir turno en el estudio 🐱")} target="_blank" rel="noreferrer" className="hover:underline underline-offset-4">
+                Turnos en el estudio
               </a>
             </li>
           </ul>
           <p className="mt-6 text-sm text-cream/70">
-            Entregas en {siteConfig.zones.join(", ")}. Envíos por Correo Argentino.
+            Estudio en {siteConfig.studio.area}, {siteConfig.studio.note}. Moto en {siteConfig.zones.join(", ")}. Envíos por Correo Argentino.
           </p>
         </div>
       </div>
       <div className="container-x flex flex-col items-start justify-between gap-3 border-t border-cream/15 py-6 text-xs text-cream/60 md:flex-row md:items-center">
-        <span>© {new Date().getFullYear()} BF Nails Studio · Lanús, Buenos Aires</span>
+        <span>© {new Date().getFullYear()} BF Nails Studio · Remedios de Escalada, Buenos Aires</span>
         <nav className="flex flex-wrap gap-x-5 gap-y-1" aria-label="Legales">
           <Link href="/terminos" className="hover:text-cream">
             Términos y condiciones

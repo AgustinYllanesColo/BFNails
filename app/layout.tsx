@@ -30,7 +30,7 @@ const sans = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} · Press-on nails soft gel a tu talle`,
+    default: `${siteConfig.name} · Press-on nails a tu talle, hechas a mano`,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,

@@ -3,6 +3,7 @@ import { Featured } from "@/components/sections/Featured";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { BuilderCta } from "@/components/sections/BuilderCta";
 import { Zones } from "@/components/sections/Zones";
+import { Studio } from "@/components/sections/Studio";
 import { Faq } from "@/components/sections/Faq";
 import { Marquee } from "@/components/motion/Marquee";
 import { getFeaturedDesigns } from "@/lib/data/repo";
@@ -20,11 +21,10 @@ export default async function HomePage() {
         <div className="-mx-[4vw] w-[108vw] -rotate-[1.5deg]">
           <Marquee
             items={[
-              "press-on en soft gel",
-              "a tu talle",
-              "hechas a mano",
+              "press-on a tu talle",
+              "hechas a mano por Bren",
               "reutilizables",
-              "Lanús",
+              "Remedios de Escalada",
               "envíos a todo el país",
             ]}
             className="bg-bordo font-display text-cream py-3 text-xl md:py-4 md:text-2xl"
@@ -36,6 +36,7 @@ export default async function HomePage() {
       <HowItWorks />
       <BuilderCta />
       <Zones />
+      <Studio />
       <Faq />
     </>
   );

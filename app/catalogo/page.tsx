@@ -7,7 +7,7 @@ import { Stars } from "@/components/motion/Stars";
 
 export const metadata: Metadata = {
   title: "Catálogo",
-  description: "Todos los sets de uñas press-on soft gel de BF Nails Studio con su precio.",
+  description: "Todos los sets de uñas press-on de BF Nails Studio, hechos a mano y a tu talle, con su precio.",
 };
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
@@ -17,12 +17,14 @@ export default async function CatalogoPage() {
   const designs = await getDesigns();
   return (
     <div className="relative pt-28 pb-24 md:pt-36">
+      {/* Estrellas decorativas: en el celular solo una chica a la derecha del titular (las grandes pisaban el texto y el menú) */}
       <Stars
         stars={[
-          { x: "85%", y: "4%", size: 90, rotate: 12, speed: 0.7 },
-          { x: "-2%", y: "20%", size: 120, rotate: -8, speed: 0.5 },
+          { x: "86%", y: "9%", size: 44, rotate: 12, speed: 0.7 },
+          { x: "85%", y: "4%", size: 90, rotate: 12, speed: 0.7, mobile: false },
+          { x: "-2%", y: "28%", size: 120, rotate: -8, speed: 0.5, mobile: false },
         ]}
-        className="max-h-[600px]"
+        className="max-h-[600px] opacity-80 md:opacity-100"
       />
       <div className="container-x relative">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">

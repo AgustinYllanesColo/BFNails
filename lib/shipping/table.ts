@@ -16,12 +16,12 @@ export type ShippingTable = {
 export const DEFAULT_SHIPPING_TABLE: ShippingTable = {
   pickup: {
     label: "Retiro en estación",
-    description: "Lanús, Banfield o Remedios de Escalada. Coordinamos por WhatsApp.",
+    description: "Remedios de Escalada, Lanús o Banfield. Coordinamos por WhatsApp.",
   },
   moto: {
     enabled: true,
-    cost: 2500,
-    description: "Lanús y alrededores. El precio final depende del barrio y te lo confirmamos por WhatsApp.",
+    cost: 3500,
+    description: "Escalada, Lomas, Banfield y Lanús. De $3.500 a $4.500 según la zona; te lo confirmamos por WhatsApp.",
   },
   // Valores de referencia (a cargar con los reales desde el admin)
   correo: {
