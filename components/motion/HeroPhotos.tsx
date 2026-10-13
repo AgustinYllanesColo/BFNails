@@ -20,7 +20,7 @@ const PHOTOS: Spec[] = [
   {
     src: "/catalog/set-leopard-red-640.webp",
     x: "3%",
-    y: "11%",
+    y: "9%",
     w: 118,
     rotate: -8,
     delay: 0,
@@ -28,8 +28,8 @@ const PHOTOS: Spec[] = [
   },
   {
     src: "/catalog/set-sunset-french-640.webp",
-    x: "68%",
-    y: "9%",
+    x: "76%",
+    y: "7%",
     w: 108,
     rotate: 7,
     delay: -3.2,
