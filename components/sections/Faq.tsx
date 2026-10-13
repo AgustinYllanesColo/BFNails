@@ -8,8 +8,8 @@ import { cn } from "@/lib/format";
 
 export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   {
-    q: "¿Qué son las press-on en soft gel?",
-    a: "Press-on son uñas ya hechas que se pegan sobre tu uña natural. Las nuestras están fabricadas en soft gel, un material flexible y liviano que se adapta a la curva de tu uña (mucho más cómodo que el plástico de las press-on comunes) y decoradas con esmalte semipermanente. Duran entre 1 y 3 semanas y se pueden despegar y volver a usar.",
+    q: "¿Qué son las press-on?",
+    a: "Uñas ya hechas que se pegan sobre tu uña natural. Bren las hace a mano en un gel flexible y liviano que se adapta a la curva de tu uña, mucho más cómodo que el plástico de las press-on comunes, y las decora con esmalte semipermanente. Duran entre 1 y 3 semanas y se pueden despegar y volver a usar.",
   },
   {
     q: "¿Cómo sé mi talle?",
@@ -30,6 +30,10 @@ export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   {
     q: "¿Qué viene en el kit?",
     a: "Las 10 uñas de tu talle, pegamento, lima y una guía rápida de aplicación y cuidado.",
+  },
+  {
+    q: "¿También atendés en el estudio?",
+    a: "Sí. En el estudio de Remedios de Escalada, a 4 cuadras de la estación, Bren hace soft gel, kapping y esmaltado semipermanente con turno. Se pide por WhatsApp o por Instagram.",
   },
 ];
 

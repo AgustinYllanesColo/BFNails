@@ -11,7 +11,7 @@ export default function TerminosPage() {
       <section>
         <h2>1. Quiénes somos</h2>
         <p>
-          {siteConfig.name} («BF Studio», «nosotros») es un emprendimiento con base en Lanús, Provincia de Buenos Aires, Argentina, dedicado a la fabricación artesanal de uñas press-on en soft gel. Al hacer un pedido a través de este sitio aceptás estos términos. Si tenés dudas, escribinos por WhatsApp antes de comprar.
+          {siteConfig.name} («BF Studio», «nosotros») es un emprendimiento con base en Remedios de Escalada, Lanús, Provincia de Buenos Aires, Argentina, dedicado a la fabricación artesanal de uñas press-on y al servicio de manicuría en su estudio. Al hacer un pedido a través de este sitio aceptás estos términos. Si tenés dudas, escribinos por WhatsApp antes de comprar.
         </p>
       </section>
       <section>

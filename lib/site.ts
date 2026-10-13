@@ -2,16 +2,24 @@ export const siteConfig = {
   name: "BF Nails Studio",
   shortName: "BF Nails",
   description:
-    "Uñas press-on soft gel semipermanentes, diseñadas a pedido y a tu talle. Kit con 10 uñas, pegamento y lima. Lanús, Banfield, Remedios de Escalada y envíos a todo el país.",
+    "Uñas press-on hechas a mano por Bren, a tu talle. Kit con 10 uñas, pegamento y lima. Remedios de Escalada, Lanús, Banfield, Lomas y envíos a todo el país.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5491100000000",
-  instagram: "https://instagram.com/",
-  tiktok: "https://tiktok.com/",
-  facebook: "https://facebook.com/",
-  zones: ["Lanús", "Banfield", "Remedios de Escalada"],
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5491128253431",
+  instagram: "https://instagram.com/bf.nailstudio_",
+  instagramHandle: "@bf.nailstudio_",
+  tiktok: "https://www.tiktok.com/@bfnails_studio",
+  tiktokHandle: "@bfnails_studio",
+  /** Zonas de moto y retiro (sur del conurbano). */
+  zones: ["Remedios de Escalada", "Lanús", "Banfield", "Lomas de Zamora"],
   transfer: {
-    alias: process.env.NEXT_PUBLIC_TRANSFER_ALIAS ?? "bfnails.studio",
+    alias: process.env.NEXT_PUBLIC_TRANSFER_ALIAS ?? "brenda.f00",
     holder: process.env.NEXT_PUBLIC_TRANSFER_HOLDER ?? "Brenda",
+  },
+  /** Servicio presencial: aparece en una sección chica de la home y manda a WhatsApp o Instagram. */
+  studio: {
+    area: "Remedios de Escalada",
+    note: "a 4 cuadras de la estación",
+    services: ["soft gel", "kapping", "esmaltado semipermanente"],
   },
 };
 

@@ -13,7 +13,7 @@ const OPTIONS = [
   {
     title: "Retiro en estación",
     price: "Gratis",
-    text: "Lanús, Banfield o Remedios de Escalada. Coordinamos día y horario por WhatsApp.",
+    text: "Remedios de Escalada, Lanús o Banfield. Coordinamos día y horario por WhatsApp.",
     icon: (
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M10 34V14a6 6 0 0 1 6-6h16a6 6 0 0 1 6 6v20" />
@@ -24,8 +24,8 @@ const OPTIONS = [
   },
   {
     title: "Moto en zona",
-    price: `Desde ${formatARS(2500)}`,
-    text: "Te lo llevamos a tu casa si estás cerca. El precio final depende del barrio y lo confirmamos por WhatsApp.",
+    price: `${formatARS(3500)} a ${formatARS(4500)}`,
+    text: "Escalada, Lomas, Banfield y Lanús. El precio depende de la zona y lo confirmamos por WhatsApp.",
     icon: (
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <circle cx="12" cy="32" r="5" /><circle cx="36" cy="32" r="5" />
@@ -90,7 +90,7 @@ export function Zones() {
           <Heading>
             Del sur del conurbano <span className="text-bordo">a todo el país</span>
           </Heading>
-          <p className="mt-5 max-w-md text-ink-soft">BF Studio está en Lanús. Si sos de la zona nos vemos en la estación o te lo llevamos. Si no, viaja por Correo Argentino.</p>
+          <p className="mt-5 max-w-md text-ink-soft">BF Studio está en Remedios de Escalada. Si sos de la zona nos vemos en la estación o te lo llevamos en moto. Si no, viaja por Correo Argentino.</p>
         </Reveal>
         <Reveal stagger={0.12} className="mt-12 grid gap-5 md:grid-cols-3">
           {OPTIONS.map((o) => (
