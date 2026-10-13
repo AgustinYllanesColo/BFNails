@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -86,140 +87,132 @@ const STEPS = [
   },
 ];
 
+
+/** Imagen o gráfico de cada paso: fotos reales donde hay, un gráfico de marca donde no. */
+const VISUALS: Record<string, { src?: string; alt?: string; caption: string }> = {
+  "01": { src: "/catalog/set-gems-french.webp", alt: "Francesita con gemas de colores", caption: "del catálogo, del armador o de tu Pinterest" },
+  "02": { caption: "talle estándar o tus 10 medidas en mm" },
+  "03": { caption: "Mercado Pago · transferencia · efectivo" },
+  "04": { src: "/catalog/set-milky-gold-foil.webp", alt: "Set milky con foil dorado listo para pegar", caption: "10 uñas + pegamento + lima + guía" },
+};
+
 /**
- * En desktop la sección se "pinea" y los pasos se recorren en horizontal con el
- * scroll (como en basement). En mobile es vertical con número sticky.
+ * Cuatro pasos en vertical, con una línea que los une y una imagen por paso. Los pasos entran
+ * de a uno al scrollear; nada se "pinea": se lee de corrido en cualquier pantalla.
  */
 export function HowItWorks() {
   const root = useRef<HTMLElement>(null);
-  const track = useRef<HTMLDivElement>(null);
 
-  // useLayoutEffect: el pin de ScrollTrigger mueve la sección dentro de un pin-spacer.
-  // La limpieza tiene que revertirlo ANTES de que React saque el nodo del DOM al navegar,
-  // si no React intenta removeChild sobre un padre que ya no es el suyo y la página se rompe.
   useLayoutEffect(() => {
     const el = root.current;
-    const tr = track.current;
-    if (!el || !tr) return;
+    if (!el) return;
     const mm = gsap.matchMedia();
-    mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
-      const distance = () => tr.scrollWidth - el.clientWidth;
-      const tween = gsap.to(tr, {
-        x: () => -distance(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top top",
-          end: () => `+=${distance()}`,
-          pin: true,
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-          anticipatePin: 1,
-        },
-      });
-      // Los números grandes se mueven más lento (profundidad)
-      gsap.utils.toArray<HTMLElement>("[data-step-number]", el).forEach((n) => {
-        gsap.fromTo(
-          n,
-          { xPercent: 30 },
-          {
-            xPercent: -30,
-            ease: "none",
-            scrollTrigger: {
-              trigger: el,
-              start: "top top",
-              end: () => `+=${distance()}`,
-              scrub: 0.8,
-            },
-          },
-        );
-      });
-      return () => {
-        tween.scrollTrigger?.kill();
-        tween.kill();
-      };
-    });
-    mm.add("(max-width: 1023px)", () => {
-      const cards = gsap.utils.toArray<HTMLElement>("[data-step]", el);
-      cards.forEach((c, i) => {
-        gsap.fromTo(
-          c,
-          { y: 40, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 1,
-            ease: "expo.out",
-            delay: i * 0.05,
-            scrollTrigger: { trigger: c, start: "top 88%" },
-          },
-        );
+    mm.add("all", () => {
+      const line = el.querySelector<SVGLineElement>("[data-line]");
+      if (line) {
+        gsap.fromTo(line, { scaleY: 0 }, { scaleY: 1, ease: "none", transformOrigin: "top", scrollTrigger: { trigger: el, start: "top 60%", end: "bottom 80%", scrub: 0.5 } });
+      }
+      gsap.utils.toArray<HTMLElement>("[data-step]", el).forEach((c) => {
+        gsap.fromTo(c, { y: 36, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.9, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 85%" } });
       });
     });
     return () => mm.revert();
   }, []);
 
   return (
-    // Contenedor propio de React: el pin-spacer de GSAP se inserta adentro, nunca entre React y su nodo.
-    <div className="relative">
-      <section ref={root} className="bg-bordo text-cream relative overflow-hidden lg:h-screen">
-        <div className="container-x pt-20 lg:pt-16">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <Eyebrow className="text-cream">Cómo funciona</Eyebrow>
-              <h2 className="font-display text-[clamp(2.2rem,6vw,4.5rem)] leading-[0.95] text-balance">
-                De tu idea a tus manos <span className="text-yellow">en 4 pasos</span>
-              </h2>
-            </div>
-            <p className="text-cream/70 hidden max-w-xs text-sm lg:block">
-              Seguí bajando: los pasos se deslizan de costado.
-            </p>
+    <section ref={root} className="relative overflow-hidden bg-bordo py-20 text-cream md:py-28">
+      <div className="container-x grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <Eyebrow className="text-cream">Cómo funciona</Eyebrow>
+          <h2 className="font-display text-[clamp(2.2rem,6vw,4.5rem)] leading-[0.95] text-balance">
+            De tu idea a tus manos <span className="text-yellow">en 4 pasos</span>
+          </h2>
+          <p className="mt-5 max-w-sm text-cream/75">
+            Todo se hace a mano y a pedido. Entre que elegís y las tenés puestas pasan entre 3 y 7 días, y te vamos avisando por WhatsApp.
+          </p>
+          <div className="mt-8 hidden items-center gap-3 lg:flex">
+            <Star size={18} className="text-yellow" />
+            <span className="text-sm text-cream/70">Reutilizables: se despegan y se vuelven a usar.</span>
           </div>
         </div>
 
-        <div
-          ref={track}
-          className="mt-10 flex flex-col gap-5 px-[clamp(16px,4vw,48px)] pb-20 lg:mt-14 lg:w-max lg:flex-row lg:gap-8 lg:pr-[40vw] lg:pb-0"
-        >
-          {STEPS.map((s, i) => (
-            <article
-              key={s.n}
-              data-step
-              className="group bg-cream text-ink ring-cream/10 relative flex shrink-0 flex-col justify-between overflow-hidden rounded-lg p-7 ring-1 transition-transform duration-500 ease-[var(--ease-out-expo)] hover:-translate-y-1 lg:h-[62vh] lg:w-[min(32vw,520px)] lg:p-10"
-            >
-              <span
-                data-step-number
-                aria-hidden
-                className="font-display text-bordo/10 pointer-events-none absolute -top-6 -right-2 text-[9rem] leading-none select-none lg:text-[13rem]"
-              >
-                {s.n}
-              </span>
-              <div className="relative flex items-center justify-between">
-                <span className="font-display text-bordo text-3xl">{s.n}</span>
-                <span className="rounded-pill bg-bordo/8 text-bordo group-hover:bg-bordo group-hover:text-cream grid size-14 place-items-center transition-all duration-500 group-hover:rotate-[-8deg] [&>svg]:size-7">
-                  {s.icon}
+        <ol className="relative space-y-6 md:space-y-8">
+          {/* línea que une los pasos y se dibuja al scrollear */}
+          <span aria-hidden className="pointer-events-none absolute top-8 bottom-8 left-[27px] w-px bg-cream/15 md:left-[31px]">
+            <span data-line className="block h-full w-full origin-top bg-yellow" />
+          </span>
+          {STEPS.map((s) => {
+            const v = VISUALS[s.n];
+            return (
+              <li key={s.n} data-step className="relative pl-[72px] md:pl-[84px]">
+                <span className="absolute top-0 left-0 grid size-14 place-items-center rounded-pill bg-yellow font-display text-2xl text-bordo shadow-[0_10px_24px_-10px_rgba(0,0,0,0.6)] md:size-16 md:text-3xl">
+                  {s.n}
                 </span>
-              </div>
-              <div className="relative mt-10 lg:mt-0">
-                <h3 className="font-display text-3xl leading-tight lg:text-4xl">{s.title}</h3>
-                <p className="text-ink-soft mt-3 max-w-sm text-[15px] leading-relaxed">{s.text}</p>
-              </div>
-              <span
-                aria-hidden
-                className="text-yellow absolute right-6 bottom-6 opacity-0 transition-all duration-500 group-hover:rotate-45 group-hover:opacity-100"
-              >
-                <Star size={22} />
-              </span>
-              {i === STEPS.length - 1 && (
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-[linear-gradient(90deg,var(--bordo),var(--leopard)_55%,var(--yellow))]"
-                />
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
+                <article className="grid overflow-hidden rounded-lg bg-cream text-ink ring-1 ring-cream/10 sm:grid-cols-[1fr_0.8fr]">
+                  <div className="order-2 p-6 sm:order-1 md:p-8">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 place-items-center rounded-pill bg-bordo/8 text-bordo [&>svg]:size-5">{s.icon}</span>
+                      <h3 className="font-display text-2xl leading-tight md:text-3xl">{s.title}</h3>
+                    </div>
+                    <p className="mt-4 text-[15px] leading-relaxed text-ink-soft">{s.text}</p>
+                    <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-cream-deep px-3 py-1 text-[11px] font-bold tracking-wider text-bordo uppercase">
+                      <Star size={10} className="text-red" /> {v.caption}
+                    </p>
+                  </div>
+                  <div className="relative order-1 min-h-[180px] overflow-hidden bg-cream-deep sm:order-2 sm:min-h-0">
+                    {v.src ? (
+                      <Image src={v.src} alt={v.alt ?? ""} fill sizes="(min-width: 1024px) 28vw, (min-width: 640px) 40vw, 100vw" quality={70} className="object-cover" />
+                    ) : s.n === "02" ? (
+                      <Ruler />
+                    ) : (
+                      <PayMarks />
+                    )}
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/** Regla en milímetros con cinco uñas marcadas: el gesto de medir, dibujado con la paleta de marca. */
+function Ruler() {
+  const widths = [13, 11, 12, 10, 8];
+  return (
+    <div aria-hidden className="absolute inset-0 flex flex-col justify-end gap-4 p-5">
+      <div className="flex items-end justify-around">
+        {widths.map((w, i) => (
+          <div key={i} className="flex flex-col items-center gap-1.5">
+            <span className="block rounded-t-full rounded-b-md bg-[#e8c4b0] shadow-[inset_-3px_0_6px_rgba(74,14,14,0.08)]" style={{ width: w * 3, height: 36 + (i % 2) * 10 }} />
+            <span className="font-mono text-[10px] font-bold text-bordo">{w} mm</span>
+          </div>
+        ))}
+      </div>
+      <div className="relative h-8 rounded-md bg-cream-ink/70 ring-1 ring-bordo/10">
+        <div className="absolute inset-x-2 top-0 h-full bg-[repeating-linear-gradient(90deg,var(--bordo)_0_1px,transparent_1px_8px)] opacity-70" />
+        <div className="absolute inset-x-2 top-0 h-1/2 bg-[repeating-linear-gradient(90deg,var(--bordo)_0_1px,transparent_1px_40px)]" />
+      </div>
+    </div>
+  );
+}
+
+/** Tres formas de pagar, como stickers. */
+function PayMarks() {
+  const items = [
+    { label: "Mercado Pago", cls: "bg-[#009ee3] text-white -rotate-3" },
+    { label: "Transferencia", cls: "bg-bordo text-cream rotate-2" },
+    { label: "Efectivo", cls: "bg-yellow text-ink -rotate-2" },
+  ];
+  return (
+    <div aria-hidden className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6">
+      {items.map((it) => (
+        <span key={it.label} className={`rounded-pill px-5 py-2 text-sm font-bold shadow-[0_12px_24px_-12px_rgba(74,14,14,0.5)] ${it.cls}`}>
+          {it.label}
+        </span>
+      ))}
     </div>
   );
 }

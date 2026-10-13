@@ -397,6 +397,8 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   const firstFrameCbs = new Set<() => void>();
   let firstFrameDone = false;
   const intervals: number[] = [];
+  /** el control de rendimiento recién mide después de este instante (la página termina de cargar y de decodificar fotos) */
+  let guardFrom = Infinity;
 
   /** al volver a pantalla: aplica de una el último cambio que llegó mientras estaba oculta */
   function resume() {
@@ -525,11 +527,16 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       return;
     }
     // control de rendimiento: intervalo real entre cuadros encadenados
-    if (perfGuard && chained && !lowPower && intervals.length < 20) {
+    // Se mide recién pasados ~2,5 s del primer cuadro y con la página cargada: durante la carga (fotos
+    // decodificándose, hidratación, scroll de entrada) todo dispositivo tira cuadros largos y antes el
+    // guardia bajaba la mano a baja resolución para siempre por un mal arranque.
+    if (perfGuard && chained && !lowPower && now > guardFrom && document.readyState === "complete") {
       intervals.push(now - lastFrameNow);
-      if (intervals.length === 20) {
+      if (intervals.length === 30) {
         const sorted = [...intervals].sort((a, b) => a - b);
-        if (sorted[10] > 45) degrade();
+        if (sorted[15] > 50) degrade();
+        intervals.length = 0;
+        guardFrom = now + 4000;
       }
     }
     lastFrameNow = now;
@@ -917,6 +924,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     requestAnimationFrame(() => {
       if (disposed || lost) return;
       firstFrameDone = true;
+      guardFrom = performance.now() + 2500;
       firstFrameCbs.forEach((cb) => cb());
       firstFrameCbs.clear();
       if (pending && (!onScreen || !pageVisible)) return;

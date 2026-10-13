@@ -61,7 +61,7 @@ export function Faq({ items = FAQ_ITEMS, compact = false }: { items?: typeof FAQ
                   aria-expanded={isOpen}
                   className="flex w-full items-center justify-between gap-6 py-5 text-left"
                 >
-                  <span className="font-display text-xl text-ink md:text-2xl">{item.q}</span>
+                  <span className="text-lg font-semibold tracking-tight text-ink md:text-xl">{item.q}</span>
                   <span
                     className={cn(
                       "grid size-9 shrink-0 place-items-center rounded-pill bg-bordo text-cream transition-transform duration-500 ease-[var(--ease-bounce)]",

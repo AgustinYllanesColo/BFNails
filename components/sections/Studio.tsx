@@ -37,8 +37,10 @@ export function Studio() {
                 </Button>
               </div>
             </div>
-            <div className="relative mx-auto w-40 md:w-56">
-              <Image src="/brand/kitty.webp" alt="" width={236} height={280} sizes="224px" className="w-full drop-shadow-[0_16px_30px_rgba(74,14,14,0.25)]" />
+            <div className="relative mx-auto grid size-44 place-items-center md:size-60">
+              <span aria-hidden className="absolute inset-0 rounded-full bg-cream-deep ring-4 ring-cream ring-offset-4 ring-offset-leopard" />
+              <span aria-hidden className="absolute inset-3 rounded-full bg-[radial-gradient(circle_at_40%_30%,#fffdf8,transparent_65%)]" />
+              <Image src="/brand/kitty.webp" alt="" width={236} height={280} sizes="(min-width: 768px) 170px, 120px" className="relative w-[62%] drop-shadow-[0_8px_12px_rgba(74,14,14,0.22)]" />
             </div>
           </div>
         </Reveal>

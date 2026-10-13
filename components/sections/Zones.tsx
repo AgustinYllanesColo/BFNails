@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Reveal } from "@/components/motion/Reveal";
 import { Eyebrow, Heading } from "@/components/ui/Section";
 import { formatARS } from "@/lib/format";
+import { Star } from "@/components/motion/Marquee";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -92,13 +93,33 @@ export function Zones() {
           </Heading>
           <p className="mt-5 max-w-md text-ink-soft">BF Studio está en Remedios de Escalada. Si sos de la zona nos vemos en la estación o te lo llevamos en moto. Si no, viaja por Correo Argentino.</p>
         </Reveal>
-        <Reveal stagger={0.12} className="mt-12 grid gap-5 md:grid-cols-3">
+        <Reveal className="mt-8 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold tracking-[0.2em] text-bordo uppercase">Zona de moto y retiro</span>
+          {["Remedios de Escalada", "Lanús", "Banfield", "Lomas de Zamora"].map((z) => (
+            <span key={z} className="rounded-pill bg-cream px-3 py-1 text-sm font-semibold text-ink ring-1 ring-bordo/10">
+              {z}
+            </span>
+          ))}
+        </Reveal>
+        <Reveal stagger={0.12} className="mt-8 grid gap-5 md:grid-cols-3">
           {OPTIONS.map((o) => (
-            <div key={o.title} data-tilt className="group relative rounded-lg bg-cream p-7 ring-1 ring-bordo/10 transition-shadow duration-500 hover:shadow-[0_30px_60px_-30px_rgba(74,14,14,0.45)]" style={{ transformStyle: "preserve-3d" }}>
-              <span className="grid size-14 place-items-center rounded-pill bg-bordo text-cream transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 [&>svg]:size-7">{o.icon}</span>
-              <h3 className="mt-6 font-display text-2xl">{o.title}</h3>
-              <p className="mt-1 text-sm font-bold text-bordo">{o.price}</p>
-              <p className="mt-3 text-sm leading-relaxed text-ink-soft">{o.text}</p>
+            <div
+              key={o.title}
+              data-tilt
+              className="group relative overflow-hidden rounded-lg bg-cream ring-1 ring-bordo/10 transition-shadow duration-500 hover:shadow-[0_30px_60px_-30px_rgba(74,14,14,0.45)]"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <div className="flex items-center justify-between gap-4 bg-bordo px-6 py-5 text-cream">
+                <span className="grid size-12 place-items-center rounded-pill bg-cream/10 ring-1 ring-cream/20 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 [&>svg]:size-6">{o.icon}</span>
+                <span className="font-display text-2xl leading-none text-yellow">{o.price}</span>
+              </div>
+              <div className="p-6">
+                <h3 className="font-display text-2xl">{o.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{o.text}</p>
+              </div>
+              <span aria-hidden className="pointer-events-none absolute -right-4 -bottom-4 text-bordo/8 transition-transform duration-500 group-hover:rotate-12">
+                <Star size={96} />
+              </span>
             </div>
           ))}
         </Reveal>
