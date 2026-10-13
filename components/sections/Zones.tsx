@@ -149,7 +149,7 @@ export function Zones() {
                 <span className="font-display text-yellow text-2xl leading-none">{o.price}</span>
               </div>
               <div className="p-6">
-                <h3 className="font-display text-2xl">{o.title}</h3>
+                <h3 className="text-xl font-bold tracking-tight">{o.title}</h3>
                 <p className="text-ink-soft mt-2 text-sm leading-relaxed">{o.text}</p>
               </div>
               <span

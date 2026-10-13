@@ -83,10 +83,11 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
                 Limpiar
               </button>
             )}
+            {/* select nativo con apariencia propia: chip crema con chevron bordó, el menú lo dibuja el sistema */}
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
-              className="h-9 rounded-pill border border-cream-ink bg-white/70 px-3 text-xs font-semibold"
+              className="h-10 cursor-pointer appearance-none rounded-pill bg-cream-deep bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%234a0e0e%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>')] bg-[length:12px] bg-[position:right_14px_center] bg-no-repeat py-0 pr-9 pl-4 text-sm font-semibold text-bordo ring-1 ring-bordo/10 transition-colors hover:bg-cream-ink/60 focus-visible:ring-2 focus-visible:ring-bordo/40 focus-visible:outline-none"
               aria-label="Ordenar"
             >
               <option value="destacados">Destacados</option>

@@ -47,7 +47,7 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
       </ViewTransition>
       <div className="mt-3 flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
         <div className="min-w-0">
-          <h3 className="font-display text-ink group-hover:text-bordo text-xl leading-tight">
+          <h3 className="text-ink group-hover:text-bordo text-[17px] leading-tight font-bold tracking-tight">
             {design.name}
           </h3>
           <p className="text-ink-soft mt-0.5 text-xs">

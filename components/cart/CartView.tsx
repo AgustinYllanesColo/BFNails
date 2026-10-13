@@ -104,7 +104,7 @@ export function CartView() {
           ]}
           footer={[
             { kind: "row", id: "items", label: "sets", value: String(items.reduce((a, i) => a + i.qty, 0)) },
-            { kind: "row", id: "kit", label: "incluye", value: "10 uñas + pegamento + lima" },
+            { kind: "row", id: "kit", label: "cada set incluye", value: "10 uñas + pegamento + lima" },
             ...(needsConfirmation ? [{ kind: "text", id: "conf", text: "* precio final a confirmar por WhatsApp", align: "left" } as ReceiptLine] : []),
             { kind: "text", id: "thanks", text: "✦ gracias por elegir bf studio ✦", align: "center" },
           ]}

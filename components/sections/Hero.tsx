@@ -29,7 +29,7 @@ export function Hero() {
     const q = gsap.utils.selector(el);
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-      tl.fromTo(q("[data-hero-logo]"), { scale: 0.82, autoAlpha: 0, filter: "blur(8px)", y: 30 }, { scale: 1, autoAlpha: 1, filter: "blur(0px)", y: 0, duration: 1.6 }, 0.1);
+      tl.fromTo(q("[data-hero-logo]"), { scale: 0.9, autoAlpha: 0, y: 24 }, { scale: 1, autoAlpha: 1, y: 0, duration: 1.3 }, 0.1);
       tl.fromTo(q("[data-hero-copy] > *"), { y: 26, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1, stagger: 0.1 }, 0.9);
       tl.fromTo(q("[data-hero-badge]"), { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 1, ease: "back.out(2)" }, 1.2);
       tl.fromTo(q("[data-hero-rows]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.4 }, 0.3);
