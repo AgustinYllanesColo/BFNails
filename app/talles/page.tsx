@@ -56,7 +56,7 @@ export default function TallesPage() {
       </div>
 
       <Section tone="deep" className="mt-20">
-        <div className="container-x grid gap-12 lg:grid-cols-2">
+        <div className="container-x grid min-w-0 gap-12 lg:grid-cols-2 [&>*]:min-w-0">
           <Reveal>
             <Eyebrow>Talles estándar</Eyebrow>
             <h2 className="font-display text-3xl md:text-4xl">¿Cuál soy?</h2>

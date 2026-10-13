@@ -31,17 +31,17 @@ test("armador: el precio sube al sumar técnicas y el set va al carrito", async 
 });
 
 test("detalle → carrito: cantidad y ticket", async ({ page }) => {
-  await page.goto("/catalogo/cherry-red", { waitUntil: "networkidle" });
+  await page.goto("/catalogo/leo-cherry", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
   await page.goto("/carrito", { waitUntil: "networkidle" });
-  await expect(page.getByText("Cherry Red").first()).toBeVisible();
+  await expect(page.getByText("Leo & cherry").first()).toBeVisible();
   await page.getByRole("button", { name: "Más" }).click();
-  await expect(page.getByText(/Cherry Red ×2/).first()).toBeVisible();
+  await expect(page.getByText(/Leo & cherry ×2/).first()).toBeVisible();
   await expect(page.getByText(/TOTAL|DESDE/).first()).toBeVisible();
 });
 
 test("checkout: transferencia crea el pedido o deriva a WhatsApp si no hay base", async ({ page }) => {
-  await page.goto("/catalogo/cherry-red", { waitUntil: "networkidle" });
+  await page.goto("/catalogo/leo-cherry", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
   await page.goto("/checkout", { waitUntil: "networkidle" });
 
@@ -62,7 +62,7 @@ test("checkout: transferencia crea el pedido o deriva a WhatsApp si no hay base"
 });
 
 test("efectivo solo se habilita con retiro o moto", async ({ page }) => {
-  await page.goto("/catalogo/cherry-red", { waitUntil: "networkidle" });
+  await page.goto("/catalogo/leo-cherry", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
   await page.goto("/checkout", { waitUntil: "networkidle" });
   const cash = page.getByRole("button", { name: /^Efectivo/ });
