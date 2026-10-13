@@ -43,6 +43,8 @@ export function Reveal({
         ease: "expo.out",
         delay,
         stagger: stagger ?? 0,
+        // al terminar se limpia el transform: un texto que queda en una capa transformada se ve borroso
+        clearProps: "transform,willChange",
         scrollTrigger: {
           trigger: el,
           start: "top 88%",

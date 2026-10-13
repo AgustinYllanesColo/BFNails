@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDesign, getDesigns } from "@/lib/data/repo";
-import { COMPLEXITY_LABEL, FINISH_LABEL, LENGTH_LABEL, SHAPE_LABEL, designImage } from "@/lib/data/catalog";
+import {
+  COMPLEXITY_LABEL,
+  FINISH_LABEL,
+  LENGTH_LABEL,
+  SHAPE_LABEL,
+  designImage,
+} from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
 import { AddDesignToCart } from "@/components/cart/AddDesignToCart";
@@ -31,12 +38,19 @@ export default async function DesignPage({ params }: Props) {
   const design = await getDesign(slug);
   if (!design) notFound();
   const all = await getDesigns();
-  const related = all.filter((d) => d.slug !== design.slug && (d.shape === design.shape || d.tags.some((t) => design.tags.includes(t)))).slice(0, 4);
+  const related = all
+    .filter(
+      (d) =>
+        d.slug !== design.slug &&
+        (d.shape === design.shape || d.tags.some((t) => design.tags.includes(t))),
+    )
+    .slice(0, 4);
+  const gallery = design.images.length ? design.images : [designImage(design, 0)];
 
   return (
     <div className="pt-24 pb-24 md:pt-32">
       <div className="container-x">
-        <nav className="mb-6 text-sm text-ink-soft" aria-label="Migas">
+        <nav className="text-ink-soft mb-6 text-sm" aria-label="Migas">
           <Link href="/catalogo" className="hover:text-bordo">
             Catálogo
           </Link>{" "}
@@ -45,23 +59,36 @@ export default async function DesignPage({ params }: Props) {
 
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           {/* Galería: la foto principal en 4:5 y, si hay más, las demás debajo en dos columnas */}
-          <Reveal className="grid grid-cols-2 gap-3">
-            {(design.images.length ? design.images : [designImage(design, 0)]).map((src, i) => (
-              <div
-                key={src}
-                className={`relative overflow-hidden rounded-lg bg-cream-deep ${i === 0 ? "col-span-2 aspect-[4/5] md:aspect-[4/5]" : "aspect-[4/5]"}`}
-              >
+          <div className="grid grid-cols-2 gap-3">
+            {/* La foto principal viene "volando" desde la tarjeta del catálogo (mismo nombre de transición) */}
+            <ViewTransition name={`design-${design.slug}`} share="morph" default="none">
+              <div className="bg-cream-deep relative col-span-2 aspect-[4/5] overflow-hidden rounded-lg">
                 <Image
-                  src={src}
-                  alt={`${design.name}, vista ${i + 1}`}
+                  src={gallery[0]}
+                  alt={`${design.name}, vista 1`}
                   fill
-                  sizes={i === 0 ? "(min-width: 1024px) 55vw, 100vw" : "(min-width: 1024px) 27vw, 50vw"}
-                  priority={i === 0}
+                  sizes="(min-width: 1024px) 55vw, 100vw"
+                  priority
                   className="object-cover"
                 />
               </div>
+            </ViewTransition>
+            {gallery.slice(1).map((src, i) => (
+              <Reveal
+                key={src}
+                delay={0.1 * i}
+                className="bg-cream-deep relative aspect-[4/5] overflow-hidden rounded-lg"
+              >
+                <Image
+                  src={src}
+                  alt={`${design.name}, vista ${i + 2}`}
+                  fill
+                  sizes="(min-width: 1024px) 27vw, 50vw"
+                  className="object-cover"
+                />
+              </Reveal>
             ))}
-          </Reveal>
+          </div>
 
           <div className="lg:sticky lg:top-28 lg:self-start">
             <Reveal>
@@ -74,8 +101,10 @@ export default async function DesignPage({ params }: Props) {
                   </Badge>
                 ))}
               </div>
-              <h1 className="mt-4 font-display text-[clamp(2.4rem,6vw,4.2rem)] leading-[0.95]">{design.name}</h1>
-              <p className="mt-4 text-lg text-ink-soft">{design.description}</p>
+              <h1 className="font-display mt-4 text-[clamp(2.4rem,6vw,4.2rem)] leading-[0.95]">
+                {design.name}
+              </h1>
+              <p className="text-ink-soft mt-4 text-lg">{design.description}</p>
 
               <dl className="mt-6 grid grid-cols-3 gap-3 text-sm">
                 {[
@@ -83,21 +112,23 @@ export default async function DesignPage({ params }: Props) {
                   ["Largo", LENGTH_LABEL[design.length]],
                   ["Acabado", FINISH_LABEL[design.finish]],
                 ].map(([k, v]) => (
-                  <div key={k} className="rounded-md bg-cream-deep p-3">
-                    <dt className="text-[11px] font-bold tracking-wider text-ink-soft uppercase">{k}</dt>
+                  <div key={k} className="bg-cream-deep rounded-md p-3">
+                    <dt className="text-ink-soft text-[11px] font-bold tracking-wider uppercase">
+                      {k}
+                    </dt>
                     <dd className="mt-1 font-semibold">{v}</dd>
                   </div>
                 ))}
               </dl>
 
               <div className="mt-8 flex items-baseline gap-3">
-                <span className="font-display text-4xl text-bordo">{formatARS(design.price)}</span>
-                <span className="text-sm text-ink-soft">kit completo</span>
+                <span className="font-display text-bordo text-4xl">{formatARS(design.price)}</span>
+                <span className="text-ink-soft text-sm">kit completo</span>
               </div>
 
               <AddDesignToCart design={design} />
 
-              <ul className="mt-8 space-y-2 text-sm text-ink-soft">
+              <ul className="text-ink-soft mt-8 space-y-2 text-sm">
                 <li>✦ 10 uñas en tu talle + pegamento + lima</li>
                 <li>✦ Hecho a mano y a pedido: 3 a 7 días</li>
                 <li>✦ Retiro en estación gratis o envío por Correo Argentino</li>

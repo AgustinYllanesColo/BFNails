@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Magnetic } from "@/components/motion/Magnetic";
-import { HeroPhotos } from "@/components/motion/HeroPhotos";
+import { FloatingNails } from "@/components/motion/FloatingNails";
 import { SpinningBadge } from "@/components/motion/SpinningBadge";
 import { Button } from "@/components/ui/Button";
 
@@ -73,7 +73,7 @@ export function Hero() {
           </div>
         ))}
       </div>
-      <HeroPhotos className="-z-10" />
+      <FloatingNails className="-z-10" />
 
       {/* Logo real */}
       <div data-hero-logo className="relative w-[min(88vw,760px)] will-change-transform">
