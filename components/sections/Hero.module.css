@@ -1,24 +1,21 @@
 /*
- * Hero (PLAN W2-A.2). OJO: en este proyecto los .module.css NO tienen alcance local (next.config manda todo *.css por
- * el loader de Tailwind como CSS global): las clases y los keyframes llevan el prefijo `bfh-` y se usan como strings.
- *
- * Hero: intro "se aplica y brilla" en CSS, que arranca en el primer paint desde un estado YA VISIBLE
+ * Hero (PLAN W2-A.2): intro "se aplica y brilla" en CSS, que arranca en el primer paint desde un estado YA VISIBLE
  * (regla §1 a). Un nodo por responsabilidad: el scroll (GSAP) va en [data-hero-logo-scroll] / [data-hero-copy] /
  * [data-hero-cue]; la flotación en su propio nodo; estas animaciones en los nodos de adentro.
  *
- * Los keyframes de acá son propios del hero (prefijo `bfh-`). Los compartidos (sheen, logo-float, twinkle…) viven en
- * app/globals.css y se aplican con clases de Tailwind en el JSX.
+ * Los keyframes de acá son propios del hero (locales al módulo). Los compartidos (sheen, logo-float, twinkle…) viven
+ * en app/globals.css y se aplican con clases de Tailwind en el JSX, así el módulo no renombra sus nombres.
  * Siempre `fill-mode: backwards` (o `both` cuando el estado final es `none`): GSAP puede escribir estilos en línea en
  * los nodos de afuera sin pelear con estos.
  */
 
 /* El logo se apoya sobre el papel: baja 14 px, se endereza y "pierde" el 6 % de tamaño. Nunca toca la opacidad. */
-.bfh-press {
+.press {
   position: relative;
   isolation: isolate;
-  animation: bfh-press var(--dur-hero) var(--ease-out-expo) 60ms both;
+  animation: hero-press var(--dur-hero) var(--ease-out-expo) 60ms both;
 }
-@keyframes bfh-press {
+@keyframes hero-press {
   from {
     transform: translate3d(0, 14px, 0) scale(1.06) rotate(-1.5deg);
   }
@@ -27,19 +24,19 @@
   }
 }
 
-/* Sombra de contacto: aparece cuando el sticker toca el papel (detrás del logo, z -1 dentro de .bfh-press). */
-.bfh-contact {
+/* Sombra de contacto: aparece cuando el sticker toca el papel (detrás del logo, z -1 dentro de .press). */
+.contact {
   position: absolute;
   z-index: -1;
   inset-inline: 14%;
   bottom: 1%;
   height: 14%;
   border-radius: 999px;
-  background: radial-gradient(closest-side, rgb(74 14 14 / 0.1), rgb(74 14 14 / 0));
+  background: radial-gradient(closest-side, rgb(74 14 14 / 0.16), rgb(74 14 14 / 0));
   pointer-events: none;
-  animation: bfh-contact var(--dur-hero) var(--ease-out-expo) 60ms both;
+  animation: hero-contact var(--dur-hero) var(--ease-out-expo) 60ms both;
 }
-@keyframes bfh-contact {
+@keyframes hero-contact {
   from {
     opacity: 0;
     transform: scale(1.25);
@@ -47,7 +44,7 @@
 }
 
 /* Brillo del top coat: la máscara es el mismo logo, así el reflejo solo pasa por el dibujo (no por el papel). */
-.bfh-sheen-mask {
+.sheenMask {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -55,79 +52,74 @@
   -webkit-mask: url(/brand/logo-nails.webp) center / 100% 100% no-repeat;
   mask: url(/brand/logo-nails.webp) center / 100% 100% no-repeat;
 }
-.bfh-sheen {
+.sheen {
   position: absolute;
   inset-block: 0;
   left: 0;
   width: 33%;
-  background: linear-gradient(
-    100deg,
-    rgb(255 255 255 / 0),
-    rgb(255 255 255 / 0.55),
-    rgb(255 255 255 / 0)
-  );
+  background: linear-gradient(100deg, rgb(255 255 255 / 0), rgb(255 255 255 / 0.55), rgb(255 255 255 / 0));
   /* sale a la izquierda del logo: en pausa (o antes de arrancar) no se ve */
   transform: translateX(-120%) skewX(-12deg);
 }
 
 /* Copy: sube 10 px desde opacidad .35 (nunca desde 0), escalonado de 50 ms. */
-@keyframes bfh-rise {
+@keyframes hero-rise {
   from {
     opacity: 0.35;
     translate: 0 10px;
   }
 }
-.bfh-rise > * {
-  animation: bfh-rise 520ms var(--ease-out-expo) backwards;
+.rise > * {
+  animation: hero-rise 520ms var(--ease-out-expo) backwards;
 }
-.bfh-rise > :nth-child(1) {
+.rise > :nth-child(1) {
   animation-delay: 0ms;
 }
-.bfh-rise > :nth-child(2) {
+.rise > :nth-child(2) {
   animation-delay: 50ms;
 }
-.bfh-rise > :nth-child(3) {
+.rise > :nth-child(3) {
   animation-delay: 100ms;
 }
 
 /* Fondo decorativo (aria-hidden): fila de contorno, sello giratorio e indicador. */
-@keyframes bfh-fade {
+@keyframes hero-fade {
   from {
     opacity: 0;
   }
 }
-.bfh-rows {
-  animation: bfh-fade 900ms ease-out 120ms backwards;
+.rows {
+  animation: hero-fade 900ms ease-out 120ms backwards;
 }
-.bfh-badge {
-  animation: bfh-badge 700ms var(--ease-bounce) 600ms backwards;
+.badge {
+  animation: hero-badge 700ms var(--ease-bounce) 600ms backwards;
 }
-@keyframes bfh-badge {
+@keyframes hero-badge {
   from {
     opacity: 0;
     transform: scale(0.9) rotate(-24deg);
   }
 }
-.bfh-cue {
-  animation: bfh-fade 500ms ease-out 900ms backwards;
+.cue {
+  animation: hero-fade 500ms ease-out 900ms backwards;
 }
 
 /* Reduced-motion atenúa: el logo ya está apoyado, el copy solo funde desde .6 y el brillo pasa una sola vez. */
 @media (prefers-reduced-motion: reduce) {
-  .bfh-press,
-  .bfh-contact {
+  .press,
+  .contact {
     animation: none;
   }
-  .bfh-rise > * {
-    animation-name: bfh-rise-reduced;
+  .rise > * {
+    animation-name: hero-rise-reduced;
     animation-duration: 200ms;
   }
-  .bfh-badge {
-    animation-name: bfh-fade;
+  .badge {
+    animation-name: hero-fade;
     animation-duration: 300ms;
   }
 }
-@keyframes bfh-rise-reduced {
+@keyframes hero-rise-reduced {
   from {
     opacity: 0.6;
   }

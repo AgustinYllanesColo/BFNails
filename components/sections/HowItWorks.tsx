@@ -10,7 +10,7 @@ import { Stamp } from "@/components/ui/Stamp";
 import { useAmbientPause } from "@/lib/hooks";
 import { MQ, isInViewportNow, registerEases } from "@/lib/motion";
 import { cn } from "@/lib/format";
-import "./home.module.css";
+import styles from "./home.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -68,7 +68,6 @@ const INK_LEAD = 16;
  * nodo) y se arma y se revierte en `useLayoutEffect`: la limpieza corre antes de que React saque los nodos al navegar.
  */
 export function HowItWorks() {
-  const wrap = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLElement>(null);
   const head = useRef<HTMLDivElement>(null);
   const feed = useRef<HTMLDivElement>(null);
@@ -79,7 +78,6 @@ export function HowItWorks() {
 
   useLayoutEffect(() => {
     const section = root.current;
-    const wrapEl = wrap.current;
     const paperBox = feed.current;
     const headEl = head.current;
     if (!section || !paperBox || !headEl) return;
@@ -94,14 +92,7 @@ export function HowItWorks() {
       },
       (ctx) => {
         const { pin, reduced } = ctx.conditions as Record<string, boolean>;
-        if (isInViewportNow(section)) {
-          // ya se ve: queda impreso y sellado, sin pin (y sin el espacio que el CSS le reserva)
-          if (!pin || !wrapEl) return;
-          wrapEl.dataset.nopin = "";
-          return () => {
-            delete wrapEl.dataset.nopin;
-          };
-        }
+        if (isInViewportNow(section)) return; // ya se ve: queda impreso y sellado
         const inks = gsap.utils.toArray<HTMLElement>("[data-ink]", paperBox);
 
         if (reduced) {
@@ -170,8 +161,11 @@ export function HowItWorks() {
           setStatus("printing");
           setLabel(LABEL.printing);
           clearTimeout(settle);
-          // Entre línea y línea el LED respira; "listo" recién cuando cae el sello.
-          settle = setTimeout(() => setStatus(stamped ? "idle" : "waiting"), 300);
+          settle = setTimeout(() => {
+            const all = printed.size === inks.length;
+            setStatus(all ? "idle" : "waiting");
+            setLabel(all ? LABEL.done : LABEL.printing);
+          }, 300);
         };
 
         /** `q` = cuánto papel salió (0 → 1). */
@@ -185,64 +179,37 @@ export function HowItWorks() {
           if (!stamped && shown >= stampAt) {
             stamped = true;
             setStamp("play");
-            setStatus("idle");
-            setLabel(LABEL.done);
           }
         };
 
         measure();
         const proxy = { p: 0 };
-        const build = () => {
-          gsap.to(proxy, {
-            p: 1,
-            ease: "none",
-            onUpdate: () => apply(pin ? Math.min(1, proxy.p / 0.9) : proxy.p),
-            scrollTrigger: pin
-              ? {
-                  trigger: section,
-                  start: "top top",
-                  end: "+=120%",
-                  pin: true,
-                  // el recorrido del pin ya lo reserva el CSS (.bfhs-pinwrap): el layout es el mismo con y sin JS,
-                  // así volver atrás o recargar cae siempre en el mismo lugar
-                  pinSpacing: false,
-                  scrub: 0.6,
-                  anticipatePin: 1,
-                  // el pin se mide antes que los disparadores de más abajo (Teaser, Envíos), que se crean antes que él
-                  refreshPriority: 1,
-                  invalidateOnRefresh: true,
-                  onRefresh: measure,
-                }
-              : {
-                  trigger: paperBox,
-                  start: "top 75%",
-                  end: "bottom 65%",
-                  scrub: 0.4,
-                  invalidateOnRefresh: true,
-                  onRefresh: measure,
-                },
-          });
-        };
-        /*
-         * El pin se arma dos frames después de montar: al crearse, ScrollTrigger mide con un `scrollTo` y, si eso pasa
-         * antes de que el navegador restaure la posición al volver atrás (~6 ms después de montar), la restauración
-         * se cancela y la home vuelve arriba de todo. Los estados de arriba ya se aplicaron antes del primer paint.
-         */
-        let raf = 0;
-        if (pin) {
-          raf = requestAnimationFrame(() => {
-            raf = requestAnimationFrame(() => {
-              raf = 0;
-              ctx.add(build);
-              section.dataset.pin = "on"; // lo leen los tests (con pinSpacing: false no hay pin-spacer)
-              ScrollTrigger.refresh();
-            });
-          });
-        } else build();
+        gsap.to(proxy, {
+          p: 1,
+          ease: "none",
+          onUpdate: () => apply(pin ? Math.min(1, proxy.p / 0.9) : proxy.p),
+          scrollTrigger: pin
+            ? {
+                trigger: section,
+                start: "top top",
+                end: "+=120%",
+                pin: true,
+                scrub: 0.6,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+                onRefresh: measure,
+              }
+            : {
+                trigger: paperBox,
+                start: "top 75%",
+                end: "bottom 65%",
+                scrub: 0.4,
+                invalidateOnRefresh: true,
+                onRefresh: measure,
+              },
+        });
 
         return () => {
-          cancelAnimationFrame(raf);
-          delete section.dataset.pin;
           clearTimeout(settle);
           for (const a of running) a.cancel();
           for (const ink of inks) ink.style.clipPath = "";
@@ -257,16 +224,16 @@ export function HowItWorks() {
   }, []);
 
   return (
-    // Contenedor propio de React: el pin-spacer de GSAP se inserta adentro, nunca entre React y su nodo. En desktop alto
-    // reserva por CSS el recorrido del pin (120 % de pantalla) debajo de la sección.
-    <div ref={wrap} className="bfhs-pinwrap bg-bordo relative">
+    // Contenedor propio de React: el pin-spacer de GSAP se inserta adentro, nunca entre React y su nodo.
+    <div className="relative">
       <section
         ref={root}
         id="como-funciona"
         data-surface="inverse"
         aria-labelledby="como-funciona-titulo"
         className={cn(
-          "bg-bordo text-on-bordo grain bfhs-ticket relative overflow-x-clip py-[var(--section-y)]",
+          "bg-bordo text-on-bordo grain relative overflow-x-clip py-[var(--section-y)]",
+          styles.ticketSection,
         )}
       >
         <div className="container-x grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-8">
@@ -304,7 +271,7 @@ export function HowItWorks() {
                     <p className="font-bold tracking-[0.04em] uppercase">BF Studio · tu pedido</p>
                     <p className="text-ink-soft">paso a paso</p>
                   </div>
-                  <ol className="bfhs-rows mt-1">
+                  <ol className={cn("mt-1", styles.ticketRows)}>
                     {STEPS.map((s) => (
                       <li key={s.n} data-row="">
                         <div data-ink="">
@@ -331,7 +298,7 @@ export function HowItWorks() {
                       <span>tus uñas</span>
                     </div>
                     <p className="text-ink-soft mt-2 text-[13px] leading-snug">
-                      a mano, en general de 3 a 7 días
+                      hechas a mano, en general en 3 a 7 días
                     </p>
                   </div>
                   {/* El sello va en su propia fila: nunca tapa el TOTAL */}

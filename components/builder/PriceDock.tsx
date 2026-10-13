@@ -5,7 +5,7 @@ import { useAnimate } from "motion/react";
 import type { Finish, Shape } from "@/lib/types";
 import { EASE } from "@/lib/motion";
 import { useReducedMotion } from "@/lib/hooks";
-import { cn, formatARS } from "@/lib/format";
+import { cn } from "@/lib/format";
 import { StickyActionBar } from "@/components/ui/StickyActionBar";
 import { PriceTicker } from "@/components/ui/PriceTicker";
 import { NailSwatch } from "@/components/ui/NailSwatch";
@@ -64,20 +64,14 @@ export function PulsingTotal({
         className,
       )}
     >
-      {/* El odómetro es solo visual; el valor accesible va una sola vez, al final (y se anuncia si `announce`). */}
-      <span aria-hidden className="inline-flex">
-        <PriceTicker value={value} size={size} delta={delta} />
-      </span>
-      <span className="sr-only" aria-live={announce ? "polite" : undefined}>
-        {formatARS(value)}
-      </span>
+      <PriceTicker value={value} size={size} delta={delta} announce={announce} />
     </span>
   );
 }
 
 type DockProps = {
-  /** Los botones del panel "Tu set": mientras están en pantalla el dock se esconde (no hay dos "Agregar" a la vista). */
-  ctaRef: RefObject<HTMLElement | null>;
+  /** El panel "Tu set": mientras está en pantalla (o la barra lo taparía) el dock se esconde. */
+  panelRef: RefObject<HTMLElement | null>;
   total: number;
   /** Paso actual ("Paso 3/7 · Acabado"). */
   step: { n: number; title: string };
@@ -93,11 +87,10 @@ type DockProps = {
 /**
  * Barra del armador en el celular (PLAN W2-D.2): siempre a mano mientras elegís. A la izquierda, un solo botón (abre
  * la hoja de pasos) con la miniatura del set, el paso en el que estás y el total que rueda; a la derecha, "Agregar".
- * Se esconde cuando los botones del panel "Tu set" están en pantalla (ahí están los grandes), con el footer y con el
- * teclado abierto.
+ * Se esconde con el panel "Tu set" en pantalla (ahí están los botones grandes), con el footer y con el teclado abierto.
  */
 export function PriceDock({
-  ctaRef,
+  panelRef,
   total,
   step,
   stepCount,
@@ -109,12 +102,12 @@ export function PriceDock({
 }: DockProps) {
   return (
     <StickyActionBar
-      watchRef={ctaRef}
-      hideWhenRef={ctaRef}
+      watchRef={panelRef}
+      hideWhenRef={panelRef}
       mode="outside"
-      label="Total de tu set"
+      label="Tu set"
       variant="bordo"
-      className="gap-2 pl-2 sm:mx-auto sm:max-w-xl"
+      className="gap-2 pl-2"
     >
       <button
         type="button"

@@ -35,7 +35,7 @@ const studio: Radiance = (x, y, z, out) => {
   // la pared del lado de la ventana (-x) es más clara; la del fondo (+x) y el horizonte, más oscuros:
   // ese contraste suave es lo que hace que el cromado se lea como metal y no como pintura
   const side = 1 + 0.3 * -x - 0.12 * Math.max(0, y);
-  const horizon = 1 - 0.34 * Math.exp(-((z - 0.12) ** 2) / 0.09) * smooth(-0.6, 0.7, x);
+  const horizon = 1 - 0.42 * Math.exp(-((z - 0.12) ** 2) / 0.05) * smooth(-0.6, 0.7, x);
   const k = (0.3 + 0.66 * up) * side * horizon;
   let r = (0.9 + 0.1 * up) * k;
   let g = (0.8 + 0.15 * up) * k;
@@ -45,7 +45,7 @@ const studio: Radiance = (x, y, z, out) => {
   g = g * (1 - down) + 0.69 * floor * down;
   b = b * (1 - down) + 0.5 * floor * down;
   // ventana principal, larga en el sentido de los dedos: núcleo brillante + halo ancho que se apaga de a poco
-  const key = softbox(x, y, z, -0.3, 0.22, 0.085, 0.5, 0.3) * 56 + softbox(x, y, z, -0.36, 0.18, 0.42, 0.95, 0.85) * 2.6;
+  const key = softbox(x, y, z, -0.5, 0.2, 0.13, 0.58, 0.35) * 24 + softbox(x, y, z, -0.48, 0.18, 0.42, 0.95, 0.85) * 2.2;
   // relleno ancho y frío del otro lado
   const fill = softbox(x, y, z, 0.7, 0.04, 0.3, 0.5, 0.7) * 2.2;
   // luz baja de contra, por delante de las puntas (brillo en el borde libre)
@@ -85,11 +85,9 @@ const GEM_LIGHTS: Array<[number, number, number, number, number, number, number]
 const gemRoom: Radiance = (x, y, z, out) => {
   // fondo casi negro con un techo apenas gris: las facetas que no "ven" una luz quedan oscuras
   const up = smooth(-0.2, 1, z);
-  // la mesa de la piedra (que mira casi a la cámara) ve un techo claro: se lee plateada, no gris
-  const zen = smooth(0.82, 0.97, z);
-  out[0] = 0.05 + 0.16 * up + 1.3 * zen;
-  out[1] = 0.05 + 0.16 * up + 1.3 * zen;
-  out[2] = 0.055 + 0.17 * up + 1.4 * zen;
+  out[0] = 0.025 + 0.12 * up;
+  out[1] = 0.025 + 0.12 * up;
+  out[2] = 0.03 + 0.13 * up;
   for (const [lx, ly, lz, s, r, g, b] of GEM_LIGHTS) {
     const w = Math.exp(-(1 - (x * lx + y * ly + z * lz)) / (s * s));
     if (w < 1e-4) continue;

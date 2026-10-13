@@ -37,15 +37,11 @@ export function SpinningBadge({ text, size = 140, className }: Props) {
       <div data-ambient="move" className="animate-spin-slow absolute inset-0">
         <svg viewBox="0 0 100 100" className="block size-full">
           <defs>
-            <path
-              id={id}
-              d={`M50,50 m-${R},0 a${R},${R} 0 1,1 ${R * 2},0 a${R},${R} 0 1,1 -${R * 2},0`}
-            />
+            <path id={id} d={`M50,50 m-${R},0 a${R},${R} 0 1,1 ${R * 2},0 a${R},${R} 0 1,1 -${R * 2},0`} />
           </defs>
           <text
             className="fill-bordo font-sans font-semibold uppercase"
-            // `pre`: el espacio final del texto (antes de empalmar con el principio) no se colapsa
-            style={{ fontSize, letterSpacing: "0.12em", whiteSpace: "pre" }}
+            style={{ fontSize, letterSpacing: "0.12em" }}
           >
             <textPath href={`#${id}`} textLength={CIRCUMFERENCE} lengthAdjust="spacing">
               {text}

@@ -1,82 +1,19 @@
 import * as THREE from "three";
 
-/**
- * Strass (flatback): faja vertical corta, corona en dos pisos de facetas triangulares alternadas
- * (como un chatón) y mesa chica. Sin índices y con una normal por cara: cada faceta refleja otra
- * dirección del entorno y destella por separado. Eje Y = normal de la uña, radio 1.
- */
+/** Strass: piedra de base plana con corona facetada (lathe de 12 lados, sombreado plano). */
 export function createGemGeometry() {
-  const N = 16;
-  const ring = (r: number, h: number, half: boolean) =>
-    Array.from({ length: N }, (_, k) => {
-      const a = ((k + (half ? 0.5 : 0)) / N) * Math.PI * 2;
-      return new THREE.Vector3(Math.cos(a) * r, h, Math.sin(a) * r);
-    });
-  const g0 = ring(1, 0, false);
-  const g1 = ring(1, 0.1, false);
-  const c1 = ring(0.8, 0.3, true);
-  const t0 = ring(0.44, 0.44, false);
-  const top = new THREE.Vector3(0, 0.44, 0);
-  const tris: THREE.Vector3[][] = [];
-  for (let k = 0; k < N; k++) {
-    const n = (k + 1) % N;
-    // faja
-    tris.push([g0[k], g0[n], g1[n]], [g0[k], g1[n], g1[k]]);
-    // corona baja: estrellas alternadas
-    tris.push([g1[k], g1[n], c1[k]], [c1[k], g1[n], c1[n]]);
-    // corona alta
-    tris.push([c1[k], t0[n], t0[k]], [c1[k], c1[n], t0[n]]);
-    // mesa
-    tris.push([t0[k], t0[n], top]);
-  }
-  const pos = new Float32Array(tris.length * 9);
-  const center = new THREE.Vector3(0, 0.18, 0);
-  const ab = new THREE.Vector3();
-  const ac = new THREE.Vector3();
-  const nn = new THREE.Vector3();
-  const cen = new THREE.Vector3();
-  tris.forEach(([a, b, c], i) => {
-    // orientación hacia afuera (la piedra es convexa)
-    nn.crossVectors(ab.subVectors(b, a), ac.subVectors(c, a));
-    cen.copy(a).add(b).add(c).multiplyScalar(1 / 3).sub(center);
-    const [p, q, r] = nn.dot(cen) >= 0 ? [a, b, c] : [a, c, b];
-    pos.set([p.x, p.y, p.z, q.x, q.y, q.z, r.x, r.y, r.z], i * 9);
-  });
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const pts = [
+    new THREE.Vector2(0, 0),
+    new THREE.Vector2(1, 0),
+    new THREE.Vector2(1, 0.12),
+    new THREE.Vector2(0.86, 0.3),
+    new THREE.Vector2(0.6, 0.46),
+    new THREE.Vector2(0.32, 0.53),
+    new THREE.Vector2(0, 0.54),
+  ];
+  const g = new THREE.LatheGeometry(pts, 12);
   g.computeVertexNormals();
   return g;
-}
-
-/** sombra de contacto de un strass: disco difuso (alfa en el canal verde) que se apoya sobre la uña */
-export function createGemShadow() {
-  const S = 64;
-  const c = document.createElement("canvas");
-  c.width = c.height = S;
-  const ctx = c.getContext("2d")!;
-  const g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-  // denso justo bajo la faja y se esfuma enseguida: apoya la piedra sin dibujarle un contorno
-  g.addColorStop(0, "rgba(255,255,255,1)");
-  g.addColorStop(0.4, "rgba(255,255,255,0.9)");
-  g.addColorStop(0.5, "rgba(255,255,255,0.42)");
-  g.addColorStop(0.66, "rgba(255,255,255,0.12)");
-  g.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, S, S);
-  const texture = new THREE.CanvasTexture(c);
-  // el disco mide 2,4 radios de piedra: asoma un anillo de sombra alrededor de la faja
-  const geometry = new THREE.PlaneGeometry(2.3, 2.3).rotateX(-Math.PI / 2);
-  const material = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#3b1d14"),
-    alphaMap: texture,
-    transparent: true,
-    opacity: 0.3,
-    depthWrite: false,
-    polygonOffset: true,
-    polygonOffsetFactor: -4,
-    polygonOffsetUnits: -4,
-  });
-  return { geometry, material, texture };
 }
 
 /** Dije: corazón dorado inflado. Eje Z = normal de la uña. */

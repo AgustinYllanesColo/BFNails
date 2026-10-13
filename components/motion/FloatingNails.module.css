@@ -1,13 +1,13 @@
 /*
- * FloatingNails (PLAN W2-A.4). Los .module.css de este proyecto son globales (ver next.config): prefijo `bfn-`. Dos nodos por uña, uno por responsabilidad:
- * - .bfn-nail (posición + entrada): sale desde el lado del logo (--fx/--fy, hacia el centro) y se abre a su lugar.
+ * FloatingNails (PLAN W2-A.4). Dos nodos por uña, uno por responsabilidad:
+ * - .nail (posición + entrada): sale desde el lado del logo (--fx/--fy, hacia el centro) y se abre a su lugar.
  * - el de adentro (deriva constante): `drift` global en línea, con data-ambient="drift" (reduced-motion la pausa).
  */
-.bfn-nail {
+.nail {
   position: absolute;
-  animation: bfn-in 800ms var(--ease-out-expo) 150ms both;
+  animation: nail-in 800ms var(--ease-out-expo) 150ms both;
 }
-@keyframes bfn-in {
+@keyframes nail-in {
   from {
     opacity: 0;
     transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0) scale(0.6);
@@ -15,12 +15,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bfn-nail {
-    animation-name: bfn-fade;
+  .nail {
+    animation-name: nail-fade;
     animation-duration: 400ms;
   }
 }
-@keyframes bfn-fade {
+@keyframes nail-fade {
   from {
     opacity: 0;
   }

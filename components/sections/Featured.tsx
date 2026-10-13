@@ -11,7 +11,7 @@ import { Heading, Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/icons";
 import { MQ, isInViewportNow, registerEases } from "@/lib/motion";
-import "./home.module.css";
+import styles from "./home.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -169,7 +169,7 @@ export function Featured({ designs }: { designs: Design[] }) {
             {designs.map((d) => (
               <li key={d.slug} className="min-w-0 snap-start">
                 <div data-card="" className="relative">
-                  <span aria-hidden className="bfhs-sheen" />
+                  <span aria-hidden className={styles.sheen} />
                   <DesignCard design={d} sizes={SIZES} />
                 </div>
               </li>

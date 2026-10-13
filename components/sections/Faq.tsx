@@ -9,7 +9,6 @@ import { Heading, Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { MQ, isInViewportNow, registerEases } from "@/lib/motion";
 import { waLink } from "@/lib/whatsapp";
-import { cn } from "@/lib/format";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -177,12 +176,7 @@ function FaqList({ items, headingLevel }: { items: typeof FAQ_ITEMS; headingLeve
                 onKeyDown={(e) => onKey(e, i)}
                 className="group flex min-h-14 w-full items-center justify-between gap-6 rounded-md py-5 text-left transition-[scale] duration-150 ease-[var(--ease-ui)] active:scale-[0.99]"
               >
-                <span
-                  className={cn(
-                    "group-hover:text-bordo font-sans text-[18px] leading-[1.35] font-semibold transition-colors duration-200 md:text-[19px]",
-                    isOpen ? "text-bordo" : "text-ink",
-                  )}
-                >
+                <span className="text-ink group-hover:text-bordo font-sans text-[18px] leading-[1.35] font-semibold transition-colors duration-200 md:text-[19px]">
                   {item.q}
                 </span>
                 <span

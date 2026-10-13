@@ -24,7 +24,7 @@ export function StepRail({ steps, current, onGo, className }: Props) {
   const touched = steps.filter((s) => s.touched).length;
   return (
     <nav aria-label="Pasos del armador" className={cn("shrink-0", className)}>
-      <ol className="flex items-center gap-1.5">
+      <ol className="flex items-center gap-1">
         {steps.map((s) => {
           const active = s.n === current;
           return (
@@ -36,12 +36,8 @@ export function StepRail({ steps, current, onGo, className }: Props) {
                 aria-label={`Paso ${s.n}: ${s.title}${s.touched ? ", elegido" : ""}`}
                 title={s.title}
                 className={cn(
-                  "rounded-pill relative flex h-9 min-w-9 items-center justify-center text-[13px] font-semibold transition-[background-color,box-shadow,scale] duration-150 ease-[var(--ease-ui)] active:scale-[0.96]",
-                  active
-                    ? "px-3.5"
-                    : s.touched
-                      ? "bg-cream-deep text-bordo [@media(hover:hover)]:hover:bg-cream-ink"
-                      : "text-ink-soft ring-line ring-1 ring-inset [@media(hover:hover)]:hover:ring-sand",
+                  "rounded-pill relative flex h-9 min-w-9 items-center justify-center px-2.5 text-[13px] font-semibold transition-colors duration-150 ease-[var(--ease-ui)]",
+                  !active && "[@media(hover:hover)]:hover:bg-cream-deep",
                 )}
               >
                 {active ? (
@@ -54,7 +50,7 @@ export function StepRail({ steps, current, onGo, className }: Props) {
                 <span
                   className={cn(
                     "relative z-[1] flex items-center gap-1.5 whitespace-nowrap",
-                    active && "text-cream",
+                    active ? "text-cream" : s.touched ? "text-bordo" : "text-ink-soft",
                   )}
                 >
                   {s.touched && !active ? (

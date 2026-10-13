@@ -175,8 +175,8 @@ export function Nav() {
             <Image
               src="/brand/kitty.webp"
               alt=""
-              width={47}
-              height={56}
+              width={48}
+              height={57}
               loading="eager"
               className="block h-12 w-auto transition-[rotate,scale] duration-300 ease-[var(--ease-bounce)] group-hover:scale-110 group-hover:rotate-[-8deg] md:h-14"
             />
@@ -185,7 +185,7 @@ export function Nav() {
             <Image
               src="/brand/wordmark-nails.webp"
               alt=""
-              width={79}
+              width={78}
               height={36}
               loading="eager"
               className="block h-[30px] w-auto md:h-9"

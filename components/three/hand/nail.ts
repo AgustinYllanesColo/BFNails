@@ -350,3 +350,63 @@ export function sampleTop(top: Float32Array, u: number, s: number, outP: THREE.V
   outN.crossVectors(du, ds).normalize();
   return outP;
 }
+
+/** contorno de la cutícula + pliegues laterales: un labio de piel que tapa la base de la uña */
+export function createCuticleGeometry(ctx: Ctx, d: NailDims) {
+  const yMax = 0.5 * d.bed;
+  const N = 44;
+  const R = 10;
+  const path: THREE.Vector3[] = [];
+  const outs: THREE.Vector3[] = [];
+  const ups: THREE.Vector3[] = [];
+  const radii: number[] = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const q = 2 * t - 1;
+    const y = yMax * q * q;
+    const side = Math.sign(q) || 1;
+    // usamos la forma ovalada: la base es igual para todas las formas
+    const hw = halfWidth("ovalada", y, d);
+    const x = side * hw;
+    const p = nailTopPoint(ctx, d, x, y, new THREE.Vector3());
+    // normal del contorno en el plano de la uña: (±1, -hw') → en la base apunta hacia la cutícula
+    const e = 0.004;
+    const dhw = (halfWidth("ovalada", y + e, d) - halfWidth("ovalada", Math.max(0, y - e), d)) / (y + e - Math.max(0, y - e));
+    const f = ctx.model.frame(ctx.model.vCuticle + y / ctx.model.length);
+    const out = f.S.clone().multiplyScalar(side).addScaledVector(f.T, -dhw);
+    const U = f.U.clone();
+    out.addScaledVector(U, -out.dot(U)).normalize();
+    const prox = 1 - Math.min(1, y / yMax);
+    // pliegue fino (no un burlete): más grueso en la base (eponiquio), se afina por los costados
+    const r = 0.016 + 0.03 * Math.pow(prox, 1.2);
+    radii.push(r * THREE.MathUtils.smoothstep(t, 0, 0.12) * THREE.MathUtils.smoothstep(1 - t, 0, 0.12) + 0.004);
+    path.push(p.addScaledVector(out, 0.004).addScaledVector(U, 0.002));
+    outs.push(out);
+    ups.push(U);
+  }
+  const pos: number[] = [];
+  const idx: number[] = [];
+  for (let i = 0; i <= N; i++) {
+    const p = path[i];
+    const r = radii[i];
+    for (let j = 0; j <= R; j++) {
+      // media caña: de adentro (sobre la uña) por arriba hasta afuera (piel)
+      const a = (j / R) * Math.PI;
+      const cx = -Math.cos(a) * r * 1.6;
+      const cz = Math.sin(a) * r * 0.5;
+      pos.push(p.x + outs[i].x * cx + ups[i].x * cz, p.y + outs[i].y * cx + ups[i].y * cz, p.z + outs[i].z * cx + ups[i].z * cz);
+    }
+  }
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < R; j++) {
+      const a = i * (R + 1) + j;
+      const b = a + R + 1;
+      idx.push(a, a + 1, b, a + 1, b + 1, b);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}

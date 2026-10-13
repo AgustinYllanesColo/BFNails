@@ -12,7 +12,7 @@ import { Price } from "@/components/ui/Price";
 import { DEFAULT_SHIPPING_TABLE } from "@/lib/shipping/table";
 import { isInViewportNow, registerEases } from "@/lib/motion";
 import { cn } from "@/lib/format";
-import "./home.module.css";
+import styles from "./home.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -93,33 +93,32 @@ export function Zones() {
         const traveler = el.querySelector<HTMLElement>("[data-traveler]");
         if (!segs.length || !end || !traveler) return;
 
-        // Geometría en coordenadas del track, con offsets de layout (no rects: los tramos y las estaciones están
-        // escalados por la propia animación). Se recalcula en cada refresh: dónde arranca y termina la línea, dónde
+        // Geometría en coordenadas del track (se recalcula en cada refresh): dónde arranca y termina la línea, dónde
         // está cada tramo y cada estación, y dónde descansa el paquete en el CSS (al final).
         let from = 0;
         let to = 1;
         let spans: Array<[number, number]> = [];
         let stations: number[] = [];
         let rest = 0;
-        const pos = (n: HTMLElement) => {
-          let x = 0;
-          let y = 0;
-          for (let cur: HTMLElement | null = n; cur && cur !== el; cur = cur.offsetParent as HTMLElement | null) {
-            x += cur.offsetLeft;
-            y += cur.offsetTop;
-          }
-          return desk ? [x, x + n.offsetWidth] : [y, y + n.offsetHeight];
-        };
-        const center = (n: HTMLElement) => {
-          const [a, b] = pos(n);
-          return (a + b) / 2;
-        };
+        const axis = (r: DOMRect) => (desk ? [r.left, r.right] : [r.top, r.bottom]);
         const measure = () => {
-          spans = segs.map((s) => pos(s) as [number, number]);
+          const box = el.getBoundingClientRect();
+          const o = desk ? box.left : box.top;
+          const center = (n: HTMLElement) => {
+            const [a, b] = axis(n.getBoundingClientRect());
+            return (a + b) / 2 - o;
+          };
+          spans = segs.map((s) => {
+            const [a, b] = axis(s.getBoundingClientRect());
+            return [a - o, b - o];
+          });
           stations = nodes.map(center);
           from = stations[0] ?? 0;
           to = center(end);
-          rest = center(traveler);
+          // el transform del paquete se descuenta: medimos dónde está en el CSS
+          const [a, b] = axis(traveler.getBoundingClientRect());
+          const now = Number(gsap.getProperty(traveler, desk ? "x" : "y")) || 0;
+          rest = (a + b) / 2 - o - now;
         };
 
         const lit = new Set<HTMLElement>();
@@ -133,8 +132,7 @@ export function Zones() {
           const tip = from + (to - from) * p;
           segs.forEach((s, i) => {
             const [a, b] = spans[i];
-            // al llegar, todo completo (el último tramo sigue unos px debajo del punto final)
-            const k = p >= 0.999 ? 1 : clamp01((tip - a) / Math.max(1, b - a));
+            const k = clamp01((tip - a) / Math.max(1, b - a));
             if (s.dataset.dashed) {
               s.style.clipPath = desk
                 ? `inset(0 ${((1 - k) * 100).toFixed(2)}% 0 0)`
@@ -153,7 +151,6 @@ export function Zones() {
         };
 
         for (const s of segs) s.style.transformOrigin = desk ? "0 50%" : "50% 0";
-        for (const n of [...nodes, end]) n.dataset.on = "0"; // apagadas hasta que pase el paquete
         measure();
         apply(0);
 
@@ -207,15 +204,7 @@ export function Zones() {
             const last = i === STOPS.length - 1;
             return (
               <div key={s.id} className="relative pb-12 pl-16 md:pt-[72px] md:pb-0 md:pl-0">
-                {/* Tramo propio: vertical en el celular (del nodo hasta el próximo), horizontal desde md. Debajo, el
-                    mismo tramo apenas marcado: el recorrido se ve antes de que el paquete lo pinte. */}
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute top-11 bottom-0 left-[20.5px] w-[3px] rounded-full opacity-[0.14] md:top-[21px] md:bottom-auto md:left-0 md:h-[3px] md:w-auto",
-                    last ? cn(DASH_V, DASH_H, "md:right-0") : "bg-bordo md:right-[-2rem]",
-                  )}
-                />
+                {/* Tramo propio: vertical en el celular (del nodo hasta el próximo), horizontal desde md */}
                 <span
                   aria-hidden
                   data-seg=""
@@ -229,7 +218,8 @@ export function Zones() {
                   aria-hidden
                   data-node=""
                   className={cn(
-                    "bg-bordo bfhs-node shadow-sm absolute top-0 left-0 z-[1] grid size-11 place-items-center rounded-full",
+                    "bg-bordo shadow-sm absolute top-0 left-0 z-[1] grid size-11 place-items-center rounded-full",
+                    styles.node,
                   )}
                 >
                   <Icon name={s.icon} size={24} />
@@ -265,7 +255,7 @@ export function Zones() {
             <span
               data-end=""
               aria-hidden
-              className="bg-cream ring-bordo bfhs-end block size-4 rounded-full ring-[3px]"
+              className={cn("bg-cream ring-bordo block size-4 rounded-full ring-[3px]", styles.endNode)}
             />
             <span className="text-meta text-bordo font-semibold whitespace-nowrap md:absolute md:right-0 md:bottom-[calc(100%+10px)]">
               todo el país
@@ -278,14 +268,21 @@ export function Zones() {
             aria-hidden
             className="pointer-events-none absolute bottom-[-9px] left-[5px] z-10 size-[34px] md:top-[-12px] md:right-[-9px] md:bottom-auto md:left-auto"
           >
-            <div data-ambient="move" className="animate-pendulum bfhs-sway size-full origin-bottom">
-              {/* Cajita de regalo kraft con cinta roja y el moño de la Kitty */}
+            <div data-ambient="move" className="animate-pendulum size-full origin-bottom">
               <svg viewBox="0 0 34 34" className="size-full overflow-visible">
-                <rect x="4" y="13" width="26" height="19" rx="3" fill="var(--cream-200)" stroke="var(--bordo-900)" strokeWidth="1.75" />
-                <rect x="2.5" y="9" width="29" height="6.5" rx="2" fill="var(--cream-100)" stroke="var(--bordo-900)" strokeWidth="1.75" />
-                <rect x="15" y="9.9" width="4" height="21.2" fill="var(--red-600)" />
+                <rect
+                  x="3"
+                  y="9"
+                  width="28"
+                  height="22"
+                  rx="4"
+                  fill="var(--cream-100)"
+                  stroke="var(--bordo-900)"
+                  strokeWidth="1.75"
+                />
+                <path d="M17 9v22" stroke="var(--bordo-900)" strokeWidth="1.75" opacity="0.35" />
               </svg>
-              <Bow size={18} className="absolute top-[1.5px] left-1/2 -translate-x-1/2" />
+              <Bow size={18} className="absolute top-[1px] left-1/2 -translate-x-1/2" />
             </div>
           </div>
         </div>

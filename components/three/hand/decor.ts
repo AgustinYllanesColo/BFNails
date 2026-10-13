@@ -28,66 +28,18 @@ export function decorKey(i: DecorInput) {
 
 const PAINTED = new Set(["francesita", "francesita-color", "degrade", "animal-print", "flores", "personajes", "a-mano", "encapsulado"]);
 
-/** contorno de la uña agrandado `grow` cm: la pintura pasa apenas el borde (sin bordes punteados al muestrear) */
-function outline(ctx: CanvasRenderingContext2D, shape: Shape, d: NailDims, grow = 0) {
+function outline(ctx: CanvasRenderingContext2D, shape: Shape, d: NailDims) {
   const N = 60;
   ctx.beginPath();
-  ctx.moveTo(0, -grow);
   for (let i = 0; i <= N; i++) {
     const y = (i / N) * d.L;
-    ctx.lineTo(-halfWidth(shape, y, d) - grow, y);
+    const x = -halfWidth(shape, y, d);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
   }
-  ctx.lineTo(0, d.L + grow);
   for (let i = N; i >= 0; i--) {
     const y = (i / N) * d.L;
-    ctx.lineTo(halfWidth(shape, y, d) + grow, y);
-  }
-  ctx.closePath();
-}
-
-/** mancha orgánica: polígono con radio ruidoso suavizado con curvas (nada de elipses perfectas) */
-function blobPath(ctx: CanvasRenderingContext2D, rand: () => number, cx: number, cy: number, rx: number, ry: number, rot: number, wobble = 0.28, n = 9) {
-  const pts: Array<[number, number]> = [];
-  for (let k = 0; k < n; k++) {
-    const a = (k / n) * Math.PI * 2;
-    const r = 1 + (rand() - 0.5) * 2 * wobble;
-    const x = Math.cos(a) * rx * r;
-    const y = Math.sin(a) * ry * r;
-    pts.push([cx + x * Math.cos(rot) - y * Math.sin(rot), cy + x * Math.sin(rot) + y * Math.cos(rot)]);
-  }
-  ctx.beginPath();
-  const mid = (i: number) => [(pts[i][0] + pts[(i + 1) % n][0]) / 2, (pts[i][1] + pts[(i + 1) % n][1]) / 2];
-  const m0 = mid(n - 1);
-  ctx.moveTo(m0[0], m0[1]);
-  for (let k = 0; k < n; k++) {
-    const m = mid(k);
-    ctx.quadraticCurveTo(pts[k][0], pts[k][1], m[0], m[1]);
-  }
-  ctx.closePath();
-}
-
-/** trozo de anillo de roseta: una "C" gruesa en el medio y afinada en las puntas, con borde irregular */
-function arcBlob(ctx: CanvasRenderingContext2D, rand: () => number, cx: number, cy: number, R: number, ry: number, rot: number, a0: number, a1: number, th: number) {
-  const N = 12;
-  const outer: Array<[number, number]> = [];
-  const inner: Array<[number, number]> = [];
-  for (let k = 0; k <= N; k++) {
-    const t = k / N;
-    const a = a0 + (a1 - a0) * t;
-    const w = th * Math.pow(Math.sin(Math.PI * t), 0.5) * (0.88 + rand() * 0.24);
-    const ro = R * (1 + (rand() - 0.5) * 0.08) + w * 0.5;
-    const ri = R - w * 0.5;
-    outer.push([Math.cos(a) * ro, Math.sin(a) * ro * ry]);
-    inner.push([Math.cos(a) * ri, Math.sin(a) * ri * ry]);
-  }
-  const tr = ([x, y]: [number, number]): [number, number] => [cx + x * Math.cos(rot) - y * Math.sin(rot), cy + x * Math.sin(rot) + y * Math.cos(rot)];
-  const path = [...outer, ...inner.reverse()].map(tr);
-  ctx.beginPath();
-  ctx.moveTo(path[0][0], path[0][1]);
-  for (let k = 1; k < path.length; k++) {
-    const [x, y] = path[k];
-    const [px, py] = path[k - 1];
-    ctx.quadraticCurveTo(px, py, (x + px) / 2, (y + py) / 2);
+    ctx.lineTo(halfWidth(shape, y, d), y);
   }
   ctx.closePath();
 }
@@ -128,7 +80,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
   const W = d.W;
 
   ctx.save();
-  outline(ctx, shape, d, px * 4);
+  outline(ctx, shape, d);
   ctx.clip();
 
   // 1. degradé / babyboomer: blanco lechoso hacia la punta
@@ -196,47 +148,39 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 3. animal print: leopardo de verdad (como el de la Kitty del logo): rosetas separadas por el color
-  //    de base, cada una con un anillo cortado en 3 o 4 "medialunas" oscuras e irregulares alrededor de
-  //    un centro caramelo, y puntitos sueltos en los huecos. Las rosetas se cortan contra el borde.
+  // 3. animal print: rosetas de leopardo (centro tostado + anillo cortado oscuro)
   if (has("animal-print")) {
-    const r0 = W * 0.13;
-    const step = r0 * 2.4;
-    const spots: Array<[number, number, number]> = [];
-    let row = 0;
-    for (let y = -r0 * 0.4; y < d.L + r0; y += step * 0.84, row++) {
-      for (let x = -W / 2 - r0 * 0.6 + (row % 2) * step * 0.5; x < W / 2 + r0; x += step) {
-        spots.push([x + (rand() - 0.5) * step * 0.3, y + (rand() - 0.5) * step * 0.28, r0 * (0.82 + rand() * 0.36)]);
-      }
-    }
-    const ink = ["rgba(40,28,22,0.97)", "rgba(56,38,28,0.95)", "rgba(33,25,21,0.97)"];
-    for (const [cx, cy, r] of spots) {
+    const count = Math.round(9 + (d.L / W) * 4);
+    for (let k = 0; k < count; k++) {
+      const cx = (rand() - 0.5) * W * 1.05;
+      const cy = d.L * (0.08 + rand() * 0.9);
+      const r = W * (0.05 + rand() * 0.07);
       const rot = rand() * Math.PI;
-      const ry = 0.74 + rand() * 0.2;
-      // centro: caramelo con un dejo rojizo en algunas (guiño a los centros bordó del leopardo de la marca)
-      ctx.fillStyle = rand() < 0.3 ? "rgba(156,82,44,0.8)" : "rgba(184,120,64,0.76)";
-      blobPath(ctx, rand, cx, cy, r * 0.7, r * 0.7 * ry, rot, 0.18);
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      // leopardo de la marca: centro #c9a063, anillo café
+      ctx.fillStyle = "rgba(201,160,99,0.9)";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 0.82, r * 0.6, 0, 0, Math.PI * 2);
       ctx.fill();
-      // anillo cortado en medialunas
-      const parts = 3 + Math.floor(rand() * 2);
-      const start = rand() * Math.PI * 2;
-      const span = (Math.PI * 2) / parts;
-      for (let a = 0; a < parts; a++) {
-        const a0 = start + a * span + rand() * 0.15;
-        const a1 = a0 + span * (0.68 + rand() * 0.16);
-        ctx.fillStyle = ink[Math.floor(rand() * ink.length)];
-        arcBlob(ctx, rand, cx, cy, r * 0.93, ry, rot, a0, a1, r * (0.4 + rand() * 0.16));
-        ctx.fill();
+      ctx.strokeStyle = "rgba(59,36,22,0.95)";
+      ctx.lineCap = "round";
+      ctx.lineWidth = r * 0.28;
+      const arcs = 3 + Math.floor(rand() * 2);
+      for (let a = 0; a < arcs; a++) {
+        const start = (a / arcs) * Math.PI * 2 + rand() * 0.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r, r * 0.78, 0, start, start + (Math.PI * 2) / arcs - 0.55 - rand() * 0.3);
+        ctx.stroke();
       }
+      ctx.restore();
     }
-    // puntitos sueltos en los huecos (nunca encima de una roseta)
-    for (let k = 0; k < spots.length * 1.6; k++) {
-      const x = (rand() - 0.5) * (W + r0);
-      const y = rand() * (d.L + r0) - r0 * 0.3;
-      if (spots.some(([sx, sy, sr]) => (sx - x) ** 2 + (sy - y) ** 2 < (sr * 1.2) ** 2)) continue;
-      const big = rand() < 0.4;
-      ctx.fillStyle = ink[k % ink.length];
-      blobPath(ctx, rand, x, y, W * (big ? 0.03 : 0.018), W * (big ? 0.022 : 0.014), rand() * Math.PI, 0.3, 7);
+    // manchas sueltas pequeñas (~30 % del total)
+    for (let k = 0; k < Math.round(count * 0.45); k++) {
+      ctx.fillStyle = "rgba(59,36,22,0.9)";
+      ctx.beginPath();
+      ctx.ellipse((rand() - 0.5) * W, d.L * rand(), W * 0.03, W * 0.022, rand() * 3, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -283,47 +227,36 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 5. dibujo a mano alzada: trazos de pincel fino con grosor que varía (corazones, estrellas, ondas y puntitos)
+  // 5. dibujo a mano alzada: corazones, estrellas y trazos finos
   if (has("a-mano")) {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    const lw = px * 8;
+    const lw = px * 4.5;
     if (i % 2 === 0) {
       ctx.strokeStyle = "#3c3c3c";
       ctx.lineWidth = lw;
-      star(ctx, W * 0.04, d.bed * 0.62, W * 0.26, 0.2);
+      star(ctx, W * 0.05, d.bed * 0.62, W * 0.2, 0.2);
       ctx.stroke();
       ctx.fillStyle = "#4a0e0e";
-      star(ctx, -W * 0.24, d.bed * 0.24, W * 0.1, -0.3);
+      star(ctx, -W * 0.22, d.bed * 0.25, W * 0.08, -0.3);
       ctx.fill();
-      for (const [dx, dy, rr] of [
-        [0.26, 0.28, 0.035],
-        [0.3, 0.9, 0.028],
-        [-0.27, 0.95, 0.025],
-      ]) {
-        ctx.beginPath();
-        ctx.arc(W * dx, d.bed * dy, W * rr, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      ctx.beginPath();
+      ctx.arc(W * 0.25, d.bed * 0.3, W * 0.03, 0, Math.PI * 2);
+      ctx.fill();
     } else {
       ctx.strokeStyle = "#4a0e0e";
-      ctx.lineWidth = lw * 1.1;
-      heart(ctx, 0, d.bed * 0.64, W * 0.2);
+      ctx.lineWidth = lw;
+      heart(ctx, 0, d.bed * 0.6, W * 0.17);
       ctx.stroke();
       ctx.strokeStyle = "#3c3c3c";
-      ctx.lineWidth = lw * 0.8;
       ctx.beginPath();
-      for (let k = 0; k <= 30; k++) {
-        const x = -W / 2 + (k / 30) * W;
-        const y = d.bed * 0.22 + Math.sin(k * 0.75) * W * 0.05;
-        if (k === 0) ctx.moveTo(x, y);
+      for (let s = 0; s <= 30; s++) {
+        const x = -W / 2 + (s / 30) * W;
+        const y = d.bed * 0.22 + Math.sin(s * 0.9) * W * 0.04;
+        if (s === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
       ctx.stroke();
-      ctx.fillStyle = "#3c3c3c";
-      ctx.beginPath();
-      ctx.arc(W * 0.24, d.bed * 0.98, W * 0.03, 0, Math.PI * 2);
-      ctx.fill();
     }
   }
 
