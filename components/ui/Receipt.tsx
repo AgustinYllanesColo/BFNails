@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/format";
 
@@ -37,6 +37,21 @@ export function Receipt({ title, meta, lines, footer = [], className, printingLa
     return () => clearTimeout(t);
   }, [key, firstPrint, lines.length]);
 
+  // Avance del papel: cada cambio después de la primera impresión empuja el papel un toque hacia abajo,
+  // como si la impresora lo alimentara. WAAPI sobre transform, sin pasar por React.
+  const paper = useRef<HTMLDivElement>(null);
+  const lastKey = useRef(key);
+  useEffect(() => {
+    if (lastKey.current === key) return;
+    lastKey.current = key;
+    const el = paper.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.animate(
+      [{ transform: "translateY(-7px)" }, { transform: "translateY(0px)" }],
+      { duration: 380, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+    );
+  }, [key]);
+
   const all = [...lines, ...(footer.length ? [{ kind: "rule", id: "footer-rule" } as ReceiptLine, ...footer] : [])];
 
   return (
@@ -60,9 +75,10 @@ export function Receipt({ title, meta, lines, footer = [], className, printingLa
       {/* Papel */}
       <div className="relative -mt-2 overflow-hidden px-2">
         <motion.div
-          initial={{ y: "-100%" }}
-          animate={{ y: 0 }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          ref={paper}
+          initial={{ transform: "translateY(-100%)" }}
+          animate={{ transform: "translateY(0%)" }}
+          transition={{ duration: 0.9, ease: [0.23, 1, 0.32, 1] }}
           className="relative bg-[#f6f1e4] px-4 pt-5 pb-6 text-ink shadow-[0_20px_40px_-24px_rgba(74,14,14,0.5)]"
           style={{
             clipPath: "polygon(0 0, 100% 0, 100% calc(100% - 8px), 97.5% 100%, 95% calc(100% - 8px), 92.5% 100%, 90% calc(100% - 8px), 87.5% 100%, 85% calc(100% - 8px), 82.5% 100%, 80% calc(100% - 8px), 77.5% 100%, 75% calc(100% - 8px), 72.5% 100%, 70% calc(100% - 8px), 67.5% 100%, 65% calc(100% - 8px), 62.5% 100%, 60% calc(100% - 8px), 57.5% 100%, 55% calc(100% - 8px), 52.5% 100%, 50% calc(100% - 8px), 47.5% 100%, 45% calc(100% - 8px), 42.5% 100%, 40% calc(100% - 8px), 37.5% 100%, 35% calc(100% - 8px), 32.5% 100%, 30% calc(100% - 8px), 27.5% 100%, 25% calc(100% - 8px), 22.5% 100%, 20% calc(100% - 8px), 17.5% 100%, 15% calc(100% - 8px), 12.5% 100%, 10% calc(100% - 8px), 7.5% 100%, 5% calc(100% - 8px), 2.5% 100%, 0 calc(100% - 8px))",
@@ -79,10 +95,10 @@ export function Receipt({ title, meta, lines, footer = [], className, printingLa
                 <motion.li
                   key={l.id}
                   layout
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, transform: "translateY(-8px)" }}
+                  animate={{ opacity: 1, transform: "translateY(0px)" }}
                   exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                  transition={{ duration: 0.35, delay: firstPrint ? 0.5 + i * 0.09 : 0.05 }}
+                  transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1], delay: firstPrint ? 0.45 + i * 0.07 : 0.08 }}
                   className="overflow-hidden"
                 >
                   {l.kind === "rule" ? (
@@ -99,7 +115,20 @@ export function Receipt({ title, meta, lines, footer = [], className, printingLa
                       )}
                     >
                       <span className="min-w-0 truncate">{l.label}</span>
-                      <span className="shrink-0 tabular-nums">{l.value}</span>
+                      <span className="relative shrink-0 overflow-hidden tabular-nums">
+                        <AnimatePresence mode="popLayout" initial={false}>
+                          <motion.span
+                            key={l.value}
+                            initial={{ opacity: 0, transform: "translateY(8px)" }}
+                            animate={{ opacity: 1, transform: "translateY(0px)" }}
+                            exit={{ opacity: 0, transform: "translateY(-8px)" }}
+                            transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                            className="inline-block"
+                          >
+                            {l.value}
+                          </motion.span>
+                        </AnimatePresence>
+                      </span>
                     </div>
                   )}
                 </motion.li>

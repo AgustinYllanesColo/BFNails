@@ -10,8 +10,8 @@ import { NailPreview2D } from "./NailPreview2D";
 // three.js va en un chunk aparte y solo se pide en el cliente, cuando la vista previa está cerca
 const NailPreview3D = dynamic(() => import("./NailPreview3D").then((m) => m.NailPreview3D), { ssr: false, loading: () => null });
 
-/** si el 3D tarda más que esto, se muestra la ilustración como respaldo */
-const FALLBACK_MS = 2500;
+/** si el 3D tarda más que esto, se muestra la ilustración como respaldo (red lenta o chunk que no llega) */
+const FALLBACK_MS = 6000;
 const HINT_MS = 2600;
 const HINT_KEY = "bf:hint-girar";
 /** para pruebas con WebGL por software: localStorage "bf:force3d" = "1" */

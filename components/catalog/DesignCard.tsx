@@ -19,8 +19,9 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
           src={designImage(design, 0)}
           alt={design.name}
           fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+          sizes="(min-width: 1024px) 25vw, 50vw"
           priority={priority}
+          quality={72}
           className={`object-cover transition-[transform,opacity] duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105 ${hasSecond ? "group-hover:opacity-0" : ""}`}
         />
         {hasSecond && (
@@ -28,7 +29,7 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
             src={designImage(design, 1)}
             alt=""
             fill
-            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+            sizes="(min-width: 1024px) 25vw, 50vw"
             className="object-cover opacity-0 transition-[transform,opacity] duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105 group-hover:opacity-100"
           />
         )}

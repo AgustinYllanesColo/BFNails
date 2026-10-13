@@ -21,7 +21,7 @@ const sizes: Record<Size, string> = {
 };
 
 type Common = { variant?: Variant; size?: Size; className?: string; children: React.ReactNode };
-type ButtonProps = Common & React.ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined };
+type ButtonProps = Common & React.ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined; ref?: React.Ref<HTMLButtonElement> };
 type LinkProps = Common & { href: string; target?: string; rel?: string; "data-cursor"?: string };
 
 export function Button(props: ButtonProps | LinkProps) {

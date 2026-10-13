@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import type { Design, SizeSelection } from "@/lib/types";
@@ -8,15 +8,18 @@ import { useCart } from "@/lib/store/cart";
 import { designImage } from "@/lib/data/catalog";
 import { SizePicker, sizesAreValid } from "./SizePicker";
 import { Button } from "@/components/ui/Button";
+import { flyToCart } from "@/components/motion/flyToCart";
 
 export function AddDesignToCart({ design }: { design: Design }) {
   const add = useCart((s) => s.add);
   const router = useRouter();
   const [sizes, setSizes] = useState<SizeSelection>({ mode: "standard", size: "S" });
   const [added, setAdded] = useState(false);
+  const btn = useRef<HTMLButtonElement>(null);
   const valid = sizesAreValid(sizes);
 
-  const onAdd = () => {
+  const onAdd = (fly = true) => {
+    if (fly) flyToCart(btn.current, designImage(design, 0));
     add({
       kind: "design",
       designSlug: design.slug,
@@ -37,7 +40,7 @@ export function AddDesignToCart({ design }: { design: Design }) {
         <SizePicker value={sizes} onChange={setSizes} />
       </div>
       <div className="flex flex-wrap gap-3">
-        <Button onClick={onAdd} size="lg" disabled={!valid} data-cursor="sumar">
+        <Button ref={btn} onClick={() => onAdd()} size="lg" disabled={!valid} data-cursor="sumar">
           <motion.span key={String(added)} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
             {added ? "¡Sumado al carrito! ✦" : "Agregar al carrito"}
           </motion.span>
@@ -47,7 +50,7 @@ export function AddDesignToCart({ design }: { design: Design }) {
           size="lg"
           disabled={!valid}
           onClick={() => {
-            onAdd();
+            onAdd(false);
             router.push("/checkout");
           }}
         >

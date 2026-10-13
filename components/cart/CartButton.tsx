@@ -13,6 +13,7 @@ export function CartButton() {
   return (
     <Link
       href="/carrito"
+      data-cart-button
       className="relative grid size-11 place-items-center rounded-pill bg-cream-deep text-bordo ring-1 ring-bordo/10 transition-colors hover:bg-bordo hover:text-cream"
       aria-label={`Carrito, ${n} ${n === 1 ? "set" : "sets"}`}
       data-cursor="carrito"

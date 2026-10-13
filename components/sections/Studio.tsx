@@ -18,7 +18,7 @@ export function Studio() {
     <section className="relative py-16 md:py-24">
       <div className="container-x">
         <Reveal className="relative overflow-hidden rounded-lg bg-white p-7 ring-1 ring-bordo/10 shadow-[0_30px_60px_-40px_rgba(74,14,14,0.4)] md:p-12">
-          <span aria-hidden className="leopard-bg absolute inset-x-0 top-0 h-1.5" />
+          <span aria-hidden className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,var(--bordo),var(--leopard)_55%,var(--yellow))]" />
           <div className="grid items-center gap-8 md:grid-cols-[1.3fr_0.7fr]">
             <div>
               <Eyebrow className="text-bordo">También en el estudio</Eyebrow>

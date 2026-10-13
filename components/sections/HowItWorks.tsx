@@ -213,7 +213,7 @@ export function HowItWorks() {
               {i === STEPS.length - 1 && (
                 <span
                   aria-hidden
-                  className="leopard-bg pointer-events-none absolute inset-x-0 bottom-0 h-1.5"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-[linear-gradient(90deg,var(--bordo),var(--leopard)_55%,var(--yellow))]"
                 />
               )}
             </article>

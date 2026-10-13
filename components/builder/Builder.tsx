@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { BuilderSelection, SizeSelection } from "@/lib/types";
 import { DEFAULT_SELECTION, quoteSelection, type BuilderConfig } from "@/lib/pricing";
 import { formatARS } from "@/lib/format";
 import { useCart } from "@/lib/store/cart";
+import { flyToCart } from "@/components/motion/flyToCart";
 import { Chip } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { Field, inputClass, textareaClass } from "@/components/ui/Field";
@@ -21,6 +22,7 @@ export function Builder({ config }: { config: BuilderConfig }) {
   const [sizes, setSizes] = useState<SizeSelection>({ mode: "standard", size: "S" });
   const [added, setAdded] = useState(false);
   const add = useCart((s) => s.add);
+  const addBtn = useRef<HTMLButtonElement>(null);
   const router = useRouter();
 
   const quote = useMemo(() => quoteSelection(sel, config), [sel, config]);
@@ -35,7 +37,8 @@ export function Builder({ config }: { config: BuilderConfig }) {
     return [...m.entries()];
   }, [config]);
 
-  const addToCart = () => {
+  const addToCart = (fly = true) => {
+    if (fly) flyToCart(addBtn.current);
     add({
       kind: "custom",
       name: `Set a medida · ${config.shapes.find((s) => s.id === sel.shape)?.label} ${config.lengths.find((l) => l.id === sel.length)?.label?.toLowerCase()}`,
@@ -179,7 +182,7 @@ export function Builder({ config }: { config: BuilderConfig }) {
             <p className="mt-2 text-xs text-ink-soft">Tus notas pueden cambiar el precio. Bren te confirma por WhatsApp antes de cobrar.</p>
           )}
           <div className="mt-5 grid gap-2">
-            <Button onClick={addToCart} size="lg" disabled={!valid}>
+            <Button ref={addBtn} onClick={() => addToCart()} size="lg" disabled={!valid}>
               <motion.span key={String(added)} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
                 {added ? "¡Sumado al carrito! ✦" : "Agregar al carrito"}
               </motion.span>
@@ -189,7 +192,7 @@ export function Builder({ config }: { config: BuilderConfig }) {
               size="lg"
               disabled={!valid}
               onClick={() => {
-                addToCart();
+                addToCart(false);
                 router.push("/checkout");
               }}
             >
