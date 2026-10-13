@@ -11,8 +11,8 @@ type Spec = { src: string; x: string; y: string; w: number; rotate: number; dela
 const PHOTOS: Spec[] = [
   { src: "/catalog/set-leopard-red-640.webp", x: "3%", y: "11%", w: 118, rotate: -8, delay: 0, mobile: true },
   { src: "/catalog/set-sunset-french-640.webp", x: "68%", y: "9%", w: 108, rotate: 7, delay: -3.2, mobile: true },
-  { src: "/catalog/set-gems-french-640.webp", x: "4%", y: "58%", w: 150, rotate: 6, delay: -5.1 },
-  { src: "/catalog/set-milky-gold-foil-640.webp", x: "85%", y: "56%", w: 160, rotate: -6, delay: -1.6 },
+  { src: "/catalog/set-gems-french-640.webp", x: "5%", y: "40%", w: 150, rotate: 6, delay: -5.1 },
+  { src: "/catalog/set-milky-gold-foil-640.webp", x: "84%", y: "44%", w: 160, rotate: -6, delay: -1.6 },
 ];
 
 export function HeroPhotos({ className }: { className?: string }) {

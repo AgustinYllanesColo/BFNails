@@ -61,7 +61,7 @@ export function BuilderCta() {
                 <p className="truncate text-sm font-semibold">{labels.join(" · ")}</p>
                 <p className="text-xs text-ink-soft">Nivel {quote.complexityLabel.toLowerCase()}</p>
               </div>
-              <p key={quote.total} className="shrink-0 font-display text-2xl text-bordo animate-[float_0.6s_ease-out]">{formatARS(quote.total)}</p>
+              <p key={quote.total} className="shrink-0 font-display text-xl text-bordo md:text-2xl animate-[float_0.6s_ease-out]">{formatARS(quote.total)}</p>
             </div>
             <div className="absolute -top-3 -left-3 rounded-pill bg-yellow px-3 py-1 text-[11px] font-bold tracking-wider text-ink uppercase shadow">demo en vivo</div>
           </div>

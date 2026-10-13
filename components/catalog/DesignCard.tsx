@@ -33,8 +33,13 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
           />
         )}
         <div className="absolute top-3 left-3 flex gap-1.5">
-          {design.featured && <Badge tone="yellow">★ favorito</Badge>}
-          <Badge tone="cream">{COMPLEXITY_LABEL[design.complexity]}</Badge>
+          {design.featured && (
+            <Badge tone="yellow" className="px-2" title="Favorito">
+              <span aria-hidden>★</span>
+              <span className="sr-only sm:not-sr-only">favorito</span>
+            </Badge>
+          )}
+          <Badge tone="cream" className="px-2 sm:px-2.5">{COMPLEXITY_LABEL[design.complexity]}</Badge>
         </div>
       </div>
       <div className="mt-3 flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">

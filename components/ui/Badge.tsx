@@ -4,10 +4,12 @@ export function Badge({
   children,
   className,
   tone = "bordo",
+  title,
 }: {
   children: React.ReactNode;
   className?: string;
   tone?: "bordo" | "cream" | "yellow" | "ink" | "red" | "green";
+  title?: string;
 }) {
   const tones = {
     bordo: "bg-bordo text-cream",
@@ -19,6 +21,7 @@ export function Badge({
   };
   return (
     <span
+      title={title}
       className={cn(
         "inline-flex items-center gap-1 rounded-pill px-2.5 py-1 text-[11px] font-bold tracking-wide whitespace-nowrap uppercase",
         tones[tone],
