@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/format";
+
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Design, Length, Shape } from "@/lib/types";
@@ -18,12 +20,18 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
   const tags = useMemo(() => {
     const count = new Map<string, number>();
     designs.forEach((d) => d.tags.forEach((t) => count.set(t, (count.get(t) ?? 0) + 1)));
-    return [...count.entries()].sort((a, b) => b[1] - a[1]).map(([t]) => t).slice(0, 10);
+    return [...count.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([t]) => t)
+      .slice(0, 10);
   }, [designs]);
 
   const filtered = useMemo(() => {
     let list = designs.filter(
-      (d) => (!shape || d.shape === shape) && (!length || d.length === length) && (!tag || d.tags.includes(tag)),
+      (d) =>
+        (!shape || d.shape === shape) &&
+        (!length || d.length === length) &&
+        (!tag || d.tags.includes(tag)),
     );
     switch (sort) {
       case "precio-asc":
@@ -45,9 +53,11 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
 
   return (
     <div>
-      <div className="sticky top-[72px] z-30 -mx-4 mb-8 space-y-3 bg-cream/90 px-4 py-3 backdrop-blur-md md:top-[84px]">
+      <div className="bg-cream/90 sticky top-[72px] z-30 -mx-4 mb-8 space-y-3 px-4 py-3 backdrop-blur-md md:top-[84px]">
         <div className="flex flex-wrap gap-2">
-          <span className="mr-1 self-center text-xs font-bold tracking-wider text-ink-soft uppercase">Forma</span>
+          <span className="text-ink-soft mr-1 self-center text-xs font-bold tracking-wider uppercase">
+            Forma
+          </span>
           {(Object.keys(SHAPE_LABEL) as Shape[]).map((s) => (
             <Chip key={s} selected={shape === s} onClick={() => setShape(shape === s ? null : s)}>
               {SHAPE_LABEL[s]}
@@ -55,17 +65,30 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
           ))}
         </div>
         <div className="flex flex-wrap gap-2">
-          <span className="mr-1 self-center text-xs font-bold tracking-wider text-ink-soft uppercase">Largo</span>
+          <span className="text-ink-soft mr-1 self-center text-xs font-bold tracking-wider uppercase">
+            Largo
+          </span>
           {(Object.keys(LENGTH_LABEL) as Length[]).map((l) => (
-            <Chip key={l} selected={length === l} onClick={() => setLength(length === l ? null : l)}>
+            <Chip
+              key={l}
+              selected={length === l}
+              onClick={() => setLength(length === l ? null : l)}
+            >
               {LENGTH_LABEL[l]}
             </Chip>
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 self-center text-xs font-bold tracking-wider text-ink-soft uppercase">Estilo</span>
+          <span className="text-ink-soft mr-1 self-center text-xs font-bold tracking-wider uppercase">
+            Estilo
+          </span>
           {tags.map((t) => (
-            <Chip key={t} selected={tag === t} onClick={() => setTag(tag === t ? null : t)} className="capitalize">
+            <Chip
+              key={t}
+              selected={tag === t}
+              onClick={() => setTag(tag === t ? null : t)}
+              className="capitalize"
+            >
               {t}
             </Chip>
           ))}
@@ -78,28 +101,42 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
                   setLength(null);
                   setTag(null);
                 }}
-                className="text-xs font-semibold text-bordo underline underline-offset-4"
+                className="text-bordo text-xs font-semibold underline underline-offset-4"
               >
                 Limpiar
               </button>
             )}
-            {/* select nativo con apariencia propia: chip crema con chevron bordó, el menú lo dibuja el sistema */}
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as Sort)}
-              className="h-10 cursor-pointer appearance-none rounded-pill bg-cream-deep bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%234a0e0e%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>')] bg-[length:12px] bg-[position:right_14px_center] bg-no-repeat py-0 pr-9 pl-4 text-sm font-semibold text-bordo ring-1 ring-bordo/10 transition-colors hover:bg-cream-ink/60 focus-visible:ring-2 focus-visible:ring-bordo/40 focus-visible:outline-none"
-              aria-label="Ordenar"
-            >
-              <option value="destacados">Destacados</option>
-              <option value="precio-asc">Menor precio</option>
-              <option value="precio-desc">Mayor precio</option>
-              <option value="nombre">Nombre</option>
-            </select>
+            {/* orden como chips: sin menú nativo, que no se puede estilar */}
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Ordenar">
+              {(
+                [
+                  ["destacados", "Destacados"],
+                  ["precio-asc", "Menor precio"],
+                  ["precio-desc", "Mayor precio"],
+                  ["nombre", "A–Z"],
+                ] as [Sort, string][]
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSort(value)}
+                  aria-pressed={sort === value}
+                  className={cn(
+                    "rounded-pill h-9 px-3.5 text-xs font-semibold transition-colors duration-200",
+                    sort === value
+                      ? "bg-bordo text-cream"
+                      : "bg-cream-deep text-bordo hover:bg-cream-ink/70",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <p className="mb-4 text-sm text-ink-soft">
+      <p className="text-ink-soft mb-4 text-sm">
         {filtered.length} {filtered.length === 1 ? "diseño" : "diseños"}
       </p>
 
@@ -112,7 +149,11 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
               initial={{ opacity: 0, y: 24, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: Math.min(i * 0.03, 0.3) }}
+              transition={{
+                duration: 0.45,
+                ease: [0.16, 1, 0.3, 1],
+                delay: Math.min(i * 0.03, 0.3),
+              }}
             >
               <DesignCard design={d} priority={i < 4} />
             </motion.div>
@@ -121,9 +162,11 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
       </motion.div>
 
       {filtered.length === 0 && (
-        <div className="rounded-lg bg-cream-deep p-10 text-center">
+        <div className="bg-cream-deep rounded-lg p-10 text-center">
           <p className="font-display text-2xl">Nada con esos filtros</p>
-          <p className="mt-2 text-ink-soft">Probá sacando alguno, o armá el tuyo en Diseñá tu set.</p>
+          <p className="text-ink-soft mt-2">
+            Probá sacando alguno, o armá el tuyo en Diseñá tu set.
+          </p>
         </div>
       )}
     </div>
