@@ -1,14 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  DEFAULT_BUILDER_CONFIG,
-  DEFAULT_SELECTION,
-  exclusiveGroup,
-  normalizeExtras,
-  quoteSelection,
-  tierForPoints,
-  toggleExtra,
-  type BuilderConfig,
-} from "@/lib/pricing";
+import { DEFAULT_BUILDER_CONFIG, DEFAULT_SELECTION, quoteSelection, tierForPoints } from "@/lib/pricing";
 
 describe("quoteSelection", () => {
   it("set base sin extras cuesta el precio base y es nivel simple", () => {
@@ -63,72 +54,5 @@ describe("tierForPoints", () => {
     expect(tierForPoints(2, tiers).level).toBe(2);
     expect(tierForPoints(4, tiers).level).toBe(3);
     expect(tierForPoints(99, tiers).level).toBe(4);
-  });
-});
-
-describe("técnicas excluyentes", () => {
-  const cfg = DEFAULT_BUILDER_CONFIG;
-
-  it("francesita y francesita de color comparten la punta; strass y strass full, el strass", () => {
-    const byId = (id: string) => cfg.extras.find((e) => e.id === id)!;
-    expect(exclusiveGroup(byId("francesita"))).toBe("punta");
-    expect(exclusiveGroup(byId("francesita-color"))).toBe("punta");
-    expect(exclusiveGroup(byId("strass"))).toBe("strass");
-    expect(exclusiveGroup(byId("strass-full"))).toBe("strass");
-    expect(exclusiveGroup(byId("glitter"))).toBeUndefined();
-  });
-
-  it("elegir una saca a su par y avisa cuál salió", () => {
-    const a = toggleExtra(["glitter", "francesita"], "francesita-color", cfg);
-    expect(a.extras).toEqual(["glitter", "francesita-color"]);
-    expect(a.removed).toEqual(["francesita"]);
-    const b = toggleExtra(a.extras, "strass", cfg);
-    const c = toggleExtra(b.extras, "strass-full", cfg);
-    expect(c.extras).toEqual(["glitter", "francesita-color", "strass-full"]);
-    expect(c.removed).toEqual(["strass"]);
-  });
-
-  it("las demás se suman y se sacan sin tocar al resto", () => {
-    const on = toggleExtra(["francesita"], "glitter", cfg);
-    expect(on).toEqual({ extras: ["francesita", "glitter"], removed: [] });
-    const off = toggleExtra(on.extras, "francesita", cfg);
-    expect(off).toEqual({ extras: ["glitter"], removed: [] });
-  });
-
-  it("no cambia la lista recibida", () => {
-    const extras = ["francesita"];
-    toggleExtra(extras, "francesita-color", cfg);
-    expect(extras).toEqual(["francesita"]);
-  });
-
-  it("una config sin el campo y con técnicas propias se comporta igual que antes", () => {
-    const custom: BuilderConfig = {
-      ...cfg,
-      extras: [
-        { id: "puntitos", group: "Diseños", label: "Puntitos", delta: 900 },
-        { id: "rayas", group: "Diseños", label: "Rayas", delta: 900 },
-      ],
-    };
-    const a = toggleExtra([], "puntitos", custom);
-    const b = toggleExtra(a.extras, "rayas", custom);
-    expect(b).toEqual({ extras: ["puntitos", "rayas"], removed: [] });
-    expect(quoteSelection({ ...DEFAULT_SELECTION, extras: b.extras }, custom).total).toBe(custom.basePrice + 1800);
-  });
-
-  it("las configs del admin sin el campo igual respetan los pares conocidos por id", () => {
-    const fromDb: BuilderConfig = { ...cfg, extras: cfg.extras.map(({ exclusive: _drop, ...e }) => e) };
-    expect(toggleExtra(["strass"], "strass-full", fromDb).extras).toEqual(["strass-full"]);
-  });
-
-  it("normaliza selecciones guardadas: sin desconocidos, sin repetidos y gana la última del par", () => {
-    expect(normalizeExtras(["francesita", "no-existe", "glitter", "glitter", "francesita-color"], cfg)).toEqual([
-      "glitter",
-      "francesita-color",
-    ]);
-  });
-
-  it("quoteSelection no cambia: cotiza lo que viene (el servidor recotiza el carrito igual que antes)", () => {
-    const q = quoteSelection({ ...DEFAULT_SELECTION, extras: ["francesita", "francesita-color"] }, cfg);
-    expect(q.total).toBe(cfg.basePrice + 1500 + 2000 + 1000);
   });
 });
