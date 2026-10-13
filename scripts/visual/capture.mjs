@@ -35,7 +35,7 @@ for (const d of DEVICES) {
   }
   await page.waitForLoadState("networkidle");
   await scrollFrames(page, `home-${d.tag}`, d, 16);
-  for (const [path, name] of [["/catalogo", "catalogo"], ["/catalogo/kitty-leopard", "detalle"], ["/disena", "disena"], ["/talles", "talles"], ["/faq", "faq"], ["/terminos", "terminos"]]) {
+  for (const [path, name] of [["/catalogo", "catalogo"], ["/catalogo/leo-star-gold", "detalle"], ["/disena", "disena"], ["/talles", "talles"], ["/faq", "faq"], ["/terminos", "terminos"]]) {
     await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
     await scrollFrames(page, `${name}-${d.tag}`, d, name === "terminos" ? 2 : 6);
@@ -53,11 +53,11 @@ for (const d of DEVICES) {
   await page.waitForTimeout(600);
   await shot(page, `disena-${d.tag}-selected`, `builder ${d.tag} after choosing coffin/largo/bordó/francesita de color/strass`);
   // Cart with two items
-  await page.goto(`${BASE}/catalogo/cherry-red`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE}/catalogo/leo-cherry`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
   await page.waitForTimeout(400);
   await shot(page, `detalle-${d.tag}-added`, `product detail ${d.tag} right after 'Agregar al carrito' (feedback state)`);
-  await page.goto(`${BASE}/catalogo/kitty-leopard`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE}/catalogo/leo-star-gold`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
   await page.goto(`${BASE}/carrito`, { waitUntil: "networkidle" });
   await page.waitForTimeout(400);

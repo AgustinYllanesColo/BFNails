@@ -44,17 +44,18 @@ export default async function DesignPage({ params }: Props) {
         </nav>
 
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          {/* Galería: la foto principal en 4:5 y, si hay más, las demás debajo en dos columnas */}
           <Reveal className="grid grid-cols-2 gap-3">
-            {[0, 1, 2].map((i) => (
+            {(design.images.length ? design.images : [designImage(design, 0)]).map((src, i) => (
               <div
-                key={i}
-                className={`relative overflow-hidden rounded-lg bg-cream-deep ${i === 0 ? "col-span-2 aspect-[4/3]" : "aspect-square"}`}
+                key={src}
+                className={`relative overflow-hidden rounded-lg bg-cream-deep ${i === 0 ? "col-span-2 aspect-[4/5] md:aspect-[4/5]" : "aspect-[4/5]"}`}
               >
                 <Image
-                  src={designImage(design, i)}
+                  src={src}
                   alt={`${design.name}, vista ${i + 1}`}
                   fill
-                  sizes="(min-width: 1024px) 55vw, 100vw"
+                  sizes={i === 0 ? "(min-width: 1024px) 55vw, 100vw" : "(min-width: 1024px) 27vw, 50vw"}
                   priority={i === 0}
                   className="object-cover"
                 />

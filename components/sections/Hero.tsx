@@ -5,19 +5,20 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Magnetic } from "@/components/motion/Magnetic";
-import { FloatingNails } from "@/components/motion/FloatingNails";
+import { HeroPhotos } from "@/components/motion/HeroPhotos";
 import { SpinningBadge } from "@/components/motion/SpinningBadge";
 import { Button } from "@/components/ui/Button";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const WORDS = ["press-on", "soft gel", "a tu talle", "hechas a mano", "lanús", "reutilizables"];
+const WORDS = ["press-on", "a tu talle", "hechas a mano", "escalada", "reutilizables", "by bren"];
 
 /**
  * Hero: el logo real de BF Studio, grande y centrado, sobre un fondo vivo:
  * dos filas de texto gigante en contorno que corren sin parar en direcciones
- * opuestas, y uñas press-on flotando a distintas profundidades.
- * Intro: el logo aparece desde el desenfoque; al scrollear se achica y se va.
+ * opuestas, y fotos reales de sets flotando alrededor como stickers.
+ * Intro: el logo aparece desde el desenfoque. Al scrollear se achica apenas y se queda
+ * a la vista (nunca se funde): la marca sigue en pantalla hasta que la barra toma la posta.
  */
 export function Hero() {
   const root = useRef<HTMLElement>(null);
@@ -37,8 +38,8 @@ export function Hero() {
       // Flotación suave del logo, siempre
       gsap.to(q("[data-hero-logo]"), { y: -12, rotate: 1.2, duration: 3.6, yoyo: true, repeat: -1, ease: "sine.inOut", delay: 1.8 });
 
-      // Scroll: el logo se achica y sube, el fondo se va más lento
-      gsap.to(q("[data-hero-logo]"), { scale: 0.6, yPercent: -40, autoAlpha: 0.2, ease: "none", scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: 0.4 } });
+      // Scroll: el logo se achica apenas y sube un poco (sin fundirse), el fondo se va más lento
+      gsap.to(q("[data-hero-logo]"), { scale: 0.88, yPercent: -14, ease: "none", scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: 0.4 } });
       gsap.to(q("[data-hero-rows]"), { yPercent: 25, ease: "none", scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: 0.4 } });
       gsap.to(q("[data-hero-copy]"), { yPercent: 30, autoAlpha: 0, ease: "none", scrollTrigger: { trigger: el, start: "30% top", end: "bottom top", scrub: 0.4 } });
     }, el);
@@ -72,7 +73,7 @@ export function Hero() {
           </div>
         ))}
       </div>
-      <FloatingNails className="-z-10" />
+      <HeroPhotos className="-z-10" />
 
       {/* Logo real */}
       <div data-hero-logo className="relative w-[min(88vw,760px)] will-change-transform">
@@ -81,7 +82,7 @@ export function Hero() {
 
       {/* Copy + CTAs */}
       <div data-hero-copy className="relative mt-6 max-w-xl rounded-[2rem] bg-cream/70 px-5 py-4 text-center backdrop-blur-[2px] md:mt-8 md:bg-transparent md:py-0 md:backdrop-blur-none">
-        <p className="text-xs font-bold tracking-[0.24em] text-bordo uppercase">Press-on en soft gel · hechas a mano en Lanús</p>
+        <p className="text-xs font-bold tracking-[0.24em] text-bordo uppercase">Press-on a tu talle · hechas a mano en Escalada</p>
         <p className="mt-3 text-balance text-lg leading-relaxed text-ink-soft md:text-xl">Uñas a tu talle, listas para pegar. Elegís del catálogo, armás el tuyo o nos pasás el diseño que viste en internet.</p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Magnetic>
@@ -98,7 +99,7 @@ export function Hero() {
       </div>
 
       <div data-hero-badge className="absolute bottom-8 left-[clamp(16px,4vw,48px)] hidden md:block">
-        <SpinningBadge text="press-on · soft gel · a tu talle · " size={140} />
+        <SpinningBadge text="press-on · a tu talle · hechas a mano · " size={140} />
       </div>
 
       <div data-hero-cue aria-hidden className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] font-bold tracking-[0.25em] text-ink-soft uppercase">

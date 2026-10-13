@@ -3,7 +3,7 @@ import { expect, type Page } from "@playwright/test";
 export const PUBLIC_ROUTES = [
   { path: "/", name: "home" },
   { path: "/catalogo", name: "catálogo" },
-  { path: "/catalogo/kitty-leopard", name: "detalle" },
+  { path: "/catalogo/leo-star-gold", name: "detalle" },
   { path: "/disena", name: "armador" },
   { path: "/talles", name: "talles" },
   { path: "/faq", name: "preguntas" },
