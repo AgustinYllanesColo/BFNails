@@ -22,10 +22,6 @@ export type NailUniforms = {
   /** fin del lecho ungueal en V del UV */
   uBedV: { value: number };
   uAurora: { value: number };
-  /** largo actual de la uña en V del UV (la banda del cat eye se apaga hacia la punta) */
-  uLenV: { value: number };
-  /** cuánto se curva la "sonrisa" del lecho natural (en V del UV) */
-  uSmile: { value: number };
 };
 
 const EPS = 1e-4;
@@ -92,9 +88,6 @@ uniform float uCatOffset;
 uniform float uSheer;
 uniform float uBedV;
 uniform float uAurora;
-uniform float uLenV;
-uniform float uSmile;
-float bfClear = 0.0;
 // la decoración se sube premultiplicada y en sRGB "crudo": des-premultiplicamos y recién ahí decodificamos
 // (decodificar sRGB sobre valores premultiplicados ensucia los semitransparentes y los bordes)
 vec3 bfDecode( vec4 c ) {
@@ -111,34 +104,21 @@ function onBeforeCompileNail(this: THREE.MeshPhysicalMaterial, shader: THREE.Web
       "#include <map_fragment>",
       /* glsl */ `
 #ifdef USE_MAP
-  // gel transparente sobre la uña natural: lecho rosado (con la lúnula más clara), la línea rosada
-  // del borde, el borde libre natural marfil y, más allá, el gel cristalino que deja ver la mesa
-  float bfQ = ( vMapUv.x - 0.5 ) * 2.1;
-  float bfLine = uBedV - uSmile * bfQ * bfQ;
-  float bfBed = 1.0 - smoothstep( bfLine - 0.012, bfLine + 0.004, vMapUv.y );
-  float bfFree = 1.0 - smoothstep( bfLine + 0.03, bfLine + 0.042, vMapUv.y );
-  float bfLun = 1.0 - smoothstep( 0.05, 0.16, vMapUv.y / max( uBedV, 0.05 ) );
-  vec3 bfNat = mix( vec3( 0.8, 0.42, 0.4 ), vec3( 0.9, 0.66, 0.62 ), bfLun * 0.7 );
-  // banda onicodérmica: un hilo más rosado justo antes del borde libre
-  bfNat = mix( bfNat, vec3( 0.72, 0.32, 0.32 ), exp( - pow( ( vMapUv.y - bfLine + 0.006 ) / 0.006, 2.0 ) ) * 0.55 );
-  vec3 bfIvory = vec3( 0.93, 0.88, 0.8 );
-  vec3 bfGel = vec3( 0.99, 0.98, 0.97 );
-  vec3 bfUnder = mix( mix( bfGel, bfIvory, bfFree ), bfNat, bfBed );
-  diffuseColor.rgb = mix( diffuseColor.rgb, bfUnder, uSheer );
-  // solo el gel transparente deja ver la mesa: el milky y el nude cubren aunque dejen intuir el lecho
-  bfClear = smoothstep( 0.55, 0.9, uSheer ) * ( 1.0 - bfFree );
-  diffuseColor.a = 1.0 - 0.66 * bfClear;
+  // gel translúcido: lecho rosado debajo, borde libre más claro y semitransparente
+  float bfBed = 1.0 - smoothstep( uBedV - 0.03, uBedV + 0.025, vMapUv.y );
+  vec3 bfPink = vec3( 0.86, 0.55, 0.50 );
+  vec3 bfTip = vec3( 0.97, 0.95, 0.92 );
+  diffuseColor.rgb = mix( diffuseColor.rgb, mix( bfTip, bfPink, bfBed ), uSheer * mix( 0.55, 0.75, bfBed ) );
+  diffuseColor.a = mix( 1.0, 0.55, uSheer * ( 1.0 - bfBed ) );
   // decoración pintada, fundida entre la anterior y la nueva
   vec4 bfA = texture2D( map, vMapUv );
   vec4 bfB = texture2D( uDecalPrev, vMapUv );
   vec3 bfC1 = mix( diffuseColor.rgb, bfDecode( bfA ), bfA.a );
   vec3 bfC0 = mix( diffuseColor.rgb, bfDecode( bfB ), bfB.a );
   diffuseColor.rgb = mix( bfC0, bfC1, uDecalMix );
-  float bfDecA = mix( bfB.a, bfA.a, uDecalMix );
-  diffuseColor.a = mix( diffuseColor.a, 1.0, bfDecA );
-  bfClear *= 1.0 - bfDecA;
-  // sombra suave del pliegue de la cutícula sobre la base de la uña
-  diffuseColor.rgb *= mix( 0.8, 1.0, smoothstep( 0.0, 0.028, vMapUv.y ) );
+  diffuseColor.a = mix( diffuseColor.a, 1.0, mix( bfB.a, bfA.a, uDecalMix ) );
+  // sombrita del pliegue de la cutícula sobre la base de la uña
+  diffuseColor.rgb *= mix( 0.74, 1.0, smoothstep( 0.0, 0.03, vMapUv.y ) );
 #endif
 `,
     )
@@ -147,28 +127,19 @@ function onBeforeCompileNail(this: THREE.MeshPhysicalMaterial, shader: THREE.Web
       /* glsl */ `
 #include <metalnessmap_fragment>
 // escamas grandes (~20 a lo ancho de la uña), como el glitter de una press-on
-// (las capas opcionales van en ramas por uniform: sin glitter/cat eye/aurora no se paga su costo)
-vec4 bfFl = vec4( 0.0, 0.5, 0.5, 0.0 );
-float bfG = 0.0;
-vec3 bfFlakeC = uGlitterTint;
-if ( uGlitter > 0.001 ) {
-  bfFl = texture2D( uFlake, vMapUv * uFlakeScale * 0.55 );
-  bfG = smoothstep( 0.55, 0.75, bfFl.r ) * uGlitter;
-  roughnessFactor = mix( roughnessFactor, 0.16, bfG );
-  metalnessFactor = mix( metalnessFactor, 0.45, bfG );
-  // escama metalizada: champagne con un leve corrimiento holográfico por escama (nunca más oscura que la base)
-  vec3 bfHue = 0.5 + 0.5 * cos( 6.2831 * ( bfFl.a + vec3( 0.0, 0.33, 0.67 ) ) );
-  bfFlakeC = mix( uGlitterTint, uGlitterTint * ( 0.75 + 0.5 * bfHue ), 0.35 );
-  diffuseColor.rgb = mix( diffuseColor.rgb, max( bfFlakeC, diffuseColor.rgb ) * ( 0.85 + 0.3 * bfFl.a ), bfG );
-}
+vec4 bfFl = texture2D( uFlake, vMapUv * uFlakeScale * 0.55 );
+float bfG = smoothstep( 0.55, 0.75, bfFl.r ) * uGlitter;
+roughnessFactor = mix( roughnessFactor, 0.2, bfG );
+metalnessFactor = mix( metalnessFactor, 0.35, bfG );
+// una escama nunca es más oscura que la base
+diffuseColor.rgb = mix( diffuseColor.rgb, max( uGlitterTint, diffuseColor.rgb ) * ( 0.9 + 0.3 * bfFl.a ), bfG );
 `,
     )
     .replace(
       "#include <normal_fragment_maps>",
       /* glsl */ `
 #include <normal_fragment_maps>
-// cada escama tiene su propia inclinación: refleja otra parte del estudio (unas brillan, otras no)
-normal = normalize( normal + vec3( bfFl.g * 2.0 - 1.0, bfFl.b * 2.0 - 1.0, 0.0 ) * bfG * 0.55 );
+normal = normalize( normal + vec3( bfFl.g * 2.0 - 1.0, bfFl.b * 2.0 - 1.0, 0.0 ) * bfG * 0.25 );
 `,
     )
     .replace(
@@ -177,60 +148,30 @@ normal = normalize( normal + vec3( bfFl.g * 2.0 - 1.0, bfFl.b * 2.0 - 1.0, 0.0 )
 #include <emissivemap_fragment>
 vec3 bfVN = normalize( vNormal );
 vec3 bfV = normalize( vViewPosition );
-if ( bfG > 0.0 ) {
-  // glitter: destello propio de cada escama según su inclinación
-  vec3 bfFN = normalize( bfVN + vec3( bfFl.g * 2.0 - 1.0, bfFl.b * 2.0 - 1.0, 0.0 ) * 0.9 );
-  float bfSp = pow( max( dot( reflect( -bfV, bfFN ), normalize( vec3( -0.35, 0.45, 0.82 ) ) ), 0.0 ), 24.0 );
-  // una escama nunca se apaga del todo: siempre devuelve algo de luz (es metal laminado)
-  totalEmissiveRadiance += bfFlakeC * ( bfSp * 3.0 + 0.16 + 0.12 * bfFl.a ) * bfG;
-}
-// cat eye: las partículas imantadas forman una banda angosta y aterciopelada bajo el top coat.
-// Vive en coordenadas de la uña (siempre cae sobre ella, también en el pulgar) y se corre con el giro.
-if ( uCatEye > 0.001 ) {
-float bfAlong = clamp( vMapUv.y / max( uLenV, 0.05 ), 0.0, 1.0 );
-float bfCx = ( vMapUv.x - 0.5 ) - uCatOffset * 0.42 - 0.07 * ( bfAlong - 0.45 );
-float bfBand = exp( - bfCx * bfCx / 0.0052 );
-float bfHalo = exp( - bfCx * bfCx / 0.04 );
-float bfEnvL = smoothstep( 0.0, 0.32, bfAlong ) * ( 1.0 - 0.55 * smoothstep( 0.6, 1.0, bfAlong ) );
-float bfGrain = texture2D( uFlake, vMapUv * uFlakeScale * 3.1 ).a;
-float bfGlint = smoothstep( 0.62, 0.95, texture2D( uFlake, vMapUv * uFlakeScale * 2.3 + 0.37 ).r );
-totalEmissiveRadiance += uCatColor * uCatEye * bfEnvL * ( bfBand * ( 0.7 + 0.45 * bfGrain + 0.7 * bfGlint ) + 0.16 * bfHalo );
-// fuera de la banda el gel queda más profundo (las partículas se fueron hacia el imán); más en las bases claras
-diffuseColor.rgb *= mix( 1.0, 0.85 - 0.38 * saturate( dot( diffuseColor.rgb, vec3( 0.3, 0.55, 0.15 ) ) ), uCatEye );
-}
-// aurora: velo perlado que cambia de rosa a celeste y a verde agua con el ángulo (suave, sin franjas)
-if ( uAurora > 0.001 ) {
-float bfF = pow( 1.0 - saturate( dot( bfVN, bfV ) ), 1.6 );
-// el tono corre a lo ancho de la uña y con el giro: rosa → durazno → verde agua → celeste → lila
-vec3 bfHolo = 0.5 + 0.5 * cos( 6.2831 * ( 0.4 * bfVN.x + 0.25 * bfVN.y + bfF * 0.7 + uCatOffset * 0.8 + vec3( 0.0, 0.33, 0.67 ) ) );
-vec3 bfPearl = mix( vec3( 1.0 ), bfHolo * 1.2, 0.3 );
-// sobre bases oscuras el velo es de aceite (más color, menos blanco); sobre las claras, nácar
-float bfLum = saturate( dot( diffuseColor.rgb, vec3( 0.3, 0.55, 0.15 ) ) * 2.0 );
-// el velo tiñe el color (también en las bases claras) y suma un brillo nacarado que crece en los bordes
-diffuseColor.rgb = mix( diffuseColor.rgb, diffuseColor.rgb * bfPearl, uAurora * 0.7 );
-totalEmissiveRadiance += mix( vec3( 1.0, 0.97, 0.95 ), bfHolo, mix( 0.92, 0.6, bfLum ) ) * uAurora * ( 0.06 + 0.34 * bfF ) * mix( 0.75, 1.0, bfLum );
-}
-`,
-    )
-    .replace(
-      "#include <lights_fragment_maps>",
-      /* glsl */ `#include <lights_fragment_maps>
-// el top coat de gel: la ventana del estudio se lee como un brillo blanco nítido también sobre los
-// colores claros; solo se refuerzan los reflejos intensos (la sala tenue no lava el color)
-clearcoatRadiance *= 1.0 + 2.2 * smoothstep( 1.5, 9.0, dot( clearcoatRadiance, vec3( 0.3, 0.55, 0.15 ) ) );`,
-    )
-    .replace(
-      "#include <opaque_fragment>",
-      /* glsl */ `
-// gel cristalino: el reflejo del top coat no se atenúa con la transparencia
-float bfSpecL = dot( totalSpecular + ( clearcoatSpecularDirect + clearcoatSpecularIndirect ) * material.clearcoat, vec3( 0.3, 0.5, 0.2 ) );
-// y el canto del gel se ve por Fresnel (el espesor del plástico)
-float bfFr = pow( 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) ), 2.5 );
-diffuseColor.a = max( diffuseColor.a, saturate( bfSpecL * 1.6 + bfFr * 0.7 ) * bfClear );
-#include <opaque_fragment>
+// glitter: destello propio de cada escama según su inclinación
+vec3 bfFN = normalize( bfVN + vec3( bfFl.g * 2.0 - 1.0, bfFl.b * 2.0 - 1.0, 0.0 ) * 0.9 );
+float bfSp = pow( max( dot( reflect( -bfV, bfFN ), normalize( vec3( -0.35, 0.45, 0.82 ) ) ), 0.0 ), 30.0 );
+totalEmissiveRadiance += uGlitterTint * ( bfSp * 2.2 + 0.22 * bfFl.a ) * bfG;
+// cat eye: banda luminosa aterciopelada bajo el top coat que sigue al ángulo de vista
+float bfCe = dot( bfVN, normalize( vec3( 0.92, 0.22, 0.0 ) ) );
+float bfDc = bfCe - uCatOffset;
+float bfBand = exp( -bfDc * bfDc * BF_CAT_SHARP );
+float bfHalo = exp( -bfDc * bfDc * 9.0 );
+float bfFine = texture2D( uFlake, vMapUv * uFlakeScale * 7.0 ).r;
+float bfSpark = step( 0.82, bfFine );
+totalEmissiveRadiance += uCatColor * uCatEye * ( bfBand * ( 0.55 + 0.9 * bfFine + 1.6 * bfSpark ) + BF_CAT_HALO * bfHalo );
+diffuseColor.rgb *= mix( 1.0, 0.55, uCatEye );
+// aurora: corrimiento holográfico (rosa, azul, verde, dorado) según el ángulo y el giro
+float bfF = pow( 1.0 - saturate( dot( bfVN, bfV ) ), 1.5 );
+vec3 bfHolo = 0.5 + 0.5 * cos( 6.2831 * ( bfF * 0.9 + vMapUv.y * 0.55 + uCatOffset * 0.6 + vec3( 0.0, 0.33, 0.67 ) ) );
+totalEmissiveRadiance += bfHolo * uAurora * ( 0.13 + 0.45 * bfF );
 `,
     );
+  shader.fragmentShader = `#define BF_CAT_SHARP ${CAT_SHARP.toFixed(1)}\n#define BF_CAT_HALO ${CAT_HALO.toFixed(3)}\n` + shader.fragmentShader;
 }
+
+const CAT_SHARP = 110;
+const CAT_HALO = 0.02;
 
 export function createNailMaterial(flake: THREE.Texture, decalA: THREE.Texture, decalB: THREE.Texture) {
   const nailUniforms: NailUniforms = {
@@ -246,8 +187,6 @@ export function createNailMaterial(flake: THREE.Texture, decalA: THREE.Texture, 
     uSheer: { value: 0 },
     uBedV: { value: 0.5 },
     uAurora: { value: 0 },
-    uLenV: { value: 0.5 },
-    uSmile: { value: 0.05 },
   };
   const m = new THREE.MeshPhysicalMaterial({
     color: "#e8c4b0",
@@ -270,7 +209,7 @@ export function createNailMaterial(flake: THREE.Texture, decalA: THREE.Texture, 
   });
   m.userData.nailUniforms = nailUniforms;
   m.onBeforeCompile = onBeforeCompileNail;
-  m.customProgramCacheKey = () => "bf-nail-v3";
+  m.customProgramCacheKey = () => "bf-nail-v2";
   return { material: m, uniforms: nailUniforms };
 }
 
@@ -291,15 +230,13 @@ export const FINISH_KEYS: (keyof FinishParams)[] = ["roughness", "metalness", "c
 export function finishParams(finish: string, extras: string[]): FinishParams {
   let p: FinishParams;
   if (finish === "mate") p = { roughness: 0.6, metalness: 0, clearcoat: 0, clearcoatRoughness: 0.5, envMapIntensity: 0.28, sheen: 0.35, iridescence: 0, glitter: 0, catEye: 0 };
-  // cromado: metal apenas satinado y un top coat fino encima → espejo líquido de degradés suaves (sin rayas duras)
-  else if (finish === "cromado") p = { roughness: 0.13, metalness: 1, clearcoat: 0.18, clearcoatRoughness: 0.08, envMapIntensity: 1.2, sheen: 0, iridescence: 0, glitter: 0, catEye: 0 };
-  else p = { roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.035, envMapIntensity: 0.42, sheen: 0, iridescence: 0, glitter: 0, catEye: 0 };
+  else if (finish === "cromado") p = { roughness: 0.06, metalness: 1, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.25, sheen: 0, iridescence: 0, glitter: 0, catEye: 0 };
+  else p = { roughness: 0.22, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 0.42, sheen: 0, iridescence: 0, glitter: 0, catEye: 0 };
   if (extras.includes("aurora")) {
-    // polvo perlado sobre el color: algo de metal (el color se conserva) y película fina iridiscente
     p.iridescence = 1;
-    p.metalness = Math.max(p.metalness, 0.32);
-    p.roughness = Math.min(p.roughness, 0.14);
-    p.envMapIntensity = Math.max(p.envMapIntensity, 0.95);
+    p.metalness = Math.max(p.metalness, 0.65);
+    p.roughness = Math.min(p.roughness, 0.1);
+    p.envMapIntensity = Math.max(p.envMapIntensity, 1.1);
   }
   if (extras.includes("glitter")) p.glitter = 1;
   if (extras.includes("cat-eye")) p.catEye = 1;
@@ -319,91 +256,74 @@ export function applyFinish(m: THREE.MeshPhysicalMaterial, u: NailUniforms, p: F
   u.uAurora.value = p.iridescence;
 }
 
-const SKIN_DIFFUSE = "reflectedLight.directDiffuse += irradiance * BRDF_Lambert( material.diffuseContribution ) * ( 1.0 - F );";
-let skinLights: string | null | undefined;
-/** iluminación de la piel: difusa "envuelta" por canal (el rojo atraviesa más), así el terminador se vuelve cálido y nunca gris */
-function skinLightsChunk() {
-  if (skinLights !== undefined) return skinLights;
-  const src = THREE.ShaderChunk.lights_physical_pars_fragment;
-  skinLights = src.includes(SKIN_DIFFUSE)
-    ? src.replace(
-        SKIN_DIFFUSE,
-        /* glsl */ `{
-    vec3 bfWrap = vec3( 0.46, 0.21, 0.14 );
-    float bfNL = dot( geometryNormal, directLight.direction );
-    vec3 bfIrr = saturate( ( vec3( bfNL ) + bfWrap ) / ( 1.0 + bfWrap ) ) * directLight.color;
-    reflectedLight.directDiffuse += bfIrr * BRDF_Lambert( material.diffuseContribution ) * ( 1.0 - F );
-  }`,
-      )
-    : null;
-  return skinLights;
-}
-
-/**
- * Piel: albedo + relieve pintados por dedo, difusa envuelta (subsuperficie falsa), brillo graso algo
- * más marcado sobre los nudillos y luz que atraviesa los bordes. `joints` = posiciones (V del UV)
- * de los nudillos del dedo.
- */
-export function createSkinMaterial(map: THREE.Texture, normalMap: THREE.Texture, joints: number[] = []) {
+export function createSkinMaterial(map: THREE.Texture, normalMap: THREE.Texture) {
   const m = new THREE.MeshPhysicalMaterial({
     color: "#ffffff",
     map,
     normalMap,
-    normalScale: new THREE.Vector2(0.75, 0.75),
-    roughness: 0.42,
+    normalScale: new THREE.Vector2(0.55, 0.55),
+    roughness: 0.47,
     metalness: 0,
     ior: 1.4,
-    specularIntensity: 0.75,
+    specularIntensity: 0.8,
     // pelusa de la piel: brillo rasante muy suave
-    sheen: 0.3,
-    sheenColor: new THREE.Color("#ffd6c4"),
-    sheenRoughness: 0.5,
+    sheen: 0.28,
+    sheenColor: new THREE.Color("#ffd9c8"),
+    sheenRoughness: 0.55,
     // película grasa muy leve
-    clearcoat: 0.32,
-    clearcoatRoughness: 0.3,
+    clearcoat: 0.2,
+    clearcoatRoughness: 0.38,
+    // "subsurface" simulado: emisión cálida mínima que levanta las sombras sin volverlas grises
     emissive: new THREE.Color("#b2452c"),
-    emissiveIntensity: 0.02,
-    envMapIntensity: 0.2,
+    emissiveIntensity: 0.03,
+    envMapIntensity: 0.32,
   });
-  const j = [...joints, -1, -1, -1].slice(0, 3);
-  const uJoints = { value: new THREE.Vector3(j[0], j[1], j[2]) };
+  // SSS falso: la luz que atraviesa la piel en los bordes los vuelve cálidos (no grises)
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uJoints = uJoints;
-    const lights = skinLightsChunk();
-    if (lights) sh.fragmentShader = sh.fragmentShader.replace("#include <lights_physical_pars_fragment>", lights);
-    sh.fragmentShader = sh.fragmentShader
-      .replace("#include <common>", "#include <common>\nuniform vec3 uJoints;")
-      .replace(
-        "#include <roughnessmap_fragment>",
-        /* glsl */ `#include <roughnessmap_fragment>
-float bfDors = 1.0 - smoothstep( 0.1, 0.3, abs( vMapUv.x - 0.5 ) );
-vec3 bfJd = ( vec3( vMapUv.y ) - uJoints ) / 0.035;
-float bfKn = exp( - min( min( bfJd.x * bfJd.x, bfJd.y * bfJd.y ), bfJd.z * bfJd.z ) );
-roughnessFactor *= 1.0 - 0.3 * bfKn * bfDors;`,
-      )
-      .replace(
-        "#include <lights_fragment_end>",
-        /* glsl */ `#include <lights_fragment_end>
+    sh.fragmentShader = sh.fragmentShader.replace(
+      "#include <lights_fragment_end>",
+      /* glsl */ `#include <lights_fragment_end>
 float bfRim = 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) );
-reflectedLight.indirectDiffuse += diffuseColor.rgb * vec3( 0.55, 0.2, 0.12 ) * pow( bfRim, 2.2 ) * 0.3;`,
-      );
+reflectedLight.indirectDiffuse += diffuseColor.rgb * vec3( 0.5, 0.2, 0.12 ) * pow( bfRim, 2.5 ) * 0.25;`,
+    );
   };
-  m.customProgramCacheKey = () => "bf-skin-v3";
+  m.customProgramCacheKey = () => "bf-skin-v2";
   return m;
 }
 
-/** cristal facetado: espejo puro (una normal por cara) que refleja su propio entorno de alto contraste */
+export function createCuticleMaterial() {
+  return new THREE.MeshPhysicalMaterial({
+    color: "#e0b29e",
+    roughness: 0.5,
+    ior: 1.4,
+    specularIntensity: 0.6,
+    sheen: 0.4,
+    sheenColor: new THREE.Color("#ffd9c8"),
+    sheenRoughness: 0.5,
+    clearcoat: 0.15,
+    clearcoatRoughness: 0.4,
+    emissive: new THREE.Color("#b2452c"),
+    emissiveIntensity: 0.03,
+    envMapIntensity: 0.32,
+    // el pliegue apoya sobre la uña: sin z-fighting en el borde
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  });
+}
+
+/** cristal facetado: espejo puro que refleja su propio entorno de alto contraste (ver createHandScene) */
 export function createGemMaterial() {
   return new THREE.MeshPhysicalMaterial({
     color: "#ffffff",
     metalness: 1,
     roughness: 0,
     clearcoat: 0,
-    // película fina: algunas facetas se tiñen de azul, rosa o dorado (el "fuego")
-    iridescence: 0.6,
-    iridescenceIOR: 1.7,
-    iridescenceThicknessRange: [180, 520],
-    envMapIntensity: 1.1,
+    iridescence: 0.5,
+    iridescenceIOR: 1.6,
+    iridescenceThicknessRange: [200, 600],
+    envMapIntensity: 1.6,
+    flatShading: true,
   });
 }
 

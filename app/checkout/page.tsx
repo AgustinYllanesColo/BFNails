@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/cart/CheckoutForm";
-import { CheckoutSteps } from "@/components/cart/CheckoutSteps";
-import { Heading } from "@/components/ui/Section";
-import { Brush } from "@/components/motion/Brush";
-import { getBuilderConfig, getSettings } from "@/lib/data/settings";
-import { getFeaturedDesigns } from "@/lib/data/repo";
+import { Eyebrow, Heading } from "@/components/ui/Section";
+import { getSettings } from "@/lib/data/settings";
 import { mpEnabled } from "@/lib/mercadopago";
+import Image from "next/image";
 import { ordersEnabled } from "@/lib/data/orders";
-import { quoteFromTable } from "@/lib/shipping/table";
+import { Button } from "@/components/ui/Button";
+import { waLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = { title: "Pagar" };
 
@@ -15,32 +14,29 @@ export const metadata: Metadata = { title: "Pagar" };
 export const revalidate = 300;
 
 export default async function CheckoutPage() {
-  const [s, config, suggestions] = await Promise.all([getSettings(), getBuilderConfig(), getFeaturedDesigns(3)]);
-  // Retiro y moto salen de la tabla (sin esperar una cotización); el Correo se cotiza con el código postal.
-  const shipping = quoteFromTable(s.shipping);
-  const correoFrom = Math.min(...Object.values(s.shipping.correo).flatMap((z) => [z.domicilio, z.sucursal]));
-
+  const s = await getSettings();
   return (
-    <div className="pt-[calc(var(--nav-h)+24px)] pb-[var(--section-y-tight)] lg:pt-[calc(var(--nav-h)+40px)]">
+    <div className="pt-28 pb-24 md:pt-36">
       <div className="container-x">
-        <div className="mx-auto max-w-[1180px]">
-          <header className="mb-10 lg:mb-14">
-            <CheckoutSteps current={1} linkBack />
-            <Heading as="h1" className="mt-5">
-              Ya casi es <Brush mode="load">tuyo</Brush>
-            </Heading>
-          </header>
-          <CheckoutForm
-            transfer={{ alias: s.transferAlias, holder: s.transferHolder }}
-            mp={mpEnabled()}
-            mode={ordersEnabled() ? "web" : "whatsapp"}
-            whatsapp={s.whatsapp}
-            shipping={shipping}
-            correoFrom={Number.isFinite(correoFrom) ? correoFrom : null}
-            config={config}
-            suggestions={suggestions}
-          />
+        <div className="mb-8">
+          <Eyebrow>Checkout</Eyebrow>
+          <Heading as="h1">
+            Último <span className="text-bordo">paso</span>
+          </Heading>
         </div>
+        {!ordersEnabled() && (
+          <div className="mb-8 flex flex-col items-start gap-5 rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10 md:flex-row md:items-center">
+            <Image src="/brand/kitty.webp" alt="" width={72} height={85} className="h-20 w-auto shrink-0" />
+            <div className="flex-1">
+              <p className="font-display text-2xl">Por ahora, los pedidos van por WhatsApp</p>
+              <p className="mt-1 text-sm text-ink-soft">Armá tu carrito igual: con un toque se lo mandás a Bren con todo el detalle y lo cerrás por ahí.</p>
+            </div>
+            <Button href={waLink("Hola Bren! Quiero hacer un pedido 🐱")} target="_blank" rel="noreferrer" size="md">
+              Pedir por WhatsApp
+            </Button>
+          </div>
+        )}
+        <CheckoutForm transfer={{ alias: s.transferAlias, holder: s.transferHolder }} mp={mpEnabled()} disabled={!ordersEnabled()} />
       </div>
     </div>
   );
