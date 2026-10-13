@@ -18,16 +18,13 @@ const PHOTOS: Spec[] = [
 export function HeroPhotos({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn("pointer-events-none absolute inset-0", className)}>
-      {PHOTOS.map((p, i) => (
+      {PHOTOS.map((p) => (
         <div
           key={p.src}
           className={cn("absolute", p.mobile ? "block" : "hidden md:block")}
           style={{ left: p.x, top: p.y, width: `clamp(${p.w * 0.8}px, ${p.w / 7.2}vw, ${p.w * 1.35}px)` }}
         >
-          <div
-            className="animate-[float_9s_ease-in-out_infinite] will-change-transform"
-            style={{ animationDelay: `${p.delay}s`, animationDuration: `${8 + i * 1.3}s` }}
-          >
+          <div>
             <div
               className="overflow-hidden rounded-[18px] bg-white p-1.5 shadow-[0_18px_40px_-18px_rgba(74,14,14,0.45)] ring-1 ring-bordo/10 md:rounded-[22px] md:p-2"
               style={{ transform: `rotate(${p.rotate}deg)` }}

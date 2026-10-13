@@ -282,7 +282,7 @@ body {
   pointer-events: none;
 }
 ::view-transition-group(.morph) {
-  animation-duration: 420ms;
+  animation-duration: 520ms;
   animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 }
 ::view-transition-image-pair(.morph) {
