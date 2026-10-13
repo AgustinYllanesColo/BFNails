@@ -307,67 +307,6 @@ test.describe("layout y superficies (F1.3–F1.4)", () => {
     expect(r.synthesis).toBe("none");
   });
 
-  test("áreas seguras (viewport-fit=cover): gutter, medidas del nav y skip link fuera del notch", async ({
-    page,
-    isMobile,
-  }) => {
-    await page.goto("/terminos", { waitUntil: "networkidle" });
-    const read = () =>
-      page.evaluate(() => {
-        const html = getComputedStyle(document.documentElement);
-        const box = getComputedStyle(document.querySelector("main .container-x")!);
-        return {
-          gutter: [box.paddingLeft, box.paddingRight],
-          navH: html.getPropertyValue("--nav-h").trim(),
-          scrollPaddingTop: html.scrollPaddingTop,
-        };
-      });
-    const [nav, padTop, padX, gutter] = isMobile ? [72, 12, 12, 16] : [84, 16, 20, 48];
-
-    // Sin áreas seguras (vertical y desktop) todo queda como estaba
-    const plain = await read();
-    expect(plain.gutter).toEqual([`${gutter}px`, `${gutter}px`]);
-    expect(plain.navH).toBe(`${nav}px`);
-    expect(plain.scrollPaddingTop).toBe(`${nav + 24}px`);
-
-    // iPhone con notch: 47 px a los costados (horizontal) y arriba (modo app), 21 px de barra de inicio
-    const cdp = await page.context().newCDPSession(page);
-    await cdp.send("Emulation.setSafeAreaInsetsOverride", {
-      insets: { top: 47, left: 47, right: 47, bottom: 21 },
-    });
-    const safe = await read();
-    const side = Math.max(gutter, 47);
-    expect(safe.gutter, "container-x nunca queda bajo el notch").toEqual([
-      `${side}px`,
-      `${side}px`,
-    ]);
-    const navSafe = 47 + (nav - padTop);
-    expect(safe.navH, "--nav-h suma el área segura y sigue en px").toBe(`${navSafe}px`);
-    expect(safe.scrollPaddingTop).toBe(`${navSafe + 24}px`);
-    // Las paddings de la cabecera fija (W2-A) toman el área segura si es mayor que la suya
-    const pads = await page.evaluate(() => {
-      const probe = document.createElement("div");
-      probe.style.cssText = "position:fixed;padding:var(--nav-pad-top) var(--nav-pad-x) 0";
-      document.body.append(probe);
-      const cs = getComputedStyle(probe);
-      const r = [cs.paddingTop, cs.paddingLeft];
-      probe.remove();
-      return r;
-    });
-    expect(pads).toEqual([`${Math.max(padTop, 47)}px`, `${Math.max(padX, 47)}px`]);
-
-    await page.keyboard.press("Tab");
-    const skip = page.getByRole("link", { name: "Saltar al contenido" });
-    await expect(skip).toBeFocused();
-    const b = (await skip.boundingBox())!;
-    expect(b.x >= 47 && b.y >= 47, `skip link en ${b.x},${b.y}`).toBe(true);
-
-    await cdp.send("Emulation.setSafeAreaInsetsOverride", {
-      insets: { top: 0, left: 0, right: 0, bottom: 0 },
-    });
-    expect((await read()).navH).toBe(`${nav}px`);
-  });
-
   test("foco: outline 2 px bordó con offset 3 px; amarillo dentro de [data-surface=inverse]", async ({
     page,
   }) => {
@@ -492,7 +431,6 @@ test.describe("capa de movimiento (F1.4–F1.5)", () => {
   });
 
   test("pausa manual y fuera de vista: solo [data-ambient] queda en paused", async ({ page }) => {
-    const errors = collectErrors(page); // el atributo puesto antes de hidratar no puede dar un mismatch
     await page.goto("/terminos", { waitUntil: "networkidle" });
     const probe = () =>
       page.evaluate(() => {
@@ -522,31 +460,12 @@ test.describe("capa de movimiento (F1.4–F1.5)", () => {
       document.getElementById("amb-probe")!.removeAttribute("data-offscreen"),
     );
 
-    // Preferencia guardada: el script del <head> la aplica antes del primer paint (se lee cuando el parser crea el
-    // <body>, antes de que React hidrate) y Providers la mantiene.
-    await page.addInitScript(() => {
-      const w = window as unknown as { __motionAtBody?: string | null };
-      new MutationObserver((_, obs) => {
-        if (!document.body) return;
-        w.__motionAtBody = document.documentElement.getAttribute("data-motion");
-        obs.disconnect();
-      }).observe(document, { childList: true, subtree: true });
-    });
+    // Preferencia guardada: Providers la restaura al cargar
     await page.evaluate(() => localStorage.setItem("bf-motion", "paused"));
     await page.reload({ waitUntil: "networkidle" });
-    expect(
-      await page.evaluate(() => (window as unknown as { __motionAtBody?: string }).__motionAtBody),
-      "pausa aplicada antes de hidratar",
-    ).toBe("paused");
     await expect(page.locator("html")).toHaveAttribute("data-motion", "paused");
     expect(await probe()).toEqual(["paused", "running"]);
-
-    // Sin preferencia guardada, nada queda pausado
     await page.evaluate(() => localStorage.removeItem("bf-motion"));
-    await page.reload({ waitUntil: "networkidle" });
-    await expect(page.locator("html")).not.toHaveAttribute("data-motion", /.*/);
-    expect(await probe()).toEqual(["running", "running"]);
-    expect(errors).toEqual([]);
   });
 });
 

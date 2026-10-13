@@ -6,8 +6,6 @@ import { Providers } from "@/components/motion/Providers";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { siteConfig } from "@/lib/site";
-import { MOTION_BOOT_SCRIPT } from "@/lib/motion-core";
-import { InlineScript } from "@/components/motion/InlineScript";
 
 /* Display: Imbue con eje de tamaño óptico. Sin `weight` (con "700" fijo se pierde el opsz); el peso lo pone la
    utilidad font-display con var(--display-weight). Es el único punto de cambio de la display (PLAN §1, F0). */
@@ -60,20 +58,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // suppressHydrationWarning: solo los atributos de <html>, que el script de abajo puede tocar antes de hidratar
     <html
       lang="es-AR"
       className={`${display.variable} ${sans.variable} ${mono.variable} h-full antialiased`}
-      suppressHydrationWarning
     >
-      <head>
-        {/* Pausa manual del ambiente (WCAG 2.2.2) aplicada antes del primer paint: sin parpadeo de movimiento. */}
-        <InlineScript html={MOTION_BOOT_SCRIPT} />
-      </head>
       <body className="bg-cream text-ink flex min-h-full flex-col">
         <a
           href="#contenido"
-          className="focus:rounded-pill focus:bg-bordo focus:text-cream sr-only focus:not-sr-only focus:fixed focus:top-[var(--nav-pad-top)] focus:left-[var(--nav-pad-x)] focus:z-[60] focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:shadow-lg"
+          className="focus:rounded-pill focus:bg-bordo focus:text-cream sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:shadow-lg"
         >
           Saltar al contenido
         </a>
