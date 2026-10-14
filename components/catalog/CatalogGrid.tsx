@@ -50,7 +50,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
   }, [designs, shape, length, tag, sort]);
 
   const anyFilter = shape || length || tag;
-  // solo las formas que realmente tienen diseños: si no hay sets ovalados, no se ofrece "Ovalada"
+  // Ovalada no se ofrece (Bren no la hace); las demás formas se muestran siempre, tengan o no sets hoy
   const shapes = (Object.keys(SHAPE_LABEL) as Shape[]).filter((sh) =>
     designs.some((d) => d.shape === sh),
   );
