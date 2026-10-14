@@ -59,6 +59,9 @@ export type CartItem =
       unitPrice: number;
       qty: number;
       sizes: SizeSelection;
+      /** forma y largo elegidos por la clienta; si faltan, son los del diseño */
+      shape?: Shape;
+      length?: Length;
     }
   | {
       id: string;
@@ -113,7 +116,12 @@ export type Order = {
   items: CartItem[];
   subtotal: number;
   delivery: { method: DeliveryMethod; cost: number; label: string; address?: Address };
-  payment: { method: PaymentMethod; mpPreferenceId?: string; mpPaymentId?: string; mpInitPoint?: string };
+  payment: {
+    method: PaymentMethod;
+    mpPreferenceId?: string;
+    mpPaymentId?: string;
+    mpInitPoint?: string;
+  };
   total: number;
   needsConfirmation: boolean;
   tracking?: string;

@@ -4,11 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDesign, getDesigns } from "@/lib/data/repo";
+import { getBuilderConfig } from "@/lib/data/settings";
 import {
   COMPLEXITY_LABEL,
   FINISH_LABEL,
-  LENGTH_LABEL,
-  SHAPE_LABEL,
   designImage,
 } from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
@@ -37,7 +36,7 @@ export default async function DesignPage({ params }: Props) {
   const { slug } = await params;
   const design = await getDesign(slug);
   if (!design) notFound();
-  const all = await getDesigns();
+  const [all, config] = await Promise.all([getDesigns(), getBuilderConfig()]);
   const related = all
     .filter(
       (d) =>
@@ -106,27 +105,11 @@ export default async function DesignPage({ params }: Props) {
               </h1>
               <p className="text-ink-soft mt-4 text-lg">{design.description}</p>
 
-              <dl className="mt-6 grid grid-cols-3 gap-3 text-sm">
-                {[
-                  ["Forma", SHAPE_LABEL[design.shape]],
-                  ["Largo", LENGTH_LABEL[design.length]],
-                  ["Acabado", FINISH_LABEL[design.finish]],
-                ].map(([k, v]) => (
-                  <div key={k} className="bg-cream-deep rounded-md p-3">
-                    <dt className="text-ink-soft text-[11px] font-bold tracking-wider uppercase">
-                      {k}
-                    </dt>
-                    <dd className="mt-1 font-semibold">{v}</dd>
-                  </div>
-                ))}
-              </dl>
+              <p className="rounded-pill bg-cream-deep text-bordo mt-5 inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold">
+                Acabado {FINISH_LABEL[design.finish].toLowerCase()}
+              </p>
 
-              <div className="mt-8 flex items-baseline gap-3">
-                <span className="font-display text-bordo text-4xl">{formatARS(design.price)}</span>
-                <span className="text-ink-soft text-sm">kit completo</span>
-              </div>
-
-              <AddDesignToCart design={design} />
+              <AddDesignToCart design={design} config={config} />
 
               <ul className="text-ink-soft mt-8 space-y-2 text-sm">
                 <li>✦ 10 uñas en tu talle + pegamento + lima</li>

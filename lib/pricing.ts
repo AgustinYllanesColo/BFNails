@@ -1,4 +1,4 @@
-import type { BuilderSelection, Complexity, Finish, Length, Quote, Shape } from "./types";
+import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
 
 /**
  * Motor de precios del armador. Es una función pura: la misma config y selección
@@ -18,7 +18,12 @@ export type Option<T extends string = string> = {
   complexity?: number; // puntos
 };
 
-export type ComplexityTier = { level: Complexity; label: string; minPoints: number; surcharge: number };
+export type ComplexityTier = {
+  level: Complexity;
+  label: string;
+  minPoints: number;
+  surcharge: number;
+};
 
 export type BuilderConfig = {
   basePrice: number;
@@ -66,20 +71,50 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
   ],
   extras: [
     { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, complexity: 1 },
-    { id: "francesita-color", group: "Clásicos", label: "Francesita de color", delta: 2000, complexity: 1 },
+    {
+      id: "francesita-color",
+      group: "Clásicos",
+      label: "Francesita de color",
+      delta: 2000,
+      complexity: 1,
+    },
     { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, complexity: 1 },
     { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, complexity: 1 },
     { id: "cat-eye", group: "Brillos", label: "Cat eye", delta: 1800, complexity: 1 },
     { id: "aurora", group: "Brillos", label: "Efecto aurora / espejo", delta: 2200, complexity: 1 },
-    { id: "strass", group: "3D y apliques", label: "Strass (hasta 10)", delta: 2000, complexity: 1 },
+    {
+      id: "strass",
+      group: "3D y apliques",
+      label: "Strass (hasta 10)",
+      delta: 2000,
+      complexity: 1,
+    },
     { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, complexity: 2 },
     { id: "charms", group: "3D y apliques", label: "Charms / dijes", delta: 2500, complexity: 2 },
-    { id: "3d", group: "3D y apliques", label: "Relieve 3D (moños, flores)", delta: 3500, complexity: 2 },
+    {
+      id: "3d",
+      group: "3D y apliques",
+      label: "Relieve 3D (moños, flores)",
+      delta: 3500,
+      complexity: 2,
+    },
     { id: "animal-print", group: "Diseños", label: "Animal print", delta: 2500, complexity: 2 },
     { id: "flores", group: "Diseños", label: "Flores a mano", delta: 3000, complexity: 2 },
-    { id: "personajes", group: "Diseños", label: "Personajes (Kitty & cía)", delta: 4000, complexity: 3 },
+    {
+      id: "personajes",
+      group: "Diseños",
+      label: "Personajes (Kitty & cía)",
+      delta: 4000,
+      complexity: 3,
+    },
     { id: "a-mano", group: "Diseños", label: "Dibujo a mano alzada", delta: 4500, complexity: 3 },
-    { id: "encapsulado", group: "Diseños", label: "Encapsulado (flores secas, foil)", delta: 3000, complexity: 2 },
+    {
+      id: "encapsulado",
+      group: "Diseños",
+      label: "Encapsulado (flores secas, foil)",
+      delta: 3000,
+      complexity: 2,
+    },
   ],
   tiers: [
     { level: 1, label: "Simple", minPoints: 0, surcharge: 0 },
@@ -89,6 +124,26 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
   ],
 };
 
+/**
+ * Precio de un diseño del catálogo en otra forma o largo: al precio del diseño se le suma la
+ * diferencia de delta entre lo elegido y lo que trae el diseño (una forma más cara suma, una
+ * más barata no descuenta por debajo del precio del diseño).
+ */
+export function designVariantPrice(
+  design: Pick<Design, "price" | "shape" | "length">,
+  shape: Shape | undefined,
+  length: Length | undefined,
+  config: BuilderConfig = DEFAULT_BUILDER_CONFIG,
+): number {
+  const delta = <T extends string>(list: Option<T>[], id: T | undefined, base: T) => {
+    const d = (x: T) => list.find((o) => o.id === x)?.delta ?? 0;
+    return id ? d(id) - d(base) : 0;
+  };
+  const extra =
+    delta(config.shapes, shape, design.shape) + delta(config.lengths, length, design.length);
+  return design.price + Math.max(0, extra);
+}
+
 export function tierForPoints(points: number, tiers: ComplexityTier[]): ComplexityTier {
   const sorted = [...tiers].sort((a, b) => a.minPoints - b.minPoints);
   let current = sorted[0];
@@ -96,15 +151,21 @@ export function tierForPoints(points: number, tiers: ComplexityTier[]): Complexi
   return current;
 }
 
-export function quoteSelection(sel: BuilderSelection, config: BuilderConfig = DEFAULT_BUILDER_CONFIG): Quote {
-  const lines: Quote["lines"] = [{ id: "base", label: "Set base (10 uñas + pegamento + lima)", amount: config.basePrice }];
+export function quoteSelection(
+  sel: BuilderSelection,
+  config: BuilderConfig = DEFAULT_BUILDER_CONFIG,
+): Quote {
+  const lines: Quote["lines"] = [
+    { id: "base", label: "Set base (10 uñas + pegamento + lima)", amount: config.basePrice },
+  ];
   let points = 0;
 
   const pick = <T extends string>(opts: Option<T>[], id: T, label: string) => {
     const opt = opts.find((o) => o.id === id);
     if (!opt) return;
     points += opt.complexity ?? 0;
-    if (opt.delta !== 0) lines.push({ id: `${label}:${opt.id}`, label: `${label}: ${opt.label}`, amount: opt.delta });
+    if (opt.delta !== 0)
+      lines.push({ id: `${label}:${opt.id}`, label: `${label}: ${opt.label}`, amount: opt.delta });
   };
 
   pick(config.shapes, sel.shape, "Forma");
@@ -112,7 +173,8 @@ export function quoteSelection(sel: BuilderSelection, config: BuilderConfig = DE
   pick(config.finishes, sel.finish, "Acabado");
 
   const base = config.bases.find((b) => b.id === sel.base);
-  if (base && base.delta !== 0) lines.push({ id: `base-color:${base.id}`, label: `Color: ${base.label}`, amount: base.delta });
+  if (base && base.delta !== 0)
+    lines.push({ id: `base-color:${base.id}`, label: `Color: ${base.label}`, amount: base.delta });
 
   for (const id of sel.extras) {
     const extra = config.extras.find((e) => e.id === id);
@@ -123,7 +185,11 @@ export function quoteSelection(sel: BuilderSelection, config: BuilderConfig = DE
 
   const tier = tierForPoints(points, config.tiers);
   if (tier.surcharge > 0) {
-    lines.push({ id: "complexity", label: `Nivel ${tier.label.toLowerCase()}`, amount: tier.surcharge });
+    lines.push({
+      id: "complexity",
+      label: `Nivel ${tier.label.toLowerCase()}`,
+      amount: tier.surcharge,
+    });
   }
 
   const subtotal = lines.reduce((acc, l) => acc + l.amount, 0);

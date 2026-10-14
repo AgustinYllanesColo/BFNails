@@ -18,10 +18,14 @@ export function describeSizes(sizes: SizeSelection): string {
 export function describeItem(item: CartItem): string {
   const sizes = describeSizes(item.sizes);
   if (item.kind === "design") {
-    return `• ${item.name} x${item.qty} (${sizes}) – ${formatARS(item.unitPrice * item.qty)}`;
+    const variant =
+      item.shape || item.length ? ` · ${[item.shape, item.length].filter(Boolean).join(", ")}` : "";
+    return `• ${item.name} x${item.qty} (${sizes}${variant}) – ${formatARS(item.unitPrice * item.qty)}`;
   }
   const s = item.selection;
-  const extras = s.extras.length ? `, extras: ${s.extras.join(", ")}${s.tipColor ? ` (punta ${s.tipColor})` : ""}` : "";
+  const extras = s.extras.length
+    ? `, extras: ${s.extras.join(", ")}${s.tipColor ? ` (punta ${s.tipColor})` : ""}`
+    : "";
   const notes = s.notes ? `\n  Nota: ${s.notes}` : "";
   const ref = s.referenceUrl ? `\n  Referencia: ${s.referenceUrl}` : "";
   return `• Diseño propio x${item.qty} (${sizes})\n  ${s.shape}, ${s.length}, ${s.finish}, base ${s.base}${extras}${notes}${ref}\n  ${formatARS(item.unitPrice * item.qty)}${item.quote.needsConfirmation ? " (a confirmar)" : ""}`;
@@ -70,5 +74,6 @@ export const adminMessages = {
     }`,
   enviado: (o: Order) =>
     `Hola ${o.customer.name}! Despaché tu pedido ${o.number} 📦 Tu número de seguimiento es ${o.tracking ?? "(a cargar)"}. Lo seguís en correoargentino.com.ar/seguimiento`,
-  estado: (o: Order) => `Hola ${o.customer.name}! Tu pedido ${o.number} está: ${ORDER_STATUS_LABEL[o.status]}.`,
+  estado: (o: Order) =>
+    `Hola ${o.customer.name}! Tu pedido ${o.number} está: ${ORDER_STATUS_LABEL[o.status]}.`,
 };

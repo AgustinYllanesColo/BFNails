@@ -23,6 +23,8 @@ export const cartItemSchema = z.discriminatedUnion("kind", [
     designSlug: z.string().min(1).max(80),
     qty: z.number().int().min(1).max(10),
     sizes: sizeSchema,
+    shape: z.enum(["almendra", "coffin", "cuadrada", "ovalada", "stiletto"]).optional(),
+    length: z.enum(["corto", "medio", "largo", "xl"]).optional(),
   }),
   z.object({
     kind: z.literal("custom"),
