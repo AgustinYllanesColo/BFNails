@@ -9,7 +9,8 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "leo-cherry",
     name: "Leo & cherry",
-    description: "Leopardo pintado a mano en el anular y el mayor, y el resto en rojo cereza glossy. El set de la casa.",
+    description:
+      "Leopardo pintado a mano en el anular y el mayor, y el resto en rojo cereza glossy. El set de la casa.",
     images: ["/catalog/set-leopard-red.webp"],
     shape: "almendra",
     length: "medio",
@@ -23,7 +24,8 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "sunset-french",
     name: "Sunset french",
-    description: "Francesita amarilla con degradé naranja y rosa en los acentos. Verano en las manos.",
+    description:
+      "Francesita amarilla con degradé naranja y rosa en los acentos. Verano en las manos.",
     images: ["/catalog/set-sunset-french.webp"],
     shape: "almendra",
     length: "medio",
@@ -37,7 +39,8 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "bordo-cat-eye",
     name: "Bordó cat eye",
-    description: "Bordó profundo con efecto cat eye que cambia con la luz. Elegante y con mucha presencia.",
+    description:
+      "Bordó profundo con efecto cat eye que cambia con la luz. Elegante y con mucha presencia.",
     images: ["/catalog/set-bordo-cat-eye.webp"],
     shape: "almendra",
     length: "largo",
@@ -51,7 +54,8 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "leo-star-gold",
     name: "Leo star gold",
-    description: "Leopardo, estrellas rosas, francesita con strass dorado y una cruz como dije. Cuadrada XL para que luzca.",
+    description:
+      "Leopardo, estrellas rosas, francesita con strass dorado y una cruz como dije. Cuadrada XL para que luzca.",
     images: ["/catalog/set-leopard-gold.webp", "/catalog/detalle-cruz-dorada.webp"],
     shape: "cuadrada",
     length: "xl",
@@ -65,7 +69,8 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "tribal-french",
     name: "Tribal french",
-    description: "Francesita blanca con tribal negro dibujado a mano y strass plateado. Cuadrada XL.",
+    description:
+      "Francesita blanca con tribal negro dibujado a mano y strass plateado. Cuadrada XL.",
     images: ["/catalog/set-tribal-french.webp"],
     shape: "cuadrada",
     length: "xl",
@@ -120,7 +125,7 @@ export const SEED_DESIGNS: Design[] = [
     description: "Degradé naranja y rosa con efecto aurora. Almendra media, para todos los días.",
     images: ["/catalog/set-sunset-aurora-street.webp"],
     shape: "almendra",
-    length: "medio",
+    length: "corto",
     finish: "glossy",
     complexity: 2,
     price: 17000,
@@ -143,9 +148,10 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "milky-gold",
     name: "Milky gold",
-    description: "Milky con francesita, foil dorado encapsulado y strass. Ovalada corta, cómoda para todos los días.",
+    description:
+      "Milky con francesita, foil dorado encapsulado y strass. Almendra corta, cómoda para todos los días.",
     images: ["/catalog/set-milky-gold-foil.webp"],
-    shape: "ovalada",
+    shape: "almendra",
     length: "corto",
     finish: "glossy",
     complexity: 2,
@@ -159,7 +165,7 @@ export const SEED_DESIGNS: Design[] = [
     description: "Degradé rosa a blanco con strass en un acento. Cuadrada media, clásica.",
     images: ["/catalog/set-babyboomer-strass.webp"],
     shape: "cuadrada",
-    length: "medio",
+    length: "corto",
     finish: "glossy",
     complexity: 2,
     price: 14500,

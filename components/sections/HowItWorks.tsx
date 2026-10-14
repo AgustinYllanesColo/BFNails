@@ -50,7 +50,7 @@ const STEPS = [
   {
     n: "03",
     title: "Pagá como quieras",
-    text: "Mercado Pago, transferencia o efectivo al recibir. Confirmás por WhatsApp con un toque y Bren se pone a trabajar.",
+    text: "Mercado Pago, transferencia o efectivo al recibir. Confirmás por WhatsApp con un toque y nos ponemos a trabajar.",
     icon: (
       <svg
         viewBox="0 0 48 48"

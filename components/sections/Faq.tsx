@@ -9,11 +9,11 @@ import { cn } from "@/lib/format";
 export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   {
     q: "¿Qué son las press-on?",
-    a: "Uñas ya hechas que se pegan sobre tu uña natural. Bren las hace a mano en un gel flexible y liviano que se adapta a la curva de tu uña, mucho más cómodo que el plástico de las press-on comunes, y las decora con esmalte semipermanente. Duran entre 1 y 3 semanas y se pueden despegar y volver a usar.",
+    a: "Uñas ya hechas que se pegan sobre tu uña natural. Las hacemos a mano en un gel flexible y liviano que se adapta a la curva de tu uña, mucho más cómodo que el plástico de las press-on comunes, y las decoramos con esmalte semipermanente. Duran entre 1 y 3 semanas y se pueden despegar y volver a usar.",
   },
   {
     q: "¿Cómo sé mi talle?",
-    a: "Tenés dos caminos. El rápido: elegir un talle estándar (XS, S, M, L) con nuestra guía. El exacto: medir el ancho de cada una de tus diez uñas en milímetros y mandárnoslo; con eso Bren hace el set personalizado a tu mano. En la página de talles te mostramos cómo medir paso a paso.",
+    a: "Tenés dos caminos. El rápido: elegir un talle estándar (XS, S, M, L) con nuestra guía. El exacto: medir el ancho de cada una de tus diez uñas en milímetros y mandárnoslo; con eso armamos el set personalizado a tu mano. En la página de talles te mostramos cómo medir paso a paso.",
   },
   {
     q: "¿Cuánto tarda mi pedido?",
@@ -25,7 +25,7 @@ export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "¿Puedo pedir un diseño que vi en internet?",
-    a: "Sí, es de lo que más hacemos. En Diseñá tu set pegá el link de Pinterest, Instagram o TikTok (o describilo en las notas) y Bren te lo cotiza por WhatsApp antes de pagar. Si preferís, armá el tuyo con las opciones y ves el precio al instante.",
+    a: "Sí, es de lo que más hacemos. En Diseñá tu set pegá el link de Pinterest, Instagram o TikTok (o describilo en las notas) y te lo cotizamos por WhatsApp antes de pagar. Si preferís, armá el tuyo con las opciones y ves el precio al instante.",
   },
   {
     q: "¿Qué viene en el kit?",
@@ -33,7 +33,7 @@ export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "¿También atendés en el estudio?",
-    a: "Sí. En el estudio de Remedios de Escalada, a 4 cuadras de la estación, Bren hace soft gel, kapping y esmaltado semipermanente con turno. Se pide por WhatsApp o por Instagram.",
+    a: "Sí. En el estudio de Remedios de Escalada, a 4 cuadras de la estación, hacemos soft gel, kapping y esmaltado semipermanente con turno. Se pide por WhatsApp o por Instagram.",
   },
 ];
 

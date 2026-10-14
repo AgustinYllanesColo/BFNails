@@ -22,7 +22,7 @@ export default async function HomePage() {
           <Marquee
             items={[
               "press-on a tu talle",
-              "hechas a mano por Bren",
+              "hechas a mano",
               "reutilizables",
               "Remedios de Escalada",
               "envíos a todo el país",

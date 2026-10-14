@@ -220,7 +220,7 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
         </p>
       )}
       <p className="pointer-events-none absolute bottom-2 left-2 max-w-[calc(100%-1rem)] rounded-pill bg-cream/90 px-2.5 py-0.5 text-[10px] font-semibold text-ink sm:text-[11px]">
-        Vista previa ilustrativa, el set real lo pinta Bren a mano
+        Vista previa ilustrativa, el set real lo pintamos a mano
       </p>
     </div>
   );

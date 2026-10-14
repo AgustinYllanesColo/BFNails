@@ -40,7 +40,7 @@ export default function TallesPage() {
           </Heading>
           <p className="mt-4 text-lg text-ink-soft">
             Las press-on quedan perfectas cuando el ancho es el justo. Podés elegir un talle estándar o
-            pasarnos tus 10 medidas y Bren arma el set a tu mano.
+            pasarnos tus 10 medidas y armamos el set a tu mano.
           </p>
         </Reveal>
 

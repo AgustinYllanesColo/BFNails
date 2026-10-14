@@ -50,6 +50,10 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
   }, [designs, shape, length, tag, sort]);
 
   const anyFilter = shape || length || tag;
+  // solo las formas que realmente tienen diseños: si no hay sets ovalados, no se ofrece "Ovalada"
+  const shapes = (Object.keys(SHAPE_LABEL) as Shape[]).filter((sh) =>
+    designs.some((d) => d.shape === sh),
+  );
 
   return (
     <div>
@@ -58,7 +62,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
           <span className="text-ink-soft mr-1 self-center text-xs font-bold tracking-wider uppercase">
             Forma
           </span>
-          {(Object.keys(SHAPE_LABEL) as Shape[]).map((s) => (
+          {shapes.map((s) => (
             <Chip key={s} selected={shape === s} onClick={() => setShape(shape === s ? null : s)}>
               {SHAPE_LABEL[s]}
             </Chip>
@@ -106,39 +110,41 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
                 Limpiar
               </button>
             )}
-            {/* orden como chips: sin menú nativo, que no se puede estilar */}
-            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Ordenar">
-              {(
-                [
-                  ["destacados", "Destacados"],
-                  ["precio-asc", "Menor precio"],
-                  ["precio-desc", "Mayor precio"],
-                  ["nombre", "A–Z"],
-                ] as [Sort, string][]
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSort(value)}
-                  aria-pressed={sort === value}
-                  className={cn(
-                    "rounded-pill h-9 px-3.5 text-xs font-semibold transition-colors duration-200",
-                    sort === value
-                      ? "bg-bordo text-cream"
-                      : "bg-cream-deep text-bordo hover:bg-cream-ink/70",
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
-      <p className="text-ink-soft mb-4 text-sm">
-        {filtered.length} {filtered.length === 1 ? "diseño" : "diseños"}
-      </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-ink-soft text-sm">
+          {filtered.length} {filtered.length === 1 ? "diseño" : "diseños"}
+        </p>
+        {/* orden como chips, en la fila del contador: no compite con los filtros ni suma alto a la barra fija */}
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Ordenar">
+          {(
+            [
+              ["destacados", "Destacados"],
+              ["precio-asc", "Menor precio"],
+              ["precio-desc", "Mayor precio"],
+              ["nombre", "A–Z"],
+            ] as [Sort, string][]
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setSort(value)}
+              aria-pressed={sort === value}
+              className={cn(
+                "rounded-pill h-8 px-3 text-xs font-semibold transition-colors duration-200",
+                sort === value
+                  ? "bg-bordo text-cream"
+                  : "bg-cream-deep text-bordo hover:bg-cream-ink/70",
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <motion.div layout className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
         <AnimatePresence mode="popLayout">

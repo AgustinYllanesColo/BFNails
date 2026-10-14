@@ -126,12 +126,12 @@ export function Builder({ config }: { config: BuilderConfig }) {
         </div>
 
         <div>
-          <StepHeader n={6} title={STEPS[5]} hint="Opcional. Si pedís algo que no está en la lista, Bren lo cotiza antes de que pagues." />
+          <StepHeader n={6} title={STEPS[5]} hint="Opcional. Si pedís algo que no está en la lista, te lo cotizamos antes de que pagues." />
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Referencia (link de Pinterest, IG, TikTok)" htmlFor="ref">
               <input id="ref" type="url" className={inputClass} placeholder="https://" value={sel.referenceUrl ?? ""} onChange={(e) => setSel({ ...sel, referenceUrl: e.target.value })} />
             </Field>
-            <Field label="Notas para Bren" htmlFor="notes" hint={sel.notes ? "Con notas, el precio final se confirma por WhatsApp." : undefined}>
+            <Field label="Notas para tu set" htmlFor="notes" hint={sel.notes ? "Con notas, el precio final se confirma por WhatsApp." : undefined}>
               <textarea id="notes" className={textareaClass} placeholder="Ej: la del anular con una K dorada, el resto liso" value={sel.notes ?? ""} onChange={(e) => setSel({ ...sel, notes: e.target.value })} />
             </Field>
           </div>
@@ -179,7 +179,7 @@ export function Builder({ config }: { config: BuilderConfig }) {
             </motion.span>
           </div>
           {quote.needsConfirmation && (
-            <p className="mt-2 text-xs text-ink-soft">Tus notas pueden cambiar el precio. Bren te confirma por WhatsApp antes de cobrar.</p>
+            <p className="mt-2 text-xs text-ink-soft">Tus notas pueden cambiar el precio. Te lo confirmamos por WhatsApp antes de cobrar.</p>
           )}
           <div className="mt-5 grid gap-2">
             <Button ref={addBtn} onClick={() => addToCart()} size="lg" disabled={!valid}>

@@ -39,7 +39,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
         <h1 className="font-display text-[clamp(2.4rem,7vw,4.5rem)] leading-[0.95]">
           {order.status === "a_confirmar" ? (
             <>
-              Recibido, <span className="text-bordo">Bren lo cotiza</span>
+              Recibido, <span className="text-bordo">lo cotizamos</span>
             </>
           ) : isPaid ? (
             <>
@@ -73,7 +73,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
         {/* Acción principal: WhatsApp */}
         <div className="mt-8 rounded-lg bg-bordo p-6 text-cream md:p-8">
           <h2 className="font-display text-2xl md:text-3xl">
-            {order.status === "a_confirmar" ? "Mandale el pedido a Bren" : order.payment.method === "transferencia" && !isPaid ? "Transferí y confirmá por WhatsApp" : order.payment.method === "efectivo" ? "Confirmá por WhatsApp y pagás al recibir" : "Confirmá por WhatsApp"}
+            {order.status === "a_confirmar" ? "Mandanos el pedido por WhatsApp" : order.payment.method === "transferencia" && !isPaid ? "Transferí y confirmá por WhatsApp" : order.payment.method === "efectivo" ? "Confirmá por WhatsApp y pagás al recibir" : "Confirmá por WhatsApp"}
           </h2>
           {order.payment.method === "transferencia" && !isPaid && order.status !== "a_confirmar" && (
             <div className="mt-4 rounded-md bg-cream/10 p-4 text-sm">
@@ -88,7 +88,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
             </div>
           )}
           <p className="mt-3 text-sm text-cream/85">
-            El botón abre WhatsApp con el resumen de tu pedido ya escrito. {order.payment.method === "transferencia" && !isPaid ? "Adjuntá el comprobante y listo." : "Así Bren lo tiene a mano y arranca."}
+            El botón abre WhatsApp con el resumen de tu pedido ya escrito. {order.payment.method === "transferencia" && !isPaid ? "Adjuntá el comprobante y listo." : "Así lo tenemos a mano y arrancamos."}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button href={wa} target="_blank" rel="noreferrer" variant="leopard" size="lg" data-cursor="wsp">

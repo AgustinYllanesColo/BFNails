@@ -22,7 +22,7 @@ export default function FaqPage() {
         </div>
         <Reveal className="mt-16 rounded-lg bg-bordo p-8 text-cream md:p-12">
           <h2 className="font-display text-3xl">¿Te quedó alguna duda?</h2>
-          <p className="mt-2 text-cream/80">Escribile a Bren por WhatsApp, responde rápido.</p>
+          <p className="mt-2 text-cream/80">Escribinos por WhatsApp, respondemos rápido.</p>
           <Button href={waLink("Hola Bren! Tengo una consulta sobre las press-on 🐱")} target="_blank" rel="noreferrer" variant="leopard" className="mt-6">
             Hablar por WhatsApp
           </Button>

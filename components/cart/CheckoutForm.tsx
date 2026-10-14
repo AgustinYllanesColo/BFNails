@@ -250,12 +250,12 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
           </div>
           {motoFrom && (
             <p className="mt-3 rounded-md bg-cream-deep p-3 text-sm text-ink-soft">
-              La moto arranca en {formatARS(chosen?.cost ?? 0)} y el precio final depende de tu barrio. Bren te lo confirma por WhatsApp antes de cobrar.
+              La moto arranca en {formatARS(chosen?.cost ?? 0)} y el precio final depende de tu barrio. Te lo confirmamos por WhatsApp antes de cobrar.
             </p>
           )}
           {needsConfirmation && (
             <p className="mt-3 rounded-md bg-yellow/30 p-3 text-sm">
-              Tenés un set con notas: Bren confirma el precio final por WhatsApp y después pagás.
+              Tenés un set con notas: te confirmamos el precio final por WhatsApp y después pagás.
             </p>
           )}
         </section>

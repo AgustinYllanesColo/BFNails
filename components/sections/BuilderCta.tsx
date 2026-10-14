@@ -42,7 +42,7 @@ export function BuilderCta() {
             Lo que tenés en la cabeza, <span className="text-bordo">con precio al instante.</span>
           </h2>
           <p className="mt-5 max-w-md text-lg text-ink-soft">
-            Forma, largo, color y técnicas. Cada elección suma y lo ves al toque. ¿Viste un diseño en internet? Pegá el link y Bren lo cotiza.
+            Forma, largo, color y técnicas. Cada elección suma y lo ves al toque. ¿Viste un diseño en internet? Pegá el link y te lo cotizamos.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Magnetic>

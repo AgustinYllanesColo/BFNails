@@ -110,7 +110,7 @@ export function SizePicker({ value, onChange, compact }: Props) {
 
       {mode === "kit" && (
         <p className="rounded-md bg-cream-deep p-4 text-sm text-ink-soft">
-          Dale, lo resolvemos juntas por WhatsApp después de confirmar el pedido. Bren te manda la guía y
+          Dale, lo resolvemos juntas por WhatsApp después de confirmar el pedido. Te mandamos la guía y
           lo ajustamos a tu mano.
         </p>
       )}
