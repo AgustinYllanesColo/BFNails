@@ -42,7 +42,7 @@ export function Heading({
   as?: "h1" | "h2" | "h3";
 }) {
   return (
-    <Tag className={cn("font-display text-balance text-[clamp(2.2rem,6vw,4.5rem)] leading-[0.95]", className)}>
+    <Tag className={cn("font-display text-balance text-[clamp(2rem,4.4vw,3.25rem)] leading-[1]", className)}>
       {children}
     </Tag>
   );

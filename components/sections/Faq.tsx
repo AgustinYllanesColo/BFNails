@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Reveal } from "@/components/motion/Reveal";
-import { Eyebrow, Heading, Section } from "@/components/ui/Section";
+import { Heading, Section } from "@/components/ui/Section";
 import { cn } from "@/lib/format";
 
 export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
@@ -29,7 +29,7 @@ export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
   },
   {
     q: "¿Qué viene en el kit?",
-    a: "Las 10 uñas y el kit de aplicación completo. Lo ves en el inicio, en \"Qué trae el kit\".",
+    a: "Las 10 uñas y el kit de colocación: pegamento, lima, lima buffer, wipes y palito de naranjo.",
   },
   {
     q: "¿También atendés en el estudio?",
@@ -39,15 +39,14 @@ export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
 
 export function Faq({ items = FAQ_ITEMS, compact = false }: { items?: typeof FAQ_ITEMS; compact?: boolean }) {
   const [open, setOpen] = useState<number | null>(0);
+  // En la página de preguntas va sin el padding de sección (py-0 no le gana a py-20 en la hoja de estilos)
+  const Wrap = compact ? CompactWrap : Section;
   return (
-    <Section tone={compact ? "cream" : "deep"} className={cn(compact && "py-0 md:py-0")}>
-      <div className={cn("container-x", !compact && "grid gap-10 md:grid-cols-[0.8fr_1.2fr]")}>
+    <Wrap tone="deep">
+      <div className={cn(!compact && "container-x grid gap-10 md:grid-cols-[0.8fr_1.2fr]")}>
         {!compact && (
           <Reveal>
-            <Eyebrow>Preguntas</Eyebrow>
-            <Heading>
-              Lo que todas <span className="text-bordo">preguntan</span>
-            </Heading>
+            <Heading>Preguntas frecuentes</Heading>
           </Reveal>
         )}
         <Reveal className="divide-y divide-bordo/10">
@@ -64,7 +63,7 @@ export function Faq({ items = FAQ_ITEMS, compact = false }: { items?: typeof FAQ
                   <span className="text-lg font-semibold tracking-tight text-ink md:text-xl">{item.q}</span>
                   <span
                     className={cn(
-                      "grid size-9 shrink-0 place-items-center rounded-pill bg-bordo text-cream transition-transform duration-500 ease-[var(--ease-bounce)]",
+                      "grid size-9 shrink-0 place-items-center rounded-pill bg-bordo text-cream transition-transform duration-300 ease-[var(--ease-out-expo)]",
                       isOpen && "rotate-45",
                     )}
                     aria-hidden
@@ -90,6 +89,10 @@ export function Faq({ items = FAQ_ITEMS, compact = false }: { items?: typeof FAQ
           })}
         </Reveal>
       </div>
-    </Section>
+    </Wrap>
   );
+}
+
+function CompactWrap({ children }: { children: React.ReactNode; tone?: string }) {
+  return <div>{children}</div>;
 }

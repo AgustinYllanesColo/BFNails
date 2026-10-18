@@ -49,7 +49,7 @@ export function Hero() {
   return (
     <section
       ref={root}
-      className="relative isolate flex min-h-[100svh] flex-col items-center justify-center overflow-hidden pt-24 pb-24 md:pt-28 md:pb-28"
+      className="relative isolate flex min-h-[86svh] flex-col items-center justify-center overflow-hidden pt-24 pb-20 md:min-h-[100svh] md:pt-28 md:pb-28"
     >
       {/* Fondo: halo cálido, estático */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-20">

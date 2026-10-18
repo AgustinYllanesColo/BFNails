@@ -207,7 +207,7 @@ export function Builder({ config }: { config: BuilderConfig }) {
               Pedir ahora
             </Button>
           </div>
-          {!valid && <p className="mt-2 text-xs text-red">Completá las 10 medidas (entre 5 y 25 mm).</p>}
+          {!valid && <p className="mt-2 text-xs text-red">Completá las 10 medidas (entre 0,5 y 2,5 cm).</p>}
         </div>
       </aside>
     </div>
@@ -247,7 +247,7 @@ function CharmPicker({
 }) {
   if (charms.length === 0) return <p className="text-sm text-ink-soft">Ahora no tengo dijes cargados.</p>;
   return (
-    <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+    <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
       {charms.map((c) => {
         const qty = picked.find((p) => p.id === c.id)?.qty ?? 0;
         return (

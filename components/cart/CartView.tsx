@@ -149,7 +149,7 @@ export function CartView() {
               kind: "row",
               id: "kit",
               label: "incluye c/u",
-              value: "10 uñas + pegamento + lima",
+              value: "10 uñas + kit de colocación",
             },
             ...(needsConfirmation
               ? [
@@ -194,7 +194,15 @@ function ItemDetails({ item }: { item: CartItem }) {
   const s = item.selection;
   return (
     <p className="text-ink-soft mt-1 text-xs">
-      {[s.shape, s.length, s.finish, `base ${s.base}`, ...s.extras].join(" · ")}
+      {[
+        SHAPE_LABEL[s.shape],
+        LENGTH_LABEL[s.length],
+        s.finish,
+        `base ${s.base}`,
+        ...s.extras,
+        // los dijes ya vienen con nombre y cantidad en las líneas del presupuesto
+        ...item.quote.lines.filter((l) => l.id.startsWith("charm:")).map((l) => l.label.replace(/^Dije /, "dije ")),
+      ].join(" · ")}
       {s.notes ? ` · nota: "${s.notes}"` : ""}
     </p>
   );

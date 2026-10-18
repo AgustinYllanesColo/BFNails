@@ -10,8 +10,6 @@ import { NailPreview2D } from "./NailPreview2D";
 // three.js va en un chunk aparte y solo se pide en el cliente, cuando la vista previa está cerca
 const NailPreview3D = dynamic(() => import("./NailPreview3D").then((m) => m.NailPreview3D), { ssr: false, loading: () => null });
 
-/** si el 3D no llegó en este tiempo (chunk que nunca carga), recién ahí la ilustración de respaldo */
-const FALLBACK_MS = 40000;
 const HINT_MS = 2600;
 const HINT_KEY = "bf:hint-girar";
 /** para pruebas con WebGL por software: localStorage "bf:force3d" = "1" */
@@ -49,44 +47,35 @@ function probeWebGL2() {
 }
 
 /**
- * Vista previa del set. Si el dispositivo tiene WebGL, carga la mano 3D en diferido y la muestra
- * sobre el fondo crema cuando dibuja su primer cuadro (sin otra mano distinta debajo). La
- * ilustración 2D queda como respaldo: sin WebGL, si el 3D falla o si tarda más de 2,5 s.
+ * Vista previa del set. La ilustración 2D se ve al instante (nunca un recuadro vacío mientras carga); si el
+ * dispositivo tiene WebGL, la mano 3D se carga en diferido y, cuando dibuja su primer cuadro, reemplaza a la
+ * ilustración con un fundido (primero se va el 2D, después entra el 3D: nunca dos manos superpuestas).
+ * `only2D` deja solo la ilustración (la demo de la home, que cambia sola y no necesita three.js).
  */
-export function NailPreview({ sel, config }: { sel: BuilderSelection; config: BuilderConfig }) {
+export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelection; config: BuilderConfig; only2D?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const [load3D, setLoad3D] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [allow2D, setAllow2D] = useState(false);
   const [hide2D, setHide2D] = useState(false);
   const [gen, setGen] = useState(0);
   const [hint, setHint] = useState<"off" | "on" | "gone">("off");
   const [perfGuard, setPerfGuard] = useState(true);
-  const fallbackTimer = useRef(0);
   const retries = useRef(0);
   const retryCleanup = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      // navegador muy viejo: queda la ilustración
-      const t = window.setTimeout(() => setAllow2D(true), 0);
-      return () => window.clearTimeout(t);
-    }
+    // sin IntersectionObserver (navegador muy viejo) o en la demo: queda la ilustración
+    if (!el || only2D || typeof IntersectionObserver === "undefined") return;
     let idle = 0;
     let soon = 0;
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         io.disconnect();
-        if (!probeWebGL2()) {
-          setAllow2D(true);
-          return;
-        }
+        if (!probeWebGL2()) return;
         setPerfGuard(!forced3D());
-        fallbackTimer.current = window.setTimeout(() => setAllow2D(true), FALLBACK_MS);
         // que three no compita con la hidratación ni con el primer toque
         const go = () => setLoad3D(true);
         if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(go, { timeout: 300 });
@@ -97,12 +86,11 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
     io.observe(el);
     return () => {
       io.disconnect();
-      window.clearTimeout(fallbackTimer.current);
       window.clearTimeout(soon);
       if (idle) window.cancelIdleCallback?.(idle);
       retryCleanup.current?.();
     };
-  }, []);
+  }, [only2D]);
 
   // si la ruta se oculta y vuelve (Activity / cacheComponents), repetimos el fundido desde cero
   useLayoutEffect(
@@ -128,7 +116,6 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   }, [hint]);
 
   const onReady = () => {
-    window.clearTimeout(fallbackTimer.current);
     setReady(true);
     let seen = false;
     try {
@@ -144,7 +131,6 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
     setFailed(true);
     setReady(false);
     setHide2D(false);
-    setAllow2D(true);
     // reintento acotado: en iOS el contexto se pierde al pasar la pestaña a segundo plano
     if (retries.current >= 2) return;
     retries.current += 1;
@@ -169,7 +155,7 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
 
   const show3D = load3D && !failed;
   const faded = show3D && ready;
-  const show2D = (allow2D || failed) && !(faded && hide2D);
+  const show2D = !(faded && hide2D);
   const label = describe(sel, config);
 
   return (
@@ -178,9 +164,6 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
       onPointerDown={() => hint === "on" && setHint("gone")}
     >
       <div ref={ref} role="img" aria-label={label} className="absolute inset-0 bg-[radial-gradient(120%_90%_at_38%_22%,#fbf0d9_0%,#f5e8c8_55%,#efdcb6_100%)]">
-        {!faded && !show2D && (
-          <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(55%_45%_at_50%_40%,rgba(255,255,255,0.45),transparent)] motion-safe:animate-pulse" />
-        )}
         {show2D && (
           <div
             className={cn(

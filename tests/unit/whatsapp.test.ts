@@ -45,7 +45,7 @@ describe("orderConfirmationMessage", () => {
     const msg = orderConfirmationMessage(order, "https://bf.test/pedido/BF-0007?t=tok");
     expect(msg).toContain("*BF-0007*");
     expect(msg).toContain("Cherry Red x2 (Medida M)");
-    expect(msg).toContain("Medidas (mm): 17 · 13");
+    expect(msg).toContain("Medidas (cm): 1,7 · 1,3");
     expect(msg).toContain("Nota: una K");
     expect(msg).toContain("(a confirmar)");
     expect(msg).toContain(`Total: *${formatARS(37200)}*`);

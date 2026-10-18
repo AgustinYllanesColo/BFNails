@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/Badge";
 import { AddDesignToCart } from "@/components/cart/AddDesignToCart";
 import { DesignCard } from "@/components/catalog/DesignCard";
 import { Reveal } from "@/components/motion/Reveal";
+import { KitItems } from "@/components/kit/KitItems";
+import { getKit } from "@/lib/data/content-repo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -36,7 +38,7 @@ export default async function DesignPage({ params }: Props) {
   const { slug } = await params;
   const design = await getDesign(slug);
   if (!design) notFound();
-  const [all, config] = await Promise.all([getDesigns(), getBuilderConfig()]);
+  const [all, config, kit] = await Promise.all([getDesigns(), getBuilderConfig(), getKit()]);
   const related = all
     .filter(
       (d) =>
@@ -111,11 +113,14 @@ export default async function DesignPage({ params }: Props) {
 
               <AddDesignToCart design={design} config={config} />
 
-              <ul className="text-ink-soft mt-8 space-y-2 text-sm">
-                <li>✦ 10 uñas + kit de aplicación</li>
-                <li>{inStock(design) ? "✦ En stock: sale en el momento" : "✦ A pedido: 3 a 7 días"}</li>
-                <li>✦ Retiro en estación gratis o envío por Correo Argentino</li>
-              </ul>
+              <div className="mt-8 border-t border-bordo/10 pt-6">
+                <p className="text-sm font-semibold">10 uñas + kit de colocación</p>
+                <KitItems items={kit.items} className="mt-3" />
+                <p className="text-ink-soft mt-4 text-sm">
+                  {inStock(design) ? "En stock: sale en el momento." : "A pedido: 3 a 7 días."} Retiro en estación gratis o
+                  envío por Correo Argentino.
+                </p>
+              </div>
             </Reveal>
           </div>
         </div>

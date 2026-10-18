@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/Button";
-import { Eyebrow } from "@/components/ui/Section";
 import { siteConfig } from "@/lib/site";
 import { waLink } from "@/lib/whatsapp";
 
@@ -24,9 +23,8 @@ export function Studio() {
           />
           <div className="grid items-center gap-8 md:grid-cols-[1.3fr_0.7fr]">
             <div>
-              <Eyebrow className="text-bordo">También en el estudio</Eyebrow>
-              <h2 className="font-display text-[clamp(1.9rem,4.5vw,3.2rem)] leading-[0.98] text-balance">
-                Soft gel, kapping y semi, <span className="text-bordo">con turno.</span>
+              <h2 className="font-display text-balance text-[clamp(1.75rem,3.6vw,2.5rem)] leading-[1.05]">
+                También en el estudio
               </h2>
               <p className="text-ink-soft mt-4 max-w-lg">
                 Si preferís que te las haga en persona: {services} en el estudio de{" "}
@@ -51,16 +49,15 @@ export function Studio() {
                 </Button>
               </div>
             </div>
-            {/* La Kitty asoma desde abajo de la tarjeta, como un sticker pegado al borde: el recorte del
-                dibujo original queda escondido por el borde de la tarjeta */}
-            <div className="relative h-40 md:h-56">
+            {/* La Kitty con las estrellas del logo: el dibujo completo, sin recortes */}
+            <div className="mx-auto w-48 md:w-full md:max-w-[260px]">
               <Image
-                src="/brand/kitty.webp"
+                src="/brand/logo-kitty.webp"
                 alt=""
-                width={508}
-                height={600}
-                sizes="(min-width: 768px) 220px, 150px"
-                className="absolute bottom-[-2.25rem] left-1/2 w-40 -translate-x-1/2 drop-shadow-[0_10px_16px_rgba(74,14,14,0.22)] md:bottom-[-3.5rem] md:w-56"
+                width={800}
+                height={747}
+                sizes="(min-width: 768px) 260px, 192px"
+                className="h-auto w-full drop-shadow-[0_10px_16px_rgba(74,14,14,0.18)]"
               />
             </div>
           </div>

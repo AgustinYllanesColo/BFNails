@@ -5,7 +5,7 @@ import type { SizeSelection, StandardSize } from "@/lib/types";
 import { FINGERS, SIZE_ORDER, STANDARD_SIZES } from "@/lib/data/sizes";
 import { Chip } from "@/components/ui/Chip";
 import { cn } from "@/lib/format";
-import { inputClass } from "@/components/ui/Field";
+import { CmInput } from "@/components/ui/CmInput";
 
 type Props = { value: SizeSelection; onChange: (v: SizeSelection) => void; compact?: boolean };
 
@@ -74,7 +74,7 @@ export function SizePicker({ value, onChange, compact }: Props) {
       {mode === "custom" && (
         <div>
           <p className="mb-3 text-xs text-ink-soft">
-            Ancho de cada uña en milímetros, en la parte más ancha.{" "}
+            Ancho de cada uña en cm (por ejemplo 1,2).{" "}
             <Link href="/medidas#personalizada" className="font-semibold text-bordo underline underline-offset-4">
               Cómo medir
             </Link>
@@ -88,16 +88,12 @@ export function SizePicker({ value, onChange, compact }: Props) {
                   return (
                     <label key={finger} className="flex items-center gap-2 text-sm">
                       <span className="w-16 text-ink-soft">{finger}</span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        step="0.5"
-                        min={5}
-                        max={25}
-                        value={mm[i] || ""}
-                        onChange={(e) => setMm(i, Number(e.target.value))}
-                        className={cn(inputClass, "h-10 px-3 text-center")}
-                        aria-label={`${finger} mano ${hand === "Der." ? "derecha" : "izquierda"} en milímetros`}
+                      <CmInput
+                        mm={mm[i] || 0}
+                        onChange={(v) => setMm(i, v)}
+                        placeholder="1,2"
+                        className="h-10 px-3 text-center"
+                        aria-label={`${finger} mano ${hand === "Der." ? "derecha" : "izquierda"} en centímetros`}
                       />
                     </label>
                   );

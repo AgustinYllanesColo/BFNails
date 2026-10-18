@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/cart/CheckoutForm";
-import { Eyebrow, Heading } from "@/components/ui/Section";
+import { Heading } from "@/components/ui/Section";
 import { getSettings } from "@/lib/data/settings";
 import { mpEnabled } from "@/lib/mercadopago";
 import Image from "next/image";
@@ -19,10 +19,7 @@ export default async function CheckoutPage() {
     <div className="pt-28 pb-24 md:pt-36">
       <div className="container-x">
         <div className="mb-8">
-          <Eyebrow>Checkout</Eyebrow>
-          <Heading as="h1">
-            Último <span className="text-bordo">paso</span>
-          </Heading>
+          <Heading as="h1">Finalizar pedido</Heading>
         </div>
         {!ordersEnabled() && (
           <div className="mb-8 flex flex-col items-start gap-5 rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10 md:flex-row md:items-center">

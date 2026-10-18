@@ -99,13 +99,15 @@ body {
 }
 
 /* Cursor custom solo con puntero fino */
+/* El cursor estrella solo existe cuando el JS lo activó (puntero fino y sin reduced-motion): si no, quedaba quieto
+   arriba a la izquierda. */
 .cursor-root {
   display: none;
 }
+html.has-cursor .cursor-root {
+  display: block;
+}
 @media (pointer: fine) {
-  .cursor-root {
-    display: block;
-  }
   html.has-cursor,
   html.has-cursor * {
     cursor: none !important;

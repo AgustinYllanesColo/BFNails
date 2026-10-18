@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Reveal } from "@/components/motion/Reveal";
-import { Eyebrow, Heading } from "@/components/ui/Section";
+import { Heading } from "@/components/ui/Section";
 import { formatARS } from "@/lib/format";
 import { Star } from "@/components/motion/Marquee";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const OPTIONS = [
   {
@@ -73,60 +68,20 @@ const OPTIONS = [
   },
 ];
 
-/** Tarjetas de envío y una línea de ruta punteada que se dibuja al hacer scroll. El tilt 3D se fue: dejaba el texto borroso. */
+/** Tarjetas de envío: retiro, moto y Correo Argentino. */
 export function Zones() {
-  const root = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const el = root.current;
-    if (!el) return;
-    const mm = gsap.matchMedia();
-    mm.add("all", () => {
-      const path = el.querySelector<SVGPathElement>("[data-route]");
-      if (path) {
-        const len = path.getTotalLength();
-        gsap.set(path, { strokeDasharray: `${len}`, strokeDashoffset: len });
-        gsap.to(path, {
-          strokeDashoffset: 0,
-          ease: "none",
-          scrollTrigger: { trigger: el, start: "top 75%", end: "bottom 60%", scrub: 0.6 },
-        });
-      }
-    });
-    return () => mm.revert();
-  }, []);
-
   return (
-    <section ref={root} className="bg-cream-deep relative overflow-hidden py-20 md:py-28">
-      <svg
-        aria-hidden
-        className="text-bordo/25 pointer-events-none absolute inset-x-0 top-0 h-full w-full"
-        viewBox="0 0 1440 600"
-        preserveAspectRatio="none"
-        fill="none"
-      >
-        <path
-          data-route
-          d="M-20 520 C 200 380, 420 620, 640 430 S 1040 260, 1460 120"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeDasharray="8 10"
-        />
-      </svg>
+    <section className="bg-cream-deep relative overflow-hidden py-20 md:py-28">
       <div className="container-x relative">
         <Reveal className="max-w-2xl">
-          <Eyebrow>Entregas y envíos</Eyebrow>
-          <Heading>
-            Del sur del conurbano <span className="text-bordo">a todo el país</span>
-          </Heading>
+          <Heading>Envíos y entregas</Heading>
           <p className="text-ink-soft mt-5 max-w-md">
             Estoy en Remedios de Escalada. Si sos de la zona nos vemos en la estación o te lo llevo en
             moto. Si no, va por Correo Argentino.
           </p>
         </Reveal>
         <Reveal className="mt-8 flex flex-wrap items-center gap-2">
-          <span className="text-bordo text-xs font-bold tracking-[0.2em] uppercase">
-            Zona de moto y retiro
-          </span>
+          <span className="text-ink-soft text-sm">Moto y retiro en</span>
           {["Remedios de Escalada", "Lanús", "Banfield", "Lomas de Zamora"].map((z) => (
             <span
               key={z}

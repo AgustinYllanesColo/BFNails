@@ -7,7 +7,6 @@ import { Studio } from "@/components/sections/Studio";
 import { Faq } from "@/components/sections/Faq";
 import { Marquee } from "@/components/motion/Marquee";
 import { Promos } from "@/components/sections/Promos";
-import { KitSection } from "@/components/sections/KitSection";
 import { getFeaturedDesigns } from "@/lib/data/repo";
 import { getKit, getLivePromos } from "@/lib/data/content-repo";
 
@@ -25,7 +24,7 @@ export default async function HomePage() {
           <Marquee
             items={[
               "press-on personalizadas",
-              "kit de aplicación incluido",
+              "kit de colocación incluido",
               "reutilizables",
               "Remedios de Escalada",
               "envíos a todo el país",
@@ -37,8 +36,7 @@ export default async function HomePage() {
       </div>
       <Promos promos={promos} />
       <Featured designs={featured} />
-      <HowItWorks />
-      <KitSection kit={kit} />
+      <HowItWorks kit={kit} />
       <BuilderCta />
       <Zones />
       <Studio />

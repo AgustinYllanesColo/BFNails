@@ -46,7 +46,7 @@ export default async function ContenidoPage() {
           </div>
         </Card>
 
-        <Card title="Kit de aplicación">
+        <Card title="Kit de colocación">
           <form action={saveKit} className="grid gap-4 lg:grid-cols-2">
             <L label="Qué trae (uno por línea; detalle opcional después de |)">
               <textarea

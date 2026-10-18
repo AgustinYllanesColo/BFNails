@@ -17,7 +17,7 @@ export default function TerminosPage() {
       <section>
         <h2>2. Productos y personalización</h2>
         <p>
-          Cada set se fabrica a pedido, a mano y según la medida y el diseño que elegís. Las fotos del catálogo y la vista previa del armador son ilustrativas: al ser un producto artesanal pueden existir pequeñas variaciones de color, brillo o detalle respecto de la imagen. El kit incluye 10 uñas, pegamento y lima.
+          Cada set se fabrica a pedido, a mano y según la medida y el diseño que elegís. Las fotos del catálogo y la vista previa del armador son ilustrativas: al ser un producto artesanal pueden existir pequeñas variaciones de color, brillo o detalle respecto de la imagen. Cada set incluye 10 uñas y el kit de colocación (pegamento, lima, lima buffer, wipes y palito de naranjo).
         </p>
         <p>
           Cuando pedís un diseño con notas libres o una referencia de internet, el precio mostrado es orientativo y se confirma por WhatsApp antes de cobrar. Los diseños inspirados en imágenes de terceros se realizan como interpretación artesanal, no como copia exacta.
@@ -26,7 +26,7 @@ export default function TerminosPage() {
       <section>
         <h2>3. Medidas</h2>
         <p>
-          La medida es responsabilidad de quien compra. Ofrezco medidas universales (S, M, L) y la opción de enviarme las medidas de cada uña en milímetros para un set personalizado. Un set hecho con medidas enviadas por la clienta no se rehace sin cargo si las medidas eran incorrectas, aunque siempre vamos a buscar la mejor solución.
+          La medida es responsabilidad de quien compra. Ofrezco medidas universales (S, M, L) y la opción de enviarme las medidas de cada uña para un set personalizado. Un set hecho con medidas enviadas por la clienta no se rehace sin cargo si las medidas eran incorrectas, aunque siempre vamos a buscar la mejor solución.
         </p>
       </section>
       <section>
@@ -50,7 +50,7 @@ export default function TerminosPage() {
       <section>
         <h2>7. Uso y cuidado</h2>
         <p>
-          Seguí la guía de aplicación incluida en el kit. No usamos materiales de uso profesional prohibidos; aun así, si tenés alergias conocidas a geles, acrílicos o adhesivos, consultá antes de comprar. No somos responsables por reacciones derivadas de un uso distinto al indicado.
+          Seguí la guía de colocación. No uso materiales de uso profesional prohibidos; aun así, si tenés alergias conocidas a geles, acrílicos o adhesivos, consultá antes de comprar. No me hago responsable por reacciones derivadas de un uso distinto al indicado.
         </p>
       </section>
       <section>

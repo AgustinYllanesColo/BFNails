@@ -4,8 +4,9 @@ import Image from "next/image";
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Eyebrow } from "@/components/ui/Section";
 import { Star } from "@/components/motion/Marquee";
+import { KitItems } from "@/components/kit/KitItems";
+import type { Kit } from "@/lib/data/content";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,7 +32,7 @@ const STEPS = [
   {
     n: "02",
     title: "Elegí tu medida",
-    text: "Universal (S, M, L) o personalizada con tus 10 medidas.",
+    text: "Universal (S, M o L) o personalizada con tus 10 medidas.",
     icon: (
       <svg
         viewBox="0 0 48 48"
@@ -69,7 +70,7 @@ const STEPS = [
   {
     n: "04",
     title: "Recibí y pegá",
-    text: "Con el kit de aplicación. Se ponen en 10 minutos y se reusan.",
+    text: "Con el kit de colocación. Se ponen en 10 minutos y se reusan.",
     icon: (
       <svg
         viewBox="0 0 48 48"
@@ -89,18 +90,18 @@ const STEPS = [
 
 
 /** Imagen o gráfico de cada paso: fotos reales donde hay, un gráfico de marca donde no. */
-const VISUALS: Record<string, { src?: string; alt?: string; caption: string }> = {
-  "01": { src: "/catalog/set-gems-french.webp", alt: "Francesita con gemas de colores", caption: "del catálogo, del armador o de tu Pinterest" },
-  "02": { caption: "S, M, L o tus 10 medidas en mm" },
-  "03": { caption: "Mercado Pago · transferencia · efectivo" },
-  "04": { src: "/catalog/set-milky-gold-foil.webp", alt: "Set milky con foil dorado listo para pegar", caption: "10 uñas + kit de aplicación" },
+const VISUALS: Record<string, { src?: string; alt?: string }> = {
+  "01": { src: "/catalog/set-gems-french.webp", alt: "Francesita con gemas de colores" },
+  "02": {},
+  "03": {},
+  "04": { src: "/catalog/set-milky-gold-foil.webp", alt: "Set milky con foil dorado listo para pegar" },
 };
 
 /**
  * Cuatro pasos en vertical, con una línea que los une y una imagen por paso. Los pasos entran
  * de a uno al scrollear; nada se "pinea": se lee de corrido en cualquier pantalla.
  */
-export function HowItWorks() {
+export function HowItWorks({ kit }: { kit?: Kit }) {
   const root = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -123,10 +124,7 @@ export function HowItWorks() {
     <section ref={root} className="relative overflow-hidden bg-bordo py-20 text-cream md:py-28">
       <div className="container-x grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <div className="lg:sticky lg:top-28 lg:self-start">
-          <Eyebrow className="text-cream">Cómo funciona</Eyebrow>
-          <h2 className="font-display text-[clamp(2.2rem,6vw,4.5rem)] leading-[0.95] text-balance">
-            De tu idea a tus manos <span className="text-yellow">en 4 pasos</span>
-          </h2>
+          <h2 className="font-display text-balance text-[clamp(2rem,4.4vw,3.25rem)] leading-[1]">Cómo funciona</h2>
           <p className="mt-5 max-w-sm text-cream/75">
             A pedido, entre 3 y 7 días. Te aviso por WhatsApp.
           </p>
@@ -155,9 +153,12 @@ export function HowItWorks() {
                       <h3 className="font-display text-2xl leading-tight md:text-3xl">{s.title}</h3>
                     </div>
                     <p className="mt-4 text-[15px] leading-relaxed text-ink-soft">{s.text}</p>
-                    <p className="mt-4 inline-flex items-center gap-2 rounded-pill bg-cream-deep px-3 py-1 text-[11px] font-bold tracking-wider text-bordo uppercase">
-                      <Star size={10} className="text-red" /> {v.caption}
-                    </p>
+                    {s.n === "04" && kit?.items.length ? (
+                      <>
+                        <p className="mt-4 text-xs font-semibold text-ink">El kit trae:</p>
+                        <KitItems items={kit.items} className="mt-2" />
+                      </>
+                    ) : null}
                   </div>
                   <div className="relative order-1 min-h-[180px] overflow-hidden bg-cream-deep sm:order-2 sm:min-h-0">
                     {v.src ? (
@@ -178,16 +179,17 @@ export function HowItWorks() {
   );
 }
 
-/** Regla en milímetros con cinco uñas marcadas: el gesto de medir, dibujado con la paleta de marca. */
+/** Regla con cinco uñas marcadas: el gesto de medir, dibujado con la paleta de marca. */
 function Ruler() {
-  const widths = [13, 11, 12, 10, 8];
+  // Medida S de la tabla de Brenda, en mm (se muestra en cm, como en su guía).
+  const widths = [15, 11, 12, 11, 9];
   return (
     <div aria-hidden className="absolute inset-0 flex flex-col justify-end gap-4 p-5">
       <div className="flex items-end justify-around">
         {widths.map((w, i) => (
           <div key={i} className="flex flex-col items-center gap-1.5">
             <span className="block rounded-t-full rounded-b-md bg-[#e8c4b0] shadow-[inset_-3px_0_6px_rgba(74,14,14,0.08)]" style={{ width: w * 3, height: 36 + (i % 2) * 10 }} />
-            <span className="font-mono text-[10px] font-bold text-bordo">{w} mm</span>
+            <span className="font-mono text-[10px] font-bold text-bordo">{(w / 10).toFixed(1).replace(".", ",")}</span>
           </div>
         ))}
       </div>

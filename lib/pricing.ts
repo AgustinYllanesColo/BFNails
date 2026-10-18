@@ -158,7 +158,7 @@ export function quoteSelection(
   config: BuilderConfig = DEFAULT_BUILDER_CONFIG,
 ): Quote {
   const lines: Quote["lines"] = [
-    { id: "base", label: "Set base (10 uñas + kit de aplicación)", amount: config.basePrice },
+    { id: "base", label: "Set base (10 uñas + kit de colocación)", amount: config.basePrice },
   ];
   let points = 0;
 

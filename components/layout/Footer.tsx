@@ -19,7 +19,10 @@ export function Footer() {
       />
       <div className="container-x grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <Image src="/brand/logo-nails.webp" alt="BF Nails Studio" width={320} height={193} sizes="256px" className="w-64 brightness-0 invert" />
+          {/* El logo va a color sobre una placa crema, como un sticker: en blanco puro la Kitty quedaba como una mancha */}
+          <span className="inline-block -rotate-2 rounded-[24px] bg-cream px-5 py-4 shadow-[0_14px_30px_-16px_rgba(0,0,0,0.55)]">
+            <Image src="/brand/logo-nails.webp" alt="BF Nails Studio" width={960} height={579} sizes="224px" className="h-auto w-56" />
+          </span>
           <p className="mt-6 max-w-sm text-cream/80">{siteConfig.description}</p>
         </div>
         <div>

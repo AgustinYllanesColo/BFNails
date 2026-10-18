@@ -1,5 +1,5 @@
 /**
- * Contenido editable desde el admin que no necesita tabla propia: promos de la semana, dijes y el kit de aplicación.
+ * Contenido editable desde el admin que no necesita tabla propia: promos de la semana, dijes y el kit de colocación.
  * Se guarda como JSON en `settings` (claves `promos`, `charms`, `kit`). Este archivo solo tiene tipos y valores por
  * defecto, así lo pueden importar el cliente y el servidor.
  */
@@ -45,6 +45,7 @@ export const DEFAULT_PROMOS: Promo[] = [
     badge: "-20%",
     title: "Francesita de la semana",
     text: "Clásica o de color, cualquier forma.",
+    image: "/catalog/set-black-french-strass-640.webp",
     theme: "rojo",
     href: "/disena",
     active: true,
@@ -54,6 +55,7 @@ export const DEFAULT_PROMOS: Promo[] = [
     badge: "4x3",
     title: "Llevá 4 sets, pagá 3",
     text: "Del catálogo, mezclando diseños.",
+    image: "/catalog/set-leopard-red-640.webp",
     theme: "leopardo",
     href: "/catalogo",
     active: true,
@@ -63,6 +65,7 @@ export const DEFAULT_PROMOS: Promo[] = [
     badge: "Mayorista",
     title: "Precios por cantidad",
     text: "Para manicuras y reventa. Escribime.",
+    image: "/catalog/set-milky-gold-foil-640.webp",
     theme: "bordo",
     active: true,
   },
@@ -77,16 +80,14 @@ export const DEFAULT_CHARMS: Charm[] = [
   { id: "cereza", name: "Cereza", price: 400, hex: "#b51c1c", active: true },
 ];
 
-/** A CONFIRMAR CON BRENDA: lo que trae el kit (lo edita desde Admin → Contenido). */
+/** Lo que trae el kit de colocación (según la guía de Brenda). Se edita desde Admin → Promos, dijes y kit. */
 export const DEFAULT_KIT: Kit = {
   items: [
-    { name: "10 uñas soft gel", detail: "Hechas a tu medida" },
     { name: "Pegamento" },
-    { name: "Stickers adhesivos", detail: "Para usarlas pocos días" },
     { name: "Lima" },
-    { name: "Pulidor" },
+    { name: "Lima buffer" },
+    { name: "Wipes" },
     { name: "Palito de naranjo" },
-    { name: "Toallita con alcohol" },
   ],
   images: [],
 };

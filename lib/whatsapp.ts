@@ -1,5 +1,5 @@
 import { siteConfig } from "./site";
-import { formatARS } from "./format";
+import { formatARS, formatCm } from "./format";
 import type { CartItem, Order, SizeSelection } from "./types";
 import { ORDER_STATUS_LABEL } from "./types";
 
@@ -11,7 +11,7 @@ export function waLink(message: string, to: string = siteConfig.whatsapp): strin
 
 export function describeSizes(sizes: SizeSelection): string {
   if (sizes.mode === "standard") return `Medida ${sizes.size}`;
-  if (sizes.mode === "custom") return `Medidas (mm): ${sizes.mm.join(" · ")}`;
+  if (sizes.mode === "custom") return `Medidas (cm): ${sizes.mm.map(formatCm).join(" · ")}`;
   return "Medida a definir por WhatsApp";
 }
 

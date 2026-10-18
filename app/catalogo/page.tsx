@@ -3,7 +3,7 @@ import { getDesigns } from "@/lib/data/repo";
 import { getLivePromos } from "@/lib/data/content-repo";
 import { Promos } from "@/components/sections/Promos";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
-import { Eyebrow, Heading } from "@/components/ui/Section";
+import { Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { Stars } from "@/components/motion/Stars";
 
@@ -22,7 +22,7 @@ export default async function CatalogoPage() {
       {/* Estrellas decorativas: en el celular solo una chica a la derecha del titular (las grandes pisaban el texto y el menú) */}
       <Stars
         stars={[
-          { x: "86%", y: "30%", size: 44, rotate: 12, speed: 0.7 },
+          { x: "86%", y: "30%", size: 44, rotate: 12, speed: 0.7, mobile: false },
           { x: "84%", y: "26%", size: 90, rotate: 12, speed: 0.7, mobile: false },
           { x: "-3%", y: "44%", size: 120, rotate: -8, speed: 0.5, mobile: false },
         ]}
@@ -31,12 +31,9 @@ export default async function CatalogoPage() {
       <div className="container-x relative">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <Eyebrow>Catálogo</Eyebrow>
-            <Heading as="h1">
-              Elegí tu <span className="text-bordo">próximo set</span>
-            </Heading>
+            <Heading as="h1">Catálogo</Heading>
             <p className="mt-4 text-ink-soft">
-              Cada precio incluye las 10 uñas y el kit de aplicación. Si no encontrás el tuyo, armalo vos.
+              Cada precio incluye las 10 uñas y el kit de colocación. Si no encontrás el tuyo, armalo vos.
             </p>
           </div>
           <Button href="/disena" variant="secondary">

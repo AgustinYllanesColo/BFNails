@@ -89,9 +89,9 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
               key={t}
               selected={tag === t}
               onClick={() => setTag(tag === t ? null : t)}
-              className="capitalize"
             >
-              {t}
+              {/* solo la primera letra en mayúscula: "Dibujo a mano", no "Dibujo A Mano" */}
+              {t === "stock" ? "Entrega inmediata" : t.charAt(0).toUpperCase() + t.slice(1)}
             </Chip>
           ))}
           <div className="ml-auto flex items-center gap-2">

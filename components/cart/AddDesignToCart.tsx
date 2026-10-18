@@ -143,7 +143,7 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
           Comprar ahora
         </Button>
       </div>
-      {!valid && <p className="text-red text-xs">Completá las 10 medidas (entre 5 y 25 mm).</p>}
+      {!valid && <p className="text-red text-xs">Completá las 10 medidas (entre 0,5 y 2,5 cm).</p>}
     </div>
   );
 }
