@@ -55,7 +55,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
 
   return (
     <div>
-      <div className="bg-cream/90 sticky top-[72px] z-30 -mx-4 mb-8 space-y-3 px-4 py-3 backdrop-blur-md md:top-[84px]">
+      <div className="bg-cream/90 z-30 -mx-4 mb-8 space-y-3 px-4 py-3 md:sticky md:top-[84px] md:backdrop-blur-md">
         <div className="flex flex-wrap gap-2">
           <span className="text-ink-soft mr-1 self-center text-xs font-bold tracking-wider uppercase">
             Forma
