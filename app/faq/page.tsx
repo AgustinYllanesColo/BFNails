@@ -7,23 +7,34 @@ import { waLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = { title: "Preguntas frecuentes" };
 
+const WA_DUDA = "Hola Bren! Tengo una consulta sobre las press-on 🐱";
+
 export default function FaqPage() {
   return (
     <div className="pt-28 pb-24 md:pt-36">
-      <div className="container-x">
-        <Reveal className="max-w-2xl">
-          <Heading as="h1">Preguntas frecuentes</Heading>
-        </Reveal>
-        <div className="mt-6 max-w-3xl">
-          <Faq compact />
+      <div className="container-x grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <Reveal>
+            <Heading as="h1">Preguntas frecuentes</Heading>
+          </Reveal>
+          <Reveal className="mt-8 hidden rounded-lg bg-bordo p-8 text-cream lg:block">
+            <h2 className="font-display text-2xl">¿Te quedó alguna duda?</h2>
+            <p className="mt-2 text-cream/80">Escribime por WhatsApp, respondo rápido.</p>
+            <Button href={waLink(WA_DUDA)} target="_blank" rel="noreferrer" variant="leopard" className="mt-6">
+              Hablar por WhatsApp
+            </Button>
+          </Reveal>
         </div>
-        <Reveal className="mt-12 rounded-lg bg-bordo p-8 text-cream md:p-12">
-          <h2 className="font-display text-3xl">¿Te quedó alguna duda?</h2>
-          <p className="mt-2 text-cream/80">Escribime por WhatsApp, respondo rápido.</p>
-          <Button href={waLink("Hola Bren! Tengo una consulta sobre las press-on 🐱")} target="_blank" rel="noreferrer" variant="leopard" className="mt-6">
-            Hablar por WhatsApp
-          </Button>
-        </Reveal>
+        <div>
+          <Faq compact />
+          <Reveal className="mt-12 rounded-lg bg-bordo p-8 text-cream lg:hidden">
+            <h2 className="font-display text-2xl">¿Te quedó alguna duda?</h2>
+            <p className="mt-2 text-cream/80">Escribime por WhatsApp, respondo rápido.</p>
+            <Button href={waLink(WA_DUDA)} target="_blank" rel="noreferrer" variant="leopard" className="mt-6">
+              Hablar por WhatsApp
+            </Button>
+          </Reveal>
+        </div>
       </div>
     </div>
   );

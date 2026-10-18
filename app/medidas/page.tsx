@@ -88,29 +88,45 @@ export default function MedidasPage() {
         </div>
       </section>
 
-      <section id="personalizada" aria-labelledby="personalizada-t" className="container-x scroll-mt-24 pt-14 md:pt-20">
-        <Heading>
-          <span id="personalizada-t">Medida personalizada</span>
-        </Heading>
-        <p className="text-ink-soft mt-3">¿Cómo saco las medidas de mis uñas?</p>
-        <ol className="mt-8 max-w-3xl divide-y divide-bordo/10 rounded-lg bg-white/80 ring-1 ring-bordo/10">
-          {STEPS.map((s, i) => (
-            <li key={i} className="grid grid-cols-[auto_1fr_88px] items-center gap-4 p-4 sm:grid-cols-[auto_1fr_120px] sm:gap-6 sm:p-5">
-              <span className="font-display text-bordo grid size-10 place-items-center rounded-pill bg-cream-deep text-xl">
-                {i + 1}
-              </span>
-              <p className="text-[15px] leading-snug sm:text-base">{s.t}</p>
-              <div className="aspect-square overflow-hidden rounded-md bg-cream">{s.art}</div>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-10 flex flex-wrap gap-3">
-          <Button href="/catalogo" size="lg">
-            Ir al catálogo
-          </Button>
-          <Button href="/disena" size="lg" variant="secondary">
-            Diseñá tu set
-          </Button>
+      <section
+        id="personalizada"
+        aria-labelledby="personalizada-t"
+        className="container-x grid scroll-mt-24 gap-8 pt-14 md:pt-20 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16"
+      >
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <Heading>
+            <span id="personalizada-t">Medida personalizada</span>
+          </Heading>
+          <p className="text-ink-soft mt-3">¿Cómo saco las medidas de mis uñas? Son 4 pasos y una regla.</p>
+          <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
+            <Button href="/disena" size="lg">
+              Diseñá tu set
+            </Button>
+            <Button href="/catalogo" size="lg" variant="secondary">
+              Ver catálogo
+            </Button>
+          </div>
+        </div>
+        <div>
+          <ol className="divide-y divide-bordo/10 rounded-lg bg-white/80 ring-1 ring-bordo/10">
+            {STEPS.map((s, i) => (
+              <li key={i} className="grid grid-cols-[auto_1fr_88px] items-center gap-4 p-4 sm:grid-cols-[auto_1fr_120px] sm:gap-6 sm:p-5">
+                <span className="font-display text-bordo grid size-10 place-items-center rounded-pill bg-cream-deep text-xl">
+                  {i + 1}
+                </span>
+                <p className="text-[15px] leading-snug sm:text-base">{s.t}</p>
+                <div className="aspect-square overflow-hidden rounded-md bg-cream">{s.art}</div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-8 flex flex-wrap gap-3 lg:hidden">
+            <Button href="/disena" size="lg">
+              Diseñá tu set
+            </Button>
+            <Button href="/catalogo" size="lg" variant="secondary">
+              Ver catálogo
+            </Button>
+          </div>
         </div>
       </section>
     </div>

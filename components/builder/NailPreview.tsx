@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { BuilderSelection } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
 import { cn } from "@/lib/format";
-import { NailPreview2D } from "./NailPreview2D";
+import Image from "next/image";
 
 // three.js va en un chunk aparte y solo se pide en el cliente, cuando la vista previa está cerca
 const NailPreview3D = dynamic(() => import("./NailPreview3D").then((m) => m.NailPreview3D), { ssr: false, loading: () => null });
@@ -47,17 +47,16 @@ function probeWebGL2() {
 }
 
 /**
- * Vista previa del set. La ilustración 2D se ve al instante (nunca un recuadro vacío mientras carga); si el
- * dispositivo tiene WebGL, la mano 3D se carga en diferido y, cuando dibuja su primer cuadro, reemplaza a la
- * ilustración con un fundido (primero se va el 2D, después entra el 3D: nunca dos manos superpuestas).
- * `only2D` deja solo la ilustración (la demo de la home, que cambia sola y no necesita three.js).
+ * Vista previa del set: solo la mano realista. Mientras three.js carga se ve una foto de esa misma mano 3D
+ * (`/brand/hand-poster.webp`, capturada del render real con la selección por defecto) y, cuando el 3D dibuja su
+ * primer cuadro, entra encima con un fundido. Sin WebGL, o si el 3D falla, queda la foto. La mano ilustrada en 2D
+ * no se muestra nunca (pedido de Brenda).
  */
-export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelection; config: BuilderConfig; only2D?: boolean }) {
+export function NailPreview({ sel, config }: { sel: BuilderSelection; config: BuilderConfig }) {
   const ref = useRef<HTMLDivElement>(null);
   const [load3D, setLoad3D] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [hide2D, setHide2D] = useState(false);
   const [gen, setGen] = useState(0);
   const [hint, setHint] = useState<"off" | "on" | "gone">("off");
   const [perfGuard, setPerfGuard] = useState(true);
@@ -66,8 +65,8 @@ export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelec
 
   useEffect(() => {
     const el = ref.current;
-    // sin IntersectionObserver (navegador muy viejo) o en la demo: queda la ilustración
-    if (!el || only2D || typeof IntersectionObserver === "undefined") return;
+    // sin IntersectionObserver (navegador muy viejo): queda la foto de la mano
+    if (!el || typeof IntersectionObserver === "undefined") return;
     let idle = 0;
     let soon = 0;
     const io = new IntersectionObserver(
@@ -90,24 +89,15 @@ export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelec
       if (idle) window.cancelIdleCallback?.(idle);
       retryCleanup.current?.();
     };
-  }, [only2D]);
+  }, []);
 
   // si la ruta se oculta y vuelve (Activity / cacheComponents), repetimos el fundido desde cero
   useLayoutEffect(
     () => () => {
       setReady(false);
-      setHide2D(false);
     },
     [],
   );
-
-  // cuando el 3D ya está a la vista, el 2D se desmonta (con un timer: si el fundido no llega a
-  // correr, por ejemplo porque el 2D recién aparecía, transitionend nunca dispararía)
-  useEffect(() => {
-    if (!(load3D && !failed && ready)) return;
-    const t = window.setTimeout(() => setHide2D(true), 420);
-    return () => window.clearTimeout(t);
-  }, [load3D, failed, ready]);
 
   useEffect(() => {
     if (hint !== "on") return;
@@ -130,7 +120,6 @@ export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelec
   const onError = () => {
     setFailed(true);
     setReady(false);
-    setHide2D(false);
     // reintento acotado: en iOS el contexto se pierde al pasar la pestaña a segundo plano
     if (retries.current >= 2) return;
     retries.current += 1;
@@ -155,7 +144,7 @@ export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelec
 
   const show3D = load3D && !failed;
   const faded = show3D && ready;
-  const show2D = !(faded && hide2D);
+  const loading = show3D && !ready;
   const label = describe(sel, config);
 
   return (
@@ -164,16 +153,15 @@ export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelec
       onPointerDown={() => hint === "on" && setHint("gone")}
     >
       <div ref={ref} role="img" aria-label={label} className="absolute inset-0 bg-[radial-gradient(120%_90%_at_38%_22%,#fbf0d9_0%,#f5e8c8_55%,#efdcb6_100%)]">
-        {show2D && (
-          <div
-            className={cn(
-              "absolute inset-0 transition-opacity ease-out starting:opacity-0",
-              faded ? "opacity-0 duration-[140ms]" : "opacity-100 duration-200",
-            )}
-          >
-            <NailPreview2D sel={sel} config={config} />
-          </div>
-        )}
+        {/* La foto de la mano realista queda debajo: el 3D entra encima con un fundido y la tapa entera */}
+        <Image
+          src="/brand/hand-poster.webp"
+          alt=""
+          fill
+          loading="eager"
+          sizes="(min-width: 1024px) 440px, 100vw"
+          className="object-cover"
+        />
         {show3D && (
           <NailPreview3D
             key={gen}
@@ -183,14 +171,22 @@ export function NailPreview({ sel, config, only2D = false }: { sel: BuilderSelec
             onReady={onReady}
             onError={onError}
             className={cn(
-              // entra sobre el fondo crema; si había 2D, espera a que se vaya (fundido secuencial, sin dos manos superpuestas)
-              "absolute inset-0 block h-full w-full transition-[opacity,filter,scale] duration-[260ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
-              faded ? "opacity-100" : "opacity-0 motion-safe:scale-[1.015] motion-safe:blur-[6px]",
-              faded && show2D && "delay-100",
+              // entra sobre la foto de la misma mano: el cambio casi no se nota
+              "absolute inset-0 block h-full w-full transition-opacity duration-[320ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
+              faded ? "opacity-100" : "opacity-0",
             )}
           />
         )}
       </div>
+      {loading && (
+        <p
+          aria-live="polite"
+          className="pointer-events-none absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-pill bg-cream/90 px-2.5 py-0.5 text-[10px] font-semibold text-ink sm:text-[11px]"
+        >
+          <span aria-hidden className="size-2 rounded-full bg-bordo/70 motion-safe:animate-pulse" />
+          Cargando vista 3D
+        </p>
+      )}
       {hint !== "off" && (
         <p
           aria-hidden="true"

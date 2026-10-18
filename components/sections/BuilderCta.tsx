@@ -52,7 +52,7 @@ export function BuilderCta() {
         </Reveal>
         <Reveal y={60} className="min-w-0">
           <div className="relative min-w-0 rounded-lg bg-white p-3 shadow-[0_40px_80px_-40px_rgba(74,14,14,0.45)] ring-1 ring-bordo/10">
-            <NailPreview sel={sel} config={DEFAULT_BUILDER_CONFIG} only2D />
+            <NailPreview sel={sel} config={DEFAULT_BUILDER_CONFIG} />
             <div className="flex items-center justify-between gap-4 px-3 pt-3 pb-1">
               <p className="min-w-0 flex-1 truncate text-sm font-semibold">{labels.join(" · ")}</p>
               <p key={quote.total} className="shrink-0 text-lg font-bold tabular-nums text-bordo md:text-xl">{formatARS(quote.total)}</p>

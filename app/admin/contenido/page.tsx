@@ -11,7 +11,7 @@ const THEMES = [
   ["rojo", "Rojo"],
   ["bordo", "Bordó"],
   ["rosa", "Rosa"],
-  ["leopardo", "Leopardo"],
+  ["leopardo", "Negro y dorado"],
 ] as const;
 
 export default async function ContenidoPage() {

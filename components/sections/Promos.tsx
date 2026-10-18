@@ -6,21 +6,14 @@ import { waLink } from "@/lib/whatsapp";
 import { Heading } from "@/components/ui/Section";
 
 /**
- * Colores de cada tarjeta. Todas llevan el texto sobre un fondo liso (se lee siempre); el leopardo va como marco,
- * igual que el botón leopardo del sitio, nunca detrás de las letras.
+ * Colores de cada tarjeta, siempre lisos para que el texto se lea. "leopardo" quedó como negro y dorado (los tonos
+ * del estampado, sin el estampado: de fondo o de marco se veía recargado).
  */
-const THEMES: Record<PromoTheme, { frame?: string; card: string; badge: string; text: string; muted: string; cta: string }> = {
+const THEMES: Record<PromoTheme, { card: string; badge: string; text: string; muted: string; cta: string }> = {
   rojo: { card: "bg-red", badge: "bg-yellow text-ink", text: "text-cream", muted: "text-cream/85", cta: "bg-cream text-red" },
   bordo: { card: "bg-bordo", badge: "bg-cream text-bordo", text: "text-cream", muted: "text-cream/80", cta: "bg-cream text-bordo" },
   rosa: { card: "bg-[#f6c3d6]", badge: "bg-bordo text-cream", text: "text-bordo", muted: "text-bordo/80", cta: "bg-bordo text-cream" },
-  leopardo: {
-    frame: "leopard-bg p-[5px]",
-    card: "bg-bordo",
-    badge: "bg-yellow text-ink",
-    text: "text-cream",
-    muted: "text-cream/80",
-    cta: "bg-cream text-bordo",
-  },
+  leopardo: { card: "bg-[#2a2321]", badge: "bg-[#c9a063] text-ink", text: "text-cream", muted: "text-cream/75", cta: "bg-[#c9a063] text-ink" },
 };
 
 const DAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
@@ -68,10 +61,9 @@ export function PromoCard({ promo: p }: { promo: Promo }) {
       rel={external ? "noopener noreferrer" : undefined}
       className={cn(
         "group block h-full rounded-[20px] shadow-[0_18px_40px_-24px_rgba(74,14,14,0.55)] transition-transform duration-300 ease-[var(--ease-out-expo)] hover:-translate-y-1",
-        t.frame,
       )}
     >
-      <span className={cn("relative flex h-full min-h-[208px] overflow-hidden", t.frame ? "rounded-[15px]" : "rounded-[20px]", t.card)}>
+      <span className={cn("relative flex h-full min-h-[208px] overflow-hidden rounded-[20px]", t.card)}>
         <span className="relative z-[1] flex min-w-0 flex-1 flex-col p-5">
           <span className={cn("font-display w-fit -rotate-2 rounded-lg px-3 py-1.5 text-[32px] leading-none md:text-[36px]", t.badge)}>
             {p.badge}
