@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const sizeSchema = z.discriminatedUnion("mode", [
-  z.object({ mode: z.literal("standard"), size: z.enum(["XS", "S", "M", "L"]) }),
+  z.object({ mode: z.literal("standard"), size: z.enum(["S", "M", "L"]) }),
   z.object({ mode: z.literal("custom"), mm: z.array(z.number().min(5).max(25)).length(10) }),
   z.object({ mode: z.literal("kit") }),
 ]);
@@ -13,6 +13,7 @@ export const selectionSchema = z.object({
   base: z.string().min(1).max(40),
   extras: z.array(z.string().max(40)).max(20),
   tipColor: z.string().max(40).optional(),
+  charms: z.array(z.object({ id: z.string().max(60), qty: z.number().int().min(1).max(20) })).max(20).optional(),
   notes: z.string().max(600).optional(),
   referenceUrl: z.string().max(500).optional(),
 });

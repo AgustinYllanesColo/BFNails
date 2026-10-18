@@ -25,7 +25,7 @@ import type { CartItem } from "@/lib/types";
 export async function POST(req: Request) {
   if (!ordersEnabled()) {
     return NextResponse.json(
-      { error: "Todavía no estamos tomando pedidos por la web. Escribinos por WhatsApp." },
+      { error: "Todavía no tomo pedidos por la web. Escribime por WhatsApp." },
       { status: 503 },
     );
   }
@@ -95,12 +95,12 @@ export async function POST(req: Request) {
     !(input.delivery.address?.street && input.delivery.address?.city && postalCode)
   ) {
     return NextResponse.json(
-      { error: "Necesitamos dirección, localidad y código postal para el envío" },
+      { error: "Faltan dirección, localidad y código postal para el envío" },
       { status: 400 },
     );
   }
   if (input.delivery.method === "moto" && !input.delivery.address?.street) {
-    return NextResponse.json({ error: "Necesitamos tu dirección para la moto" }, { status: 400 });
+    return NextResponse.json({ error: "Falta tu dirección para la moto" }, { status: 400 });
   }
 
   if (

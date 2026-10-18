@@ -13,7 +13,7 @@ const STEPS = [
   {
     n: "01",
     title: "Elegí o diseñá",
-    text: "Un set del catálogo, uno armado por vos o el diseño que viste en Pinterest o TikTok. Nos pasás la foto y lo hacemos.",
+    text: "Un set del catálogo, uno armado por vos o el diseño que viste. Me pasás la foto y lo hago.",
     icon: (
       <svg
         viewBox="0 0 48 48"
@@ -30,8 +30,8 @@ const STEPS = [
   },
   {
     n: "02",
-    title: "Medí tu talle",
-    text: "Elegís un talle estándar con nuestra guía, o nos mandás el ancho de cada una de tus diez uñas y las hacemos personalizadas.",
+    title: "Elegí tu medida",
+    text: "Universal (S, M, L) o personalizada con tus 10 medidas.",
     icon: (
       <svg
         viewBox="0 0 48 48"
@@ -50,7 +50,7 @@ const STEPS = [
   {
     n: "03",
     title: "Pagá como quieras",
-    text: "Mercado Pago, transferencia o efectivo al recibir. Confirmás por WhatsApp con un toque y nos ponemos a trabajar.",
+    text: "Mercado Pago, transferencia o efectivo. Me confirmás por WhatsApp y arranco.",
     icon: (
       <svg
         viewBox="0 0 48 48"
@@ -69,7 +69,7 @@ const STEPS = [
   {
     n: "04",
     title: "Recibí y pegá",
-    text: "Kit con las diez uñas, pegamento y lima. Se ponen en diez minutos, duran semanas y se vuelven a usar.",
+    text: "Con el kit de aplicación. Se ponen en 10 minutos y se reusan.",
     icon: (
       <svg
         viewBox="0 0 48 48"
@@ -91,9 +91,9 @@ const STEPS = [
 /** Imagen o gráfico de cada paso: fotos reales donde hay, un gráfico de marca donde no. */
 const VISUALS: Record<string, { src?: string; alt?: string; caption: string }> = {
   "01": { src: "/catalog/set-gems-french.webp", alt: "Francesita con gemas de colores", caption: "del catálogo, del armador o de tu Pinterest" },
-  "02": { caption: "talle estándar o tus 10 medidas en mm" },
+  "02": { caption: "S, M, L o tus 10 medidas en mm" },
   "03": { caption: "Mercado Pago · transferencia · efectivo" },
-  "04": { src: "/catalog/set-milky-gold-foil.webp", alt: "Set milky con foil dorado listo para pegar", caption: "10 uñas + pegamento + lima + guía" },
+  "04": { src: "/catalog/set-milky-gold-foil.webp", alt: "Set milky con foil dorado listo para pegar", caption: "10 uñas + kit de aplicación" },
 };
 
 /**
@@ -128,7 +128,7 @@ export function HowItWorks() {
             De tu idea a tus manos <span className="text-yellow">en 4 pasos</span>
           </h2>
           <p className="mt-5 max-w-sm text-cream/75">
-            Todo se hace a mano y a pedido. Entre que elegís y las tenés puestas pasan entre 3 y 7 días, y te vamos avisando por WhatsApp.
+            A pedido, entre 3 y 7 días. Te aviso por WhatsApp.
           </p>
           <div className="mt-8 hidden items-center gap-3 lg:flex">
             <Star size={18} className="text-yellow" />

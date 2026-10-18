@@ -59,7 +59,7 @@ export function DesignForm({ design }: { design?: Design }) {
           <L label="Precio (ARS)">
             <input name="price" type="number" min={0} step={100} required defaultValue={design?.price} className={adminInput} />
           </L>
-          <L label="Tags (coma)">
+          <L label="Tags (coma; &quot;stock&quot; = entrega inmediata)">
             <input name="tags" defaultValue={design?.tags.join(", ")} className={adminInput} placeholder="francesita, minimal" />
           </L>
           <L label="Colores hex (coma)">

@@ -87,7 +87,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
 
   const onSubmit = form.handleSubmit(async (v) => {
     setServerError(null);
-    if (needsAddress && !v.street) return form.setError("street", { message: "Necesitamos tu dirección" });
+    if (needsAddress && !v.street) return form.setError("street", { message: "Falta tu dirección" });
     if (needsFullAddress && (!v.city || !v.postalCode)) {
       if (!v.city) form.setError("city", { message: "Localidad" });
       if (!v.postalCode) form.setError("postalCode", { message: "Código postal" });
@@ -145,7 +145,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
             <Field label="Nombre" htmlFor="name" error={form.formState.errors.name?.message}>
               <input id="name" className={inputClass} autoComplete="name" {...form.register("name")} />
             </Field>
-            <Field label="WhatsApp" htmlFor="whatsapp" hint="Por acá confirmamos todo." error={form.formState.errors.whatsapp?.message}>
+            <Field label="WhatsApp" htmlFor="whatsapp" hint="Por acá te confirmo todo." error={form.formState.errors.whatsapp?.message}>
               <input id="whatsapp" className={inputClass} inputMode="tel" autoComplete="tel" placeholder="11 2345 6789" {...form.register("whatsapp")} />
             </Field>
             <Field label="Email (opcional)" htmlFor="email" error={form.formState.errors.email?.message} className="md:col-span-2">
@@ -244,18 +244,18 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
               selected={effectivePayment === "efectivo"}
               onClick={() => setPayment("efectivo")}
               title="Efectivo"
-              description={cashAllowed ? "Pagás al recibir, en la estación o cuando te lo llevamos." : "Solo para retiro en estación o moto."}
+              description={cashAllowed ? "Pagás al recibir, en la estación o cuando te lo llevo." : "Solo para retiro en estación o moto."}
               disabled={!cashAllowed}
             />
           </div>
           {motoFrom && (
             <p className="mt-3 rounded-md bg-cream-deep p-3 text-sm text-ink-soft">
-              La moto arranca en {formatARS(chosen?.cost ?? 0)} y el precio final depende de tu barrio. Te lo confirmamos por WhatsApp antes de cobrar.
+              La moto arranca en {formatARS(chosen?.cost ?? 0)} y el precio final depende de tu barrio. Te lo confirmo por WhatsApp antes de cobrar.
             </p>
           )}
           {needsConfirmation && (
             <p className="mt-3 rounded-md bg-yellow/30 p-3 text-sm">
-              Tenés un set con notas: te confirmamos el precio final por WhatsApp y después pagás.
+              Tenés un set con notas: te confirmo el precio final por WhatsApp y después pagás.
             </p>
           )}
         </section>

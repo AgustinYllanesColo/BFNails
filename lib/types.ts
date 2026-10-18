@@ -19,7 +19,7 @@ export type Design = {
   colors?: string[]; // paleta para placeholder y filtros
 };
 
-export type StandardSize = "XS" | "S" | "M" | "L";
+export type StandardSize = "S" | "M" | "L";
 
 export type SizeSelection =
   | { mode: "standard"; size: StandardSize }
@@ -33,6 +33,7 @@ export type BuilderSelection = {
   base: string; // id de color base
   extras: string[]; // ids de técnicas/extras
   tipColor?: string; // id de color base para la francesita de color
+  charms?: Array<{ id: string; qty: number }>; // dijes elegidos
   notes?: string;
   referenceUrl?: string;
 };

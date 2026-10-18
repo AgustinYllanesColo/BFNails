@@ -11,22 +11,22 @@ export default function TerminosPage() {
       <section>
         <h2>1. Quiénes somos</h2>
         <p>
-          {siteConfig.name} («BF Studio», «nosotros») es un emprendimiento con base en Remedios de Escalada, Lanús, Provincia de Buenos Aires, Argentina, dedicado a la fabricación artesanal de uñas press-on y al servicio de manicuría en su estudio. Al hacer un pedido a través de este sitio aceptás estos términos. Si tenés dudas, escribinos por WhatsApp antes de comprar.
+          {siteConfig.name} («BF Studio», «nosotros») es un emprendimiento con base en Remedios de Escalada, Lanús, Provincia de Buenos Aires, Argentina, dedicado a la fabricación artesanal de uñas press-on y al servicio de manicuría en su estudio. Al hacer un pedido a través de este sitio aceptás estos términos. Si tenés dudas, escribime por WhatsApp antes de comprar.
         </p>
       </section>
       <section>
         <h2>2. Productos y personalización</h2>
         <p>
-          Cada set se fabrica a pedido, a mano y según el talle y el diseño que elegís. Las fotos del catálogo y la vista previa del armador son ilustrativas: al ser un producto artesanal pueden existir pequeñas variaciones de color, brillo o detalle respecto de la imagen. El kit incluye 10 uñas, pegamento y lima.
+          Cada set se fabrica a pedido, a mano y según la medida y el diseño que elegís. Las fotos del catálogo y la vista previa del armador son ilustrativas: al ser un producto artesanal pueden existir pequeñas variaciones de color, brillo o detalle respecto de la imagen. El kit incluye 10 uñas, pegamento y lima.
         </p>
         <p>
           Cuando pedís un diseño con notas libres o una referencia de internet, el precio mostrado es orientativo y se confirma por WhatsApp antes de cobrar. Los diseños inspirados en imágenes de terceros se realizan como interpretación artesanal, no como copia exacta.
         </p>
       </section>
       <section>
-        <h2>3. Talles</h2>
+        <h2>3. Medidas</h2>
         <p>
-          El talle es responsabilidad de quien compra. Ofrecemos una guía de talles estándar y la opción de enviarnos las medidas de cada uña en milímetros para un set personalizado. Un set hecho con medidas enviadas por la clienta no se rehace sin cargo si las medidas eran incorrectas, aunque siempre vamos a buscar la mejor solución.
+          La medida es responsabilidad de quien compra. Ofrezco medidas universales (S, M, L) y la opción de enviarme las medidas de cada uña en milímetros para un set personalizado. Un set hecho con medidas enviadas por la clienta no se rehace sin cargo si las medidas eran incorrectas, aunque siempre vamos a buscar la mejor solución.
         </p>
       </section>
       <section>
@@ -62,7 +62,7 @@ export default function TerminosPage() {
       <section>
         <h2>9. Contacto y ley aplicable</h2>
         <p>
-          Para cualquier consulta escribinos por WhatsApp desde el sitio. Estos términos se rigen por las leyes de la República Argentina. Defensa del Consumidor: para reclamos podés ingresar a www.argentina.gob.ar/defensadelconsumidor o llamar al 0800-666-1518.
+          Para cualquier consulta escribime por WhatsApp desde el sitio. Estos términos se rigen por las leyes de la República Argentina. Defensa del Consumidor: para reclamos podés ingresar a www.argentina.gob.ar/defensadelconsumidor o llamar al 0800-666-1518.
         </p>
       </section>
     </LegalPage>

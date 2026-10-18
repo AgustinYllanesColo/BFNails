@@ -29,7 +29,7 @@ export function Studio() {
                 Soft gel, kapping y semi, <span className="text-bordo">con turno.</span>
               </h2>
               <p className="text-ink-soft mt-4 max-w-lg">
-                Si preferís que te las hagamos en persona: {services} en el estudio de{" "}
+                Si preferís que te las haga en persona: {services} en el estudio de{" "}
                 {studio.area}, {studio.note}. Pedí tu turno por WhatsApp o por Instagram.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">

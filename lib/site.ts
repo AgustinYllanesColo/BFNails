@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "BF Nails Studio",
   shortName: "BF Nails",
   description:
-    "Uñas press-on hechas a mano por Bren, a tu talle. Kit con 10 uñas, pegamento y lima. Remedios de Escalada, Lanús, Banfield, Lomas y envíos a todo el país.",
+    "Uñas press-on personalizadas, con kit de aplicación. Remedios de Escalada, Lanús, Banfield, Lomas y envíos a todo el país.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5491128253431",
   instagram: "https://instagram.com/bf.nailstudio_",
@@ -26,6 +26,7 @@ export const siteConfig = {
 export const nav = [
   { href: "/catalogo", label: "Catálogo" },
   { href: "/disena", label: "Diseñá tu set" },
-  { href: "/talles", label: "Talles" },
+  { href: "/dijes", label: "Dijes" },
+  { href: "/medidas", label: "Medidas" },
   { href: "/faq", label: "Preguntas" },
 ] as const;

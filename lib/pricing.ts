@@ -1,4 +1,5 @@
 import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
+import type { Charm } from "./data/content";
 
 /**
  * Motor de precios del armador. Es una función pura: la misma config y selección
@@ -33,6 +34,8 @@ export type BuilderConfig = {
   bases: Array<Option & { hex: string }>;
   extras: Array<Option & { group: string }>;
   tiers: ComplexityTier[];
+  /** Dijes disponibles (se cargan desde el admin); cada uno suma su precio por unidad. */
+  charms?: Charm[];
 };
 
 export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
@@ -90,7 +93,6 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
       complexity: 1,
     },
     { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, complexity: 2 },
-    { id: "charms", group: "3D y apliques", label: "Charms / dijes", delta: 2500, complexity: 2 },
     {
       id: "3d",
       group: "3D y apliques",
@@ -156,7 +158,7 @@ export function quoteSelection(
   config: BuilderConfig = DEFAULT_BUILDER_CONFIG,
 ): Quote {
   const lines: Quote["lines"] = [
-    { id: "base", label: "Set base (10 uñas + pegamento + lima)", amount: config.basePrice },
+    { id: "base", label: "Set base (10 uñas + kit de aplicación)", amount: config.basePrice },
   ];
   let points = 0;
 
@@ -183,13 +185,15 @@ export function quoteSelection(
     lines.push({ id: `extra:${extra.id}`, label: extra.label, amount: extra.delta });
   }
 
+  for (const pick of sel.charms ?? []) {
+    const charm = config.charms?.find((c) => c.id === pick.id);
+    if (!charm || pick.qty <= 0) continue;
+    lines.push({ id: `charm:${charm.id}`, label: `Dije ${charm.name} ×${pick.qty}`, amount: charm.price * pick.qty });
+  }
+
   const tier = tierForPoints(points, config.tiers);
   if (tier.surcharge > 0) {
-    lines.push({
-      id: "complexity",
-      label: `Nivel ${tier.label.toLowerCase()}`,
-      amount: tier.surcharge,
-    });
+    lines.push({ id: "complexity", label: "Trabajo de detalle", amount: tier.surcharge });
   }
 
   const subtotal = lines.reduce((acc, l) => acc + l.amount, 0);

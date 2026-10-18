@@ -100,7 +100,7 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
         </div>
       </div>
       <div>
-        <p className="mb-3 text-sm font-semibold">Tu talle</p>
+        <p className="mb-3 text-sm font-semibold">Tu medida</p>
         <SizePicker value={sizes} onChange={setSizes} />
       </div>
 

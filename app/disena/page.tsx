@@ -22,7 +22,7 @@ export default async function DisenaPage() {
             Diseñá <span className="text-bordo">tu set</span>
           </Heading>
           <p className="mt-4 text-ink-soft">
-            Elegí y mirá cómo cambia el precio. El set base incluye 10 uñas a tu talle, pegamento y lima.
+            Elegí y mirá el precio al instante. Incluye el kit de aplicación.
           </p>
         </div>
         <Builder config={config} />

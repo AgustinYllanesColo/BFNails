@@ -44,7 +44,7 @@ describe("orderConfirmationMessage", () => {
   it("incluye número, items, talles, total, pago y link", () => {
     const msg = orderConfirmationMessage(order, "https://bf.test/pedido/BF-0007?t=tok");
     expect(msg).toContain("*BF-0007*");
-    expect(msg).toContain("Cherry Red x2 (Talle M)");
+    expect(msg).toContain("Cherry Red x2 (Medida M)");
     expect(msg).toContain("Medidas (mm): 17 · 13");
     expect(msg).toContain("Nota: una K");
     expect(msg).toContain("(a confirmar)");
@@ -57,7 +57,7 @@ describe("orderConfirmationMessage", () => {
 
 describe("describeSizes", () => {
   it("describe los tres modos", () => {
-    expect(describeSizes({ mode: "standard", size: "L" })).toBe("Talle L");
+    expect(describeSizes({ mode: "standard", size: "L" })).toBe("Medida L");
     expect(describeSizes({ mode: "kit" })).toMatch(/WhatsApp/);
   });
 });

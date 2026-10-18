@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/admin", label: "Resumen", icon: "◆" },
   { href: "/admin/pedidos", label: "Pedidos", icon: "✦" },
   { href: "/admin/catalogo", label: "Catálogo", icon: "✿" },
+  { href: "/admin/contenido", label: "Promos, dijes y kit", icon: "★" },
   { href: "/admin/armador", label: "Armador", icon: "✧" },
   { href: "/admin/insumos", label: "Insumos", icon: "⬢" },
   { href: "/admin/costos", label: "Costos y margen", icon: "%" },

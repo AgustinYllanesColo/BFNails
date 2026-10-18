@@ -2,7 +2,7 @@ import { ViewTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Design } from "@/lib/types";
-import { COMPLEXITY_LABEL, LENGTH_LABEL, SHAPE_LABEL, designImage } from "@/lib/data/catalog";
+import { LENGTH_LABEL, SHAPE_LABEL, designImage, inStock } from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
 
@@ -39,9 +39,11 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
                 <span className="sr-only sm:not-sr-only">favorito</span>
               </Badge>
             )}
-            <Badge tone="cream" className="px-2 sm:px-2.5">
-              {COMPLEXITY_LABEL[design.complexity]}
-            </Badge>
+            {inStock(design) && (
+              <Badge tone="green" className="px-2 sm:px-2.5">
+                Entrega inmediata
+              </Badge>
+            )}
           </div>
         </div>
       </ViewTransition>

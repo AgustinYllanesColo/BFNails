@@ -25,19 +25,19 @@ export function SizePicker({ value, onChange, compact }: Props) {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         <Chip selected={mode === "standard"} onClick={() => onChange({ mode: "standard", size: "S" })}>
-          Talle estándar
+          Universal (S · M · L)
         </Chip>
         <Chip selected={mode === "custom"} onClick={() => onChange({ mode: "custom", mm: Array(10).fill(0) })}>
-          Mis medidas en mm
+          Personalizada
         </Chip>
         <Chip selected={mode === "kit"} onClick={() => onChange({ mode: "kit" })}>
-          Lo veo por WhatsApp
+          Te la paso por WhatsApp
         </Chip>
       </div>
 
       {mode === "standard" && (
         <div>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {SIZE_ORDER.map((s: StandardSize) => {
               const selected = value.mode === "standard" && value.size === s;
               return (
@@ -62,8 +62,8 @@ export function SizePicker({ value, onChange, compact }: Props) {
           {!compact && (
             <p className="mt-2 text-xs text-ink-soft">
               ¿No sabés cuál sos?{" "}
-              <Link href="/talles" className="font-semibold text-bordo underline underline-offset-4">
-                Mirá la guía de talles
+              <Link href="/medidas#universal" className="font-semibold text-bordo underline underline-offset-4">
+                Mirá la tabla
               </Link>
               .
             </p>
@@ -75,7 +75,7 @@ export function SizePicker({ value, onChange, compact }: Props) {
         <div>
           <p className="mb-3 text-xs text-ink-soft">
             Ancho de cada uña en milímetros, en la parte más ancha.{" "}
-            <Link href="/talles" className="font-semibold text-bordo underline underline-offset-4">
+            <Link href="/medidas#personalizada" className="font-semibold text-bordo underline underline-offset-4">
               Cómo medir
             </Link>
           </p>
@@ -110,8 +110,7 @@ export function SizePicker({ value, onChange, compact }: Props) {
 
       {mode === "kit" && (
         <p className="rounded-md bg-cream-deep p-4 text-sm text-ink-soft">
-          Dale, lo resolvemos juntas por WhatsApp después de confirmar el pedido. Te mandamos la guía y
-          lo ajustamos a tu mano.
+          Después de confirmar el pedido te paso la guía por WhatsApp y lo vemos juntas.
         </p>
       )}
     </div>

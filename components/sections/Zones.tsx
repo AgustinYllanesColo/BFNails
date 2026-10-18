@@ -35,7 +35,7 @@ const OPTIONS = [
   {
     title: "Moto en zona",
     price: `${formatARS(3500)} a ${formatARS(4500)}`,
-    text: "Escalada, Lomas, Banfield y Lanús. El precio depende de la zona y lo confirmamos por WhatsApp.",
+    text: "Escalada, Lomas, Banfield y Lanús. El precio depende de la zona, te lo confirmo por WhatsApp.",
     icon: (
       <svg
         viewBox="0 0 48 48"
@@ -119,8 +119,8 @@ export function Zones() {
             Del sur del conurbano <span className="text-bordo">a todo el país</span>
           </Heading>
           <p className="text-ink-soft mt-5 max-w-md">
-            BF Studio está en Remedios de Escalada. Si sos de la zona nos vemos en la estación o te
-            lo llevamos en moto. Si no, viaja por Correo Argentino.
+            Estoy en Remedios de Escalada. Si sos de la zona nos vemos en la estación o te lo llevo en
+            moto. Si no, va por Correo Argentino.
           </p>
         </Reveal>
         <Reveal className="mt-8 flex flex-wrap items-center gap-2">

@@ -208,6 +208,11 @@ export const FINISH_LABEL: Record<Design["finish"], string> = {
   cromado: "Cromado",
 };
 
+/** Sets hechos en medidas universales que ya están listos (tag "stock" desde el admin). */
+export function inStock(design: Pick<Design, "tags">): boolean {
+  return design.tags.some((t) => t.toLowerCase() === "stock");
+}
+
 export const COMPLEXITY_LABEL: Record<Design["complexity"], string> = {
   1: "Simple",
   2: "Intermedio",

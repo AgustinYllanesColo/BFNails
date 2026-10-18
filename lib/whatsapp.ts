@@ -10,9 +10,9 @@ export function waLink(message: string, to: string = siteConfig.whatsapp): strin
 }
 
 export function describeSizes(sizes: SizeSelection): string {
-  if (sizes.mode === "standard") return `Talle ${sizes.size}`;
+  if (sizes.mode === "standard") return `Medida ${sizes.size}`;
   if (sizes.mode === "custom") return `Medidas (mm): ${sizes.mm.join(" · ")}`;
-  return "Talle a definir por WhatsApp";
+  return "Medida a definir por WhatsApp";
 }
 
 export function describeItem(item: CartItem): string {
@@ -26,9 +26,10 @@ export function describeItem(item: CartItem): string {
   const extras = s.extras.length
     ? `, extras: ${s.extras.join(", ")}${s.tipColor ? ` (punta ${s.tipColor})` : ""}`
     : "";
+  const charms = s.charms?.length ? `, dijes: ${s.charms.map((c) => `${c.id} ×${c.qty}`).join(", ")}` : "";
   const notes = s.notes ? `\n  Nota: ${s.notes}` : "";
   const ref = s.referenceUrl ? `\n  Referencia: ${s.referenceUrl}` : "";
-  return `• Diseño propio x${item.qty} (${sizes})\n  ${s.shape}, ${s.length}, ${s.finish}, base ${s.base}${extras}${notes}${ref}\n  ${formatARS(item.unitPrice * item.qty)}${item.quote.needsConfirmation ? " (a confirmar)" : ""}`;
+  return `• Diseño propio x${item.qty} (${sizes})\n  ${s.shape}, ${s.length}, ${s.finish}, base ${s.base}${extras}${charms}${notes}${ref}\n  ${formatARS(item.unitPrice * item.qty)}${item.quote.needsConfirmation ? " (a confirmar)" : ""}`;
 }
 
 /** Mensaje que la clienta le manda a Brenda para confirmar el pedido. */

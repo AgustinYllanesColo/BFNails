@@ -17,7 +17,7 @@ export function ArrepentimientoForm() {
         <Field label="Tu nombre" htmlFor="r-name">
           <input id="r-name" className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
-        <Field label="Número de pedido" htmlFor="r-order" hint="Ej: BF-0012. Está en el link que te mandamos.">
+        <Field label="Número de pedido" htmlFor="r-order" hint="Ej: BF-0012. Está en el link que te mandé.">
           <input id="r-order" className={inputClass} value={order} onChange={(e) => setOrder(e.target.value)} />
         </Field>
         <Field label="Motivo (opcional)" htmlFor="r-reason" className="md:col-span-2">

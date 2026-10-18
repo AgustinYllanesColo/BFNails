@@ -29,7 +29,7 @@ export default async function CheckoutPage() {
             <Image src="/brand/kitty.webp" alt="" width={72} height={85} className="h-20 w-auto shrink-0" />
             <div className="flex-1">
               <p className="font-display text-2xl">Por ahora, los pedidos van por WhatsApp</p>
-              <p className="mt-1 text-sm text-ink-soft">Armá tu carrito igual: con un toque nos lo mandás con todo el detalle y lo cerrás por ahí.</p>
+              <p className="mt-1 text-sm text-ink-soft">Armá tu carrito igual: con un toque me lo mandás con todo el detalle y lo cerrás por ahí.</p>
             </div>
             <Button href={waLink("Hola Bren! Quiero hacer un pedido 🐱")} target="_blank" rel="noreferrer" size="md">
               Pedir por WhatsApp

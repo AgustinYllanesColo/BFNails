@@ -34,12 +34,12 @@ export function SizeFinder() {
           >
             <span className="grid size-16 place-items-center rounded-pill bg-bordo font-display text-3xl text-cream">{size}</span>
             <p className="text-sm text-ink-soft">
-              Te sugerimos el <strong className="text-ink">talle {size}</strong>. Si querés exactitud total, cargá
-              las 10 medidas al hacer el pedido.
+              Sos <strong className="text-ink">{size}</strong>. Para que queden exactas, pedilas con medida
+              personalizada.
             </p>
           </motion.div>
         ) : (
-          <p className="text-sm text-ink-soft">Cargá las dos medidas y te decimos tu talle.</p>
+          <p className="text-sm text-ink-soft">Cargá las dos medidas.</p>
         )}
       </div>
     </div>

@@ -39,7 +39,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
         <h1 className="font-display text-[clamp(2.4rem,7vw,4.5rem)] leading-[0.95]">
           {order.status === "a_confirmar" ? (
             <>
-              Recibido, <span className="text-bordo">lo cotizamos</span>
+              Recibido, <span className="text-bordo">te lo cotizo</span>
             </>
           ) : isPaid ? (
             <>
@@ -53,7 +53,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
         </h1>
 
         {pago === "error" && <p className="mt-4 rounded-md bg-red/10 p-3 text-sm text-red">El pago no se completó. Podés reintentar o elegir transferencia.</p>}
-        {pago === "pendiente" && <p className="mt-4 rounded-md bg-yellow/30 p-3 text-sm">Mercado Pago está procesando tu pago. Te avisamos por WhatsApp cuando se acredite.</p>}
+        {pago === "pendiente" && <p className="mt-4 rounded-md bg-yellow/30 p-3 text-sm">Mercado Pago está procesando tu pago. Te aviso por WhatsApp cuando se acredite.</p>}
 
         {/* Estado */}
         <ol className="mt-8 grid grid-cols-3 gap-2 text-center text-[11px] font-bold tracking-wider uppercase md:grid-cols-6">
@@ -88,7 +88,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
             </div>
           )}
           <p className="mt-3 text-sm text-cream/85">
-            El botón abre WhatsApp con el resumen de tu pedido ya escrito. {order.payment.method === "transferencia" && !isPaid ? "Adjuntá el comprobante y listo." : "Así lo tenemos a mano y arrancamos."}
+            El botón abre WhatsApp con el resumen de tu pedido ya escrito. {order.payment.method === "transferencia" && !isPaid ? "Adjuntá el comprobante y listo." : "Así lo tengo a mano y arrancamos."}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button href={wa} target="_blank" rel="noreferrer" variant="leopard" size="lg" data-cursor="wsp">

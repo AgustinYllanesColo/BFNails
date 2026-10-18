@@ -6,13 +6,16 @@ import { Zones } from "@/components/sections/Zones";
 import { Studio } from "@/components/sections/Studio";
 import { Faq } from "@/components/sections/Faq";
 import { Marquee } from "@/components/motion/Marquee";
+import { Promos } from "@/components/sections/Promos";
+import { KitSection } from "@/components/sections/KitSection";
 import { getFeaturedDesigns } from "@/lib/data/repo";
+import { getKit, getLivePromos } from "@/lib/data/content-repo";
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const featured = await getFeaturedDesigns(4);
+  const [featured, promos, kit] = await Promise.all([getFeaturedDesigns(4), getLivePromos(), getKit()]);
   return (
     <>
       <Hero />
@@ -21,8 +24,8 @@ export default async function HomePage() {
         <div className="-mx-[4vw] w-[108vw] -rotate-[1.5deg]">
           <Marquee
             items={[
-              "press-on a tu talle",
-              "hechas a mano",
+              "press-on personalizadas",
+              "kit de aplicación incluido",
               "reutilizables",
               "Remedios de Escalada",
               "envíos a todo el país",
@@ -32,8 +35,10 @@ export default async function HomePage() {
           />
         </div>
       </div>
+      <Promos promos={promos} />
       <Featured designs={featured} />
       <HowItWorks />
+      <KitSection kit={kit} />
       <BuilderCta />
       <Zones />
       <Studio />

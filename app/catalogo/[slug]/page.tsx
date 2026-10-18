@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { getDesign, getDesigns } from "@/lib/data/repo";
 import { getBuilderConfig } from "@/lib/data/settings";
 import {
-  COMPLEXITY_LABEL,
+  inStock,
   FINISH_LABEL,
   designImage,
 } from "@/lib/data/catalog";
@@ -93,8 +93,8 @@ export default async function DesignPage({ params }: Props) {
             <Reveal>
               <div className="flex flex-wrap gap-2">
                 {design.featured && <Badge tone="yellow">★ favorito</Badge>}
-                <Badge tone="cream">{COMPLEXITY_LABEL[design.complexity]}</Badge>
-                {design.tags.map((t) => (
+                {inStock(design) && <Badge tone="green">Entrega inmediata</Badge>}
+                {design.tags.filter((t) => t !== "stock").map((t) => (
                   <Badge key={t} tone="cream" className="normal-case">
                     {t}
                   </Badge>
@@ -112,8 +112,8 @@ export default async function DesignPage({ params }: Props) {
               <AddDesignToCart design={design} config={config} />
 
               <ul className="text-ink-soft mt-8 space-y-2 text-sm">
-                <li>✦ 10 uñas en tu talle + pegamento + lima</li>
-                <li>✦ Hecho a mano y a pedido: 3 a 7 días</li>
+                <li>✦ 10 uñas + kit de aplicación</li>
+                <li>{inStock(design) ? "✦ En stock: sale en el momento" : "✦ A pedido: 3 a 7 días"}</li>
                 <li>✦ Retiro en estación gratis o envío por Correo Argentino</li>
               </ul>
             </Reveal>

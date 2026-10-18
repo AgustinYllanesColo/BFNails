@@ -5,12 +5,11 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { HeroPhotos } from "@/components/motion/HeroPhotos";
-import { SpinningBadge } from "@/components/motion/SpinningBadge";
 import { Button } from "@/components/ui/Button";
 
 /**
  * Hero: el logo real de BF Studio, grande y centrado, sobre un halo cálido, con fotos reales de sets
- * alrededor como stickers. Una sola intro corta (logo, fotos, copy, sello) y después nada corre por
+ * alrededor como stickers. Una sola intro corta (logo, fotos, copy) y después nada corre por
  * cuadro: ni filas de texto en movimiento ni parallax atado al scroll. Lo único vivo es una
  * flotación suave del logo, en CSS.
  */
@@ -41,12 +40,6 @@ export function Hero() {
         { autoAlpha: 0, y: reduce ? 0 : 16 },
         { autoAlpha: 1, y: 0, stagger: 0.08 },
         0.55,
-      );
-      tl.fromTo(
-        q("[data-hero-badge]"),
-        { autoAlpha: 0, scale: 0.8 },
-        { autoAlpha: 1, scale: 1, ease: "back.out(1.6)" },
-        0.9,
       );
       tl.fromTo(q("[data-hero-cue]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6 }, 1.3);
     }, el);
@@ -82,13 +75,9 @@ export function Hero() {
 
       {/* Copy + CTAs */}
       <div data-hero-copy className="relative mt-6 max-w-xl px-5 text-center md:mt-8">
-        <p className="text-bordo text-xs font-bold tracking-[0.24em] uppercase">
-          Press-on a tu talle · hechas a mano en Escalada
-        </p>
-        <p className="text-ink-soft mt-3 text-lg leading-relaxed text-balance md:text-xl">
-          Uñas a tu talle, listas para pegar. Elegís del catálogo, armás el tuyo o nos pasás el
-          diseño que viste en internet.
-        </p>
+        <h1 className="font-display text-ink text-4xl md:text-5xl">
+          Press-on <span className="text-bordo">personalizadas</span>
+        </h1>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Magnetic>
             <Button href="/catalogo" size="lg" data-cursor="ver">
@@ -101,13 +90,6 @@ export function Hero() {
             </Button>
           </Magnetic>
         </div>
-      </div>
-
-      <div
-        data-hero-badge
-        className="absolute bottom-8 left-[clamp(16px,4vw,48px)] hidden md:block"
-      >
-        <SpinningBadge text="press-on · a tu talle · hechas a mano · " size={140} />
       </div>
 
       <div

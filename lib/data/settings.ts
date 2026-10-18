@@ -4,6 +4,7 @@ import { builderOptions, settings } from "@/lib/db/schema";
 import { DEFAULT_BUILDER_CONFIG, type BuilderConfig } from "@/lib/pricing";
 import { DEFAULT_SHIPPING_TABLE, type ShippingTable } from "@/lib/shipping/table";
 import { eq } from "drizzle-orm";
+import { getCharms } from "./content-repo";
 
 export type SiteSettings = {
   basePrice: number;
@@ -44,13 +45,15 @@ export async function setSetting<K extends keyof SiteSettings>(key: K, value: Si
 
 export async function getBuilderConfig(): Promise<BuilderConfig> {
   const db = getDb();
-  if (!db) return DEFAULT_BUILDER_CONFIG;
-  const [rows, s] = await Promise.all([
+  if (!db) return { ...DEFAULT_BUILDER_CONFIG, charms: await getCharms() };
+  const [rows, s, charms] = await Promise.all([
     db.select().from(builderOptions).where(eq(builderOptions.active, true)).orderBy(builderOptions.sort),
     getSettings(),
+    getCharms(),
   ]);
-  if (rows.length === 0) return { ...DEFAULT_BUILDER_CONFIG, basePrice: s.basePrice };
-  const of = (kind: string) => rows.filter((r) => r.kind === kind);
+  if (rows.length === 0) return { ...DEFAULT_BUILDER_CONFIG, basePrice: s.basePrice, charms };
+  // La técnica genérica "charms" quedó reemplazada por los dijes de verdad (con foto y precio cada uno).
+  const of = (kind: string) => rows.filter((r) => r.kind === kind && r.id !== "charms");
   return {
     basePrice: s.basePrice,
     shapes: of("shape").map((r) => ({ id: r.id as BuilderConfig["shapes"][number]["id"], label: r.label, delta: r.delta, complexity: r.complexity })),
@@ -59,5 +62,6 @@ export async function getBuilderConfig(): Promise<BuilderConfig> {
     bases: of("base").map((r) => ({ id: r.id, label: r.label, delta: r.delta, hex: r.hex ?? "#e8c4b0" })),
     extras: of("extra").map((r) => ({ id: r.id, label: r.label, delta: r.delta, complexity: r.complexity, group: r.group ?? "Otros", description: r.description ?? undefined })),
     tiers: DEFAULT_BUILDER_CONFIG.tiers,
+    charms,
   };
 }

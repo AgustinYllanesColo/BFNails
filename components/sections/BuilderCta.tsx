@@ -42,7 +42,7 @@ export function BuilderCta() {
             Lo que tenés en la cabeza, <span className="text-bordo">con precio al instante.</span>
           </h2>
           <p className="mt-5 max-w-md text-lg text-ink-soft">
-            Forma, largo, color y técnicas. Cada elección suma y lo ves al toque. ¿Viste un diseño en internet? Pegá el link y te lo cotizamos.
+            Forma, largo, color, técnicas y dijes, con el precio al toque. ¿Viste un diseño en internet? Pegá el link y te lo cotizo.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Magnetic>
@@ -59,7 +59,6 @@ export function BuilderCta() {
             <div className="flex items-center justify-between px-3 pt-3 pb-1">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{labels.join(" · ")}</p>
-                <p className="text-xs text-ink-soft">Nivel {quote.complexityLabel.toLowerCase()}</p>
               </div>
               <p key={quote.total} className="shrink-0 font-display text-xl text-bordo md:text-2xl animate-[float_0.6s_ease-out]">{formatARS(quote.total)}</p>
             </div>

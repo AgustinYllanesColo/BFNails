@@ -21,7 +21,7 @@ export const DEFAULT_SHIPPING_TABLE: ShippingTable = {
   moto: {
     enabled: true,
     cost: 3500,
-    description: "Escalada, Lomas, Banfield y Lanús. De $3.500 a $4.500 según la zona; te lo confirmamos por WhatsApp.",
+    description: "Escalada, Lomas, Banfield y Lanús. De $3.500 a $4.500 según la zona; te lo confirmo por WhatsApp.",
   },
   // Valores de referencia (a cargar con los reales desde el admin)
   correo: {

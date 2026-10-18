@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { getDesigns } from "@/lib/data/repo";
+import { getLivePromos } from "@/lib/data/content-repo";
+import { Promos } from "@/components/sections/Promos";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Eyebrow, Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
@@ -7,14 +9,14 @@ import { Stars } from "@/components/motion/Stars";
 
 export const metadata: Metadata = {
   title: "Catálogo",
-  description: "Todos los sets de uñas press-on de BF Nails Studio, hechos a mano y a tu talle, con su precio.",
+  description: "Todos los sets de uñas press-on de BF Nails Studio, personalizados, con su precio.",
 };
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
 export const revalidate = 300;
 
 export default async function CatalogoPage() {
-  const designs = await getDesigns();
+  const [designs, promos] = await Promise.all([getDesigns(), getLivePromos()]);
   return (
     <div className="relative isolate pt-28 pb-24 md:pt-36">
       {/* Estrellas decorativas: en el celular solo una chica a la derecha del titular (las grandes pisaban el texto y el menú) */}
@@ -34,14 +36,16 @@ export default async function CatalogoPage() {
               Elegí tu <span className="text-bordo">próximo set</span>
             </Heading>
             <p className="mt-4 text-ink-soft">
-              Todos los precios incluyen el kit completo: 10 uñas a tu talle, pegamento y lima. Si no encontrás
-              lo que buscás, armalo vos.
+              Cada precio incluye las 10 uñas y el kit de aplicación. Si no encontrás el tuyo, armalo vos.
             </p>
           </div>
           <Button href="/disena" variant="secondary">
             Diseñá tu set
           </Button>
         </div>
+      </div>
+      <Promos promos={promos} />
+      <div className="container-x relative">
         <h2 className="sr-only">Diseños</h2>
         <CatalogGrid designs={designs} />
       </div>
