@@ -69,7 +69,8 @@ export default async function DesignPage({ params }: Props) {
                   alt={`${design.name}, vista 1`}
                   fill
                   sizes="(min-width: 1024px) 55vw, 100vw"
-                  priority
+                  preload
+                  loading="eager"
                   className="object-cover"
                 />
               </div>

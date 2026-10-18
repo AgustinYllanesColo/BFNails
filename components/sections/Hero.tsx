@@ -65,7 +65,8 @@ export function Hero() {
             alt="BF Studio nails"
             width={960}
             height={580}
-            priority
+            preload
+            loading="eager"
             fetchPriority="high"
             sizes="(min-width: 768px) 760px, 88vw"
             className="w-full drop-shadow-[0_30px_50px_rgba(74,14,14,0.22)]"

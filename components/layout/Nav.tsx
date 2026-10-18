@@ -44,7 +44,8 @@ export function Nav() {
             alt=""
             width={51}
             height={60}
-            priority
+            preload
+            loading="eager"
             className="h-12 w-auto transition-transform duration-500 ease-[var(--ease-bounce)] group-hover:rotate-[-8deg] group-hover:scale-110 md:h-14"
           />
           <span className="flex flex-col leading-none">

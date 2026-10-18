@@ -19,7 +19,8 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
             alt={design.name}
             fill
             sizes="(min-width: 1024px) 25vw, 50vw"
-            priority={priority}
+            preload={priority}
+            loading={priority ? "eager" : undefined}
             quality={72}
             className={`object-cover transition-[transform,opacity] duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105 ${hasSecond ? "group-hover:opacity-0" : ""}`}
           />
