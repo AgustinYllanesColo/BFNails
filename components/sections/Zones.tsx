@@ -100,7 +100,10 @@ export function Zones() {
                 <span className="rounded-pill bg-cream/10 ring-cream/20 grid size-12 place-items-center ring-1 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 [&>svg]:size-6">
                   {o.icon}
                 </span>
-                <span className="font-display text-yellow text-2xl leading-none">{o.price}</span>
+                {/* Sans en negrita: Shrikhand a 24 px cierra los huecos de las letras y el precio se veía empastado */}
+                <span className="text-yellow text-right text-[19px] leading-tight font-bold tracking-tight tabular-nums md:text-xl">
+                  {o.price}
+                </span>
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold tracking-tight">{o.title}</h3>
