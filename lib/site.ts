@@ -23,10 +23,16 @@ export const siteConfig = {
   },
 };
 
+/**
+ * Dijes apagados hasta tener las fotos reales (y sus precios): sin sección, sin menú y sin paso en el armador.
+ * El código queda; para volver a mostrarlos alcanza con poner esto en true.
+ */
+export const CHARMS_ENABLED = false;
+
 export const nav = [
   { href: "/catalogo", label: "Catálogo" },
   { href: "/disena", label: "Diseñá tu set" },
-  { href: "/dijes", label: "Dijes" },
+  ...(CHARMS_ENABLED ? [{ href: "/dijes", label: "Dijes" }] : []),
   { href: "/medidas", label: "Medidas" },
   { href: "/faq", label: "Preguntas" },
-] as const;
+];

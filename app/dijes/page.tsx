@@ -3,6 +3,8 @@ import { Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { CharmsGrid } from "@/components/charms/CharmsGrid";
 import { getCharms } from "@/lib/data/content-repo";
+import { notFound } from "next/navigation";
+import { CHARMS_ENABLED } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Dijes",
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function DijesPage() {
+  if (!CHARMS_ENABLED) notFound();
   const charms = await getCharms();
   return (
     <div className="pt-28 pb-24 md:pt-36">

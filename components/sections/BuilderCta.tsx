@@ -44,7 +44,7 @@ export function BuilderCta() {
         <Reveal className="min-w-0">
           <h2 className="font-display text-balance text-[clamp(2rem,4.4vw,3.25rem)] leading-[1]">Diseñá tu set</h2>
           <p className="mt-5 max-w-md text-lg text-ink-soft">
-            Forma, largo, color, técnicas y dijes, con el precio al toque. ¿Viste un diseño en internet? Pegá el link y te lo cotizo.
+            Forma, largo, color y técnicas, con el precio al toque. ¿Viste un diseño en internet? Pegá el link y te lo cotizo.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Magnetic>

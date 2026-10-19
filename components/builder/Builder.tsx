@@ -16,8 +16,11 @@ import { Field, inputClass, textareaClass } from "@/components/ui/Field";
 import { SizePicker, sizesAreValid } from "@/components/cart/SizePicker";
 import { NailPreview } from "./NailPreview";
 import { cn } from "@/lib/format";
+import { CHARMS_ENABLED } from "@/lib/site";
 
 const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Dijes", "Detalles", "Medidas"] as const;
+/** Con los dijes apagados, Detalles y Medidas suben un número. */
+const SHIFT = CHARMS_ENABLED ? 0 : 1;
 
 export function Builder({ config }: { config: BuilderConfig }) {
   const [sel, setSel] = useState<BuilderSelection>(DEFAULT_SELECTION);
@@ -136,13 +139,15 @@ export function Builder({ config }: { config: BuilderConfig }) {
           </div>
         </div>
 
-        <div id="paso-6" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
-          <StepHeader n={6} title={STEPS[5]} hint="Opcional. Elegí cuántos de cada uno." />
-          <CharmPicker charms={config.charms ?? []} picked={sel.charms ?? []} onChange={setCharm} />
-        </div>
+        {CHARMS_ENABLED && (
+          <div id="paso-6" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
+            <StepHeader n={6} title={STEPS[5]} hint="Opcional. Elegí cuántos de cada uno." />
+            <CharmPicker charms={config.charms ?? []} picked={sel.charms ?? []} onChange={setCharm} />
+          </div>
+        )}
 
         <div>
-          <StepHeader n={7} title={STEPS[6]} hint="Opcional. Si pedís algo que no está en la lista, te lo cotizo antes de que pagues." />
+          <StepHeader n={7 - SHIFT} title={STEPS[6]} hint="Opcional. Si pedís algo que no está en la lista, te lo cotizo antes de que pagues." />
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Referencia (link de Pinterest, IG, TikTok)" htmlFor="ref">
               <input id="ref" type="url" className={inputClass} placeholder="https://" value={sel.referenceUrl ?? ""} onChange={(e) => setSel({ ...sel, referenceUrl: e.target.value })} />
@@ -154,7 +159,7 @@ export function Builder({ config }: { config: BuilderConfig }) {
         </div>
 
         <div>
-          <StepHeader n={8} title={STEPS[7]} hint="Universal, personalizada o te la paso por WhatsApp." />
+          <StepHeader n={8 - SHIFT} title={STEPS[7]} hint="Universal, personalizada o te la paso por WhatsApp." />
           <SizePicker value={sizes} onChange={setSizes} />
         </div>
       </div>
