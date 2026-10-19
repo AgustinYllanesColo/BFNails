@@ -4,7 +4,8 @@ import { cn } from "@/lib/format";
 /**
  * Fotos reales de sets alrededor del logo del hero, como stickers con borde crema. Reemplazan a las uñas
  * dibujadas en SVG: lo que vende es el trabajo de Bren, no un dibujo. Dos en el celular (arriba, lejos del
- * copy) y cuatro desde md, en las esquinas del logo. Decorativas (`aria-hidden`), con una flotación suave.
+ * copy) y cuatro desde md, en las esquinas del logo. Decorativas (`aria-hidden`): entran repartidas desde el logo, flotan cada una a su ritmo y se corren con
+ * el mouse (capa `data-depth`, la mueve el Hero).
  */
 type Spec = {
   src: string;
@@ -46,38 +47,64 @@ const PHOTOS: Spec[] = [
   },
 ];
 
+/** Ritmo de flotación de cada foto (s) y profundidad al mover el mouse (px): ninguna se mueve igual que otra. */
+const BOB = [6.4, 7.2, 8.1, 6.9];
+const DEPTH = [-34, -26, -44, -38];
+
 export function HeroPhotos({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn("pointer-events-none absolute inset-0", className)}>
-      {PHOTOS.map((p) => (
-        <div
-          key={p.src}
-          data-hero-photo
-          className={cn("hero-in-fade absolute", p.mobile ? "block" : "hidden md:block")}
-          style={{
-            left: p.x,
-            top: p.y,
-            width: `clamp(${p.w * 0.8}px, ${p.w / 7.2}vw, ${p.w * 1.35}px)`,
-          }}
-        >
-          <div>
-            <div
-              className="ring-bordo/10 overflow-hidden rounded-[18px] bg-white p-1.5 shadow-[0_18px_40px_-18px_rgba(74,14,14,0.45)] ring-1 md:rounded-[22px] md:p-2"
-              style={{ transform: `rotate(${p.rotate}deg)` }}
-            >
-              <Image
-                src={p.src}
-                alt=""
-                width={640}
-                height={800}
-                sizes="(min-width: 768px) 200px, 120px"
-                quality={90}
-                className="aspect-[4/5] w-full rounded-[13px] object-cover md:rounded-[16px]"
-              />
+      {PHOTOS.map((p, i) => {
+        // desde la posición de la foto hacia el centro del logo (≈ 50 % × 42 %)
+        const fx = `${((50 - parseFloat(p.x)) * 0.85).toFixed(1)}vw`;
+        const fy = `${((42 - parseFloat(p.y)) * 0.8).toFixed(1)}svh`;
+        return (
+          <div
+            key={p.src}
+            data-hero-photo
+            className={cn("absolute", p.mobile ? "block" : "hidden md:block")}
+            style={{
+              left: p.x,
+              top: p.y,
+              width: `clamp(${p.w * 0.8}px, ${p.w / 7.2}vw, ${p.w * 1.35}px)`,
+            }}
+          >
+            <div data-depth={DEPTH[i]}>
+              <div
+                className="hero-deal"
+                style={{
+                  ["--fx" as string]: fx,
+                  ["--fy" as string]: fy,
+                  animationDelay: `${260 + i * 90}ms`,
+                }}
+              >
+                <div
+                  className="hero-bob"
+                  style={{
+                    animation: `hero-bob ${BOB[i]}s ease-in-out ${-i * 1.7}s infinite`,
+                    ["--sway" as string]: `${p.rotate > 0 ? -2.5 : 2.5}deg`,
+                  }}
+                >
+                  <div
+                    className="ring-bordo/10 overflow-hidden rounded-[18px] bg-white p-1.5 shadow-[0_18px_40px_-18px_rgba(74,14,14,0.45)] ring-1 md:rounded-[22px] md:p-2"
+                    style={{ transform: `rotate(${p.rotate}deg)` }}
+                  >
+                    <Image
+                      src={p.src}
+                      alt=""
+                      width={640}
+                      height={800}
+                      sizes="(min-width: 768px) 200px, 120px"
+                      quality={90}
+                      className="aspect-[4/5] w-full rounded-[13px] object-cover md:rounded-[16px]"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

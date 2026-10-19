@@ -220,6 +220,80 @@ html.has-cursor .cursor-root {
 .hero-in-cue {
   animation: hero-in-fade 600ms ease-out 900ms both;
 }
+/* Fotos del hero: salen de atrás del logo y se reparten como cartas (rebote corto), después cada una flota
+   a su ritmo. --fx/--fy apuntan al centro del logo desde la posición de cada foto. */
+@keyframes hero-deal {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0) scale(0.7) rotate(0deg);
+  }
+  60% {
+    opacity: 1;
+  }
+}
+.hero-deal {
+  animation: hero-deal 1100ms var(--ease-bounce) both;
+}
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0) rotate(var(--sway, 2deg));
+  }
+}
+/* Brillo de top coat que barre el logo cada ~7 s (la máscara es el mismo logo: no toca el fondo) */
+@keyframes hero-sheen {
+  0%,
+  55% {
+    transform: translateX(-130%) skewX(-14deg);
+  }
+  85%,
+  100% {
+    transform: translateX(330%) skewX(-14deg);
+  }
+}
+.hero-sheen-mask {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: url(/brand/logo-nails.webp) center / 100% 100% no-repeat;
+  mask: url(/brand/logo-nails.webp) center / 100% 100% no-repeat;
+}
+.hero-sheen {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 30%;
+  background: linear-gradient(100deg, rgb(255 255 255 / 0), rgb(255 255 255 / 0.6), rgb(255 255 255 / 0));
+  transform: translateX(-130%) skewX(-14deg);
+  animation: hero-sheen 7s var(--ease-out-expo) 1.2s infinite;
+}
+/* Palabra que rota en el titular: entra desde abajo de su máscara, sale hacia arriba */
+@keyframes hero-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(70%);
+    filter: blur(4px);
+  }
+}
+.hero-word {
+  display: inline-block;
+  animation: hero-word-in 520ms var(--ease-out-expo) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-deal,
+  .hero-sheen,
+  .hero-word {
+    animation: none;
+  }
+  .hero-bob {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-in-logo,
   .hero-in-fade,
