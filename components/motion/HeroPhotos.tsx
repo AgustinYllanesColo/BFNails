@@ -71,7 +71,7 @@ export function HeroPhotos({ className }: { className?: string }) {
                 width={640}
                 height={800}
                 sizes="(min-width: 768px) 200px, 120px"
-                quality={70}
+                quality={90}
                 className="aspect-[4/5] w-full rounded-[13px] object-cover md:rounded-[16px]"
               />
             </div>

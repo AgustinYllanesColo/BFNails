@@ -67,6 +67,8 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
     const el = ref.current;
     // sin IntersectionObserver (navegador muy viejo): queda la foto de la mano
     if (!el || typeof IntersectionObserver === "undefined") return;
+    // el código de three.js se empieza a bajar ya, mientras la página termina de hidratar
+    void import("./NailPreview3D");
     let idle = 0;
     let soon = 0;
     const io = new IntersectionObserver(

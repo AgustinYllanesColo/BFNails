@@ -162,7 +162,7 @@ export function HowItWorks({ kit }: { kit?: Kit }) {
                   </div>
                   <div className="relative order-1 min-h-[180px] overflow-hidden bg-cream-deep sm:order-2 sm:min-h-0">
                     {v.src ? (
-                      <Image src={v.src} alt={v.alt ?? ""} fill sizes="(min-width: 1024px) 28vw, (min-width: 640px) 40vw, 100vw" quality={70} className="object-cover" />
+                      <Image src={v.src} alt={v.alt ?? ""} fill sizes="(min-width: 1024px) 28vw, (min-width: 640px) 40vw, 100vw" quality={90} className="object-cover" />
                     ) : s.n === "02" ? (
                       <Ruler />
                     ) : (

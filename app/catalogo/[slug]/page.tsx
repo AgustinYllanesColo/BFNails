@@ -69,6 +69,7 @@ export default async function DesignPage({ params }: Props) {
                   alt={`${design.name}, vista 1`}
                   fill
                   sizes="(min-width: 1024px) 55vw, 100vw"
+                  quality={90}
                   preload
                   loading="eager"
                   className="object-cover"
@@ -86,6 +87,7 @@ export default async function DesignPage({ params }: Props) {
                   alt={`${design.name}, vista ${i + 2}`}
                   fill
                   sizes="(min-width: 1024px) 27vw, 50vw"
+                  quality={90}
                   className="object-cover"
                 />
               </Reveal>

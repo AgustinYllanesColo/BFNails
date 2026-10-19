@@ -84,7 +84,7 @@ export function PromoCard({ promo: p }: { promo: Promo }) {
         </span>
         {p.image && (
           <span className="relative w-[38%] shrink-0">
-            <Image src={p.image} alt="" fill sizes="(min-width: 768px) 180px, 140px" className="object-cover" />
+            <Image src={p.image} alt="" fill sizes="(min-width: 768px) 180px, 140px" quality={90} className="object-cover" />
           </span>
         )}
         {until && (

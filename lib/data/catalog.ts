@@ -16,7 +16,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 17000,
-    tags: ["dibujo a mano", "fucsia"],
+    tags: ["dibujo a mano", "fucsia", "stock"],
     colors: ["#e3196f", "#f3c1b5"],
   },
   {
@@ -29,7 +29,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 17000,
-    tags: ["charms", "lila"],
+    tags: ["charms", "lila", "stock"],
     colors: ["#b9b8ec", "#f6efe6"],
   },
   {
@@ -42,7 +42,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 3,
     price: 19000,
-    tags: ["cat eye", "charms", "strass"],
+    tags: ["cat eye", "charms", "strass", "stock"],
     colors: ["#111111", "#b8a24a", "#f0c4b0"],
   },
   {
@@ -55,7 +55,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 18000,
-    tags: ["cat eye", "degradé"],
+    tags: ["cat eye", "degradé", "stock"],
     colors: ["#111111", "#e8838f"],
   },
   {
@@ -68,7 +68,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 17000,
-    tags: ["animal print"],
+    tags: ["animal print", "stock"],
     colors: ["#111111", "#f0c4b0"],
   },
   {
@@ -81,7 +81,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 16500,
-    tags: ["francesita", "glitter"],
+    tags: ["francesita", "glitter", "stock"],
     colors: ["#e9a68e", "#ffffff"],
   },
   {
@@ -94,7 +94,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 1,
     price: 13000,
-    tags: ["verde"],
+    tags: ["verde", "stock"],
     colors: ["#9aa565"],
   },
   {
@@ -107,7 +107,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 1,
     price: 13000,
-    tags: ["lila"],
+    tags: ["lila", "stock"],
     colors: ["#9a5ad9"],
   },
   {
@@ -190,7 +190,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 18000,
-    tags: ["cat eye", "bordó"],
+    tags: ["cat eye", "bordó", "stock"],
     featured: true,
     colors: ["#4a0e0e", "#8c1610"],
   },

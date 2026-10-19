@@ -3,7 +3,6 @@
 import { Reveal } from "@/components/motion/Reveal";
 import { Heading } from "@/components/ui/Section";
 import { formatARS } from "@/lib/format";
-import { Star } from "@/components/motion/Marquee";
 
 const OPTIONS = [
   {
@@ -107,12 +106,6 @@ export function Zones() {
                 <h3 className="text-xl font-bold tracking-tight">{o.title}</h3>
                 <p className="text-ink-soft mt-2 text-sm leading-relaxed">{o.text}</p>
               </div>
-              <span
-                aria-hidden
-                className="text-bordo/8 pointer-events-none absolute -right-4 -bottom-4 transition-transform duration-500 group-hover:rotate-12"
-              >
-                <Star size={96} />
-              </span>
             </div>
           ))}
         </Reveal>

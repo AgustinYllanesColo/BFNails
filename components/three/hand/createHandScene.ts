@@ -48,8 +48,11 @@ const MATERIAL_MS = 240;
 const DECAL_MS = 220;
 /** con "reducir movimiento": nada se desplaza, pero color, acabado y decoración se funden igual */
 const REDUCED_FADE_MS = 160;
-/** el balanceo de reposo dura unos segundos después de la última interacción y se apaga */
-const IDLE_MS = 6000;
+/**
+ * El balanceo de reposo no se apaga mientras la mano está en pantalla (quieta del todo parecía una foto). Igual se
+ * pausa fuera de pantalla, con la pestaña oculta, con "reducir movimiento" o si el dispositivo no llega.
+ */
+const IDLE_MS = Number.POSITIVE_INFINITY;
 const MAX_TILT = THREE.MathUtils.degToRad(25);
 const CAMERA_TILT = THREE.MathUtils.degToRad(16);
 const FOV = 26;
@@ -508,9 +511,9 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     idleAmp += (idleTarget - idleAmp) * (1 - Math.exp(-dt * 2.5));
     if (Math.abs(idleTarget - idleAmp) < 0.002) idleAmp = idleTarget;
     const t = now / 1000;
-    const idleY = Math.sin(t * 0.7) * 0.022 * idleAmp;
-    const idleX = Math.sin(t * 0.53 + 1.3) * 0.012 * idleAmp;
-    pivot.rotation.set(idleX + parallax.y, idleY + rot + parallax.x, Math.sin(t * 0.41) * 0.006 * idleAmp);
+    const idleY = Math.sin(t * 0.7) * 0.05 * idleAmp;
+    const idleX = Math.sin(t * 0.53 + 1.3) * 0.022 * idleAmp;
+    pivot.rotation.set(idleX + parallax.y, idleY + rot + parallax.x, Math.sin(t * 0.41) * 0.01 * idleAmp);
     // cat eye y aurora: el reflejo acompaña el giro
     for (const n of nails) n.uniforms.uCatOffset.value = -(rot + parallax.x + idleY) * 0.9;
     return busy;

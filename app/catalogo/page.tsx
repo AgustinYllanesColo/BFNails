@@ -5,7 +5,6 @@ import { Promos } from "@/components/sections/Promos";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
-import { Stars } from "@/components/motion/Stars";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -19,15 +18,6 @@ export default async function CatalogoPage() {
   const [designs, promos] = await Promise.all([getDesigns(), getLivePromos()]);
   return (
     <div className="relative isolate pt-28 pb-24 md:pt-36">
-      {/* Estrellas decorativas: en el celular solo una chica a la derecha del titular (las grandes pisaban el texto y el menú) */}
-      <Stars
-        stars={[
-          { x: "86%", y: "30%", size: 44, rotate: 12, speed: 0.7, mobile: false },
-          { x: "84%", y: "26%", size: 90, rotate: 12, speed: 0.7, mobile: false },
-          { x: "-3%", y: "44%", size: 120, rotate: -8, speed: 0.5, mobile: false },
-        ]}
-        className="-z-10 max-h-[600px] opacity-60 md:opacity-80"
-      />
       <div className="container-x relative">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">

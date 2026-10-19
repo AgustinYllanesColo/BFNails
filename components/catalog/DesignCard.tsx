@@ -21,7 +21,7 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
             sizes="(min-width: 1024px) 25vw, 50vw"
             preload={priority}
             loading={priority ? "eager" : undefined}
-            quality={72}
+            quality={90}
             className={`object-cover transition-[transform,opacity] duration-700 ease-[var(--ease-out-expo)] group-hover:scale-105 ${hasSecond ? "group-hover:opacity-0" : ""}`}
           />
           {hasSecond && (
@@ -41,8 +41,8 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
               </Badge>
             )}
             {inStock(design) && (
-              <Badge tone="green" className="px-2 sm:px-2.5">
-                Entrega inmediata
+              <Badge tone="green" className="px-2 sm:px-2.5" title="Entrega inmediata">
+                En stock
               </Badge>
             )}
           </div>

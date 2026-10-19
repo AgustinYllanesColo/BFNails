@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/Button";
 import { Magnetic } from "@/components/motion/Magnetic";
-import { NailPreview } from "@/components/builder/NailPreview";
+import Image from "next/image";
+import { cn } from "@/lib/format";
 import { DEFAULT_BUILDER_CONFIG } from "@/lib/pricing";
 import type { BuilderSelection } from "@/lib/types";
 import { formatARS } from "@/lib/format";
@@ -18,7 +19,11 @@ const DEMO: BuilderSelection[] = [
   { shape: "cuadrada", length: "medio", finish: "mate", base: "milky", extras: ["animal-print", "personajes"] },
 ];
 
-/** Teaser del armador: la vista previa cambia sola cada 2,6 s con el precio real. */
+/**
+ * Teaser del armador: cambia solo cada 2,6 s con el precio real. Las manos son renders de la mano 3D del armador
+ * (`/brand/demo-hand-N.webp`, uno por diseño de DEMO): se ven realistas desde el primer instante y la home no carga
+ * three.js. Si se cambia DEMO, hay que volver a renderizarlas.
+ */
 export function BuilderCta() {
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -52,7 +57,28 @@ export function BuilderCta() {
         </Reveal>
         <Reveal y={60} className="min-w-0">
           <div className="relative min-w-0 rounded-lg bg-white p-3 shadow-[0_40px_80px_-40px_rgba(74,14,14,0.45)] ring-1 ring-bordo/10">
-            <NailPreview sel={sel} config={DEFAULT_BUILDER_CONFIG} />
+            <div
+              role="img"
+              aria-label={`Vista previa: ${labels.join(", ").toLowerCase()}`}
+              className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-cream-deep ring-1 ring-bordo/10"
+            >
+              {DEMO.map((_, k) => (
+                <Image
+                  key={k}
+                  src={`/brand/demo-hand-${k}.webp`}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 640px, 100vw"
+                  className={cn(
+                    "object-cover transition-opacity duration-700 ease-[var(--ease-out-expo)]",
+                    k === i ? "opacity-100" : "opacity-0",
+                  )}
+                />
+              ))}
+              <p className="pointer-events-none absolute bottom-2 left-2 max-w-[calc(100%-1rem)] rounded-pill bg-cream/90 px-2.5 py-0.5 text-[10px] font-semibold text-ink sm:text-[11px]">
+                Vista previa ilustrativa, el set real lo pinto a mano
+              </p>
+            </div>
             <div className="flex items-center justify-between gap-4 px-3 pt-3 pb-1">
               <p className="min-w-0 flex-1 truncate text-sm font-semibold">{labels.join(" · ")}</p>
               <p key={quote.total} className="shrink-0 text-lg font-bold tabular-nums text-bordo md:text-xl">{formatARS(quote.total)}</p>
