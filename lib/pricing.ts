@@ -102,6 +102,10 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     },
     { id: "animal-print", group: "Diseños", label: "Animal print", delta: 2500, complexity: 2 },
     { id: "flores", group: "Diseños", label: "Flores a mano", delta: 3000, complexity: 2 },
+    { id: "puntitos", group: "Diseños", label: "Puntitos", delta: 1500, complexity: 1 },
+    { id: "cebra", group: "Diseños", label: "Cebra / tigre", delta: 2500, complexity: 2 },
+    { id: "ondas", group: "Diseños", label: "Ondas", delta: 2000, complexity: 1 },
+    { id: "estrellas", group: "Diseños", label: "Estrellitas", delta: 1500, complexity: 1 },
     {
       id: "personajes",
       group: "Diseños",
@@ -216,3 +220,8 @@ export const DEFAULT_SELECTION: BuilderSelection = {
   base: "nude",
   extras: [],
 };
+
+/** Color del diseño si la clienta no eligió uno: blanco sobre bases oscuras, bordó sobre las claras. */
+export function defaultDetailColor(base: string): string {
+  return ["negro", "bordo", "chocolate", "verde"].includes(base) ? "blanco" : "bordo";
+}

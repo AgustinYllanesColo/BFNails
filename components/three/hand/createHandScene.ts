@@ -1,3 +1,4 @@
+import { defaultDetailColor } from "@/lib/pricing";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { BuilderSelection, Length, Shape } from "@/lib/types";
@@ -712,8 +713,8 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     return out;
   }
 
-  function setDecal(n: NailState, i: number, sel: BuilderSelection, tipHex: string, instant: boolean) {
-    const input = { index: i, shape: sel.shape, dims: n.dims[sel.length], extras: sel.extras, tipHex, kitty };
+  function setDecal(n: NailState, i: number, sel: BuilderSelection, tipHex: string, detailHex: string, instant: boolean) {
+    const input = { index: i, shape: sel.shape, dims: n.dims[sel.length], extras: sel.extras, tipHex, detailHex, accent: sel.accent ?? "todas", kitty };
     const k = decorKey(input);
     if (k === n.decorKey) return false;
     n.decorKey = k;
@@ -750,6 +751,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     idleUntil = now + IDLE_MS;
     const baseHex = config.bases.find((b) => b.id === sel.base)?.hex ?? "#e8c4b0";
     const tipHex = config.bases.find((b) => b.id === (sel.tipColor ?? "bordo"))?.hex ?? "#4a0e0e";
+    const detailHex = config.bases.find((b) => b.id === (sel.detailColor ?? defaultDetailColor(sel.base)))?.hex ?? "#4a0e0e";
 
     // forma / largo → morph
     if (instant || sel.shape !== shape || sel.length !== length) {
@@ -822,7 +824,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     // decoración pintada
     let decalChanged = false;
     nails.forEach((n, i) => {
-      if (setDecal(n, i, sel, tipHex, instant)) decalChanged = true;
+      if (setDecal(n, i, sel, tipHex, detailHex, instant)) decalChanged = true;
     });
     if (decalChanged && !instant) {
       decalStart = now;

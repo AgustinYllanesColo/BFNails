@@ -33,6 +33,9 @@ export type BuilderSelection = {
   base: string; // id de color base
   extras: string[]; // ids de técnicas/extras
   tipColor?: string; // id de color base para la francesita de color
+  detailColor?: string; // id de color base de los diseños (puntitos, ondas, cebra, estrellitas)
+  /** en qué uñas va el diseño: todas, solo el anular (uña acento) o una sí y una no */
+  accent?: "todas" | "acento" | "alternadas";
   charms?: Array<{ id: string; qty: number }>; // dijes elegidos
   notes?: string;
   referenceUrl?: string;

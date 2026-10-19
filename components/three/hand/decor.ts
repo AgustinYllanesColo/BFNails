@@ -17,16 +17,44 @@ export type DecorInput = {
   dims: NailDims;
   extras: string[];
   tipHex: string;
+  /** color de los diseños (puntitos, ondas, cebra, estrellitas) */
+  detailHex: string;
+  /** en qué uñas van los diseños con patrón: todas, solo el anular o una sí y una no */
+  accent: "todas" | "acento" | "alternadas";
   kitty: HTMLImageElement | null;
 };
 
-export function decorKey(i: DecorInput) {
-  const relevant = i.extras.filter((e) => PAINTED.has(e)).sort();
-  if (relevant.length === 0) return "none";
-  return [i.shape, i.dims.L.toFixed(3), relevant.join(","), i.tipHex, i.kitty ? "k" : ""].join("|");
+/** Diseños con patrón que respetan la uña acento (los clásicos y los brillos van siempre en todas). */
+const ACCENTED = new Set(["animal-print", "flores", "puntitos", "cebra", "ondas", "estrellas", "encapsulado"]);
+
+/** ¿Esta uña lleva el patrón? Anular = índice 3; alternadas = pulgar, medio y meñique. */
+function carriesPattern(i: number, accent: DecorInput["accent"]) {
+  if (accent === "acento") return i === 3;
+  if (accent === "alternadas") return i % 2 === 0;
+  return true;
 }
 
-const PAINTED = new Set(["francesita", "francesita-color", "degrade", "animal-print", "flores", "personajes", "a-mano", "encapsulado"]);
+export function decorKey(i: DecorInput) {
+  const on = carriesPattern(i.index, i.accent);
+  const relevant = i.extras.filter((e) => PAINTED.has(e) && (on || !ACCENTED.has(e))).sort();
+  if (relevant.length === 0) return "none";
+  return [i.shape, i.dims.L.toFixed(3), relevant.join(","), i.tipHex, i.detailHex, i.kitty ? "k" : ""].join("|");
+}
+
+const PAINTED = new Set([
+  "francesita",
+  "francesita-color",
+  "degrade",
+  "animal-print",
+  "flores",
+  "personajes",
+  "a-mano",
+  "encapsulado",
+  "puntitos",
+  "cebra",
+  "ondas",
+  "estrellas",
+]);
 
 function outline(ctx: CanvasRenderingContext2D, shape: Shape, d: NailDims) {
   const N = 60;
@@ -69,7 +97,10 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const { dims: d, shape, extras, index: i } = input;
-  const has = (x: string) => extras.includes(x);
+  const on = carriesPattern(i, input.accent);
+  // los patrones solo en las uñas que los llevan; el resto de las técnicas, en todas
+  const has = (x: string) => extras.includes(x) && (on || !ACCENTED.has(x));
+  const detail = input.detailHex;
   if (decorKey(input) === "none") return;
 
   const sx = canvas.width / d.W;
@@ -186,7 +217,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
   }
 
   // 4. flores a mano (uñas pares: pulgar, medio, meñique)
-  if (has("flores") && i % 2 === 0) {
+  if (has("flores") && (input.accent !== "todas" || i % 2 === 0)) {
     const cy = d.bed * 0.58;
     const r = W * 0.17;
     ctx.save();
@@ -257,6 +288,94 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
         else ctx.lineTo(x, y);
       }
       ctx.stroke();
+    }
+  }
+
+  // 5b. puntitos: filas alternadas de lunares en el color del detalle, con un brillo cada uno
+  if (has("puntitos")) {
+    const r = W * 0.075;
+    const stepX = W * 0.3;
+    const stepY = W * 0.27;
+    let row = 0;
+    for (let y = d.bed * 0.12; y < d.L + r; y += stepY, row++) {
+      for (let x = -W / 2 + (row % 2 ? stepX / 2 : 0); x < W / 2 + r; x += stepX) {
+        ctx.fillStyle = detail;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.35)";
+        ctx.beginPath();
+        ctx.arc(x - r * 0.3, y + r * 0.3, r * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // 5c. cebra / tigre: rayas cruzadas que se afinan en las puntas, irregulares como pintadas a pincel
+  if (has("cebra")) {
+    ctx.fillStyle = detail;
+    const n = Math.round(4 + d.L / W * 2.2);
+    for (let k = 0; k < n; k++) {
+      const y0 = d.L * ((k + 0.3 + rand() * 0.4) / n);
+      const fromLeft = k % 2 === 0;
+      const len = W * (0.55 + rand() * 0.35);
+      const thick = W * (0.07 + rand() * 0.05);
+      const tilt = (rand() - 0.5) * W * 0.5;
+      const x0 = fromLeft ? -W * 0.6 : W * 0.6;
+      const x1 = fromLeft ? x0 + len : x0 - len;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0 - thick);
+      ctx.quadraticCurveTo((x0 + x1) / 2, y0 + tilt * 0.5 - thick * 0.6, x1, y0 + tilt);
+      ctx.quadraticCurveTo((x0 + x1) / 2, y0 + tilt * 0.5 + thick * 0.6, x0, y0 + thick);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // 5d. ondas: dos o tres líneas sinuosas a lo largo de la uña (como el set rosa de ondas de Brenda)
+  if (has("ondas")) {
+    ctx.strokeStyle = detail;
+    ctx.lineCap = "round";
+    ctx.lineWidth = W * 0.07;
+    const lines = 3;
+    for (let k = 0; k < lines; k++) {
+      const off = (k - (lines - 1) / 2) * W * 0.32 + (i % 2 ? W * 0.05 : -W * 0.05);
+      const phase = i * 0.9 + k * 0.6;
+      ctx.beginPath();
+      for (let sN = 0; sN <= 40; sN++) {
+        const y = d.bed * 0.05 + (sN / 40) * (d.L * 1.02);
+        const x = off + Math.sin(phase + (y / d.L) * Math.PI * 2.2) * W * 0.16;
+        if (sN === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  // 5e. estrellitas: una estrella de cuatro puntas grande, dos chicas y puntos de brillo
+  if (has("estrellas")) {
+    const sparkle = (x: number, y: number, r: number) => {
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const a = (k * Math.PI) / 4;
+        const rr = k % 2 === 0 ? r : r * 0.22;
+        ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+      }
+      ctx.closePath();
+      ctx.fill();
+    };
+    ctx.fillStyle = detail;
+    sparkle(W * (i % 2 ? -0.08 : 0.1), d.bed * 0.6, W * 0.24);
+    sparkle(-W * 0.22, d.bed * 0.25 + d.L * 0.1, W * 0.1);
+    sparkle(W * 0.24, d.L * 0.82, W * 0.12);
+    for (const [dx, dy] of [
+      [0.28, 0.32],
+      [-0.25, 0.75],
+      [0.05, 0.95],
+    ]) {
+      ctx.beginPath();
+      ctx.arc(W * dx, d.L * dy, W * 0.03, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 

@@ -24,7 +24,9 @@ export function describeItem(item: CartItem): string {
   }
   const s = item.selection;
   const extras = s.extras.length
-    ? `, extras: ${s.extras.join(", ")}${s.tipColor ? ` (punta ${s.tipColor})` : ""}`
+    ? `, extras: ${s.extras.join(", ")}${s.tipColor ? ` (punta ${s.tipColor})` : ""}${s.detailColor ? ` (diseño en ${s.detailColor})` : ""}${
+        s.accent === "acento" ? " · diseño solo en el anular" : s.accent === "alternadas" ? " · diseño una sí, una no" : ""
+      }`
     : "";
   const charms = s.charms?.length ? `, dijes: ${s.charms.map((c) => `${c.id} ×${c.qty}`).join(", ")}` : "";
   const notes = s.notes ? `\n  Nota: ${s.notes}` : "";

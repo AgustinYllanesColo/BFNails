@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { BuilderSelection, SizeSelection } from "@/lib/types";
-import { DEFAULT_SELECTION, quoteSelection, type BuilderConfig } from "@/lib/pricing";
+import { DEFAULT_SELECTION, defaultDetailColor, quoteSelection, type BuilderConfig } from "@/lib/pricing";
 import { formatARS } from "@/lib/format";
 import type { Charm } from "@/lib/data/content";
 import { CharmThumb } from "@/components/charms/CharmThumb";
@@ -19,6 +19,15 @@ import { cn } from "@/lib/format";
 import { CHARMS_ENABLED } from "@/lib/site";
 
 const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Dijes", "Detalles", "Medidas"] as const;
+/** Diseños que pueden ir solo en algunas uñas (uña acento), como los hace Brenda. */
+const PATTERNS = new Set(["animal-print", "flores", "puntitos", "cebra", "ondas", "estrellas", "encapsulado"]);
+/** Los que se pintan en el color que elijas. */
+const COLORED_PATTERNS = new Set(["puntitos", "cebra", "ondas", "estrellas"]);
+const ACCENTS: Array<{ id: NonNullable<BuilderSelection["accent"]>; label: string }> = [
+  { id: "todas", label: "En todas" },
+  { id: "acento", label: "Solo en el anular" },
+  { id: "alternadas", label: "Una sí, una no" },
+];
 /** Con los dijes apagados, Detalles y Medidas suben un número. */
 const SHIFT = CHARMS_ENABLED ? 0 : 1;
 
@@ -41,6 +50,10 @@ export function Builder({ config }: { config: BuilderConfig }) {
       const rest = (s.charms ?? []).filter((c) => c.id !== id);
       return { ...s, charms: qty > 0 ? [...rest, { id, qty }] : rest };
     });
+
+  // los diseños con patrón pueden ir en todas las uñas o solo en algunas; los de color propio eligen su color
+  const hasPattern = sel.extras.some((e) => PATTERNS.has(e));
+  const hasColoredPattern = sel.extras.some((e) => COLORED_PATTERNS.has(e));
 
   const groups = useMemo(() => {
     const m = new Map<string, BuilderConfig["extras"]>();
@@ -130,6 +143,34 @@ export function Builder({ config }: { config: BuilderConfig }) {
                             </Chip>
                           ))}
                         </div>
+                      </div>
+                    </motion.div>
+                  )}
+                  {group === "Diseños" && hasPattern && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden">
+                      <div className="mt-3 space-y-4 rounded-lg bg-white/70 p-3 ring-1 ring-bordo/10">
+                        <div>
+                          <p className="mb-2 text-xs font-semibold text-ink-soft">¿En qué uñas va el diseño?</p>
+                          <div className="flex flex-wrap gap-2">
+                            {ACCENTS.map((a) => (
+                              <Chip key={a.id} selected={(sel.accent ?? "todas") === a.id} onClick={() => setSel({ ...sel, accent: a.id })}>
+                                {a.label}
+                              </Chip>
+                            ))}
+                          </div>
+                        </div>
+                        {hasColoredPattern && (
+                          <div>
+                            <p className="mb-2 text-xs font-semibold text-ink-soft">Color del diseño</p>
+                            <div className="flex flex-wrap gap-2">
+                              {config.bases.map((b) => (
+                                <Chip key={b.id} selected={(sel.detailColor ?? defaultDetailColor(sel.base)) === b.id} onClick={() => setSel({ ...sel, detailColor: b.id })} swatch={b.hex}>
+                                  {b.label}
+                                </Chip>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}

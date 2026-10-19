@@ -60,8 +60,26 @@ export async function getBuilderConfig(): Promise<BuilderConfig> {
     lengths: of("length").map((r) => ({ id: r.id as BuilderConfig["lengths"][number]["id"], label: r.label, delta: r.delta, complexity: r.complexity })),
     finishes: of("finish").map((r) => ({ id: r.id as BuilderConfig["finishes"][number]["id"], label: r.label, delta: r.delta, complexity: r.complexity })),
     bases: of("base").map((r) => ({ id: r.id, label: r.label, delta: r.delta, hex: r.hex ?? "#e8c4b0" })),
-    extras: of("extra").map((r) => ({ id: r.id, label: r.label, delta: r.delta, complexity: r.complexity, group: r.group ?? "Otros", description: r.description ?? undefined })),
+    extras: withNewDefaults(
+      of("extra").map((r) => ({ id: r.id, label: r.label, delta: r.delta, complexity: r.complexity, group: r.group ?? "Otros", description: r.description ?? undefined })),
+    ),
     tiers: DEFAULT_BUILDER_CONFIG.tiers,
     charms,
   };
+}
+
+/**
+ * Técnicas que el código sumó después de que se cargaron las opciones en la base: aparecen con su precio por
+ * defecto (al final de su grupo) hasta que se den de alta desde el admin. Lo que ya está en la base no se toca.
+ */
+function withNewDefaults(extras: BuilderConfig["extras"]): BuilderConfig["extras"] {
+  const known = new Set(extras.map((e) => e.id));
+  const missing = DEFAULT_BUILDER_CONFIG.extras.filter((e) => !known.has(e.id) && e.id !== "charms");
+  if (missing.length === 0) return extras;
+  const out = [...extras];
+  for (const m of missing) {
+    const lastOfGroup = out.map((e) => e.group).lastIndexOf(m.group);
+    out.splice(lastOfGroup === -1 ? out.length : lastOfGroup + 1, 0, m);
+  }
+  return out;
 }
