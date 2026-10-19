@@ -110,10 +110,12 @@ export function HowItWorks({ kit }: { kit?: Kit }) {
     const mm = gsap.matchMedia();
     mm.add("all", () => {
       const line = el.querySelector<SVGLineElement>("[data-line]");
-      if (line) {
+      // si se recargó con la sección ya en pantalla, la línea queda entera (no se achica y vuelve a crecer)
+      if (line && el.getBoundingClientRect().top > window.innerHeight * 0.6) {
         gsap.fromTo(line, { scaleY: 0 }, { scaleY: 1, ease: "none", transformOrigin: "top", scrollTrigger: { trigger: el, start: "top 60%", end: "bottom 80%", scrub: 0.5 } });
       }
       gsap.utils.toArray<HTMLElement>("[data-step]", el).forEach((c) => {
+        if (c.getBoundingClientRect().top < window.innerHeight * 0.92) return;
         gsap.fromTo(c, { y: 36, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.9, ease: "expo.out", scrollTrigger: { trigger: c, start: "top 85%" } });
       });
     });

@@ -1,8 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { HeroPhotos } from "@/components/motion/HeroPhotos";
 import { Button } from "@/components/ui/Button";
@@ -12,43 +10,13 @@ import { Button } from "@/components/ui/Button";
  * alrededor como stickers. Una sola intro corta (logo, fotos, copy) y después nada corre por
  * cuadro: ni filas de texto en movimiento ni parallax atado al scroll. Lo único vivo es una
  * flotación suave del logo, en CSS.
+ *
+ * La intro es CSS (`hero-in-*` en globals.css) y arranca desde el primer cuadro pintado: con GSAP el
+ * contenido llegaba visible del servidor, se escondía al hidratar y volvía a aparecer (parpadeo al recargar).
  */
 export function Hero() {
-  const root = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const el = root.current;
-    if (!el) return;
-    const q = gsap.utils.selector(el);
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "expo.out", duration: reduce ? 0.3 : 1 } });
-      tl.fromTo(
-        q("[data-hero-logo]"),
-        { scale: 0.94, autoAlpha: 0 },
-        { scale: 1, autoAlpha: 1, duration: reduce ? 0.3 : 1.1 },
-        0.05,
-      );
-      tl.fromTo(
-        q("[data-hero-photo]"),
-        { autoAlpha: 0, y: reduce ? 0 : 18 },
-        { autoAlpha: 1, y: 0, stagger: 0.08 },
-        0.35,
-      );
-      tl.fromTo(
-        q("[data-hero-copy] > *"),
-        { autoAlpha: 0, y: reduce ? 0 : 16 },
-        { autoAlpha: 1, y: 0, stagger: 0.08 },
-        0.55,
-      );
-      tl.fromTo(q("[data-hero-cue]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6 }, 1.3);
-    }, el);
-    return () => ctx.revert();
-  }, []);
-
   return (
     <section
-      ref={root}
       className="relative isolate flex min-h-[86svh] flex-col items-center justify-center overflow-hidden pt-24 pb-20 md:min-h-[100svh] md:pt-28 md:pb-28"
     >
       {/* Fondo: halo cálido, estático */}
@@ -58,7 +26,7 @@ export function Hero() {
       <HeroPhotos className="-z-10" />
 
       {/* Logo real: flota apenas, en CSS */}
-      <div data-hero-logo className="relative w-[min(88vw,760px)]">
+      <div data-hero-logo className="hero-in-logo relative w-[min(88vw,760px)]">
         <div className="motion-safe:animate-[float_7s_ease-in-out_infinite]">
           <Image
             src="/brand/logo-nails.webp"
@@ -75,7 +43,7 @@ export function Hero() {
       </div>
 
       {/* Copy + CTAs */}
-      <div data-hero-copy className="relative mt-6 max-w-xl px-5 text-center md:mt-8">
+      <div data-hero-copy className="hero-in-copy relative mt-6 max-w-xl px-5 text-center md:mt-8">
         <h1 className="font-display text-ink text-4xl md:text-5xl">
           Press-on <span className="text-bordo">personalizadas</span>
         </h1>
@@ -96,7 +64,7 @@ export function Hero() {
       <div
         data-hero-cue
         aria-hidden
-        className="text-ink-soft absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] font-bold tracking-[0.25em] uppercase"
+        className="hero-in-cue text-ink-soft absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-[10px] font-bold tracking-[0.25em] uppercase"
       >
         deslizá
         <span className="bg-bordo/15 block h-10 w-px overflow-hidden">

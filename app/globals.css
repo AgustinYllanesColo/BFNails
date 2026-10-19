@@ -184,6 +184,51 @@ html.has-cursor .cursor-root {
 }
 
 /* ---------- Animaciones CSS ---------- */
+/* ---------- Intro del hero (CSS desde el primer cuadro: sin parpadeo al hidratar) ---------- */
+@keyframes hero-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes hero-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes hero-in-fade {
+  from {
+    opacity: 0;
+  }
+}
+.hero-in-logo {
+  animation: hero-in-scale 900ms var(--ease-out-expo) 50ms both;
+}
+.hero-in-fade {
+  animation: hero-in-fade 700ms ease-out 300ms both;
+}
+.hero-in-copy > * {
+  animation: hero-in-up 800ms var(--ease-out-expo) both;
+}
+.hero-in-copy > :nth-child(1) {
+  animation-delay: 380ms;
+}
+.hero-in-copy > :nth-child(2) {
+  animation-delay: 480ms;
+}
+.hero-in-cue {
+  animation: hero-in-fade 600ms ease-out 900ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-in-logo,
+  .hero-in-fade,
+  .hero-in-copy > *,
+  .hero-in-cue {
+    animation: none;
+  }
+}
+
 @keyframes marquee {
   from {
     transform: translate3d(0, 0, 0);

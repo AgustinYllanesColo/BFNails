@@ -145,7 +145,8 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
       </div>
 
       <motion.div layout className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
-        <AnimatePresence mode="popLayout">
+        {/* initial={false}: al cargar, las tarjetas llegan visibles; solo se animan al filtrar */}
+        <AnimatePresence initial={false} mode="popLayout">
           {filtered.map((d, i) => (
             <motion.div
               key={d.slug}

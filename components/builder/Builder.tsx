@@ -63,8 +63,11 @@ export function Builder({ config }: { config: BuilderConfig }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:gap-12">
       <div className="space-y-10">
-        <div className="lg:hidden">
-          <NailPreview sel={sel} config={config} />
+        {/* En el celu la mano queda fija arriba mientras elegís: si no, al bajar a los colores ya no se veía el cambio */}
+        <div className="sticky top-[72px] z-20 bg-cream pt-2 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-5 after:bg-linear-to-b after:from-cream after:to-transparent md:top-[88px] lg:hidden">
+          <div className="mx-auto max-w-[min(100%,calc(36svh*4/3))]">
+            <NailPreview sel={sel} config={config} />
+          </div>
         </div>
 
         <Step n={1} title={STEPS[0]} hint="Todas quedan bien, es gusto.">
@@ -133,7 +136,7 @@ export function Builder({ config }: { config: BuilderConfig }) {
           </div>
         </div>
 
-        <div id="paso-6" className="scroll-mt-28">
+        <div id="paso-6" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
           <StepHeader n={6} title={STEPS[5]} hint="Opcional. Elegí cuántos de cada uno." />
           <CharmPicker charms={config.charms ?? []} picked={sel.charms ?? []} onChange={setCharm} />
         </div>
@@ -182,18 +185,23 @@ export function Builder({ config }: { config: BuilderConfig }) {
           </ul>
           <div className="mt-4 flex items-baseline justify-between border-t border-bordo/10 pt-4">
             <span className="font-semibold">{quote.needsConfirmation ? "Desde" : "Total"}</span>
-            <motion.span key={quote.total} initial={{ scale: 1.15, color: "#b51c1c" }} animate={{ scale: 1, color: "#4a0e0e" }} className="font-display text-3xl text-bordo">
-              {formatARS(quote.total)}
-            </motion.span>
+            {/* initial={false}: al cargar la página el precio ya está; solo late cuando cambia */}
+            <AnimatePresence initial={false} mode="popLayout">
+              <motion.span key={quote.total} initial={{ scale: 1.15, color: "#b51c1c" }} animate={{ scale: 1, color: "#4a0e0e" }} className="font-display text-3xl text-bordo">
+                {formatARS(quote.total)}
+              </motion.span>
+            </AnimatePresence>
           </div>
           {quote.needsConfirmation && (
             <p className="mt-2 text-xs text-ink-soft">Tus notas pueden cambiar el precio. Te lo confirmo por WhatsApp antes de cobrar.</p>
           )}
           <div className="mt-5 grid gap-2">
             <Button ref={addBtn} onClick={() => addToCart()} size="lg" disabled={!valid}>
-              <motion.span key={String(added)} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-                {added ? "¡Sumado al carrito! ✦" : "Agregar al carrito"}
-              </motion.span>
+              <AnimatePresence initial={false} mode="popLayout">
+                <motion.span key={String(added)} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+                  {added ? "¡Sumado al carrito! ✦" : "Agregar al carrito"}
+                </motion.span>
+              </AnimatePresence>
             </Button>
             <Button
               variant="secondary"

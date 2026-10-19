@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import type { Design, Length, Shape, SizeSelection } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
 import { designVariantPrice } from "@/lib/pricing";
@@ -105,14 +105,17 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
       </div>
 
       <div className="border-bordo/10 flex items-baseline gap-3 border-t pt-4">
-        <motion.span
-          key={price}
-          initial={{ opacity: 0, transform: "translateY(6px)" }}
-          animate={{ opacity: 1, transform: "translateY(0px)" }}
-          className="font-display text-bordo text-4xl"
-        >
-          {formatARS(price)}
-        </motion.span>
+        {/* initial={false}: el precio llega visible del servidor; solo se anima cuando cambia */}
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.span
+            key={price}
+            initial={{ opacity: 0, transform: "translateY(6px)" }}
+            animate={{ opacity: 1, transform: "translateY(0px)" }}
+            className="font-display text-bordo text-4xl"
+          >
+            {formatARS(price)}
+          </motion.span>
+        </AnimatePresence>
         <span className="text-ink-soft text-sm">
           kit completo
           {isOriginal
@@ -123,13 +126,15 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
 
       <div className="flex flex-wrap gap-3">
         <Button ref={btn} onClick={() => onAdd()} size="lg" disabled={!valid} data-cursor="sumar">
-          <motion.span
-            key={String(added)}
-            initial={{ y: 8, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-          >
-            {added ? "¡Sumado al carrito! ✦" : "Agregar al carrito"}
-          </motion.span>
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.span
+              key={String(added)}
+              initial={{ y: 8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+            >
+              {added ? "¡Sumado al carrito! ✦" : "Agregar al carrito"}
+            </motion.span>
+          </AnimatePresence>
         </Button>
         <Button
           variant="secondary"

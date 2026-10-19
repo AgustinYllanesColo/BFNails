@@ -23,7 +23,7 @@ export function Reveal({
   className,
   stagger,
   delay = 0,
-  y = 40,
+  y = 24,
   once = true,
   as: Tag = "div",
 }: Props) {
@@ -32,6 +32,9 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Lo que ya está en pantalla (o más arriba, si se recargó a mitad de página) queda como vino del servidor:
+    // esconderlo al hidratar y volver a mostrarlo hacía que la página pareciera trabada.
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return;
     const mm = gsap.matchMedia();
     mm.add("all", () => {
       const targets = stagger != null ? Array.from(el.children) : el;
@@ -39,7 +42,7 @@ export function Reveal({
       const tween = gsap.to(targets, {
         autoAlpha: 1,
         y: 0,
-        duration: 1.1,
+        duration: 0.8,
         ease: "expo.out",
         delay,
         stagger: stagger ?? 0,

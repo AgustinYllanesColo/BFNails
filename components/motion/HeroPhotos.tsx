@@ -53,7 +53,7 @@ export function HeroPhotos({ className }: { className?: string }) {
         <div
           key={p.src}
           data-hero-photo
-          className={cn("absolute", p.mobile ? "block" : "hidden md:block")}
+          className={cn("hero-in-fade absolute", p.mobile ? "block" : "hidden md:block")}
           style={{
             left: p.x,
             top: p.y,

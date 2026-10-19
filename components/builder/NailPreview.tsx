@@ -57,6 +57,7 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   const [load3D, setLoad3D] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [posterHidden, setPosterHidden] = useState(false);
   const [gen, setGen] = useState(0);
   const [hint, setHint] = useState<"off" | "on" | "gone">("off");
   const [perfGuard, setPerfGuard] = useState(true);
@@ -97,9 +98,17 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   useLayoutEffect(
     () => () => {
       setReady(false);
+      setPosterHidden(false);
     },
     [],
   );
+
+  // la foto se desmonta cuando terminó de fundirse (con timer: transitionend puede no dispararse)
+  useEffect(() => {
+    if (!(load3D && !failed && ready)) return;
+    const t = window.setTimeout(() => setPosterHidden(true), 360);
+    return () => window.clearTimeout(t);
+  }, [load3D, failed, ready]);
 
   useEffect(() => {
     if (hint !== "on") return;
@@ -122,6 +131,7 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   const onError = () => {
     setFailed(true);
     setReady(false);
+    setPosterHidden(false);
     // reintento acotado: en iOS el contexto se pierde al pasar la pestaña a segundo plano
     if (retries.current >= 2) return;
     retries.current += 1;
@@ -146,6 +156,7 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
 
   const show3D = load3D && !failed;
   const faded = show3D && ready;
+  const posterGone = faded && posterHidden;
   const loading = show3D && !ready;
   const label = describe(sel, config);
 
@@ -155,15 +166,21 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
       onPointerDown={() => hint === "on" && setHint("gone")}
     >
       <div ref={ref} role="img" aria-label={label} className="absolute inset-0 bg-[radial-gradient(120%_90%_at_38%_22%,#fbf0d9_0%,#f5e8c8_55%,#efdcb6_100%)]">
-        {/* La foto de la mano realista queda debajo: el 3D entra encima con un fundido y la tapa entera */}
-        <Image
-          src="/brand/hand-poster.webp"
-          alt=""
-          fill
-          loading="eager"
-          sizes="(min-width: 1024px) 440px, 100vw"
-          className="object-cover"
-        />
+        {/* La foto de la mano realista mientras carga el 3D. Cuando el 3D está listo se funde y se desmonta: el
+            canvas es transparente, y con la mano 3D balanceándose se veían las dos manos superpuestas. */}
+        {!posterGone && (
+          <Image
+            src="/brand/hand-poster.webp"
+            alt=""
+            fill
+            loading="eager"
+            sizes="(min-width: 1024px) 440px, 100vw"
+            className={cn(
+              "object-cover transition-opacity duration-300 ease-out",
+              faded ? "opacity-0" : "opacity-100",
+            )}
+          />
+        )}
         {show3D && (
           <NailPreview3D
             key={gen}
