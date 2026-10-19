@@ -47,7 +47,7 @@ export function SizePicker({ value, onChange, compact }: Props) {
                   onClick={() => onChange({ mode: "standard", size: s })}
                   aria-pressed={selected}
                   className={cn(
-                    "rounded-md border p-3 text-center transition-all duration-300 ease-[var(--ease-out-expo)]",
+                    "rounded-md border p-3 text-center transition-[background-color,border-color,color,scale] duration-200 ease-[var(--ease-ui)] active:scale-[0.96]",
                     selected ? "border-bordo bg-bordo text-cream" : "border-cream-ink bg-white/60 hover:border-bordo/50",
                   )}
                 >

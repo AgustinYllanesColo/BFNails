@@ -22,12 +22,11 @@ export default async function CatalogoPage() {
   return (
     <div className="relative isolate pt-[calc(var(--nav-h)+24px)] pb-[var(--section-y)] md:pt-[calc(var(--nav-h)+56px)]">
       {/* Trío del logo arriba a la derecha, al costado del titular (≥ 12 px de aire con cualquier texto y lejos de la
-          píldora del nav). La chica también en el celular; la grande y la del borde izquierdo, desde md. */}
+          píldora del nav). La chica también en el celular; la grande, desde md. */}
       <Stars
         stars={[
           { x: "calc(100% - var(--gutter) - 38px)", y: "14px", size: 38, rotate: 14, speed: 0.6 },
           { x: "88%", y: "10%", size: 90, rotate: 12, speed: 0.7, mobile: false },
-          { x: "-6%", y: "46%", size: 120, rotate: -8, speed: 0.5, mobile: false },
         ]}
         className="top-[calc(var(--nav-h)+8px)] -z-10 max-h-[600px]"
       />

@@ -17,19 +17,19 @@ export function SizeFinder() {
     <div className="mt-6 rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10">
       <div className="grid grid-cols-2 gap-4">
         <Field label="Pulgar (mm)" htmlFor="thumb">
-          <input id="thumb" type="number" inputMode="decimal" step="0.5" className={inputClass} value={thumb} onChange={(e) => setThumb(e.target.value)} placeholder="17" />
+          <input id="thumb" type="number" inputMode="decimal" step="0.5" className={inputClass} value={thumb} onChange={(e) => setThumb(e.target.value)} placeholder="ej. 17" />
         </Field>
         <Field label="Anular (mm)" htmlFor="ring">
-          <input id="ring" type="number" inputMode="decimal" step="0.5" className={inputClass} value={ring} onChange={(e) => setRing(e.target.value)} placeholder="13" />
+          <input id="ring" type="number" inputMode="decimal" step="0.5" className={inputClass} value={ring} onChange={(e) => setRing(e.target.value)} placeholder="ej. 13" />
         </Field>
       </div>
       <div className="mt-5 flex min-h-16 items-center gap-4">
         {size ? (
           <motion.div
             key={size}
-            initial={{ scale: 0.7, opacity: 0, rotate: -6 }}
+            initial={{ scale: 0.9, opacity: 0, rotate: -4 }}
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 18 }}
+            transition={{ type: "spring", duration: 0.45, bounce: 0.3 }}
             className="flex items-center gap-4"
           >
             <span className="grid size-16 place-items-center rounded-pill bg-bordo font-display text-3xl text-cream">{size}</span>
