@@ -109,7 +109,8 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   renderer.toneMappingExposure = 0.75;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+  // Suave: con PCF a secas el borde es duro y la sombra de los dedos se lee como una segunda mano al costado
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = true;
 
   const disposables: Array<{ dispose(): void }> = [];
@@ -131,7 +132,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
 
   /* ---------- luz ---------- */
   const key = new THREE.DirectionalLight("#ffeedb", 2.5);
-  key.position.set(-9, 6, 11).add(PIVOT);
+  key.position.set(-5, 5, 14).add(PIVOT);
   key.target.position.copy(PIVOT);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
@@ -166,7 +167,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   pivot.add(hand);
 
   // sombra proyectada suave (solo sombra, el fondo es el crema del contenedor)
-  const shadowMat = track(new THREE.ShadowMaterial({ color: new THREE.Color("#5b2618"), opacity: 0.24 }));
+  const shadowMat = track(new THREE.ShadowMaterial({ color: new THREE.Color("#5b2618"), opacity: 0.11 }));
   const floorGeo = track(new THREE.PlaneGeometry(40, 40));
   const floor = new THREE.Mesh(floorGeo, shadowMat);
   floor.position.set(PIVOT.x, PIVOT.y, 0);

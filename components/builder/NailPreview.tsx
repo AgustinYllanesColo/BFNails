@@ -59,7 +59,6 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [allow2D, setAllow2D] = useState(false);
-  const [hide2D, setHide2D] = useState(false);
   const [gen, setGen] = useState(0);
   const [hint, setHint] = useState<"off" | "on" | "gone">("off");
   const [perfGuard, setPerfGuard] = useState(true);
@@ -108,18 +107,9 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   useLayoutEffect(
     () => () => {
       setReady(false);
-      setHide2D(false);
     },
     [],
   );
-
-  // cuando el 3D ya está a la vista, el 2D se desmonta (con un timer: si el fundido no llega a
-  // correr, por ejemplo porque el 2D recién aparecía, transitionend nunca dispararía)
-  useEffect(() => {
-    if (!(load3D && !failed && ready)) return;
-    const t = window.setTimeout(() => setHide2D(true), 420);
-    return () => window.clearTimeout(t);
-  }, [load3D, failed, ready]);
 
   useEffect(() => {
     if (hint !== "on") return;
@@ -143,7 +133,6 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   const onError = () => {
     setFailed(true);
     setReady(false);
-    setHide2D(false);
     setAllow2D(true);
     // reintento acotado: en iOS el contexto se pierde al pasar la pestaña a segundo plano
     if (retries.current >= 2) return;
@@ -169,7 +158,8 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
 
   const show3D = load3D && !failed;
   const faded = show3D && ready;
-  const show2D = (allow2D || failed) && !(faded && hide2D);
+  // nunca dos manos a la vez: en cuanto el 3D dibujó, la ilustración se va (el 3D entra solo sobre el crema)
+  const show2D = (allow2D || failed) && !faded;
   const label = describe(sel, config);
 
   return (
@@ -203,7 +193,6 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
               // entra sobre el fondo crema; si había 2D, espera a que se vaya (fundido secuencial, sin dos manos superpuestas)
               "absolute inset-0 block h-full w-full transition-[opacity,filter,scale] duration-[260ms] ease-[cubic-bezier(0.23,1,0.32,1)]",
               faded ? "opacity-100" : "opacity-0 motion-safe:scale-[1.015] motion-safe:blur-[6px]",
-              faded && show2D && "delay-100",
             )}
           />
         )}

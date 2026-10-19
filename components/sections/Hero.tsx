@@ -12,6 +12,7 @@ import { Marquee } from "@/components/motion/Marquee";
 import { SpinningBadge } from "@/components/motion/SpinningBadge";
 import { LOGO_STAR_PATH, LogoStar } from "@/components/brand/LogoStar";
 import { Button } from "@/components/ui/Button";
+import { Brush } from "@/components/motion/Brush";
 import { Icon } from "@/components/ui/icons";
 // Global a propósito (los .module.css de este proyecto no tienen alcance local): clases con prefijo `bfh-`.
 import "./Hero.module.css";
@@ -108,6 +109,46 @@ export function Hero() {
     return () => mm.revert();
   }, []);
 
+  // Profundidad con el puntero (solo mouse/trackpad y sin reduced-motion): cada capa [data-depth] se corre en px
+  // proporcionales a su profundidad (las negativas van en contra: los rayos quedan "atrás", las uñas "adelante").
+  // quickTo con una sola curva de salida: interrumpible, sin acumular tweens. Nodos propios: no pisa scroll ni flotación.
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const mq = window.matchMedia("(pointer: fine) and (prefers-reduced-motion: no-preference)");
+    if (!mq.matches) return;
+    const layers = gsap.utils.toArray<HTMLElement>("[data-depth]", el).map((n) => {
+      const d = Number(n.dataset.depth) || 0;
+      return {
+        d,
+        x: gsap.quickTo(n, "x", { duration: 1.1, ease: "power3.out" }),
+        y: gsap.quickTo(n, "y", { duration: 1.1, ease: "power3.out" }),
+      };
+    });
+    const move = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      const nx = (e.clientX - r.left) / r.width - 0.5;
+      const ny = (e.clientY - r.top) / r.height - 0.5;
+      for (const l of layers) {
+        l.x(nx * l.d);
+        l.y(ny * l.d * 0.6);
+      }
+    };
+    const leave = () => {
+      for (const l of layers) {
+        l.x(0);
+        l.y(0);
+      }
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerleave", leave);
+    return () => {
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerleave", leave);
+      gsap.set(gsap.utils.toArray("[data-depth]", el), { clearProps: "transform" });
+    };
+  }, []);
+
   return (
     <AmbientZone
       as="section"
@@ -116,7 +157,9 @@ export function Hero() {
       aria-labelledby="hero-title"
       className="relative isolate flex min-h-[100svh] flex-col items-center overflow-hidden px-[var(--gutter)] pt-[calc(var(--nav-h)+16px)] pb-20 md:justify-center md:pb-[clamp(4rem,10svh,6rem)]"
     >
-      <FloatingNails className="-z-10" />
+      <div data-depth="-48" className="pointer-events-none absolute inset-0 -z-10">
+        <FloatingNails />
+      </div>
 
       {/* Logo: banda (en el celular se lleva el aire libre, 60 % arriba) › caja del logo (centra rayos, halo y fila) ›
           scroll (GSAP) › flotación › intro › imagen + sombra + brillo */}
@@ -127,10 +170,12 @@ export function Hero() {
             aria-hidden
             className="pointer-events-none absolute top-1/2 left-1/2 -z-20 -translate-1/2 [mask-image:radial-gradient(closest-side,#000_22%,transparent_88%)]"
           >
-            <div
-              data-ambient="move"
-              className="aspect-square w-[min(150vw,1440px)] animate-[spin-slow_calc(160s*var(--amb-k))_linear_infinite] rounded-full bg-[repeating-conic-gradient(from_0deg,rgb(245_232_200/0.8)_0deg_5.4deg,rgb(245_232_200/0)_6deg_14.4deg,rgb(245_232_200/0.8)_15deg)]"
-            />
+            <div data-depth="18">
+              <div
+                data-ambient="move"
+                className="aspect-square w-[min(150vw,1440px)] animate-[spin-slow_calc(70s*var(--amb-k))_linear_infinite] rounded-full bg-[repeating-conic-gradient(from_0deg,rgb(245_232_200/0.8)_0deg_5.4deg,rgb(245_232_200/0)_6deg_14.4deg,rgb(245_232_200/0.8)_15deg)]"
+              />
+            </div>
           </div>
           <div
             aria-hidden
@@ -149,65 +194,67 @@ export function Hero() {
                   speed={44}
                   reactive={false}
                   separator={<OutlineStar />}
-                  className="font-display text-[clamp(5rem,16vw,15rem)] leading-[0.95] opacity-[0.07] md:opacity-[0.08]"
+                  className="font-display text-[clamp(5rem,16vw,15rem)] leading-[0.95] opacity-[0.1] md:opacity-[0.13]"
                 />
               </div>
             </div>
           </div>
           <div data-hero-logo-scroll="" className="relative">
-            <div data-ambient="move" className="animate-logo-float [animation-delay:1.4s]">
-              <div className="bfh-press">
-                <Image
-                  src="/brand/logo-nails.webp"
-                  width={960}
-                  height={582}
-                  alt="BF Nails Studio"
-                  unoptimized
-                  loading="eager"
-                  fetchPriority="high"
-                  crossOrigin="anonymous"
-                  className="drop-shadow-logo block h-auto w-full"
-                />
-                <span aria-hidden className="bfh-contact" />
-                <span aria-hidden className="bfh-sheen-mask">
-                  <span
-                    data-ambient="move"
-                    className="bfh-sheen animate-[sheen_calc(9s*var(--amb-k))_var(--ease-move)_650ms_infinite] motion-reduce:[animation-iteration-count:1]"
+            <div data-depth="-16">
+              <div data-ambient="move" className="animate-logo-float [animation-delay:1.4s]">
+                <div className="bfh-press">
+                  <Image
+                    src="/brand/logo-nails.webp"
+                    width={960}
+                    height={582}
+                    alt="BF Nails Studio"
+                    unoptimized
+                    loading="eager"
+                    fetchPriority="high"
+                    crossOrigin="anonymous"
+                    className="drop-shadow-logo block h-auto w-full"
                   />
-                </span>
-              </div>
-              {/* Sello en el celular: abajo a la izquierda del logo, en el hueco que deja la estrella grande */}
-              <div
-                aria-hidden
-                data-hero-badge-m=""
-                className="pointer-events-none absolute top-[calc(100%-34px)] left-[3%] md:hidden [@media(max-height:780px)]:hidden"
-              >
-                <div className="bfh-badge">
-                  <SpinningBadge text="hechas a mano por Bren · Lanús · " size={96} />
-                </div>
-              </div>
-              {STARS.map((star) => (
-                <div
-                  key={star.left}
-                  aria-hidden
-                  data-hero-star=""
-                  className="pointer-events-none absolute -translate-1/2"
-                  style={{ left: star.left, top: star.top }}
-                >
-                  <div
-                    className="animate-pop-in motion-reduce:animate-fade-in"
-                    style={{ animationDelay: `${star.delay}ms` }}
-                  >
+                  <span aria-hidden className="bfh-contact" />
+                  <span aria-hidden className="bfh-sheen-mask">
                     <span
                       data-ambient="move"
-                      className="animate-twinkle block"
-                      style={{ animationDelay: `${star.twinkle}s` }}
-                    >
-                      <LogoStar size={star.size} tilt />
-                    </span>
+                      className="bfh-sheen animate-[sheen_calc(9s*var(--amb-k))_var(--ease-move)_650ms_infinite] motion-reduce:[animation-iteration-count:1]"
+                    />
+                  </span>
+                </div>
+                {/* Sello en el celular: abajo a la izquierda del logo, en el hueco que deja la estrella grande */}
+                <div
+                  aria-hidden
+                  data-hero-badge-m=""
+                  className="pointer-events-none absolute top-[calc(100%-34px)] left-[3%] md:hidden [@media(max-height:780px)]:hidden"
+                >
+                  <div className="bfh-badge">
+                    <SpinningBadge text="hechas a mano por Bren · Lanús · " size={96} />
                   </div>
                 </div>
-              ))}
+                {STARS.map((star) => (
+                  <div
+                    key={star.left}
+                    aria-hidden
+                    data-hero-star=""
+                    className="pointer-events-none absolute -translate-1/2"
+                    style={{ left: star.left, top: star.top }}
+                  >
+                    <div
+                      className="animate-pop-in motion-reduce:animate-fade-in"
+                      style={{ animationDelay: `${star.delay}ms` }}
+                    >
+                      <span
+                        data-ambient="move"
+                        className="animate-twinkle block"
+                        style={{ animationDelay: `${star.twinkle}s` }}
+                      >
+                        <LogoStar size={star.size} tilt />
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -222,7 +269,9 @@ export function Hero() {
           >
             {/* Corte en la coma: "soft gel" nunca se parte (W1) y "a tu talle." baja entero */}
             <span className="whitespace-nowrap">Press-on de soft gel,</span>{" "}
-            <span className="text-bordo whitespace-nowrap">a tu talle.</span>
+            <span className="whitespace-nowrap">
+              <Brush mode="load">a tu talle</Brush>.
+            </span>
           </h1>
           <p
             data-hero-lead=""

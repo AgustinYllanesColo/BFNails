@@ -236,8 +236,8 @@ export function Zones() {
                 </span>
 
                 <div className="pt-2.5 md:pt-0">
-                  <h3 className="text-ink font-sans text-[20px] leading-tight font-semibold">{s.title}</h3>
-                  <span className="mt-2.5 inline-block -rotate-2">
+                  <h3 className="text-ink font-display text-[clamp(1.6rem,2.4vw,2rem)] leading-none">{s.title}</h3>
+                  <span className="mt-3 inline-block">
                     <span className="bg-bordo text-cream rounded-pill tabular inline-flex h-8 items-center px-3 font-sans text-[15px] font-bold whitespace-nowrap shadow-sm">
                       {s.price}
                     </span>
