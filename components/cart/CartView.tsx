@@ -113,6 +113,21 @@ function FilledCart({ items, config }: { items: CartItem[]; config: BuilderConfi
             ))}
           </AnimatePresence>
         </ul>
+        {/* Lo que viene con cada set y cómo sigue: llena el aire de la columna con lo que la clienta quiere saber */}
+        <ul className="border-line text-meta text-ink-soft mt-6 grid gap-2 border-t pt-6 sm:grid-cols-3 sm:gap-4">
+          <li>
+            <span className="text-ink block font-semibold">Kit completo</span>
+            10 uñas en tu talle + pegamento + lima
+          </li>
+          <li>
+            <span className="text-ink block font-semibold">Hecho a pedido</span>
+            Bren lo pinta a mano en 3 a 7 días
+          </li>
+          <li>
+            <span className="text-ink block font-semibold">Envío</span>
+            Retiro gratis en estación, moto o Correo Argentino
+          </li>
+        </ul>
       </section>
 
       <motion.aside

@@ -343,6 +343,7 @@ export function Receipt({
     const html = document.documentElement;
     const booted = firstVisitKey && html.dataset.bfPrintKey === firstVisitKey;
     if (booted) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- el estado sale del DOM al hidratar (script de primera visita): no se conoce en el render
       setPhase("pending");
       setStampState("hidden");
       return;
@@ -458,6 +459,7 @@ export function Receipt({
     callbacks.current.onPrinted?.();
     const node = cutNode.current;
     if (!node || reduced) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- la fase "done" llega del final de la animación; el sello sigue ese evento
       if (stamp) setStampState(reduced ? "play" : "rest");
       return;
     }
@@ -481,6 +483,7 @@ export function Receipt({
     timers.current.forEach(clearTimeout);
     timers.current = [];
     if (!label) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- el sello sigue a un cambio de prop que puede llegar con el ticket ya impreso
       setStampState("hidden");
       return;
     }

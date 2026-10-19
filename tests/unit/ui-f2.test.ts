@@ -584,16 +584,12 @@ describe("CopyButton", () => {
 describe("DesignCard", () => {
   const kitty = DESIGNS.find((d) => d.slug === "kitty-leopard")!;
 
-  it("sin fotos (placeholder cuadrado viejo): abanico NailSwatch con el nombre accesible, sin <img>", () => {
+  it("sin fotos: la ilustración del placeholder (con v=) como imagen con el nombre accesible", () => {
     const { container } = render(h(DesignCard, { design: kitty, priority: true }));
-    const ph = container.querySelector("[data-card-placeholder]")!;
-    expect(ph).not.toBeNull();
-    const swatch = ph.querySelector('svg[data-nail-swatch="5"]')!;
-    expect(swatch.getAttribute("role")).toBe("img");
-    expect(swatch.getAttribute("aria-label")).toBe(kitty.name);
-    // kitty-leopard es animal print: el abanico usa la trama de leopardo
-    expect(swatch.innerHTML).toContain("leopard-tile.svg");
-    expect(container.querySelectorAll("img")).toHaveLength(0);
+    expect(container.querySelector("[data-card-placeholder]")).toBeNull();
+    const img = container.querySelector("img")!;
+    expect(img.getAttribute("alt")).toBe(kitty.name);
+    expect(decodeURIComponent(img.getAttribute("src") ?? "")).toMatch(/api\/placeholder.*v=\d/);
   });
 
   it("con fotos reales: next/image con prioridad y segunda foto solo si hay dos", () => {

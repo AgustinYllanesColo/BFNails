@@ -166,6 +166,7 @@ export function CheckoutForm({
 
   useEffect(() => {
     if (delivery !== "correo" || cp.length < 4) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- vuelve a idle cuando el CP deja de ser cotizable (estado de un fetch externo)
       setQuote((q) => (q.status === "idle" ? q : { status: "idle", options: [] }));
       return;
     }
@@ -412,6 +413,12 @@ export function CheckoutForm({
     void submitWeb(v);
   };
 
+  const emptyBag = () => {
+    clear();
+    setCleared(true);
+    toast.show({ message: "Listo, vaciaste tu bolsita", icon: "check" });
+  };
+
   /* Volver de WhatsApp: recién ahí se imprime "enviado" y cae el sello; después, la pregunta de vaciar. */
   useEffect(() => {
     if (!wa) return;
@@ -441,12 +448,6 @@ export function CheckoutForm({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wa, cleared]);
-
-  const emptyBag = () => {
-    clear();
-    setCleared(true);
-    toast.show({ message: "Listo, vaciaste tu bolsita", icon: "check" });
-  };
 
   /* ---------- ticket ---------- */
   const ticketItems = snapshot ?? items;
