@@ -24,25 +24,26 @@ function forced3D() {
 }
 
 /**
- * ¿Hay WebGL2 con GPU de verdad? Un solo contexto de sondeo. Los renderizadores por software
- * (SwiftShader, llvmpipe, "Microsoft Basic Render") llevarían toda la página a pocos fps: ahí queda el 2D.
+ * ¿Qué WebGL2 hay? Un solo contexto de sondeo. Con un renderizador por software (SwiftShader, llvmpipe,
+ * "Microsoft Basic Render": aceleración apagada, ahorro de batería) la mano igual se carga, con el freno de
+ * calidad puesto: antes ahí quedaba la foto fija y la mano no cambiaba al elegir.
  */
-function probeWebGL2() {
-  if (typeof WebGL2RenderingContext === "undefined") return false;
+function probeWebGL2(): "gpu" | "software" | "none" {
+  if (typeof WebGL2RenderingContext === "undefined") return "none";
   try {
     const c = document.createElement("canvas");
     const gl = c.getContext("webgl2", { powerPreference: "default" });
-    if (!gl) return false;
-    let ok = true;
+    if (!gl) return "none";
+    let kind: "gpu" | "software" = "gpu";
     if (!forced3D()) {
       const ext = gl.getExtension("WEBGL_debug_renderer_info");
       const name = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
-      if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(name)) ok = false;
+      if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(name)) kind = "software";
     }
     gl.getExtension("WEBGL_lose_context")?.loseContext();
-    return ok;
+    return kind;
   } catch {
-    return false;
+    return "none";
   }
 }
 
@@ -61,6 +62,8 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
   const [gen, setGen] = useState(0);
   const [hint, setHint] = useState<"off" | "on" | "gone">("off");
   const [perfGuard, setPerfGuard] = useState(true);
+  /** sin WebGL: queda la foto, con un aviso (no se hace pasar por una vista en vivo) */
+  const [noGL, setNoGL] = useState(false);
   const retries = useRef(0);
   const retryCleanup = useRef<(() => void) | null>(null);
 
@@ -76,8 +79,12 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         io.disconnect();
-        if (!probeWebGL2()) return;
-        setPerfGuard(!forced3D());
+        const gl = probeWebGL2();
+        if (gl === "none") {
+          setNoGL(true);
+          return;
+        }
+        setPerfGuard(gl === "software" || !forced3D());
         // que three no compita con la hidratación ni con el primer toque
         const go = () => setLoad3D(true);
         if (typeof window.requestIdleCallback === "function") idle = window.requestIdleCallback(go, { timeout: 300 });
@@ -133,7 +140,10 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
     setReady(false);
     setPosterHidden(false);
     // reintento acotado: en iOS el contexto se pierde al pasar la pestaña a segundo plano
-    if (retries.current >= 2) return;
+    if (retries.current >= 2) {
+      setNoGL(true);
+      return;
+    }
     retries.current += 1;
     const retry = () => {
       retryCleanup.current = null;
@@ -204,6 +214,11 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
         >
           <span aria-hidden className="size-2 rounded-full bg-bordo/70 motion-safe:animate-pulse" />
           Cargando vista 3D
+        </p>
+      )}
+      {noGL && (
+        <p className="pointer-events-none absolute top-2 right-2 left-2 rounded-md bg-cream/95 px-3 py-2 text-[11px] font-semibold text-ink sm:text-xs">
+          Tu navegador no puede mostrar la mano en 3D. Tu elección queda guardada igual: la ves en el resumen.
         </p>
       )}
       {hint !== "off" && (

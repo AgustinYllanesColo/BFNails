@@ -135,7 +135,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
 
   /* ---------- luz ---------- */
   const key = new THREE.DirectionalLight("#ffeedb", 2.2);
-  key.position.set(-9, 6, 11).add(PIVOT);
+  key.position.set(-4, 5, 15).add(PIVOT);
   key.target.position.copy(PIVOT);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
@@ -167,7 +167,9 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   pivot.add(hand);
 
   // sombra proyectada suave (solo sombra, el fondo es el crema del contenedor)
-  const shadowMat = track(new THREE.ShadowMaterial({ color: new THREE.Color("#5b2618"), opacity: 0.2 }));
+  // Neutra, tenue y con la luz casi de frente: rojiza al 20 % y con la luz de costado, la sombra de los dedos se
+  // leía como una segunda mano color piel al lado de la primera.
+  const shadowMat = track(new THREE.ShadowMaterial({ color: new THREE.Color("#3a2a24"), opacity: 0.1 }));
   const floorGeo = track(new THREE.PlaneGeometry(40, 40));
   const floor = new THREE.Mesh(floorGeo, shadowMat);
   floor.position.set(PIVOT.x, PIVOT.y, 0);
