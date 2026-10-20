@@ -62,11 +62,18 @@ export function HeroPhotos({ className }: { className?: string }) {
           <div
             key={p.src}
             data-hero-photo
-            className={cn("absolute", p.mobile ? "block" : "hidden md:block")}
+            className={cn(
+              "absolute",
+              p.mobile
+                ? "block max-md:[--hp-w:clamp(72px,21vw,96px)] max-md:[--hp-x:var(--hp-x-m)]"
+                : "hidden md:block",
+            )}
             style={{
-              left: p.x,
+              // en el celular, más chicas y contra los bordes: detrás del logo, nunca tapando "BF STUDIO"
+              left: `var(--hp-x, ${p.x})`,
               top: p.y,
-              width: `clamp(${p.w * 0.8}px, ${p.w / 7.2}vw, ${p.w * 1.35}px)`,
+              width: `var(--hp-w, clamp(${p.w * 0.8}px, ${p.w / 7.2}vw, ${p.w * 1.35}px))`,
+              ...(p.mobile ? { ["--hp-x-m" as string]: parseFloat(p.x) < 50 ? "-6%" : "82%" } : {}),
             }}
           >
             <div data-depth={DEPTH[i]}>

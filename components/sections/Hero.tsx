@@ -82,7 +82,7 @@ export function Hero() {
       <HeroPhotos className="-z-10" />
 
       {/* Logo real: flota apenas, en CSS */}
-      <div data-hero-logo className="hero-in-logo relative w-[min(88vw,760px)]">
+      <div data-hero-logo className="hero-in-logo relative z-10 w-[min(88vw,760px)]">
         <div data-depth="14">
           <div className="relative motion-safe:animate-[float_7s_ease-in-out_infinite]">
             <Image
