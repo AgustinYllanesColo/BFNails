@@ -17,28 +17,21 @@ export type DecorInput = {
   dims: NailDims;
   extras: string[];
   tipHex: string;
-  /** color de los diseños (puntitos, ondas, cebra, estrellitas) */
+  /** color de los diseños (puntitos, ondas, cebra, estrellitas, tribal) */
   detailHex: string;
-  /** en qué uñas van los diseños con patrón: todas, solo el anular o una sí y una no */
-  accent: "todas" | "acento" | "alternadas";
+  /** color al que llega el degradé */
+  degradeHex: string;
+  /** esta uña es acento: lleva las técnicas del set más las suyas (ya sumadas en `extras`) */
+  isAccent: boolean;
+  /** color propio de la uña acento (se pinta como base opaca debajo de todo); null = el de la base del set */
+  accentHex: string | null;
   kitty: HTMLImageElement | null;
 };
 
-/** Diseños con patrón que respetan la uña acento (los clásicos y los brillos van siempre en todas). */
-const ACCENTED = new Set(["animal-print", "flores", "puntitos", "cebra", "ondas", "estrellas", "encapsulado"]);
-
-/** ¿Esta uña lleva el patrón? Anular = índice 3; alternadas = pulgar, medio y meñique. */
-function carriesPattern(i: number, accent: DecorInput["accent"]) {
-  if (accent === "acento") return i === 3;
-  if (accent === "alternadas") return i % 2 === 0;
-  return true;
-}
-
 export function decorKey(i: DecorInput) {
-  const on = carriesPattern(i.index, i.accent);
-  const relevant = i.extras.filter((e) => PAINTED.has(e) && (on || !ACCENTED.has(e))).sort();
-  if (relevant.length === 0) return "none";
-  return [i.shape, i.dims.L.toFixed(3), relevant.join(","), i.tipHex, i.detailHex, i.kitty ? "k" : ""].join("|");
+  const relevant = i.extras.filter((e) => PAINTED.has(e)).sort();
+  if (relevant.length === 0 && !i.accentHex) return "none";
+  return [i.shape, i.dims.L.toFixed(3), relevant.join(","), i.tipHex, i.detailHex, i.degradeHex, i.isAccent ? "a" : "", i.accentHex ?? "", i.kitty ? "k" : ""].join("|");
 }
 
 const PAINTED = new Set([
@@ -54,7 +47,16 @@ const PAINTED = new Set([
   "cebra",
   "ondas",
   "estrellas",
+  "tribal",
+  "perlas",
+  "strass-colores",
 ]);
+
+/** "#rrggbb" + alfa → rgba() */
+function rgba(hex: string, a: number) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
 
 function outline(ctx: CanvasRenderingContext2D, shape: Shape, d: NailDims) {
   const N = 60;
@@ -97,9 +99,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const { dims: d, shape, extras, index: i } = input;
-  const on = carriesPattern(i, input.accent);
-  // los patrones solo en las uñas que los llevan; el resto de las técnicas, en todas
-  const has = (x: string) => extras.includes(x) && (on || !ACCENTED.has(x));
+  const has = (x: string) => extras.includes(x);
   const detail = input.detailHex;
   if (decorKey(input) === "none") return;
 
@@ -114,12 +114,18 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
   outline(ctx, shape, d);
   ctx.clip();
 
-  // 1. degradé / babyboomer: blanco lechoso hacia la punta
+  // 0. uña acento con color propio: base opaca debajo de todo (el acabado del set sigue arriba)
+  if (input.accentHex) {
+    ctx.fillStyle = input.accentHex;
+    ctx.fillRect(-W, 0, W * 2, d.Lref);
+  }
+
+  // 1. degradé: babyboomer (blanco lechoso) o de color (sunset, rosa a negro) hacia la punta
   if (has("degrade")) {
-    const g = ctx.createLinearGradient(0, d.L * 0.25, 0, d.L);
-    g.addColorStop(0, "rgba(255,252,248,0)");
-    g.addColorStop(0.55, "rgba(255,252,248,0.55)");
-    g.addColorStop(1, "rgba(255,253,250,0.97)");
+    const g = ctx.createLinearGradient(0, d.L * 0.22, 0, d.L);
+    g.addColorStop(0, rgba(input.degradeHex, 0));
+    g.addColorStop(0.55, rgba(input.degradeHex, 0.6));
+    g.addColorStop(1, rgba(input.degradeHex, 0.98));
     ctx.fillStyle = g;
     ctx.fillRect(-W, 0, W * 2, d.Lref);
   }
@@ -216,8 +222,9 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 4. flores a mano (uñas pares: pulgar, medio, meñique)
-  if (has("flores") && (input.accent !== "todas" || i % 2 === 0)) {
+  // 4. flores a mano
+  // en todo el set van una sí, una no (pulgar, mayor, meñique); en una uña acento, siempre
+  if (has("flores") && (input.isAccent || i % 2 === 0)) {
     const cy = d.bed * 0.58;
     const r = W * 0.17;
     ctx.save();
@@ -291,7 +298,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 5b. puntitos: filas alternadas de lunares en el color del detalle, con un brillo cada uno
+  // 6. puntitos: filas alternadas de lunares en el color del detalle, con un brillo cada uno
   if (has("puntitos")) {
     const r = W * 0.075;
     const stepX = W * 0.3;
@@ -311,7 +318,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 5c. cebra / tigre: rayas cruzadas que se afinan en las puntas, irregulares como pintadas a pincel
+  // 7. cebra / tigre: rayas cruzadas que se afinan en las puntas, irregulares como pintadas a pincel
   if (has("cebra")) {
     ctx.fillStyle = detail;
     const n = Math.round(4 + d.L / W * 2.2);
@@ -332,7 +339,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 5d. ondas: dos o tres líneas sinuosas a lo largo de la uña (como el set rosa de ondas de Brenda)
+  // 8. ondas: dos o tres líneas sinuosas a lo largo de la uña (como el set rosa de ondas de Brenda)
   if (has("ondas")) {
     ctx.strokeStyle = detail;
     ctx.lineCap = "round";
@@ -352,7 +359,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 5e. estrellitas: una estrella de cuatro puntas grande, dos chicas y puntos de brillo
+  // 9. estrellitas: una estrella de cuatro puntas grande, dos chicas y puntos de brillo
   if (has("estrellas")) {
     const sparkle = (x: number, y: number, r: number) => {
       ctx.beginPath();
@@ -379,19 +386,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 6. personajes: la Kitty de la marca en el anular
-  if (has("personajes") && i === 3 && input.kitty) {
-    const img = input.kitty;
-    const w = W * 0.78;
-    const h = (w * img.naturalHeight) / img.naturalWidth;
-    ctx.save();
-    ctx.translate(0, d.bed * 0.55);
-    ctx.scale(1, -1);
-    ctx.drawImage(img, -w / 2, -h / 2, w, h);
-    ctx.restore();
-  }
-
-  // 7. francesita (blanca o de color) por encima de todo, con línea de sonrisa
+  // 10. francesita (blanca o de color) sobre los patrones, con línea de sonrisa
   if (has("francesita") || has("francesita-color")) {
     const free = d.L - d.bed;
     // sonrisa suave: la punta no cubre la mitad de la uña
@@ -410,6 +405,103 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     ctx.lineTo(-W, d.Lref + 1);
     ctx.closePath();
     ctx.fill();
+  }
+
+
+  // 11. tribal: trazos curvos que nacen del borde libre con puntas afiladas (como el Tribal french de Brenda)
+  if (has("tribal")) {
+    ctx.fillStyle = detail;
+    const blade = (x0: number, y0: number, x1: number, y1: number, cx: number, cy: number, w: number) => {
+      ctx.beginPath();
+      ctx.moveTo(x0 - w, y0);
+      ctx.quadraticCurveTo(cx - w * 0.6, cy, x1, y1);
+      ctx.quadraticCurveTo(cx + w * 0.6, cy, x0 + w, y0);
+      ctx.closePath();
+      ctx.fill();
+    };
+    const top = d.L;
+    const flip = i % 2 ? -1 : 1;
+    blade(0, top + 0.05, flip * W * 0.1, d.bed * 0.3, flip * W * 0.36, top * 0.72, W * 0.18);
+    blade(-W * 0.34 * flip, top, -W * 0.02 * flip, top * 0.5, -W * 0.46 * flip, top * 0.7, W * 0.11);
+    blade(W * 0.36 * flip, top, W * 0.18 * flip, top * 0.55, W * 0.5 * flip, top * 0.78, W * 0.1);
+  }
+
+  // 12. personajes: la Kitty de la marca en el anular
+  if (has("personajes") && i === 3 && input.kitty) {
+    const img = input.kitty;
+    const w = W * 0.78;
+    const h = (w * img.naturalHeight) / img.naturalWidth;
+    ctx.save();
+    ctx.translate(0, d.bed * 0.55);
+    ctx.scale(1, -1);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
+
+  // 13. perlas: tres o cuatro perlas con su sombra y su brillo, cerca de la cutícula
+  if (has("perlas")) {
+    const pearl = (x: number, y: number, r: number) => {
+      const g = ctx.createRadialGradient(x - r * 0.35, y + r * 0.35, r * 0.1, x, y, r);
+      g.addColorStop(0, "#fffefb");
+      g.addColorStop(0.55, "#f3ece2");
+      g.addColorStop(1, "#c9bba8");
+      ctx.fillStyle = "rgba(60,40,30,0.18)";
+      ctx.beginPath();
+      ctx.arc(x + r * 0.12, y - r * 0.16, r * 1.02, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.beginPath();
+      ctx.arc(x - r * 0.35, y + r * 0.35, r * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    const r = W * 0.16;
+    if (input.isAccent || i % 2 === 1) {
+      // corazón de perlas
+      for (const [dx, dy] of [
+        [0, -0.32],
+        [-0.17, -0.16],
+        [0.17, -0.16],
+        [-0.28, 0.04],
+        [0.28, 0.04],
+        [-0.15, 0.17],
+        [0.15, 0.17],
+      ]) pearl(W * dx * 1.35, d.bed * 0.55 + W * dy * 1.45, r * 0.62);
+    } else {
+      pearl(0, d.bed * 0.3, r);
+    }
+  }
+
+  // 14. gemas de colores: piedritas facetadas en la punta (como el Candy gems de Brenda)
+  if (has("strass-colores")) {
+    const COLORS = ["#e0337f", "#2f8fe0", "#f5c400", "#35b06a", "#9b5de5", "#ff7a3d"];
+    const gem = (x: number, y: number, r: number, c: string) => {
+      ctx.fillStyle = "rgba(40,20,20,0.25)";
+      ctx.beginPath();
+      ctx.arc(x + r * 0.1, y - r * 0.14, r, 0, Math.PI * 2);
+      ctx.fill();
+      const g = ctx.createRadialGradient(x - r * 0.3, y + r * 0.3, r * 0.05, x, y, r);
+      g.addColorStop(0, "#ffffff");
+      g.addColorStop(0.35, c);
+      g.addColorStop(1, rgba(c, 0.85));
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const a = (k * Math.PI) / 4 + Math.PI / 8;
+        ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r);
+      }
+      ctx.closePath();
+      ctx.fill();
+    };
+    const n = input.isAccent ? 3 : 2;
+    for (let k = 0; k < n; k++) {
+      const x = (k - (n - 1) / 2) * W * 0.26;
+      gem(x, d.L * 0.86 - Math.abs(x) * 0.3, W * 0.1, COLORS[(i * 2 + k) % COLORS.length]);
+    }
   }
 
   ctx.restore();

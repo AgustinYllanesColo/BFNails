@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { BuilderSelection, SizeSelection } from "@/lib/types";
-import { DEFAULT_SELECTION, defaultDetailColor, quoteSelection, type BuilderConfig } from "@/lib/pricing";
+import { ACCENT_OPTIONS, DEFAULT_SELECTION, accentMode, defaultDetailColor, quoteSelection, type BuilderConfig } from "@/lib/pricing";
+import { presetFor } from "@/lib/data/presets";
 import { formatARS } from "@/lib/format";
 import type { Charm } from "@/lib/data/content";
 import { CharmThumb } from "@/components/charms/CharmThumb";
@@ -18,21 +20,39 @@ import { NailPreview } from "./NailPreview";
 import { cn } from "@/lib/format";
 import { CHARMS_ENABLED } from "@/lib/site";
 
-const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Dijes", "Detalles", "Medidas"] as const;
-/** Diseños que pueden ir solo en algunas uñas (uña acento), como los hace Brenda. */
-const PATTERNS = new Set(["animal-print", "flores", "puntitos", "cebra", "ondas", "estrellas", "encapsulado"]);
-/** Los que se pintan en el color que elijas. */
-const COLORED_PATTERNS = new Set(["puntitos", "cebra", "ondas", "estrellas"]);
-const ACCENTS: Array<{ id: NonNullable<BuilderSelection["accent"]>; label: string }> = [
-  { id: "todas", label: "En todas" },
-  { id: "acento", label: "Solo en el anular" },
-  { id: "alternadas", label: "Una sí, una no" },
-];
+const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uñas acento", "Dijes", "Detalles", "Medidas"] as const;
+/** Técnicas que se pintan en el color que elijas. */
+const COLORED = new Set(["puntitos", "cebra", "ondas", "estrellas", "tribal"]);
+/**
+ * Técnicas que pueden ir solo en las uñas acento: las pintadas y los apliques. Los brillos (glitter, cat eye,
+ * aurora) y la forma de la punta (francesita) son del set entero.
+ */
+const ACCENT_GROUPS = new Set(["Diseños", "3D y apliques"]);
 /** Con los dijes apagados, Detalles y Medidas suben un número. */
 const SHIFT = CHARMS_ENABLED ? 0 : 1;
 
-export function Builder({ config }: { config: BuilderConfig }) {
+export type PresetDesign = { slug: string; name: string; image: string };
+
+export function Builder({ config, presets = [] }: { config: BuilderConfig; presets?: PresetDesign[] }) {
   const [sel, setSel] = useState<BuilderSelection>(DEFAULT_SELECTION);
+  const [from, setFrom] = useState<string | null>(null);
+
+  // /disena?desde=slug: arranca desde ese diseño del catálogo (se lee en el cliente: la página sigue siendo estática)
+  useEffect(() => {
+    const slug = new URLSearchParams(window.location.search).get("desde");
+    const p = presetFor(slug);
+    if (!p) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- la receta sale de la URL, que no se conoce en el render del servidor
+    setSel(p);
+    setFrom(slug);
+  }, []);
+
+  const startFrom = (slug: string) => {
+    const p = presetFor(slug);
+    if (!p) return;
+    setSel((s) => ({ ...p, notes: s.notes, referenceUrl: s.referenceUrl }));
+    setFrom(slug);
+  };
   const [sizes, setSizes] = useState<SizeSelection>({ mode: "standard", size: "S" });
   const [added, setAdded] = useState(false);
   const add = useCart((s) => s.add);
@@ -44,6 +64,11 @@ export function Builder({ config }: { config: BuilderConfig }) {
 
   const toggleExtra = (id: string) =>
     setSel((s) => ({ ...s, extras: s.extras.includes(id) ? s.extras.filter((e) => e !== id) : [...s.extras, id] }));
+  const toggleAccentExtra = (id: string) =>
+    setSel((s) => {
+      const cur = s.accentExtras ?? [];
+      return { ...s, accentExtras: cur.includes(id) ? cur.filter((e) => e !== id) : [...cur, id] };
+    });
 
   const setCharm = (id: string, qty: number) =>
     setSel((s) => {
@@ -51,9 +76,11 @@ export function Builder({ config }: { config: BuilderConfig }) {
       return { ...s, charms: qty > 0 ? [...rest, { id, qty }] : rest };
     });
 
-  // los diseños con patrón pueden ir en todas las uñas o solo en algunas; los de color propio eligen su color
-  const hasPattern = sel.extras.some((e) => PATTERNS.has(e));
-  const hasColoredPattern = sel.extras.some((e) => COLORED_PATTERNS.has(e));
+  const mode = accentMode(sel);
+  const allExtras = mode === "ninguno" ? sel.extras : [...sel.extras, ...(sel.accentExtras ?? [])];
+  const hasColored = allExtras.some((e) => COLORED.has(e));
+  const hasDegrade = allExtras.includes("degrade");
+  const accentChoices = config.extras.filter((e) => ACCENT_GROUPS.has(e.group) || e.id === "degrade");
 
   const groups = useMemo(() => {
     const m = new Map<string, BuilderConfig["extras"]>();
@@ -78,13 +105,43 @@ export function Builder({ config }: { config: BuilderConfig }) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:gap-12">
-      <div className="space-y-10">
+      <div className="min-w-0 space-y-10">
         {/* En el celu la mano queda fija arriba mientras elegís: si no, al bajar a los colores ya no se veía el cambio */}
         <div className="sticky top-[72px] z-20 bg-cream pt-2 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-5 after:bg-linear-to-b after:from-cream after:to-transparent md:top-[88px] lg:hidden">
           <div className="mx-auto max-w-[min(100%,calc(36svh*4/3))]">
             <NailPreview sel={sel} config={config} />
           </div>
         </div>
+
+        {presets.length > 0 && (
+          <div>
+            <p className="mb-1 font-display text-xl">Partí de un diseño de Brenda</p>
+            <p className="mb-3 text-sm text-ink-soft">Tocá uno y cambiale lo que quieras: forma, colores, acentos.</p>
+            <div className="-mx-[var(--gutter,16px)] flex snap-x gap-3 overflow-x-auto px-[var(--gutter,16px)] pb-2 [scrollbar-width:none] md:mx-0 md:px-0">
+              {presets.map((d) => (
+                <button
+                  key={d.slug}
+                  type="button"
+                  onClick={() => startFrom(d.slug)}
+                  aria-pressed={from === d.slug}
+                  className={cn(
+                    "group w-24 shrink-0 snap-start text-left transition-[scale] duration-150 ease-[var(--ease-out-expo)] active:scale-[0.96]",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "block aspect-[4/5] overflow-hidden rounded-md ring-2 transition-[box-shadow] duration-200",
+                      from === d.slug ? "ring-bordo" : "ring-transparent group-hover:ring-bordo/30",
+                    )}
+                  >
+                    <Image src={d.image} alt="" width={96} height={120} sizes="96px" className="size-full object-cover" />
+                  </span>
+                  <span className={cn("mt-1 block truncate text-xs", from === d.slug ? "font-bold text-bordo" : "text-ink-soft")}>{d.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Step n={1} title={STEPS[0]} hint="Todas quedan bien, es gusto.">
           {config.shapes.map((o) => (
@@ -146,49 +203,83 @@ export function Builder({ config }: { config: BuilderConfig }) {
                       </div>
                     </motion.div>
                   )}
-                  {group === "Diseños" && hasPattern && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden">
-                      <div className="mt-3 space-y-4 rounded-lg bg-white/70 p-3 ring-1 ring-bordo/10">
-                        <div>
-                          <p className="mb-2 text-xs font-semibold text-ink-soft">¿En qué uñas va el diseño?</p>
-                          <div className="flex flex-wrap gap-2">
-                            {ACCENTS.map((a) => (
-                              <Chip key={a.id} selected={(sel.accent ?? "todas") === a.id} onClick={() => setSel({ ...sel, accent: a.id })}>
-                                {a.label}
-                              </Chip>
-                            ))}
-                          </div>
-                        </div>
-                        {hasColoredPattern && (
-                          <div>
-                            <p className="mb-2 text-xs font-semibold text-ink-soft">Color del diseño</p>
-                            <div className="flex flex-wrap gap-2">
-                              {config.bases.map((b) => (
-                                <Chip key={b.id} selected={(sel.detailColor ?? defaultDetailColor(sel.base)) === b.id} onClick={() => setSel({ ...sel, detailColor: b.id })} swatch={b.hex}>
-                                  {b.label}
-                                </Chip>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
                 </AnimatePresence>
               </div>
             ))}
           </div>
         </div>
 
+        {(hasColored || hasDegrade) && (
+          <div className="-mt-4 space-y-4 rounded-lg bg-white/70 p-4 ring-1 ring-bordo/10">
+            {hasColored && (
+              <ColorRow
+                label="Color del diseño (puntitos, cebra, ondas, estrellitas, tribal)"
+                bases={config.bases}
+                value={sel.detailColor ?? defaultDetailColor(sel.base)}
+                onChange={(id) => setSel({ ...sel, detailColor: id })}
+              />
+            )}
+            {hasDegrade && (
+              <ColorRow
+                label="El degradé va hacia"
+                bases={config.bases}
+                value={sel.degradeColor ?? "blanco"}
+                onChange={(id) => setSel({ ...sel, degradeColor: id })}
+              />
+            )}
+          </div>
+        )}
+
+        <div id="acentos" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
+          <StepHeader n={6} title={STEPS[5]} hint="Las uñas que se distinguen del resto: otro color, otro diseño. Así se arman casi todos los sets." />
+          <div className="flex flex-wrap gap-2">
+            {ACCENT_OPTIONS.map((o) => (
+              <Chip key={o.id} selected={mode === o.id} onClick={() => setSel({ ...sel, accent: o.id })}>
+                {o.label}
+              </Chip>
+            ))}
+          </div>
+          <AnimatePresence initial={false}>
+            {mode !== "ninguno" && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden">
+                <div className="mt-4 space-y-4 rounded-lg bg-white/70 p-4 ring-1 ring-bordo/10">
+                  <ColorRow
+                    label="Color de los acentos"
+                    bases={config.bases}
+                    value={sel.accentColor ?? sel.base}
+                    onChange={(id) => setSel({ ...sel, accentColor: id })}
+                  />
+                  <div>
+                    <p className="mb-2 text-xs font-semibold text-ink-soft">Qué llevan solo los acentos</p>
+                    <div className="flex flex-wrap gap-2">
+                      {accentChoices.map((e) => (
+                        <Chip
+                          key={e.id}
+                          selected={(sel.accentExtras ?? []).includes(e.id) || sel.extras.includes(e.id)}
+                          disabled={sel.extras.includes(e.id)}
+                          onClick={() => toggleAccentExtra(e.id)}
+                          hint={sel.extras.includes(e.id) ? "en todo el set" : `+${formatARS(e.delta)}`}
+                        >
+                          {e.label}
+                        </Chip>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         {CHARMS_ENABLED && (
           <div id="paso-6" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
-            <StepHeader n={6} title={STEPS[5]} hint="Opcional. Elegí cuántos de cada uno." />
+            <StepHeader n={7} title={STEPS[6]} hint="Opcional. Elegí cuántos de cada uno." />
             <CharmPicker charms={config.charms ?? []} picked={sel.charms ?? []} onChange={setCharm} />
           </div>
         )}
 
         <div>
-          <StepHeader n={7 - SHIFT} title={STEPS[6]} hint="Opcional. Si pedís algo que no está en la lista, te lo cotizo antes de que pagues." />
+          <StepHeader n={9 - SHIFT} title={STEPS[8]} hint="Opcional. Si pedís algo que no está en la lista, te lo cotizo antes de que pagues." />
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Referencia (link de Pinterest, IG, TikTok)" htmlFor="ref">
               <input id="ref" type="url" className={inputClass} placeholder="https://" value={sel.referenceUrl ?? ""} onChange={(e) => setSel({ ...sel, referenceUrl: e.target.value })} />
@@ -328,5 +419,31 @@ function CharmPicker({
         );
       })}
     </ul>
+  );
+}
+
+/** Fila de colores con su título (color del diseño, del degradé, de los acentos). */
+function ColorRow({
+  label,
+  bases,
+  value,
+  onChange,
+}: {
+  label: string;
+  bases: BuilderConfig["bases"];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div>
+      <p className="mb-2 text-xs font-semibold text-ink-soft">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {bases.map((b) => (
+          <Chip key={b.id} selected={value === b.id} onClick={() => onChange(b.id)} swatch={b.hex}>
+            {b.label}
+          </Chip>
+        ))}
+      </div>
+    </div>
   );
 }

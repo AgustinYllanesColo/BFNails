@@ -1,3 +1,4 @@
+import { ACCENT_OPTIONS, accentMode } from "./pricing";
 import { siteConfig } from "./site";
 import { formatARS, formatCm } from "./format";
 import type { CartItem, Order, SizeSelection } from "./types";
@@ -25,13 +26,20 @@ export function describeItem(item: CartItem): string {
   const s = item.selection;
   const extras = s.extras.length
     ? `, extras: ${s.extras.join(", ")}${s.tipColor ? ` (punta ${s.tipColor})` : ""}${s.detailColor ? ` (diseño en ${s.detailColor})` : ""}${
-        s.accent === "acento" ? " · diseño solo en el anular" : s.accent === "alternadas" ? " · diseño una sí, una no" : ""
+        s.degradeColor ? ` (degradé hacia ${s.degradeColor})` : ""
       }`
     : "";
+  const mode = accentMode(s);
+  const accent =
+    mode === "ninguno"
+      ? ""
+      : `\n  Acentos (${ACCENT_OPTIONS.find((o) => o.id === mode)?.label.toLowerCase()}): ${s.accentColor ?? s.base}${
+          s.accentExtras?.length ? ` con ${s.accentExtras.join(", ")}` : ""
+        }`;
   const charms = s.charms?.length ? `, dijes: ${s.charms.map((c) => `${c.id} ×${c.qty}`).join(", ")}` : "";
   const notes = s.notes ? `\n  Nota: ${s.notes}` : "";
   const ref = s.referenceUrl ? `\n  Referencia: ${s.referenceUrl}` : "";
-  return `• Diseño propio x${item.qty} (${sizes})\n  ${s.shape}, ${s.length}, ${s.finish}, base ${s.base}${extras}${charms}${notes}${ref}\n  ${formatARS(item.unitPrice * item.qty)}${item.quote.needsConfirmation ? " (a confirmar)" : ""}`;
+  return `• Diseño propio x${item.qty} (${sizes})\n  ${s.shape}, ${s.length}, ${s.finish}, base ${s.base}${extras}${charms}${accent}${notes}${ref}\n  ${formatARS(item.unitPrice * item.qty)}${item.quote.needsConfirmation ? " (a confirmar)" : ""}`;
 }
 
 /** Mensaje que la clienta le manda a Brenda para confirmar el pedido. */

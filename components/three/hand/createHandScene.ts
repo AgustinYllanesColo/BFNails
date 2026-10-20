@@ -1,4 +1,4 @@
-import { defaultDetailColor } from "@/lib/pricing";
+import { accentMode, defaultDetailColor, isAccentNail } from "@/lib/pricing";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { BuilderSelection, Length, Shape } from "@/lib/types";
@@ -89,6 +89,8 @@ type NailState = {
   canvases: [HTMLCanvasElement, HTMLCanvasElement];
   textures: [THREE.CanvasTexture, THREE.CanvasTexture];
   decorKey: string;
+  /** formas ya calculadas ("forma|largo"): cambiar de forma no recalcula en el momento del toque */
+  shapes: Map<string, NailBuffers>;
 };
 
 type Accessory = { object: THREE.Object3D; key: string; nail: number; u: number; y: number; size: number; tilt: number; scale: number; vel: number; target: number; delay: number };
@@ -227,7 +229,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     cut.receiveShadow = true;
     hand.add(cut);
     const b = computeNail(geom.getIndex()!, ctx, "almendra", d);
-    return { model, ctx, dims, geom, mesh, material, uniforms, from: b, to: b, cur: cloneBuffers(b), canvases, textures, decorKey: "none" };
+    return { model, ctx, dims, geom, mesh, material, uniforms, from: b, to: b, cur: cloneBuffers(b), canvases, textures, decorKey: "none", shapes: new Map([[`almendra|medio`, b]]) };
   });
 
   /* ---------- apliques ---------- */
@@ -591,6 +593,36 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     applyFinish(n.material, n.uniforms, finCur);
   }
 
+  /** La forma de una uña en forma y largo dados: de la caché si ya se calculó (en un celular calcular las cinco
+   *  en el momento del toque eran ~70 ms de imagen congelada justo al elegir Coffin o Stiletto). */
+  function nailShape(n: NailState, shp: Shape, len: Length): NailBuffers {
+    const key = `${shp}|${len}`;
+    let b = n.shapes.get(key);
+    if (!b) {
+      b = computeNail(n.geom.getIndex()!, n.ctx, shp, n.dims[len]);
+      n.shapes.set(key, b);
+    }
+    return b;
+  }
+
+  /** Precalcula en los ratos libres todas las formas (primero las del largo actual): una por tanda. */
+  function warmShapes() {
+    const SHAPES: Shape[] = ["almendra", "ovalada", "cuadrada", "coffin", "stiletto"];
+    const LENGTHS: Length[] = ["corto", "medio", "largo", "xl"];
+    const queue: Array<[Shape, Length]> = [];
+    for (const l of [length, ...LENGTHS.filter((x) => x !== length)]) for (const sh of SHAPES) queue.push([sh, l]);
+    const idle = (cb: () => void) =>
+      typeof window.requestIdleCallback === "function" ? window.requestIdleCallback(cb, { timeout: 800 }) : window.setTimeout(cb, 60);
+    const next = () => {
+      if (disposed || lost) return;
+      const job = queue.shift();
+      if (!job) return;
+      for (const n of nails) nailShape(n, job[0], job[1]);
+      idle(next);
+    };
+    idle(next);
+  }
+
   function blendNail(n: NailState, e: number) {
     const { from, to, cur } = n;
     for (let i = 0; i < cur.pos.length; i++) cur.pos[i] = from.pos[i] + (to.pos[i] - from.pos[i]) * e;
@@ -684,12 +716,13 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     [0.3, 0.94, 0.06],
   ];
 
-  function gemLayout(extras: string[], shp: Shape, len: Length) {
+  function gemLayout(extrasOf: (i: number) => string[], shp: Shape, len: Length) {
     const out: Array<{ key: string; nail: number; u: number; y: number; size: number }> = [];
-    const full = extras.includes("strass-full");
-    const some = extras.includes("strass");
-    if (!full && !some) return out;
     nails.forEach((n, i) => {
+      const extras = extrasOf(i);
+      const full = extras.includes("strass-full");
+      const some = extras.includes("strass");
+      if (!full && !some) return;
       const d = n.dims[len];
       const { W, bed } = d;
       if (full) {
@@ -713,8 +746,28 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     return out;
   }
 
-  function setDecal(n: NailState, i: number, sel: BuilderSelection, tipHex: string, detailHex: string, instant: boolean) {
-    const input = { index: i, shape: sel.shape, dims: n.dims[sel.length], extras: sel.extras, tipHex, detailHex, accent: sel.accent ?? "todas", kitty };
+  /** Técnicas que lleva la uña i: las del set y, si es acento, también las suyas. */
+  function nailExtras(sel: BuilderSelection, i: number): string[] {
+    const mode = accentMode(sel);
+    if (mode === "ninguno" || !isAccentNail(mode, i)) return sel.extras;
+    return [...new Set([...sel.extras, ...(sel.accentExtras ?? [])])];
+  }
+
+  function setDecal(n: NailState, i: number, sel: BuilderSelection, hex: { tip: string; detail: string; degrade: string; accent: string | null }, instant: boolean) {
+    const mode = accentMode(sel);
+    const isAccent = mode !== "ninguno" && isAccentNail(mode, i);
+    const input = {
+      index: i,
+      shape: sel.shape,
+      dims: n.dims[sel.length],
+      extras: nailExtras(sel, i),
+      tipHex: hex.tip,
+      detailHex: hex.detail,
+      degradeHex: hex.degrade,
+      isAccent,
+      accentHex: isAccent ? hex.accent : null,
+      kitty,
+    };
     const k = decorKey(input);
     if (k === n.decorKey) return false;
     n.decorKey = k;
@@ -752,6 +805,9 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     const baseHex = config.bases.find((b) => b.id === sel.base)?.hex ?? "#e8c4b0";
     const tipHex = config.bases.find((b) => b.id === (sel.tipColor ?? "bordo"))?.hex ?? "#4a0e0e";
     const detailHex = config.bases.find((b) => b.id === (sel.detailColor ?? defaultDetailColor(sel.base)))?.hex ?? "#4a0e0e";
+    const degradeHex = sel.degradeColor ? (config.bases.find((b) => b.id === sel.degradeColor)?.hex ?? "#fffdfa") : "#fffdfa";
+    // color propio de los acentos: solo si es distinto del de la base
+    const accentHex = sel.accentColor && sel.accentColor !== sel.base ? (config.bases.find((b) => b.id === sel.accentColor)?.hex ?? null) : null;
 
     // forma / largo → morph
     if (instant || sel.shape !== shape || sel.length !== length) {
@@ -759,7 +815,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       length = sel.length;
       for (const n of nails) {
         n.from = cloneBuffers(n.cur);
-        n.to = computeNail(n.geom.getIndex()!, n.ctx, shape, n.dims[length]);
+        n.to = nailShape(n, shape, length);
       }
       morphStart = now;
       morphT = instant ? 1 : 0;
@@ -824,7 +880,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     // decoración pintada
     let decalChanged = false;
     nails.forEach((n, i) => {
-      if (setDecal(n, i, sel, tipHex, detailHex, instant)) decalChanged = true;
+      if (setDecal(n, i, sel, { tip: tipHex, detail: detailHex, degrade: degradeHex, accent: accentHex }, instant)) decalChanged = true;
     });
     if (decalChanged && !instant) {
       decalStart = now;
@@ -832,7 +888,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     }
 
     // strass: los que siguen en su lugar se quedan; los nuevos aparecen escalonados
-    const layout = gemLayout(sel.extras, sel.shape, sel.length);
+    const layout = gemLayout((i) => nailExtras(sel, i), sel.shape, sel.length);
     const prevSlots = new Map(gemSlots.map((g) => [g.key, g]));
     gemSlots.length = 0;
     layout.forEach((g, i) => {
@@ -858,7 +914,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     heartAcc.y = nails[1].dims.medio.bed * 0.5;
     for (const [acc, on] of [
       [heartAcc, sel.extras.includes("charms")],
-      [bowAcc, sel.extras.includes("3d")],
+      [bowAcc, nailExtras(sel, 3).includes("3d")],
     ] as const) {
       const t = on ? 1 : 0;
       if (acc.target !== t) {
@@ -933,6 +989,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       guardFrom = performance.now() + 2500;
       firstFrameCbs.forEach((cb) => cb());
       firstFrameCbs.clear();
+      warmShapes();
       if (pending && (!onScreen || !pageVisible)) return;
       resume();
     });

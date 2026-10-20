@@ -1,4 +1,4 @@
-import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
+import type { AccentMode, BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
 import type { Charm } from "./data/content";
 
 /**
@@ -71,6 +71,11 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "verde", label: "Verde", delta: 0, hex: "#6f9a6b" },
     { id: "chocolate", label: "Chocolate", delta: 0, hex: "#5a3a2a" },
     { id: "transparente", label: "Transparente", delta: 0, hex: "#f8f5ef" },
+    { id: "fucsia", label: "Fucsia", delta: 0, hex: "#e0337f" },
+    { id: "violeta", label: "Violeta", delta: 0, hex: "#8a4fc8" },
+    { id: "amarillo", label: "Amarillo", delta: 0, hex: "#f5c84a" },
+    { id: "naranja", label: "Naranja", delta: 0, hex: "#f2853a" },
+    { id: "dorado", label: "Dorado", delta: 0, hex: "#c9a24a" },
   ],
   extras: [
     { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, complexity: 1 },
@@ -93,6 +98,8 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
       complexity: 1,
     },
     { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, complexity: 2 },
+    { id: "strass-colores", group: "3D y apliques", label: "Gemas de colores", delta: 2500, complexity: 1 },
+    { id: "perlas", group: "3D y apliques", label: "Perlas", delta: 2500, complexity: 1 },
     {
       id: "3d",
       group: "3D y apliques",
@@ -106,6 +113,7 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "cebra", group: "Diseños", label: "Cebra / tigre", delta: 2500, complexity: 2 },
     { id: "ondas", group: "Diseños", label: "Ondas", delta: 2000, complexity: 1 },
     { id: "estrellas", group: "Diseños", label: "Estrellitas", delta: 1500, complexity: 1 },
+    { id: "tribal", group: "Diseños", label: "Tribal", delta: 3000, complexity: 2 },
     {
       id: "personajes",
       group: "Diseños",
@@ -188,6 +196,18 @@ export function quoteSelection(
     points += extra.complexity ?? 0;
     lines.push({ id: `extra:${extra.id}`, label: extra.label, amount: extra.delta });
   }
+  // técnicas de las uñas acento: se cobran como en el set (Brenda cobra la técnica, no la uña); si ya está
+  // en todo el set no se cobra dos veces
+  const accent = accentMode(sel);
+  if (accent !== "ninguno") {
+    for (const id of sel.accentExtras ?? []) {
+      if (sel.extras.includes(id)) continue;
+      const extra = config.extras.find((e) => e.id === id);
+      if (!extra) continue;
+      points += extra.complexity ?? 0;
+      lines.push({ id: `accent:${extra.id}`, label: `${extra.label} (acentos)`, amount: extra.delta });
+    }
+  }
 
   for (const pick of sel.charms ?? []) {
     const charm = config.charms?.find((c) => c.id === pick.id);
@@ -225,3 +245,35 @@ export const DEFAULT_SELECTION: BuilderSelection = {
 export function defaultDetailColor(base: string): string {
   return ["negro", "bordo", "chocolate", "verde"].includes(base) ? "blanco" : "bordo";
 }
+
+/** Modo de acento, con los valores viejos traducidos ("todas" = sin acento, "acento" = anular). */
+export function accentMode(sel: Pick<BuilderSelection, "accent">): AccentMode {
+  const a = sel.accent;
+  if (!a || a === "todas") return "ninguno";
+  if (a === "acento") return "anular";
+  return a;
+}
+
+/** ¿La uña i (0 pulgar … 4 meñique) es acento? */
+export function isAccentNail(mode: AccentMode, i: number): boolean {
+  switch (mode) {
+    case "anular":
+      return i === 3;
+    case "anular-mayor":
+      return i === 2 || i === 3;
+    case "pulgar-menique":
+      return i === 0 || i === 4;
+    case "alternadas":
+      return i % 2 === 1;
+    default:
+      return false;
+  }
+}
+
+export const ACCENT_OPTIONS: Array<{ id: AccentMode; label: string }> = [
+  { id: "ninguno", label: "Sin acentos" },
+  { id: "anular", label: "Anular" },
+  { id: "anular-mayor", label: "Anular y mayor" },
+  { id: "pulgar-menique", label: "Pulgar y meñique" },
+  { id: "alternadas", label: "Una sí, una no" },
+];

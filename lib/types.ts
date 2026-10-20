@@ -26,6 +26,9 @@ export type SizeSelection =
   | { mode: "custom"; mm: number[] } // 10 medidas, pulgar der → meñique izq
   | { mode: "kit" }; // pide kit de medición / lo resuelve por WhatsApp
 
+/** Qué uñas son acento. Las 10 uñas se piensan por dedo: pulgar, índice, mayor, anular, meñique (en las dos manos). */
+export type AccentMode = "ninguno" | "anular" | "anular-mayor" | "pulgar-menique" | "alternadas";
+
 export type BuilderSelection = {
   shape: Shape;
   length: Length;
@@ -33,9 +36,16 @@ export type BuilderSelection = {
   base: string; // id de color base
   extras: string[]; // ids de técnicas/extras
   tipColor?: string; // id de color base para la francesita de color
-  detailColor?: string; // id de color base de los diseños (puntitos, ondas, cebra, estrellitas)
-  /** en qué uñas va el diseño: todas, solo el anular (uña acento) o una sí y una no */
-  accent?: "todas" | "acento" | "alternadas";
+  detailColor?: string; // id de color base de los diseños (puntitos, ondas, cebra, estrellitas, tribal)
+  /** color al que va el degradé (por defecto blanco lechoso: babyboomer) */
+  degradeColor?: string;
+  /**
+   * Uñas acento, como arma los sets una nail artist: cuáles son, de qué color van (si no, el de la base) y qué
+   * técnicas llevan solo ellas (además de las del set). "todas"/"acento" son valores viejos (carritos guardados).
+   */
+  accent?: AccentMode | "todas" | "acento";
+  accentColor?: string;
+  accentExtras?: string[];
   charms?: Array<{ id: string; qty: number }>; // dijes elegidos
   notes?: string;
   referenceUrl?: string;
