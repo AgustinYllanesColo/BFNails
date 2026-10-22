@@ -168,7 +168,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
 
       {filtered.length === 0 && (
         <div className="bg-cream-deep rounded-lg p-10 text-center">
-          <p className="font-display text-2xl">Nada con esos filtros</p>
+          <p className="font-title text-2xl">Nada con esos filtros</p>
           <p className="text-ink-soft mt-2">
             Probá sacando alguno, o armá el tuyo en Diseñá tu set.
           </p>

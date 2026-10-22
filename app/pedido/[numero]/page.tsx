@@ -72,7 +72,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
 
         {/* Acción principal: WhatsApp */}
         <div className="mt-8 rounded-lg bg-bordo p-6 text-cream md:p-8">
-          <h2 className="font-display text-2xl md:text-3xl">
+          <h2 className="font-title text-2xl md:text-3xl">
             {order.status === "a_confirmar" ? "Mandanos el pedido por WhatsApp" : order.payment.method === "transferencia" && !isPaid ? "Transferí y confirmá por WhatsApp" : order.payment.method === "efectivo" ? "Confirmá por WhatsApp y pagás al recibir" : "Confirmá por WhatsApp"}
           </h2>
           {order.payment.method === "transferencia" && !isPaid && order.status !== "a_confirmar" && (
@@ -122,7 +122,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
             idleLabel="guardá este link"
           />
           <div className="rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10">
-            <h2 className="font-display text-2xl">Detalle de tu set</h2>
+            <h2 className="font-title text-2xl">Detalle de tu set</h2>
             <pre className="mt-3 font-sans text-sm whitespace-pre-wrap text-ink-soft">{order.items.map(describeItem).join("\n\n")}</pre>
             <p className="mt-4 text-xs text-ink-soft">Guardá este link para ver el estado de tu pedido cuando quieras.</p>
           </div>

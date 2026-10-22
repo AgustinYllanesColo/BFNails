@@ -24,7 +24,7 @@ export function AdminShell({ children, session, dbReady }: { children: React.Rea
       <aside className="border-b border-bordo/10 bg-cream-deep/60 p-4 md:sticky md:top-0 md:h-screen md:border-r md:border-b-0">
         <Link href="/admin" className="flex items-center gap-2">
           <Image src="/brand/kitty-icon.png" alt="" width={32} height={30} className="h-8 w-auto" />
-          <span className="font-display text-xl">
+          <span className="font-title text-xl">
             nails <span className="font-sans text-[10px] font-bold tracking-[0.18em] text-bordo uppercase">admin</span>
           </span>
         </Link>

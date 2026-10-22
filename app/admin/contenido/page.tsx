@@ -84,7 +84,7 @@ function PromoForm({ promo }: { promo?: Promo }) {
     <form action={savePromo} className="grid gap-4 rounded-lg border border-bordo/10 p-4 lg:grid-cols-[1fr_300px]">
       {promo && <input type="hidden" name="id" value={promo.id} />}
       <div className="space-y-3">
-        {!promo && <p className="font-display text-lg">Nueva promo</p>}
+        {!promo && <p className="font-title text-lg">Nueva promo</p>}
         <div className="grid gap-3 md:grid-cols-[120px_1fr]">
           <L label="Destacado">
             <input name="badge" required defaultValue={promo?.badge} placeholder="-20% / 4x3" className={adminInput} />

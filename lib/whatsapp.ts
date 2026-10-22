@@ -3,6 +3,7 @@ import { siteConfig } from "./site";
 import { formatARS, formatCm } from "./format";
 import type { CartItem, Order, SizeSelection } from "./types";
 import { ORDER_STATUS_LABEL } from "./types";
+import { describeNails } from "./charms";
 
 /** Link wa.me con mensaje prearmado. `to` sin "+" ni espacios; por defecto, Brenda. */
 export function waLink(message: string, to: string = siteConfig.whatsapp): string {
@@ -36,7 +37,14 @@ export function describeItem(item: CartItem): string {
       : `\n  Acentos (${ACCENT_OPTIONS.find((o) => o.id === mode)?.label.toLowerCase()}): ${s.accentColor ?? s.base}${
           s.accentExtras?.length ? ` con ${s.accentExtras.join(", ")}` : ""
         }`;
-  const charms = s.charms?.length ? `, dijes: ${s.charms.map((c) => `${c.id} ×${c.qty}`).join(", ")}` : "";
+  const charms = s.charms?.length
+    ? `\n  Dijes: ${s.charms
+        .map((c) => {
+          const where = describeNails(c.nails);
+          return `${c.id} ×${c.qty}${where ? ` (${where})` : ""}`;
+        })
+        .join(", ")}`
+    : "";
   const notes = s.notes ? `\n  Nota: ${s.notes}` : "";
   const ref = s.referenceUrl ? `\n  Referencia: ${s.referenceUrl}` : "";
   return `• Diseño propio x${item.qty} (${sizes})\n  ${s.shape}, ${s.length}, ${s.finish}, base ${s.base}${extras}${charms}${accent}${notes}${ref}\n  ${formatARS(item.unitPrice * item.qty)}${item.quote.needsConfirmation ? " (a confirmar)" : ""}`;

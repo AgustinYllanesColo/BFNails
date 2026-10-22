@@ -12,7 +12,7 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
     <div className="grid min-h-screen place-items-center p-6">
       <div className="w-full max-w-sm rounded-lg bg-white/80 p-8 ring-1 ring-bordo/10">
         <Image src="/brand/kitty-icon.png" alt="" width={48} height={45} className="h-12 w-auto" />
-        <h1 className="mt-4 font-display text-3xl">Panel de Bren</h1>
+        <h1 className="mt-4 font-title text-3xl">Panel de Bren</h1>
         <p className="mt-1 text-sm text-ink-soft">Te mandamos un link mágico a tu email.</p>
         {error && <p className="mt-3 rounded bg-red/10 p-2 text-sm text-red">{decodeURIComponent(error)}</p>}
         {supabaseConfigured() ? (

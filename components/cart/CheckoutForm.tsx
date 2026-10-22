@@ -126,7 +126,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
   if (items.length === 0) {
     return (
       <div className="rounded-lg bg-cream-deep p-12 text-center">
-        <p className="font-display text-3xl">Tu carrito está vacío</p>
+        <p className="font-title text-3xl">Tu carrito está vacío</p>
         <Button href="/catalogo" className="mt-6">
           Ver catálogo
         </Button>
@@ -138,7 +138,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
     <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1fr_380px]" noValidate>
       <div className="space-y-10">
         <section>
-          <h2 className="mb-4 font-display text-2xl">
+          <h2 className="mb-4 font-title text-2xl">
             <span className="mr-2 text-bordo">01</span>Tus datos
           </h2>
           <div className="grid gap-4 md:grid-cols-2">
@@ -155,7 +155,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
         </section>
 
         <section>
-          <h2 className="mb-4 font-display text-2xl">
+          <h2 className="mb-4 font-title text-2xl">
             <span className="mr-2 text-bordo">02</span>Entrega
           </h2>
           <div className="grid gap-3">
@@ -228,7 +228,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
         </section>
 
         <section>
-          <h2 className="mb-4 font-display text-2xl">
+          <h2 className="mb-4 font-title text-2xl">
             <span className="mr-2 text-bordo">03</span>Pago
           </h2>
           <div className="grid gap-3 md:grid-cols-3">

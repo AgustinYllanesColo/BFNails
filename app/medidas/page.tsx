@@ -27,7 +27,7 @@ export default function MedidasPage() {
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <a href="#universal" className="bg-bordo text-cream rounded-lg p-5 shadow-sm transition-transform duration-300 hover:-translate-y-0.5">
-            <span className="font-display block text-2xl">Universales</span>
+            <span className="font-title block text-2xl">Universales</span>
             <span className="text-cream/80 mt-1 block">S, M o L. Sets en stock, entrega inmediata.</span>
             <span className="mt-3 inline-block text-sm font-semibold">Ver tabla →</span>
           </a>
@@ -35,7 +35,7 @@ export default function MedidasPage() {
             href="#personalizada"
             className="rounded-lg bg-white/80 p-5 shadow-sm ring-1 ring-bordo/10 transition-transform duration-300 hover:-translate-y-0.5"
           >
-            <span className="font-display text-bordo block text-2xl">Personalizada</span>
+            <span className="font-title text-bordo block text-2xl">Personalizada</span>
             <span className="text-ink-soft mt-1 block">Tus 10 medidas exactas. Las hago a tu mano.</span>
             <span className="text-bordo mt-3 inline-block text-sm font-semibold">Cómo medir →</span>
           </a>
@@ -57,7 +57,7 @@ export default function MedidasPage() {
                       Uña
                     </th>
                     {SIZE_ORDER.map((s) => (
-                      <th key={s} scope="col" className="font-display px-4 py-3 text-center text-xl font-normal">
+                      <th key={s} scope="col" className="font-title px-4 py-3 text-center text-xl font-normal">
                         {s}
                       </th>
                     ))}
@@ -81,7 +81,7 @@ export default function MedidasPage() {
             </div>
           </div>
           <div className="min-w-0">
-            <h2 className="font-display text-2xl md:text-3xl">¿Cuál sos?</h2>
+            <h2 className="font-title text-2xl md:text-3xl">¿Cuál sos?</h2>
             <p className="text-ink-soft mt-2">Poné el ancho del pulgar y del anular.</p>
             <SizeFinder />
           </div>
@@ -111,7 +111,7 @@ export default function MedidasPage() {
           <ol className="divide-y divide-bordo/10 rounded-lg bg-white/80 ring-1 ring-bordo/10">
             {STEPS.map((s, i) => (
               <li key={i} className="grid grid-cols-[auto_1fr_88px] items-center gap-4 p-4 sm:grid-cols-[auto_1fr_120px] sm:gap-6 sm:p-5">
-                <span className="font-display text-bordo grid size-10 place-items-center rounded-pill bg-cream-deep text-xl">
+                <span className="font-title text-bordo grid size-10 place-items-center rounded-pill bg-cream-deep text-xl">
                   {i + 1}
                 </span>
                 <p className="text-[15px] leading-snug sm:text-base">{s.t}</p>

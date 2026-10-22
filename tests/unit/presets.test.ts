@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import { SEED_DESIGNS } from "@/lib/data/catalog";
 import { PRESETS, presetFor } from "@/lib/data/presets";
 import { DEFAULT_BUILDER_CONFIG, accentMode, isAccentNail, quoteSelection } from "@/lib/pricing";
+import { DEFAULT_CHARMS } from "@/lib/data/content";
+import { qtyForNails } from "@/lib/charms";
 
 const cfg = DEFAULT_BUILDER_CONFIG;
 const colorIds = new Set(cfg.bases.map((b) => b.id));
 const extraIds = new Set(cfg.extras.map((e) => e.id));
+const charms = new Map(DEFAULT_CHARMS.map((c) => [c.id, c]));
 
 describe("todo el catálogo se puede armar en el armador", () => {
   it.each(SEED_DESIGNS.map((d) => [d.slug, d] as const))("%s tiene receta válida", (slug, d) => {
@@ -16,7 +19,14 @@ describe("todo el catálogo se puede armar en el armador", () => {
     for (const c of [p.base, p.tipColor, p.detailColor, p.degradeColor, p.accentColor].filter(Boolean))
       expect(colorIds.has(c!), `color ${c}`).toBe(true);
     for (const e of [...p.extras, ...(p.accentExtras ?? [])]) expect(extraIds.has(e), `técnica ${e}`).toBe(true);
-    expect(quoteSelection(p, cfg).total).toBeGreaterThanOrEqual(cfg.basePrice);
+    for (const c of p.charms ?? []) {
+      const charm = charms.get(c.id);
+      expect(charm, `dije ${c.id}`).toBeDefined();
+      // los dijes de las recetas se ven en la mano: tienen pieza recortada y uñas, y la cantidad sale de las uñas
+      expect(charm!.piece, `pieza de ${c.id}`).toBeDefined();
+      expect(c.qty).toBe(qtyForNails(c.nails ?? []));
+    }
+    expect(quoteSelection(p, { ...cfg, charms: DEFAULT_CHARMS }).total).toBeGreaterThanOrEqual(cfg.basePrice);
   });
 
   it("presetFor devuelve una copia (editar en el armador no toca la receta)", () => {

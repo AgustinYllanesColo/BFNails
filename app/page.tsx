@@ -29,7 +29,7 @@ export default async function HomePage() {
               "Remedios de Escalada",
               "envíos a todo el país",
             ]}
-            className="bg-bordo font-display text-cream py-3 text-xl md:py-4 md:text-2xl"
+            className="bg-bordo font-title text-cream py-3 text-xl md:py-4 md:text-2xl"
             speed={26}
           />
         </div>

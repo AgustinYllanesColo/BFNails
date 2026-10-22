@@ -11,6 +11,7 @@ import { formatARS } from "@/lib/format";
 import type { Charm } from "@/lib/data/content";
 import { CharmThumb } from "@/components/charms/CharmThumb";
 import { useCharmFilter } from "@/components/charms/CharmFilter";
+import { FINGERS, defaultCharmNails, describeNails, qtyForNails, type CharmPick } from "@/lib/charms";
 import { useCart } from "@/lib/store/cart";
 import { flyToCart } from "@/components/motion/flyToCart";
 import { Chip } from "@/components/ui/Chip";
@@ -71,11 +72,20 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
       return { ...s, accentExtras: cur.includes(id) ? cur.filter((e) => e !== id) : [...cur, id] };
     });
 
-  const setCharm = (id: string, qty: number) =>
+  /** Reemplaza (o saca, si no queda cantidad) un dije elegido, sin moverlo de lugar en la lista. */
+  const putCharm = (pick: CharmPick) =>
     setSel((s) => {
-      const rest = (s.charms ?? []).filter((c) => c.id !== id);
-      return { ...s, charms: qty > 0 ? [...rest, { id, qty }] : rest };
+      const list = s.charms ?? [];
+      const i = list.findIndex((c) => c.id === pick.id);
+      if (pick.qty <= 0) return { ...s, charms: list.filter((c) => c.id !== pick.id) };
+      return { ...s, charms: i < 0 ? [...list, pick] : list.map((c, k) => (k === i ? pick : c)) };
     });
+  /** Dije nuevo: los que se apoyan en la uña arrancan en las acento (o el anular); los surtidos, uno. */
+  const addCharm = (c: Charm) => {
+    if (!c.piece) return putCharm({ id: c.id, qty: 1 });
+    const nails = defaultCharmNails(sel);
+    putCharm({ id: c.id, qty: qtyForNails(nails), nails });
+  };
 
   const mode = accentMode(sel);
   const allExtras = mode === "ninguno" ? sel.extras : [...sel.extras, ...(sel.accentExtras ?? [])];
@@ -116,7 +126,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
 
         {presets.length > 0 && (
           <div>
-            <p className="mb-1 font-display text-xl">Partí de un diseño de Brenda</p>
+            <p className="mb-1 font-title text-xl">Partí de un diseño de Brenda</p>
             <p className="mb-3 text-sm text-ink-soft">Tocá uno y cambiale lo que quieras: forma, colores, acentos.</p>
             <div className="-mx-[var(--gutter,16px)] flex snap-x gap-3 overflow-x-auto px-[var(--gutter,16px)] pb-2 [scrollbar-width:none] md:mx-0 md:px-0">
               {presets.map((d) => (
@@ -275,7 +285,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         {CHARMS_ENABLED && (
           <div id="paso-6" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
             <StepHeader n={7} title={STEPS[6]} hint="Opcional. Elegí cuántos de cada uno." />
-            <CharmPicker charms={config.charms ?? []} picked={sel.charms ?? []} onChange={setCharm} />
+            <CharmPicker charms={config.charms ?? []} picked={sel.charms ?? []} onAdd={addCharm} onChange={putCharm} />
           </div>
         )}
 
@@ -325,7 +335,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
             <span className="font-semibold">{quote.needsConfirmation ? "Desde" : "Total"}</span>
             {/* initial={false}: al cargar la página el precio ya está; solo late cuando cambia */}
             <AnimatePresence initial={false} mode="popLayout">
-              <motion.span key={quote.total} initial={{ scale: 1.15, color: "#b51c1c" }} animate={{ scale: 1, color: "#4a0e0e" }} className="font-display text-3xl text-bordo">
+              <motion.span key={quote.total} initial={{ scale: 1.15, color: "#b51c1c" }} animate={{ scale: 1, color: "#4a0e0e" }} className="font-title text-3xl text-bordo">
                 {formatARS(quote.total)}
               </motion.span>
             </AnimatePresence>
@@ -363,9 +373,9 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
 function StepHeader({ n, title, hint }: { n: number; title: string; hint?: string }) {
   return (
     <div className="mb-4 flex items-baseline gap-3">
-      <span className="font-display text-2xl text-bordo">0{n}</span>
+      <span className="font-title text-2xl text-bordo">0{n}</span>
       <div>
-        <h2 className="font-display text-2xl">{title}</h2>
+        <h2 className="font-title text-2xl">{title}</h2>
         {hint && <p className="text-xs text-ink-soft">{hint}</p>}
       </div>
     </div>
@@ -385,40 +395,104 @@ function Step({ n, title, hint, children }: { n: number; title: string; hint?: s
 function CharmPicker({
   charms,
   picked,
+  onAdd,
   onChange,
 }: {
   charms: Charm[];
-  picked: Array<{ id: string; qty: number }>;
-  onChange: (id: string, qty: number) => void;
+  picked: CharmPick[];
+  onAdd: (c: Charm) => void;
+  onChange: (pick: CharmPick) => void;
 }) {
   const { chips, visible } = useCharmFilter(charms);
   if (charms.length === 0) return <p className="text-sm text-ink-soft">Ahora no tengo dijes cargados.</p>;
+  const chosen = picked
+    .map((p) => ({ pick: p, charm: charms.find((c) => c.id === p.id) }))
+    .filter((x): x is { pick: CharmPick; charm: Charm } => Boolean(x.charm));
   return (
     <>
+      {chosen.length > 0 && (
+        <div className="mb-6 space-y-2 rounded-lg bg-white/80 p-3 ring-1 ring-bordo/15">
+          <p className="text-sm font-semibold">Tus dijes</p>
+          {chosen.map(({ pick, charm }) => (
+            <div key={charm.id} className="flex items-start gap-3 border-t border-bordo/10 pt-2 first:border-t-0 first:pt-0">
+              <CharmThumb charm={charm} className="w-14 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="truncate text-sm font-semibold">{charm.name}</p>
+                  <p className="shrink-0 text-sm tabular-nums text-ink-soft">{formatARS(charm.price * pick.qty)}</p>
+                </div>
+                {charm.piece ? (
+                  <>
+                    <div className="mt-1.5 flex flex-wrap gap-1" role="group" aria-label={`Uñas con ${charm.name}`}>
+                      {FINGERS.map((f, i) => {
+                        const on = pick.nails?.includes(i) ?? false;
+                        return (
+                          <button
+                            key={f}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => {
+                              const nails = on ? (pick.nails ?? []).filter((n) => n !== i) : [...(pick.nails ?? []), i];
+                              onChange({ ...pick, nails, qty: qtyForNails(nails) });
+                            }}
+                            className={cn(
+                              "rounded-pill border px-2.5 py-1 text-xs font-medium transition-colors",
+                              on ? "border-bordo bg-bordo text-cream" : "border-cream-ink bg-white text-ink hover:border-bordo/60",
+                            )}
+                          >
+                            {f}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-1 text-xs text-ink-soft">
+                      {pick.qty > 0 ? `${pick.qty} en total: ${describeNails(pick.nails)}` : "Elegí al menos una uña"}
+                    </p>
+                  </>
+                ) : (
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <button type="button" onClick={() => onChange({ ...pick, qty: pick.qty - 1 })} aria-label={`Sacar un ${charm.name}`} className="grid size-7 place-items-center rounded-full bg-cream-deep font-bold text-bordo">
+                      −
+                    </button>
+                    <span className="w-5 text-center text-sm font-bold tabular-nums" aria-live="polite">
+                      {pick.qty}
+                    </span>
+                    <button type="button" onClick={() => onChange({ ...pick, qty: Math.min(20, pick.qty + 1) })} aria-label={`Sumar ${charm.name}`} className="grid size-7 place-items-center rounded-full bg-bordo font-bold text-cream">
+                      +
+                    </button>
+                    <span className="text-xs text-ink-soft">Brenda los ubica en el diseño</span>
+                  </div>
+                )}
+              </div>
+              <button type="button" onClick={() => onChange({ ...pick, qty: 0 })} aria-label={`Quitar ${charm.name}`} className="grid size-7 shrink-0 place-items-center rounded-full text-lg text-ink-soft hover:bg-cream-deep hover:text-bordo">
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       {chips}
       <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {visible.map((c) => {
-          const qty = picked.find((p) => p.id === c.id)?.qty ?? 0;
+          const on = picked.some((p) => p.id === c.id);
           return (
-            <li key={c.id} className={cn("rounded-lg bg-white/80 p-2 ring-1 transition-shadow", qty > 0 ? "ring-2 ring-bordo" : "ring-bordo/10")}>
-              <button type="button" onClick={() => onChange(c.id, Math.min(20, qty + 1))} aria-label={`Sumar ${c.name}`} className="block w-full">
+            <li key={c.id}>
+              <button
+                type="button"
+                onClick={() => (on ? onChange({ id: c.id, qty: 0 }) : onAdd(c))}
+                aria-pressed={on}
+                aria-label={on ? `Quitar ${c.name}` : `Sumar ${c.name}`}
+                className={cn("relative block h-full w-full rounded-lg bg-white/80 p-2 text-left ring-1 transition-shadow", on ? "ring-2 ring-bordo" : "ring-bordo/10 hover:ring-bordo/30")}
+              >
                 <CharmThumb charm={c} />
-              </button>
-              <p className="mt-2 px-1 text-[13px] leading-tight font-semibold">{c.name}</p>
-              <p className="mt-0.5 px-1 text-[13px] text-ink-soft">+{formatARS(c.price)}</p>
-              {qty > 0 && (
-                <div className="mt-1.5 flex items-center justify-between gap-1 px-1">
-                  <button type="button" onClick={() => onChange(c.id, qty - 1)} aria-label={`Sacar un ${c.name}`} className="grid size-7 place-items-center rounded-full bg-cream-deep font-bold text-bordo">
-                    −
-                  </button>
-                  <span className="w-4 text-center text-sm font-bold tabular-nums" aria-live="polite">
-                    {qty}
+                <span className="mt-2 block px-1 text-[13px] leading-tight font-semibold">{c.name}</span>
+                <span className="mt-0.5 block px-1 text-[13px] text-ink-soft">+{formatARS(c.price)} c/u</span>
+                {on && (
+                  <span aria-hidden className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-bordo text-xs font-bold text-cream">
+                    ✓
                   </span>
-                  <button type="button" onClick={() => onChange(c.id, Math.min(20, qty + 1))} aria-label={`Sumar ${c.name}`} className="grid size-7 place-items-center rounded-full bg-bordo font-bold text-cream">
-                    +
-                  </button>
-                </div>
-              )}
+                )}
+              </button>
             </li>
           );
         })}

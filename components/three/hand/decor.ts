@@ -50,6 +50,7 @@ const PAINTED = new Set([
   "tribal",
   "perlas",
   "strass-colores",
+  "cadenas",
 ]);
 
 /** "#rrggbb" + alfa → rgba() */
@@ -502,6 +503,43 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
       const x = (k - (n - 1) / 2) * W * 0.26;
       gem(x, d.L * 0.86 - Math.abs(x) * 0.3, W * 0.1, COLORS[(i * 2 + k) % COLORS.length]);
     }
+  }
+
+  // 15. cadenitas doradas: eslabones que cruzan la uña en curva, como colgadas (Leo star gold de Brenda)
+  if (has("cadenas")) {
+    const link = (x: number, y: number, ang: number, r: number, flat: boolean) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(ang);
+      const g = ctx.createLinearGradient(-r, r, r, -r);
+      g.addColorStop(0, "#8a6420");
+      g.addColorStop(0.45, "#f6dc8c");
+      g.addColorStop(1, "#b88a2e");
+      ctx.strokeStyle = g;
+      ctx.lineWidth = r * (flat ? 0.55 : 0.7);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r, flat ? r * 0.38 : r * 0.62, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    };
+    const drape = (y0: number, y1: number, sag: number) => {
+      // curva de borde a borde: punto de control abajo, como una cadena que cuelga
+      const x0 = -W * 0.62;
+      const x1 = W * 0.62;
+      const cy = (y0 + y1) / 2 - sag;
+      const r = W * 0.05;
+      const steps = Math.ceil((W * 1.3) / (r * 1.45));
+      for (let k = 0; k <= steps; k++) {
+        const t = k / steps;
+        const x = (1 - t) * (1 - t) * x0 + 2 * (1 - t) * t * 0 + t * t * x1;
+        const y = (1 - t) * (1 - t) * y0 + 2 * (1 - t) * t * cy + t * t * y1;
+        const dx = 2 * (1 - t) * (0 - x0) + 2 * t * (x1 - 0);
+        const dy = 2 * (1 - t) * (cy - y0) + 2 * t * (y1 - cy);
+        link(x, y, Math.atan2(dy, dx), r, k % 2 === 1);
+      }
+    };
+    drape(d.L * 0.62, d.L * 0.48, d.L * 0.12);
+    if (input.isAccent || d.L > W * 1.6) drape(d.L * 0.4, d.L * 0.3, d.L * 0.08);
   }
 
   ctx.restore();

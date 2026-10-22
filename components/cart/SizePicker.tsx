@@ -51,7 +51,7 @@ export function SizePicker({ value, onChange, compact }: Props) {
                     selected ? "border-bordo bg-bordo text-cream" : "border-cream-ink bg-white/60 hover:border-bordo/50",
                   )}
                 >
-                  <span className="font-display text-2xl">{s}</span>
+                  <span className="font-title text-2xl">{s}</span>
                   <span className={cn("block text-[11px]", selected ? "text-cream/80" : "text-ink-soft")}>
                     {STANDARD_SIZES[s].hint}
                   </span>

@@ -18,7 +18,7 @@ export function PageTitle({ title, children, action }: { title: string; children
 export function Card({ children, className, title }: { children: React.ReactNode; className?: string; title?: string }) {
   return (
     <section className={cn("rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10", className)}>
-      {title && <h2 className="mb-4 font-display text-xl">{title}</h2>}
+      {title && <h2 className="mb-4 font-title text-xl">{title}</h2>}
       {children}
     </section>
   );
@@ -28,7 +28,7 @@ export function Stat({ label, value, hint }: { label: string; value: string; hin
   return (
     <div className="rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10">
       <p className="text-xs font-bold tracking-wider text-ink-soft uppercase">{label}</p>
-      <p className="mt-1 font-display text-3xl text-bordo">{value}</p>
+      <p className="mt-1 font-title text-3xl text-bordo">{value}</p>
       {hint && <p className="mt-1 text-xs text-ink-soft">{hint}</p>}
     </div>
   );

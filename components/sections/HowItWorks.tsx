@@ -145,14 +145,14 @@ export function HowItWorks({ kit }: { kit?: Kit }) {
             const v = VISUALS[s.n];
             return (
               <li key={s.n} data-step className="relative pl-[72px] md:pl-[84px]">
-                <span className="absolute top-0 left-0 grid size-14 place-items-center rounded-pill bg-yellow font-display text-2xl text-bordo shadow-[0_10px_24px_-10px_rgba(0,0,0,0.6)] md:size-16 md:text-3xl">
+                <span className="absolute top-0 left-0 grid size-14 place-items-center rounded-pill bg-yellow font-title text-2xl text-bordo shadow-[0_10px_24px_-10px_rgba(0,0,0,0.6)] md:size-16 md:text-3xl">
                   {s.n}
                 </span>
                 <article className="grid overflow-hidden rounded-lg bg-cream text-ink ring-1 ring-cream/10 sm:grid-cols-[1fr_0.8fr]">
                   <div className="order-2 p-6 sm:order-1 md:p-8">
                     <div className="flex items-center gap-3">
                       <span className="grid size-10 place-items-center rounded-pill bg-bordo/8 text-bordo [&>svg]:size-5">{s.icon}</span>
-                      <h3 className="font-display text-2xl leading-tight md:text-3xl">{s.title}</h3>
+                      <h3 className="font-title text-2xl leading-tight md:text-3xl">{s.title}</h3>
                     </div>
                     <p className="mt-4 text-[15px] leading-relaxed text-ink-soft">{s.text}</p>
                     {s.n === "04" && kit?.items.length ? (

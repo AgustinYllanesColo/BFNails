@@ -31,7 +31,7 @@ export function SizeFinder() {
             transition={{ type: "spring", stiffness: 400, damping: 18 }}
             className="flex items-center gap-4"
           >
-            <span className="grid size-16 place-items-center rounded-pill bg-bordo font-display text-3xl text-cream">{size}</span>
+            <span className="grid size-16 place-items-center rounded-pill bg-bordo font-title text-3xl text-cream">{size}</span>
             <p className="text-sm text-ink-soft">
               Sos <strong className="text-ink">{size}</strong>. Si querés que queden exactas, pedilas con medida
               personalizada.

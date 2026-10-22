@@ -5,6 +5,8 @@ import type { BuilderSelection } from "@/lib/types";
  * color y técnicas de las 10 uñas) y uñas acento (cuáles, de qué color y qué llevan solo ellas). Sirve para
  * "Partí de un diseño de Brenda" en el armador y para "Modificalo en el armador" en la ficha.
  *
+ * Los dijes son los de verdad (lib/data/content.ts), en las uñas donde los pone Brenda.
+ *
  * Es una aproximación de la vista previa: el set real lo pinta Brenda a mano. Un test chequea que cada diseño
  * del catálogo tenga su receta y que todas sus técnicas y colores existan en el armador.
  */
@@ -15,11 +17,13 @@ export const PRESETS: Record<string, BuilderSelection> = {
   },
   "lila-perlas": {
     shape: "cuadrada", length: "largo", finish: "glossy", base: "lila", extras: [],
-    accent: "anular-mayor", accentExtras: ["perlas"],
+    accent: "anular-mayor", accentExtras: [],
+    charms: [{ id: "corazon-perlitas", qty: 4, nails: [2, 3] }],
   },
   "black-snake": {
     shape: "almendra", length: "largo", finish: "glossy", base: "negro", extras: ["cat-eye"],
-    accent: "anular", accentColor: "nude", accentExtras: ["strass"],
+    accent: "anular", accentColor: "nude", accentExtras: [],
+    charms: [{ id: "serpiente-dorada", qty: 2, nails: [3] }],
   },
   "black-stiletto": {
     shape: "stiletto", length: "xl", finish: "glossy", base: "negro", extras: ["cat-eye"],
@@ -56,7 +60,8 @@ export const PRESETS: Record<string, BuilderSelection> = {
   "bordo-cat-eye": { shape: "almendra", length: "largo", finish: "glossy", base: "bordo", extras: ["cat-eye"] },
   "leo-star-gold": {
     shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "strass"],
-    accent: "alternadas", accentExtras: ["animal-print", "estrellas"], detailColor: "rosa",
+    accent: "alternadas", accentExtras: ["animal-print", "estrellas", "cadenas"], detailColor: "rosa",
+    charms: [{ id: "cruces-piedras", qty: 2, nails: [2] }],
   },
   "tribal-french": {
     shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "tribal"], detailColor: "negro",
@@ -77,6 +82,7 @@ export const PRESETS: Record<string, BuilderSelection> = {
   "milky-pearl": {
     shape: "stiletto", length: "largo", finish: "glossy", base: "milky", extras: [],
     accent: "anular", accentExtras: ["perlas"],
+    charms: [{ id: "piercing", qty: 2, nails: [2] }],
   },
   "milky-gold": {
     shape: "almendra", length: "corto", finish: "glossy", base: "milky", extras: ["francesita", "encapsulado"],
@@ -92,5 +98,12 @@ export const PRESETS: Record<string, BuilderSelection> = {
 export function presetFor(slug: string | null | undefined): BuilderSelection | null {
   if (!slug) return null;
   const p = PRESETS[slug];
-  return p ? { ...p, extras: [...p.extras], accentExtras: p.accentExtras ? [...p.accentExtras] : undefined } : null;
+  return p
+    ? {
+        ...p,
+        extras: [...p.extras],
+        accentExtras: p.accentExtras ? [...p.accentExtras] : undefined,
+        charms: p.charms?.map((c) => ({ ...c, nails: c.nails ? [...c.nails] : undefined })),
+      }
+    : null;
 }

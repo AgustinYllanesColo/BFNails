@@ -252,6 +252,76 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   const heartAcc: Accessory = { object: heart, key: "heart", nail: 1, u: 0, y: 0.5, size: 0.24, tilt: 0.25, scale: 0, vel: 0, target: 0, delay: 0 };
   const bowAcc: Accessory = { object: bow, key: "bow", nail: 3, u: 0, y: 0.5, size: 0.36, tilt: -0.18, scale: 0, vel: 0, target: 0, delay: 0 };
 
+  /* dijes reales: la foto recortada de la pieza (fondo transparente) apoyada sobre la uña, un plano por dije y uña */
+  const charmGeo = track(new THREE.PlaneGeometry(1, 1));
+  const texLoader = new THREE.TextureLoader();
+  const charmTex = new Map<string, THREE.Texture>();
+  type CharmAcc = Accessory & { aspect: number; gone: boolean };
+  const charmAccs = new Map<string, CharmAcc>();
+  function charmTexture(url: string) {
+    let t = charmTex.get(url);
+    if (!t) {
+      t = track(
+        texLoader.load(url, (tex) => {
+          const im = tex.image as { width: number; height: number };
+          for (const a of charmAccs.values()) {
+            if (((a.object as THREE.Mesh).material as THREE.MeshBasicMaterial).map === tex) a.aspect = im.width / im.height;
+          }
+          accDirty = true;
+          wake();
+        }),
+      );
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = 4;
+      charmTex.set(url, t);
+    }
+    return t;
+  }
+  function syncCharms(wanted: Map<string, { url: string; nail: number; y: number; size: number }>, instant: boolean) {
+    for (const [key, a] of charmAccs) {
+      if (wanted.has(key)) continue;
+      a.gone = true;
+      a.target = 0;
+      if (instant) a.scale = 0;
+    }
+    let order = 0;
+    for (const [key, w] of wanted) {
+      const old = charmAccs.get(key);
+      if (old) {
+        old.gone = false;
+        old.target = 1;
+        old.y = w.y;
+        old.size = w.size;
+        continue;
+      }
+      const tex = charmTexture(w.url);
+      // la foto ya trae sus luces y brillos: se muestra tal cual (con la luz de la escena el metal se veía apagado)
+      const mat = track(new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.35, toneMapped: false }));
+      // un punto más de luz: achicada a la uña, la foto pierde los brillos (las perlas se veían grises)
+      mat.color.setScalar(1.15);
+      const mesh = new THREE.Mesh(charmGeo, mat);
+      mesh.castShadow = true;
+      mesh.visible = false;
+      hand.add(mesh);
+      const im = tex.image as { width: number; height: number } | undefined;
+      charmAccs.set(key, {
+        object: mesh,
+        key,
+        nail: w.nail,
+        u: 0,
+        y: w.y,
+        size: w.size,
+        tilt: 0,
+        scale: instant ? 1 : 0,
+        vel: 0,
+        target: 1,
+        delay: instant ? 0 : order++ * 0.05,
+        aspect: im?.width ? im.width / im.height : 1,
+        gone: false,
+      });
+    }
+  }
+
   /* ---------- estado ---------- */
   let shape: Shape = "almendra";
   let length: Length = "medio";
@@ -486,6 +556,14 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     for (const a of gemSlots) if (springAcc(a, dt)) accBusy = true;
     if (springAcc(heartAcc, dt)) accBusy = true;
     if (springAcc(bowAcc, dt)) accBusy = true;
+    for (const [key, a] of charmAccs) {
+      if (springAcc(a, dt)) accBusy = true;
+      else if (a.gone) {
+        hand.remove(a.object);
+        ((a.object as THREE.Mesh).material as THREE.Material).dispose();
+        charmAccs.delete(key);
+      }
+    }
     if (accBusy || morphing || accDirty) {
       placeAccessories();
       accDirty = false;
@@ -695,6 +773,18 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       o.quaternion.setFromRotationMatrix(_M);
       const sc = Math.max(0, a.scale) * a.size;
       o.scale.set(sc, sc, sc * 0.9);
+    }
+    for (const a of charmAccs.values()) {
+      const o = a.object;
+      o.visible = a.scale > 0.001;
+      if (!o.visible) continue;
+      frameOn(a);
+      // el plano mira hacia afuera de la uña (Z = normal) y la foto queda derecha, con la parte de arriba hacia la punta
+      _M.makeBasis(_X, _T, _N);
+      o.position.copy(_P).addScaledVector(_N, a.size * 0.08);
+      o.quaternion.setFromRotationMatrix(_M);
+      const sc = Math.max(0, a.scale) * a.size;
+      o.scale.set(sc * Math.min(1, a.aspect), sc * Math.min(1, 1 / a.aspect), 1);
     }
   }
 
@@ -922,6 +1012,24 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
         if (instant) acc.scale = t;
       }
     }
+    // dijes elegidos con sus uñas: uno va al medio de la uña; varios en la misma uña se reparten a lo largo
+    const perNail = new Map<number, string[]>();
+    for (const p of sel.charms ?? []) {
+      const piece = config.charms?.find((c) => c.id === p.id)?.piece;
+      if (!piece || !p.nails) continue;
+      for (const i of p.nails) if (i >= 0 && i < nails.length) perNail.set(i, [...(perNail.get(i) ?? []), piece]);
+    }
+    const wanted = new Map<string, { url: string; nail: number; y: number; size: number }>();
+    perNail.forEach((urls, i) => {
+      const d = nails[i].dims[sel.length];
+      urls.forEach((url, k) => {
+        const n = urls.length;
+        const y = n === 1 ? d.L * 0.42 : d.L * (0.26 + (0.46 * k) / (n - 1));
+        wanted.set(`${url}|${i}|${k}`, { url, nail: i, y, size: d.W * (n === 1 ? 0.88 : 0.66) });
+      });
+    });
+    syncCharms(wanted, instant);
+
     placeAccessories();
     accDirty = false;
     firstUpdate = false;

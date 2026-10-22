@@ -14,7 +14,7 @@ export function Footer() {
     <footer className="relative overflow-hidden bg-bordo text-cream">
       <Marquee
         items={["press-on", "personalizadas", "soft gel en el estudio", "Remedios de Escalada", "envíos a todo el país"]}
-        className="border-b border-cream/15 py-4 font-display text-2xl md:text-3xl"
+        className="border-b border-cream/15 py-4 font-title text-2xl md:text-3xl"
         speed={34}
       />
       <div className="container-x grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">

@@ -121,6 +121,13 @@ html.has-cursor .cursor-root {
   letter-spacing: -0.01em;
 }
 
+/* Títulos chicos (hasta ~30 px): Shrikhand cierra los huecos de las letras y se ve empastada, así que van en la sans. */
+@utility font-title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 @utility container-x {
   width: 100%;
   margin-inline: auto;

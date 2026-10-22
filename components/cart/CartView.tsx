@@ -22,7 +22,7 @@ export function CartView() {
   if (items.length === 0) {
     return (
       <div className="bg-cream-deep rounded-lg p-12 text-center">
-        <p className="font-display text-3xl">Todavía no hay nada acá</p>
+        <p className="font-title text-3xl">Todavía no hay nada acá</p>
         <p className="text-ink-soft mt-2">Elegí un set del catálogo o armá el tuyo.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button href="/catalogo">Ver catálogo</Button>
@@ -51,7 +51,7 @@ export function CartView() {
                 {item.kind === "design" && item.image ? (
                   <Image src={item.image} alt="" fill sizes="96px" className="object-cover" />
                 ) : (
-                  <div className="font-display text-bordo grid h-full place-items-center text-3xl">
+                  <div className="font-title text-bordo grid h-full place-items-center text-3xl">
                     ✦
                   </div>
                 )}
@@ -59,7 +59,7 @@ export function CartView() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-display text-xl leading-tight">{item.name}</p>
+                    <p className="font-title text-xl leading-tight">{item.name}</p>
                     <p className="text-ink-soft text-xs">{describeSizes(item.sizes)}</p>
                     <ItemDetails item={item} />
                   </div>

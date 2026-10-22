@@ -46,7 +46,11 @@ export type BuilderSelection = {
   accent?: AccentMode | "todas" | "acento";
   accentColor?: string;
   accentExtras?: string[];
-  charms?: Array<{ id: string; qty: number }>; // dijes elegidos
+  /**
+   * Dijes elegidos. `nails`: en qué uñas va (0 pulgar … 4 meñique, en las dos manos); con uñas, qty = 2 por uña.
+   * Los surtidos (florcitas, glitter, stickers) no se ubican: van sin `nails` y con la cantidad que se pida.
+   */
+  charms?: Array<{ id: string; qty: number; nails?: number[] }>;
   notes?: string;
   referenceUrl?: string;
 };

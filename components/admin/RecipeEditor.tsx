@@ -20,7 +20,7 @@ export function RecipeEditor({ supplies, recipes, targets, dbReady }: { supplies
 
   return (
     <section className="rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10">
-      <h2 className="mb-3 font-display text-xl">Receta de costo</h2>
+      <h2 className="mb-3 font-title text-xl">Receta de costo</h2>
       <form action={(fd) => start(() => saveRecipe(fd))} className="space-y-3 text-sm">
         <select
           name="target"

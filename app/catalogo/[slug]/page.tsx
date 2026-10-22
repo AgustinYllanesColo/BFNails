@@ -141,7 +141,7 @@ export default async function DesignPage({ params }: Props) {
         {related.length > 0 && (
           <div className="mt-24">
             <Reveal>
-              <h2 className="font-display text-3xl">También te pueden gustar</h2>
+              <h2 className="font-title text-3xl">También te pueden gustar</h2>
             </Reveal>
             <Reveal stagger={0.08} className="mt-6 grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
               {related.map((d) => (

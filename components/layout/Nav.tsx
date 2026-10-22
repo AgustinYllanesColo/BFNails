@@ -126,7 +126,7 @@ export function Nav() {
                 >
                   <Link
                     href={item.href}
-                    className="flex items-center justify-between rounded-md px-4 py-4 font-display text-3xl text-ink hover:bg-cream-deep"
+                    className="flex items-center justify-between rounded-md px-4 py-4 font-title text-3xl text-ink hover:bg-cream-deep"
                   >
                     {item.label}
                     <Star size={18} className="text-bordo" />
