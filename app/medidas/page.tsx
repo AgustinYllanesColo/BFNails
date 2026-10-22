@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Heading } from "@/components/ui/Section";
 import { FINGERS, SIZE_ORDER, STANDARD_SIZES } from "@/lib/data/sizes";
-import { SizeFinder } from "@/components/catalog/SizeFinder";
 import { Button } from "@/components/ui/Button";
 import { formatCm } from "@/lib/format";
 
@@ -43,21 +42,25 @@ export default function MedidasPage() {
       </div>
 
       <section id="universal" aria-labelledby="universal-t" className="bg-cream-deep mt-14 scroll-mt-24 py-14 md:py-20">
-        <div className="container-x grid gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="container-x max-w-3xl">
           <div className="min-w-0">
             <Heading>
               <span id="universal-t">Medidas universales</span>
             </Heading>
-            <p className="text-ink-soft mt-3">Ancho de cada uña, en cm. Si estás entre dos, elegí la más chica.</p>
+            <p className="text-ink-soft mt-3">
+              Si querés comprar un set en stock y no sabés qué medida te queda mejor, te dejo la tabla de talles
+              universales para que midas tus uñas y elijas la que mejor te quede.
+            </p>
+            <p className="text-ink-soft mt-2">Ancho de cada uña, en cm. Si estás entre dos, elegí la más chica.</p>
             <div className="mt-6 overflow-hidden rounded-lg bg-white/80 ring-1 ring-bordo/10">
-              <table className="w-full text-[15px] tabular-nums">
+              <table className="w-full border-collapse text-[15px] tabular-nums">
                 <thead>
                   <tr className="bg-bordo text-cream">
-                    <th scope="col" className="px-4 py-3 text-left font-semibold">
+                    <th scope="col" className="border border-bordo/30 px-4 py-3 text-left font-semibold">
                       Uña
                     </th>
                     {SIZE_ORDER.map((s) => (
-                      <th key={s} scope="col" className="font-title px-4 py-3 text-center text-xl font-normal">
+                      <th key={s} scope="col" className="font-title border border-bordo/30 px-4 py-3 text-center text-xl font-normal">
                         {s}
                       </th>
                     ))}
@@ -65,12 +68,12 @@ export default function MedidasPage() {
                 </thead>
                 <tbody>
                   {FINGERS.map((f, i) => (
-                    <tr key={f} className="border-t border-bordo/10">
-                      <th scope="row" className="px-4 py-3 text-left font-semibold">
+                    <tr key={f} className="even:bg-cream-deep/60">
+                      <th scope="row" className="border border-bordo/20 px-4 py-3 text-left font-semibold">
                         {f}
                       </th>
                       {SIZE_ORDER.map((s) => (
-                        <td key={s} className="px-4 py-3 text-center">
+                        <td key={s} className="border border-bordo/20 px-4 py-3 text-center">
                           {formatCm(STANDARD_SIZES[s].widthMm[i])}
                         </td>
                       ))}
@@ -79,11 +82,6 @@ export default function MedidasPage() {
                 </tbody>
               </table>
             </div>
-          </div>
-          <div className="min-w-0">
-            <h2 className="font-title text-2xl md:text-3xl">¿Cuál sos?</h2>
-            <p className="text-ink-soft mt-2">Poné el ancho del pulgar y del anular.</p>
-            <SizeFinder />
           </div>
         </div>
       </section>

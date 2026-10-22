@@ -13,45 +13,45 @@ import type { BuilderSelection } from "@/lib/types";
 export const PRESETS: Record<string, BuilderSelection> = {
   // la flor va en el índice derecho y el anular izquierdo, como en la tarjeta de Brenda
   "polka-flower": {
-    shape: "almendra", length: "largo", finish: "glossy", base: "nude", extras: ["francesita", "puntitos"], detailColor: "negro",
+    shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita", "puntitos"], detailColor: "negro",
     nailDesigns: [null, { color: "nude", extras: ["francesita", "puntitos", "flor-3d"] }, null, null, null, null, null, null, { color: "nude", extras: ["francesita", "puntitos", "flor-3d"] }, null],
   },
   "pink-dots": {
-    shape: "cuadrada", length: "largo", finish: "glossy", base: "fucsia", extras: [],
+    shape: "cuadrada", length: "medio", finish: "glossy", base: "fucsia", extras: [],
     accent: "alternadas", accentColor: "nude", accentExtras: ["puntitos"], detailColor: "fucsia",
   },
   "lila-perlas": {
-    shape: "cuadrada", length: "largo", finish: "glossy", base: "lila", extras: [],
+    shape: "cuadrada", length: "medio", finish: "glossy", base: "lila", extras: [],
     accent: "anular-mayor", accentExtras: [],
     charms: [{ id: "corazon-perlitas", qty: 4, nails: [2, 3, 7, 8] }],
   },
   "black-snake": {
-    shape: "almendra", length: "largo", finish: "glossy", base: "negro", extras: ["cat-eye"],
+    shape: "almendra", length: "medio", finish: "glossy", base: "negro", extras: [],
     accent: "anular", accentColor: "nude", accentExtras: [],
     charms: [{ id: "serpiente-dorada", qty: 2, nails: [3, 8] }],
   },
   "black-stiletto": {
-    shape: "stiletto", length: "xl", finish: "glossy", base: "negro", extras: ["cat-eye"],
+    shape: "stiletto", length: "largo", finish: "glossy", base: "negro", extras: [],
     accent: "anular-mayor", accentColor: "rosa", accentExtras: ["degrade"], degradeColor: "negro",
   },
   "black-leo": {
-    shape: "almendra", length: "largo", finish: "glossy", base: "negro", extras: [],
+    shape: "almendra", length: "medio", finish: "glossy", base: "negro", extras: [],
     accent: "pulgar-menique", accentColor: "nude", accentExtras: ["animal-print"],
   },
   "french-glitter": {
-    shape: "cuadrada", length: "largo", finish: "glossy", base: "nude", extras: ["francesita", "glitter"],
+    shape: "cuadrada", length: "medio", finish: "glossy", base: "nude", extras: ["francesita", "glitter"],
   },
-  "verde-oliva": { shape: "almendra", length: "largo", finish: "glossy", base: "verde", extras: [] },
-  violeta: { shape: "almendra", length: "largo", finish: "glossy", base: "violeta", extras: [] },
+  "verde-oliva": { shape: "almendra", length: "medio", finish: "glossy", base: "verde", extras: [] },
+  violeta: { shape: "almendra", length: "medio", finish: "glossy", base: "violeta", extras: [] },
   "pink-babyboomer": {
-    shape: "almendra", length: "largo", finish: "glossy", base: "rosa", extras: ["degrade", "glitter"],
+    shape: "almendra", length: "medio", finish: "glossy", base: "rosa", extras: ["degrade", "glitter"],
   },
   "pink-wave": {
-    shape: "cuadrada", length: "xl", finish: "glossy", base: "rosa", extras: ["ondas", "glitter"], detailColor: "fucsia",
+    shape: "cuadrada", length: "largo", finish: "glossy", base: "rosa", extras: ["ondas", "glitter"], detailColor: "fucsia",
     accent: "anular", accentExtras: ["strass"],
   },
   "milky-star": {
-    shape: "almendra", length: "largo", finish: "glossy", base: "milky", extras: [],
+    shape: "almendra", length: "medio", finish: "glossy", base: "milky", extras: [],
     accent: "anular", accentExtras: ["estrellas", "puntitos"], detailColor: "dorado",
   },
   "leo-cherry": {
@@ -62,7 +62,7 @@ export const PRESETS: Record<string, BuilderSelection> = {
     shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita-color"], tipColor: "amarillo",
     accent: "anular-mayor", accentColor: "naranja", accentExtras: ["degrade"], degradeColor: "rosa",
   },
-  "bordo-cat-eye": { shape: "almendra", length: "largo", finish: "glossy", base: "bordo", extras: ["cat-eye"] },
+  "bordo-aura": { shape: "almendra", length: "medio", finish: "glossy", base: "bordo", extras: ["aurora"] },
   "leo-star-gold": {
     shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "strass"],
     accent: "alternadas", accentExtras: ["animal-print", "estrellas", "cadenas"], detailColor: "rosa",
@@ -73,10 +73,10 @@ export const PRESETS: Record<string, BuilderSelection> = {
     accent: "anular", accentExtras: ["strass"],
   },
   "black-french": {
-    shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita-color", "strass"], tipColor: "negro",
+    shape: "cuadrada", length: "largo", finish: "glossy", base: "nude", extras: ["francesita-color", "strass"], tipColor: "negro",
   },
   "pink-zebra": {
-    shape: "almendra", length: "largo", finish: "glossy", base: "rosa", extras: ["cebra", "glitter"], detailColor: "rojo",
+    shape: "almendra", length: "medio", finish: "glossy", base: "rosa", extras: ["cat-eye", "cebra"], detailColor: "rojo",
   },
   "candy-gems": {
     shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita", "strass-colores"],
@@ -97,7 +97,7 @@ export const PRESETS: Record<string, BuilderSelection> = {
     shape: "cuadrada", length: "corto", finish: "glossy", base: "rosa", extras: ["degrade"],
     accent: "anular", accentExtras: ["strass"],
   },
-  "gold-glitter": { shape: "cuadrada", length: "medio", finish: "glossy", base: "dorado", extras: ["glitter"] },
+  "gold-glitter": { shape: "cuadrada", length: "medio", finish: "glossy", base: "dorado", extras: ["cat-eye", "glitter"] },
 };
 
 export function presetFor(slug: string | null | undefined): BuilderSelection | null {

@@ -5,35 +5,37 @@ import { AnimatePresence, motion } from "motion/react";
 import { Reveal } from "@/components/motion/Reveal";
 import { Heading, Section } from "@/components/ui/Section";
 import { cn } from "@/lib/format";
+import { siteConfig } from "@/lib/site";
 
-export const FAQ_ITEMS: Array<{ q: string; a: string }> = [
+export const FAQ_ITEMS: Array<{ q: string; a: string; link?: { href: string; label: string } }> = [
   {
     q: "¿Qué son las press-on?",
-    a: "Uñas ya hechas que se pegan sobre la tuya. Las hago a mano, flexibles y livianas. Duran de 1 a 3 semanas y se pueden reusar.",
+    a: "Las press-on son uñas personalizadas, hechas a mano y diseñadas a tu gusto 💖. Podés elegir el diseño, la forma y el largo que más te guste. Son ideales para lucir unas uñas hermosas sin necesidad de ir al salón y perder tiempo, ya que te las podés colocar vos misma desde la comodidad de tu casa. Además, ¡las podés usar las veces que quieras siempre y cuando las cuides de la manera correcta!",
   },
   {
-    q: "¿Cómo sé mi medida?",
-    a: "Dos opciones: una medida universal (S, M o L), con sets en stock para entrega inmediata, o una personalizada con el ancho de tus 10 uñas. En Medidas te muestro cómo medir.",
+    q: "¿Cuánto tiempo duran?",
+    a: "Pegándolas de la forma correcta pueden durarte de 1 a 2 semanas.",
   },
   {
     q: "¿Cuánto tarda mi pedido?",
-    a: "Los sets a pedido están en 3 a 7 días. Los que tengo en stock salen en el momento. Te aviso por WhatsApp.",
-  },
-  {
-    q: "¿Cómo pago?",
-    a: "Mercado Pago (tarjeta, dinero en cuenta, cuotas), transferencia o efectivo si retirás o te lo llevo en moto.",
+    a: "Los sets personalizados pueden estar listos entre 2 y 7 días, dependiendo de la complejidad del set o de la cantidad de pedidos que tenga. Si sos de la zona y ponemos punto de encuentro o moto, es mucho más rápido. Si el envío es por Correo Argentino, sumado al tiempo que tarda el set, son aprox. de 5 a 10 días.",
   },
   {
     q: "¿Puedo pedir un diseño que vi en internet?",
-    a: "Sí. En Diseñá tu set pegá el link (Pinterest, Instagram, TikTok) y te lo cotizo por WhatsApp antes de pagar.",
+    a: "Sí. Pegá el link en Diseñá tu set o escribime por WhatsApp.",
   },
   {
-    q: "¿Qué viene en el kit?",
-    a: "Las 10 uñas y el kit de colocación: pegamento, lima, lima buffer, wipes y palito de naranjo.",
+    q: "¿Qué viene incluido en el set de uñas?",
+    a: "Incluye tu set de press-on y el kit de colocación para que las uses inmediatamente: pegamento, lima, buffer, wipes y palito de naranjo.",
   },
   {
-    q: "¿También atendés en el estudio?",
-    a: "Sí. En Remedios de Escalada, a 4 cuadras de la estación: soft gel, kapping y semi, con turno por WhatsApp o Instagram.",
+    q: "¿Cómo pegármelas para que duren?",
+    a: "Te dejo un video tutorial para aplicarlas correctamente:",
+    link: { href: siteConfig.tutorial, label: "Ver el tutorial" },
+  },
+  {
+    q: "¿Atendés de forma presencial?",
+    a: "Sí, atiendo en Remedios de Escalada, a 4 cuadras de la estación. Si las press-on no son lo tuyo, los servicios que realizo son soft gel, kapping o semipermanente, con turno previo a coordinar por WhatsApp o Instagram.",
   },
 ];
 
@@ -47,6 +49,7 @@ export function Faq({ items = FAQ_ITEMS, compact = false }: { items?: typeof FAQ
         {!compact && (
           <Reveal>
             <Heading>Preguntas frecuentes</Heading>
+            <p className="text-ink-soft mt-4 max-w-[36ch]">¿Te quedó alguna duda? Escribime por WhatsApp o Instagram y hablamos.</p>
           </Reveal>
         )}
         <Reveal className="divide-y divide-bordo/10">
@@ -80,7 +83,22 @@ export function Faq({ items = FAQ_ITEMS, compact = false }: { items?: typeof FAQ
                       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="pb-6 leading-relaxed text-ink-soft">{item.a}</p>
+                      <p className="pb-6 leading-relaxed text-ink-soft">
+                        {item.a}
+                        {item.link && (
+                          <>
+                            {" "}
+                            <a
+                              href={item.link.href}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-bordo font-semibold underline decoration-[1.5px] underline-offset-4"
+                            >
+                              {item.link.label}
+                            </a>
+                          </>
+                        )}
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>

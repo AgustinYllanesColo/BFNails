@@ -9,6 +9,8 @@ export const siteConfig = {
   instagramHandle: "@bf.nailstudio_",
   tiktok: "https://www.tiktok.com/@bfnails_studio",
   tiktokHandle: "@bfnails_studio",
+  /** Video tutorial de colocación (FAQ). Hasta tener el link de Brenda, manda a su TikTok. */
+  tutorial: process.env.NEXT_PUBLIC_TUTORIAL_URL ?? "https://www.tiktok.com/@bfnails_studio",
   /** Zonas de moto y retiro (sur del conurbano). */
   zones: ["Remedios de Escalada", "Lanús", "Banfield", "Lomas de Zamora"],
   transfer: {

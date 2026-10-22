@@ -42,11 +42,11 @@ export type BuilderConfig = {
 export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
   basePrice: 12000,
   shapes: [
+    // Bren hace estas cuatro (ovalada no) y todas salen lo mismo
     { id: "almendra", label: "Almendra", delta: 0 },
-    { id: "ovalada", label: "Ovalada", delta: 0 },
     { id: "cuadrada", label: "Cuadrada", delta: 0 },
-    { id: "coffin", label: "Coffin", delta: 500 },
-    { id: "stiletto", label: "Stiletto", delta: 800 },
+    { id: "coffin", label: "Coffin", delta: 0 },
+    { id: "stiletto", label: "Stiletto", delta: 0 },
   ],
   lengths: [
     { id: "corto", label: "Corto", delta: 0 },
@@ -55,9 +55,9 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "xl", label: "XL", delta: 2000 },
   ],
   finishes: [
-    { id: "glossy", label: "Glossy", delta: 0 },
+    // solo brillo o mate
+    { id: "glossy", label: "Brillo", delta: 0 },
     { id: "mate", label: "Mate", delta: 500 },
-    { id: "cromado", label: "Cromado", delta: 2500, complexity: 1 },
   ],
   bases: [
     { id: "nude", label: "Nude", delta: 0, hex: "#e8c4b0" },
@@ -117,6 +117,7 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "ondas", group: "Diseños", label: "Ondas", delta: 2000, complexity: 1 },
     { id: "estrellas", group: "Diseños", label: "Estrellitas", delta: 1500, complexity: 1 },
     { id: "tribal", group: "Diseños", label: "Tribal", delta: 3000, complexity: 2 },
+    { id: "blooming", group: "Diseños", label: "Blooming", delta: 2500, complexity: 1 },
     {
       id: "personajes",
       group: "Diseños",

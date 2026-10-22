@@ -10,14 +10,16 @@ describe("quoteSelection", () => {
     expect(q.lines).toHaveLength(1);
   });
 
-  it("suma deltas de forma, largo y acabado", () => {
+  it("suma deltas de largo y acabado; la forma no cambia el precio", () => {
     const q = quoteSelection({ ...DEFAULT_SELECTION, shape: "stiletto", length: "xl", finish: "mate" });
-    expect(q.total).toBe(12000 + 800 + 2000 + 500);
+    expect(q.total).toBe(12000 + 0 + 2000 + 500);
+    expect(DEFAULT_BUILDER_CONFIG.shapes.map((s) => s.id)).not.toContain("ovalada");
+    expect(DEFAULT_BUILDER_CONFIG.finishes.map((f) => f.id)).toEqual(["glossy", "mate"]);
   });
 
   it("los extras suman precio y puntos de complejidad con recargo por nivel", () => {
-    const q = quoteSelection({ ...DEFAULT_SELECTION, finish: "cromado", extras: ["francesita", "strass", "personajes"] });
-    // base 12000 + cromado 2500 + francesita 1500 + strass 2000 + personajes 4000 = 22000
+    const q = quoteSelection({ ...DEFAULT_SELECTION, extras: ["blooming", "francesita", "strass", "personajes"] });
+    // base 12000 + blooming 2500 + francesita 1500 + strass 2000 + personajes 4000 = 22000
     // puntos: 1 + 1 + 1 + 3 = 6 → nivel elaborado (+2500)
     expect(q.complexity).toBe(3);
     expect(q.complexityLabel).toBe("Elaborado");

@@ -26,7 +26,7 @@ export default async function HomePage() {
               "press-on personalizadas",
               "kit de colocación incluido",
               "reutilizables",
-              "Remedios de Escalada",
+              "puntos de encuentro",
               "envíos a todo el país",
             ]}
             className="bg-bordo font-title text-cream py-3 text-xl md:py-4 md:text-2xl"

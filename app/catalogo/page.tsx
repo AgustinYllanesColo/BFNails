@@ -23,7 +23,8 @@ export default async function CatalogoPage() {
           <div className="max-w-2xl">
             <Heading as="h1">Catálogo</Heading>
             <p className="mt-4 text-ink-soft">
-              Cada precio incluye las 10 uñas y el kit de colocación. Si no encontrás el tuyo, armalo vos.
+              Uñas disponibles en stock para entrega inmediata, con kit de aplicación incluido. Y si no sabés qué
+              pedir, también te dejo algunas opciones hechas por mí para que elijas más rápido.
             </p>
           </div>
           <Button href="/disena" variant="secondary">

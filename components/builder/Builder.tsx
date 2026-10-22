@@ -24,10 +24,10 @@ import { NailPreview } from "./NailPreview";
 import { cn } from "@/lib/format";
 import { CHARMS_ENABLED } from "@/lib/site";
 
-const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uña por uña", "Dijes", "Detalles", "Medidas"] as const;
+const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uña por uña", "Dijes", "Medidas", "Detalles"] as const;
 /** Técnicas que se pintan en el color que elijas. */
 const COLORED = new Set(["puntitos", "cebra", "ondas", "estrellas", "tribal"]);
-/** Con los dijes apagados, Detalles y Medidas suben un número. */
+/** Con los dijes apagados, Medidas y Detalles suben un número. */
 const SHIFT = CHARMS_ENABLED ? 0 : 1;
 
 export type PresetDesign = { slug: string; name: string; image: string };
@@ -349,6 +349,10 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         )}
 
         <div>
+          <StepHeader n={8 - SHIFT} title={STEPS[7]} hint="Universal, personalizada o te la paso por WhatsApp." />
+          <SizePicker value={sizes} onChange={setSizes} />
+        </div>
+        <div>
           <StepHeader n={9 - SHIFT} title={STEPS[8]} hint="Opcional. Si pedís algo que no está en la lista, te lo cotizo antes de que pagues." />
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Referencia (link de Pinterest, IG, TikTok)" htmlFor="ref">
@@ -358,11 +362,6 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
               <textarea id="notes" className={textareaClass} placeholder="Ej: la del anular con una K dorada, el resto liso" value={sel.notes ?? ""} onChange={(e) => setSel({ ...sel, notes: e.target.value })} />
             </Field>
           </div>
-        </div>
-
-        <div>
-          <StepHeader n={8 - SHIFT} title={STEPS[7]} hint="Universal, personalizada o te la paso por WhatsApp." />
-          <SizePicker value={sizes} onChange={setSizes} />
         </div>
       </div>
 

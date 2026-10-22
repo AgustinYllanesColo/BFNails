@@ -19,7 +19,7 @@ export default function FaqPage() {
           </Reveal>
           <Reveal className="mt-8 hidden rounded-lg bg-bordo p-8 text-cream lg:block">
             <h2 className="font-title text-2xl">¿Te quedó alguna duda?</h2>
-            <p className="mt-2 text-cream/80">Escribime por WhatsApp, respondo rápido.</p>
+            <p className="mt-2 text-cream/80">Escribime por WhatsApp o Instagram y hablamos.</p>
             <Button href={waLink(WA_DUDA)} target="_blank" rel="noreferrer" variant="leopard" className="mt-6">
               Hablar por WhatsApp
             </Button>
@@ -29,7 +29,7 @@ export default function FaqPage() {
           <Faq compact />
           <Reveal className="mt-12 rounded-lg bg-bordo p-8 text-cream lg:hidden">
             <h2 className="font-title text-2xl">¿Te quedó alguna duda?</h2>
-            <p className="mt-2 text-cream/80">Escribime por WhatsApp, respondo rápido.</p>
+            <p className="mt-2 text-cream/80">Escribime por WhatsApp o Instagram y hablamos.</p>
             <Button href={waLink(WA_DUDA)} target="_blank" rel="noreferrer" variant="leopard" className="mt-6">
               Hablar por WhatsApp
             </Button>

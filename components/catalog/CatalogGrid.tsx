@@ -2,24 +2,32 @@
 
 import { cn } from "@/lib/format";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Design, Length, Shape } from "@/lib/types";
-import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
+import { LENGTH_LABEL, SHAPE_LABEL, inStock } from "@/lib/data/catalog";
 import { DesignCard } from "./DesignCard";
 import { Chip } from "@/components/ui/Chip";
 
 type Sort = "destacados" | "precio-asc" | "precio-desc" | "nombre";
+
+const noop = () => () => {};
+const readUrlStock = () => new URLSearchParams(window.location.search).get("stock") === "1";
 
 export function CatalogGrid({ designs }: { designs: Design[] }) {
   const [shape, setShape] = useState<Shape | null>(null);
   const [length, setLength] = useState<Length | null>(null);
   const [tag, setTag] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("destacados");
+  // Solo los sets listos para entrega inmediata (tag "stock"); va junto al orden, no entre los estilos.
+  // /catalogo?stock=1 (desde la promo) llega con el filtro puesto hasta que la clienta lo toca.
+  const urlStock = useSyncExternalStore(noop, readUrlStock, () => false);
+  const [stockPick, setStock] = useState<boolean | null>(null);
+  const stock = stockPick ?? urlStock;
 
   const tags = useMemo(() => {
     const count = new Map<string, number>();
-    designs.forEach((d) => d.tags.forEach((t) => count.set(t, (count.get(t) ?? 0) + 1)));
+    designs.forEach((d) => d.tags.forEach((t) => t !== "stock" && count.set(t, (count.get(t) ?? 0) + 1)));
     return [...count.entries()]
       .sort((a, b) => b[1] - a[1])
       .map(([t]) => t)
@@ -31,7 +39,8 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
       (d) =>
         (!shape || d.shape === shape) &&
         (!length || d.length === length) &&
-        (!tag || d.tags.includes(tag)),
+        (!tag || d.tags.includes(tag)) &&
+        (!stock || inStock(d)),
     );
     switch (sort) {
       case "precio-asc":
@@ -47,9 +56,9 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
         list = [...list].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
     }
     return list;
-  }, [designs, shape, length, tag, sort]);
+  }, [designs, shape, length, tag, sort, stock]);
 
-  const anyFilter = shape || length || tag;
+  const anyFilter = shape || length || tag || stock;
   // Ovalada no se ofrece (Bren no la hace); las demás formas se muestran siempre, tengan o no sets hoy
   const shapes = (Object.keys(SHAPE_LABEL) as Shape[]).filter((sh) => sh !== "ovalada");
 
@@ -91,7 +100,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
               onClick={() => setTag(tag === t ? null : t)}
             >
               {/* solo la primera letra en mayúscula: "Dibujo a mano", no "Dibujo A Mano" */}
-              {t === "stock" ? "Entrega inmediata" : t.charAt(0).toUpperCase() + t.slice(1)}
+              {t.charAt(0).toUpperCase() + t.slice(1)}
             </Chip>
           ))}
           <div className="ml-auto flex items-center gap-2">
@@ -102,6 +111,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
                   setShape(null);
                   setLength(null);
                   setTag(null);
+                  setStock(false);
                 }}
                 className="text-bordo text-xs font-semibold underline underline-offset-4"
               >
@@ -116,8 +126,21 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
         <p className="text-ink-soft text-sm">
           {filtered.length} {filtered.length === 1 ? "diseño" : "diseños"}
         </p>
-        {/* orden como chips, en la fila del contador: no compite con los filtros ni suma alto a la barra fija */}
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Ordenar">
+        {/* orden como chips, en la fila del contador: no compite con los filtros ni suma alto a la barra fija.
+            "En stock" va primero: es un filtro (se combina con el orden), no un orden más */}
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Ordenar y en stock">
+          <button
+            type="button"
+            onClick={() => setStock(!stock)}
+            aria-pressed={stock}
+            title="Sets listos para entrega inmediata"
+            className={cn(
+              "rounded-pill h-8 px-3 text-xs font-semibold transition-colors duration-200",
+              stock ? "bg-emerald-700 text-cream" : "bg-cream-deep text-emerald-700 hover:bg-cream-ink/70",
+            )}
+          >
+            En stock
+          </button>
           {(
             [
               ["destacados", "Destacados"],
