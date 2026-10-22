@@ -27,7 +27,7 @@ export const siteConfig = {
  * Dijes apagados hasta tener las fotos reales (y sus precios): sin sección, sin menú y sin paso en el armador.
  * El código queda; para volver a mostrarlos alcanza con poner esto en true.
  */
-export const CHARMS_ENABLED = false;
+export const CHARMS_ENABLED = true;
 
 export const nav = [
   { href: "/catalogo", label: "Catálogo" },
