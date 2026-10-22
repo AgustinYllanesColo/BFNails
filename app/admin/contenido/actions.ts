@@ -81,6 +81,7 @@ export async function saveCharm(formData: FormData) {
   const charm: Charm = {
     ...d,
     id,
+    category: prev?.category,
     image: await imageFrom(formData, "dijes", prev?.image),
     active: formData.get("active") === "on",
   };

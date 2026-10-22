@@ -10,6 +10,7 @@ import { presetFor } from "@/lib/data/presets";
 import { formatARS } from "@/lib/format";
 import type { Charm } from "@/lib/data/content";
 import { CharmThumb } from "@/components/charms/CharmThumb";
+import { useCharmFilter } from "@/components/charms/CharmFilter";
 import { useCart } from "@/lib/store/cart";
 import { flyToCart } from "@/components/motion/flyToCart";
 import { Chip } from "@/components/ui/Chip";
@@ -390,35 +391,39 @@ function CharmPicker({
   picked: Array<{ id: string; qty: number }>;
   onChange: (id: string, qty: number) => void;
 }) {
+  const { chips, visible } = useCharmFilter(charms);
   if (charms.length === 0) return <p className="text-sm text-ink-soft">Ahora no tengo dijes cargados.</p>;
   return (
-    <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-      {charms.map((c) => {
-        const qty = picked.find((p) => p.id === c.id)?.qty ?? 0;
-        return (
-          <li key={c.id} className={cn("rounded-lg bg-white/80 p-2 ring-1 transition-shadow", qty > 0 ? "ring-2 ring-bordo" : "ring-bordo/10")}>
-            <button type="button" onClick={() => onChange(c.id, Math.min(20, qty + 1))} aria-label={`Sumar ${c.name}`} className="block w-full">
-              <CharmThumb charm={c} />
-            </button>
-            <p className="mt-2 px-1 text-[13px] leading-tight font-semibold">{c.name}</p>
-            <p className="mt-0.5 px-1 text-[13px] text-ink-soft">+{formatARS(c.price)}</p>
-            {qty > 0 && (
-              <div className="mt-1.5 flex items-center justify-between gap-1 px-1">
-                <button type="button" onClick={() => onChange(c.id, qty - 1)} aria-label={`Sacar un ${c.name}`} className="grid size-7 place-items-center rounded-full bg-cream-deep font-bold text-bordo">
-                  −
-                </button>
-                <span className="w-4 text-center text-sm font-bold tabular-nums" aria-live="polite">
-                  {qty}
-                </span>
-                <button type="button" onClick={() => onChange(c.id, Math.min(20, qty + 1))} aria-label={`Sumar ${c.name}`} className="grid size-7 place-items-center rounded-full bg-bordo font-bold text-cream">
-                  +
-                </button>
-              </div>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <>
+      {chips}
+      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+        {visible.map((c) => {
+          const qty = picked.find((p) => p.id === c.id)?.qty ?? 0;
+          return (
+            <li key={c.id} className={cn("rounded-lg bg-white/80 p-2 ring-1 transition-shadow", qty > 0 ? "ring-2 ring-bordo" : "ring-bordo/10")}>
+              <button type="button" onClick={() => onChange(c.id, Math.min(20, qty + 1))} aria-label={`Sumar ${c.name}`} className="block w-full">
+                <CharmThumb charm={c} />
+              </button>
+              <p className="mt-2 px-1 text-[13px] leading-tight font-semibold">{c.name}</p>
+              <p className="mt-0.5 px-1 text-[13px] text-ink-soft">+{formatARS(c.price)}</p>
+              {qty > 0 && (
+                <div className="mt-1.5 flex items-center justify-between gap-1 px-1">
+                  <button type="button" onClick={() => onChange(c.id, qty - 1)} aria-label={`Sacar un ${c.name}`} className="grid size-7 place-items-center rounded-full bg-cream-deep font-bold text-bordo">
+                    −
+                  </button>
+                  <span className="w-4 text-center text-sm font-bold tabular-nums" aria-live="polite">
+                    {qty}
+                  </span>
+                  <button type="button" onClick={() => onChange(c.id, Math.min(20, qty + 1))} aria-label={`Sumar ${c.name}`} className="grid size-7 place-items-center rounded-full bg-bordo font-bold text-cream">
+                    +
+                  </button>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }
 
