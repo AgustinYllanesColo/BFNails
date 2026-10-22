@@ -11,7 +11,13 @@ export const SEED_DESIGNS: Design[] = [
     name: "Polka flower",
     description:
       "Francesita blanca con lunares negros sobre nude, y una flor 3D de organza rosa con centro dorado en un acento. Almendra larga.",
-    images: ["/catalog/set-polka-flower.webp", "/catalog/set-polka-flower-2.webp", "/catalog/set-polka-flower-3.webp"],
+    images: [
+      "/catalog/set-polka-flower.webp",
+      "/catalog/set-polka-flower-2.webp",
+      "/catalog/set-polka-flower-3.webp",
+      "/catalog/set-polka-flower-4.webp",
+      "/catalog/set-polka-flower-5.webp",
+    ],
     shape: "almendra",
     length: "largo",
     finish: "glossy",
