@@ -53,6 +53,48 @@ export function createBowGeometry() {
   return smoothNormals(mergeNonIndexed(parts));
 }
 
+/**
+ * Flor 3D de organza (como la del set de lunares de Brenda): cinco pétalos en gota, finos y un poco levantados hacia
+ * afuera. Eje Z = normal de la uña; radio ≈ 1.
+ */
+export function createFlowerGeometry() {
+  const petal = new THREE.Shape();
+  petal.moveTo(0, 0.08);
+  petal.bezierCurveTo(0.42, 0.3, 0.5, 0.82, 0.12, 1);
+  petal.bezierCurveTo(0.04, 0.9, -0.04, 0.9, -0.12, 1);
+  petal.bezierCurveTo(-0.5, 0.82, -0.42, 0.3, 0, 0.08);
+  const opts = { depth: 0.04, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.04, bevelSegments: 3, curveSegments: 20 };
+  const parts: THREE.BufferGeometry[] = [];
+  for (let k = 0; k < 5; k++) {
+    const g = new THREE.ExtrudeGeometry(petal, opts);
+    // el pétalo sube desde el centro hacia afuera (como la organza armada) y se reparte en la vuelta
+    g.rotateX(-0.32);
+    g.translate(0, 0, 0.12);
+    g.rotateZ((k / 5) * Math.PI * 2 + 0.2);
+    const n = g.index ? g.toNonIndexed() : g;
+    if (n.getAttribute("uv")) n.deleteAttribute("uv");
+    parts.push(n);
+  }
+  return smoothNormals(mergeNonIndexed(parts));
+}
+
+/** Centro de la flor: tres bolitas doradas. */
+export function createFlowerCenterGeometry() {
+  const parts: THREE.BufferGeometry[] = [];
+  for (const [x, y, r] of [
+    [0, 0.07, 0.13],
+    [-0.1, -0.07, 0.11],
+    [0.11, -0.06, 0.12],
+  ] as const) {
+    const g = new THREE.SphereGeometry(r, 16, 12);
+    g.translate(x, y, 0.3);
+    const n = g.toNonIndexed();
+    n.deleteAttribute("uv");
+    parts.push(n);
+  }
+  return mergeNonIndexed(parts);
+}
+
 /** promedia normales de vértices coincidentes (ExtrudeGeometry sale facetada) */
 export function smoothNormals(g: THREE.BufferGeometry) {
   const geo = g.index ? g.toNonIndexed() : g;

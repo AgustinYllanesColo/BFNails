@@ -299,14 +299,13 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     }
   }
 
-  // 6. puntitos: filas alternadas de lunares en el color del detalle, con un brillo cada uno
-  if (has("puntitos")) {
-    const r = W * 0.075;
-    const stepX = W * 0.3;
-    const stepY = W * 0.27;
+  // 6. puntitos: filas alternadas de lunares en el color del detalle, con un brillo cada uno. Con francesita van
+  // sobre la punta (como el set de lunares de Brenda): se pintan después, en el paso 10.
+  const french = has("francesita") || has("francesita-color");
+  const dots = (from: number, r: number, step: number) => {
     let row = 0;
-    for (let y = d.bed * 0.12; y < d.L + r; y += stepY, row++) {
-      for (let x = -W / 2 + (row % 2 ? stepX / 2 : 0); x < W / 2 + r; x += stepX) {
+    for (let y = from; y < d.L + r; y += step, row++) {
+      for (let x = -W / 2 + (row % 2 ? step / 2 : 0); x < W / 2 + r; x += step * 1.1) {
         ctx.fillStyle = detail;
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -317,7 +316,8 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
         ctx.fill();
       }
     }
-  }
+  };
+  if (has("puntitos") && !french) dots(d.bed * 0.12, W * 0.075, W * 0.27);
 
   // 7. cebra / tigre: rayas cruzadas que se afinan en las puntas, irregulares como pintadas a pincel
   if (has("cebra")) {
@@ -406,6 +406,13 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     ctx.lineTo(-W, d.Lref + 1);
     ctx.closePath();
     ctx.fill();
+    if (has("puntitos")) {
+      // lunares solo dentro de la punta
+      ctx.save();
+      ctx.clip();
+      dots(yc - drop * 1.2 + W * 0.07, W * 0.075, W * 0.26);
+      ctx.restore();
+    }
   }
 
 

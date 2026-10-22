@@ -101,6 +101,7 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "strass-colores", group: "3D y apliques", label: "Gemas de colores", delta: 2500, complexity: 1 },
     { id: "perlas", group: "3D y apliques", label: "Perlas", delta: 2500, complexity: 1 },
     { id: "cadenas", group: "3D y apliques", label: "Cadenitas doradas", delta: 2500, complexity: 1 },
+    { id: "flor-3d", group: "3D y apliques", label: "Flor 3D (organza)", delta: 3500, complexity: 2 },
     {
       id: "3d",
       group: "3D y apliques",

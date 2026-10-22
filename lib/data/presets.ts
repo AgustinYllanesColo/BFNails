@@ -11,6 +11,10 @@ import type { BuilderSelection } from "@/lib/types";
  * del catálogo tenga su receta y que todas sus técnicas y colores existan en el armador.
  */
 export const PRESETS: Record<string, BuilderSelection> = {
+  "polka-flower": {
+    shape: "almendra", length: "largo", finish: "glossy", base: "nude", extras: ["francesita", "puntitos"], detailColor: "negro",
+    accent: "anular", accentExtras: ["flor-3d"],
+  },
   "pink-dots": {
     shape: "cuadrada", length: "largo", finish: "glossy", base: "fucsia", extras: [],
     accent: "alternadas", accentColor: "nude", accentExtras: ["puntitos"], detailColor: "fucsia",

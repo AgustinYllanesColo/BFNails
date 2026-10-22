@@ -349,3 +349,19 @@ export function createBowMaterial() {
     envMapIntensity: 0.45,
   });
 }
+
+/** Organza rosa de la flor 3D: translúcida, con brillo de tela y el rosa más intenso de la marca. */
+export function createFlowerMaterial() {
+  return new THREE.MeshPhysicalMaterial({
+    color: "#f27fb6",
+    roughness: 0.35,
+    transparent: true,
+    opacity: 0.86,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.2,
+    sheen: 1,
+    sheenColor: new THREE.Color("#ffd3e8"),
+    side: THREE.DoubleSide,
+    envMapIntensity: 0.4,
+  });
+}

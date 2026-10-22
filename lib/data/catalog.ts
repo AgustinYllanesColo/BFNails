@@ -7,6 +7,22 @@ import type { Design } from "@/lib/types";
  */
 export const SEED_DESIGNS: Design[] = [
   {
+    slug: "polka-flower",
+    name: "Polka flower",
+    description:
+      "Francesita blanca con lunares negros sobre nude, y una flor 3D de organza rosa con centro dorado en un acento. Almendra larga.",
+    images: ["/catalog/set-polka-flower.webp", "/catalog/set-polka-flower-2.webp", "/catalog/set-polka-flower-3.webp"],
+    shape: "almendra",
+    length: "largo",
+    finish: "glossy",
+    complexity: 3,
+    // lo mismo que da el armador con su receta (francesita, puntitos, flor 3D y trabajo de detalle)
+    price: 22000,
+    tags: ["francesita", "dibujo a mano", "3D"],
+    featured: true,
+    colors: ["#f3c1a5", "#ffffff", "#1d1d1d", "#f27fb6"],
+  },
+  {
     slug: "pink-dots",
     name: "Pink dots",
     description: "Fucsia con nude y lunares fucsia en algunas uñas. Cuadrada larga, bien divertida.",

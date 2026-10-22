@@ -10,6 +10,7 @@ import {
   FINISH_KEYS,
   applyFinish,
   createBowMaterial,
+  createFlowerMaterial,
   createCuticleMaterial,
   createFlakeTexture,
   createGemMaterial,
@@ -19,7 +20,7 @@ import {
   finishParams,
   type NailUniforms,
 } from "./materials";
-import { createBowGeometry, createGemGeometry, createHeartGeometry } from "./accessories";
+import { createBowGeometry, createFlowerCenterGeometry, createFlowerGeometry, createGemGeometry, createHeartGeometry } from "./accessories";
 
 /**
  * Escena procedural de la mano con uñas (estilo img2threejs: todo en código, sin modelos).
@@ -251,6 +252,21 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   hand.add(heart, bow);
   const heartAcc: Accessory = { object: heart, key: "heart", nail: 1, u: 0, y: 0.5, size: 0.24, tilt: 0.25, scale: 0, vel: 0, target: 0, delay: 0 };
   const bowAcc: Accessory = { object: bow, key: "bow", nail: 3, u: 0, y: 0.5, size: 0.36, tilt: -0.18, scale: 0, vel: 0, target: 0, delay: 0 };
+
+  /* flor 3D de organza: una por uña (la llevan las uñas que tienen la técnica, en general las acento) */
+  const flowerGeo = track(createFlowerGeometry());
+  const flowerCenterGeo = track(createFlowerCenterGeometry());
+  const flowerMat = track(withEnv(createFlowerMaterial()));
+  const flowerGold = track(withEnv(createGoldMaterial()));
+  const flowerAccs: Accessory[] = [0, 1, 2, 3, 4].map((i) => {
+    const g = new THREE.Group();
+    const petals = new THREE.Mesh(flowerGeo, flowerMat);
+    petals.castShadow = true;
+    g.add(petals, new THREE.Mesh(flowerCenterGeo, flowerGold));
+    g.visible = false;
+    hand.add(g);
+    return { object: g, key: `flower${i}`, nail: i, u: 0, y: 0.5, size: 0.3, tilt: 0.35, scale: 0, vel: 0, target: 0, delay: i * 0.04 };
+  });
 
   /* dijes reales: la foto recortada de la pieza (fondo transparente) apoyada sobre la uña, un plano por dije y uña */
   const charmGeo = track(new THREE.PlaneGeometry(1, 1));
@@ -556,6 +572,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     for (const a of gemSlots) if (springAcc(a, dt)) accBusy = true;
     if (springAcc(heartAcc, dt)) accBusy = true;
     if (springAcc(bowAcc, dt)) accBusy = true;
+    for (const a of flowerAccs) if (springAcc(a, dt)) accBusy = true;
     for (const [key, a] of charmAccs) {
       if (springAcc(a, dt)) accBusy = true;
       else if (a.gone) {
@@ -763,7 +780,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     }
     gems.count = count;
     gems.instanceMatrix.needsUpdate = true;
-    for (const a of [heartAcc, bowAcc]) {
+    for (const a of [heartAcc, bowAcc, ...flowerAccs]) {
       const o = a.object;
       o.visible = a.scale > 0.001;
       if (!o.visible) continue;
@@ -1012,6 +1029,18 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
         if (instant) acc.scale = t;
       }
     }
+    // flor 3D: al medio de la uña, del ancho de la uña
+    flowerAccs.forEach((a, i) => {
+      const d = nails[i].dims[sel.length];
+      a.y = d.L * 0.45;
+      a.size = d.W * 0.62;
+      const t = nailExtras(sel, i).includes("flor-3d") ? 1 : 0;
+      if (a.target !== t) {
+        a.target = t;
+        if (instant) a.scale = t;
+      }
+    });
+
     // dijes elegidos con sus uñas: uno va al medio de la uña; varios en la misma uña se reparten a lo largo
     const perNail = new Map<number, string[]>();
     for (const p of sel.charms ?? []) {
