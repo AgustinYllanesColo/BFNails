@@ -53,7 +53,18 @@ function probeWebGL2(): "gpu" | "software" | "none" {
  * primer cuadro, entra encima con un fundido. Sin WebGL, o si el 3D falla, queda la foto. La mano ilustrada en 2D
  * no se muestra nunca (pedido de Brenda).
  */
-export function NailPreview({ sel, config }: { sel: BuilderSelection; config: BuilderConfig }) {
+export function NailPreview({
+  sel,
+  config,
+  hand = 0,
+  onHand,
+}: {
+  sel: BuilderSelection;
+  config: BuilderConfig;
+  /** mano a la vista: 0 derecha, 1 izquierda */
+  hand?: 0 | 1;
+  onHand?: (hand: 0 | 1) => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const [load3D, setLoad3D] = useState(false);
   const [ready, setReady] = useState(false);
@@ -197,6 +208,7 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
             sel={sel}
             config={config}
             perfGuard={perfGuard}
+            hand={hand}
             onReady={onReady}
             onError={onError}
             className={cn(
@@ -207,6 +219,21 @@ export function NailPreview({ sel, config }: { sel: BuilderSelection; config: Bu
           />
         )}
       </div>
+      {onHand && !noGL && (
+        <div role="group" aria-label="Qué mano ver" className="absolute top-2 left-2 flex rounded-pill bg-cream/90 p-0.5 text-[11px] font-semibold sm:text-xs">
+          {(["Derecha", "Izquierda"] as const).map((label, h) => (
+            <button
+              key={label}
+              type="button"
+              aria-pressed={hand === h}
+              onClick={() => onHand(h as 0 | 1)}
+              className={cn("rounded-pill px-2.5 py-1 transition-colors", hand === h ? "bg-bordo text-cream" : "text-ink hover:text-bordo")}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       {loading && (
         <p
           aria-live="polite"

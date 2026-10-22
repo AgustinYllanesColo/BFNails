@@ -11,9 +11,10 @@ import type { BuilderSelection } from "@/lib/types";
  * del catálogo tenga su receta y que todas sus técnicas y colores existan en el armador.
  */
 export const PRESETS: Record<string, BuilderSelection> = {
+  // la flor va en el índice derecho y el anular izquierdo, como en la tarjeta de Brenda
   "polka-flower": {
     shape: "almendra", length: "largo", finish: "glossy", base: "nude", extras: ["francesita", "puntitos"], detailColor: "negro",
-    accent: "anular", accentExtras: ["flor-3d"],
+    nailDesigns: [null, { color: "nude", extras: ["francesita", "puntitos", "flor-3d"] }, null, null, null, null, null, null, { color: "nude", extras: ["francesita", "puntitos", "flor-3d"] }, null],
   },
   "pink-dots": {
     shape: "cuadrada", length: "largo", finish: "glossy", base: "fucsia", extras: [],
@@ -22,12 +23,12 @@ export const PRESETS: Record<string, BuilderSelection> = {
   "lila-perlas": {
     shape: "cuadrada", length: "largo", finish: "glossy", base: "lila", extras: [],
     accent: "anular-mayor", accentExtras: [],
-    charms: [{ id: "corazon-perlitas", qty: 4, nails: [2, 3] }],
+    charms: [{ id: "corazon-perlitas", qty: 4, nails: [2, 3, 7, 8] }],
   },
   "black-snake": {
     shape: "almendra", length: "largo", finish: "glossy", base: "negro", extras: ["cat-eye"],
     accent: "anular", accentColor: "nude", accentExtras: [],
-    charms: [{ id: "serpiente-dorada", qty: 2, nails: [3] }],
+    charms: [{ id: "serpiente-dorada", qty: 2, nails: [3, 8] }],
   },
   "black-stiletto": {
     shape: "stiletto", length: "xl", finish: "glossy", base: "negro", extras: ["cat-eye"],
@@ -65,7 +66,7 @@ export const PRESETS: Record<string, BuilderSelection> = {
   "leo-star-gold": {
     shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "strass"],
     accent: "alternadas", accentExtras: ["animal-print", "estrellas", "cadenas"], detailColor: "rosa",
-    charms: [{ id: "cruces-piedras", qty: 2, nails: [2] }],
+    charms: [{ id: "cruces-piedras", qty: 2, nails: [2, 7] }],
   },
   "tribal-french": {
     shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "tribal"], detailColor: "negro",
@@ -86,7 +87,7 @@ export const PRESETS: Record<string, BuilderSelection> = {
   "milky-pearl": {
     shape: "stiletto", length: "largo", finish: "glossy", base: "milky", extras: [],
     accent: "anular", accentExtras: ["perlas"],
-    charms: [{ id: "piercing", qty: 2, nails: [2] }],
+    charms: [{ id: "piercing", qty: 2, nails: [2, 7] }],
   },
   "milky-gold": {
     shape: "almendra", length: "corto", finish: "glossy", base: "milky", extras: ["francesita", "encapsulado"],
@@ -108,6 +109,7 @@ export function presetFor(slug: string | null | undefined): BuilderSelection | n
         extras: [...p.extras],
         accentExtras: p.accentExtras ? [...p.accentExtras] : undefined,
         charms: p.charms?.map((c) => ({ ...c, nails: c.nails ? [...c.nails] : undefined })),
+        nailDesigns: p.nailDesigns?.map((d) => (d ? { ...d, extras: d.extras ? [...d.extras] : undefined } : null)),
       }
     : null;
 }

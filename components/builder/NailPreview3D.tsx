@@ -14,6 +14,7 @@ export function NailPreview3D({
   config,
   className,
   perfGuard = true,
+  hand = 0,
   onReady,
   onError,
 }: {
@@ -22,6 +23,8 @@ export function NailPreview3D({
   className?: string;
   /** baja la calidad si el dispositivo no llega (se apaga en pruebas con WebGL por software) */
   perfGuard?: boolean;
+  /** 0 derecha, 1 izquierda: la izquierda es la misma mano espejada */
+  hand?: 0 | 1;
   onReady?: () => void;
   onError?: () => void;
 }) {
@@ -30,7 +33,10 @@ export function NailPreview3D({
 
   const ready = useEffectEvent(() => onReady?.());
   const fail = useEffectEvent(() => onError?.());
-  const initialUpdate = useEffectEvent((scene: HandScene) => scene.update(sel, config));
+  const initialUpdate = useEffectEvent((scene: HandScene) => {
+    scene.setHand(hand);
+    scene.update(sel, config);
+  });
   const guard = useEffectEvent(() => perfGuard);
 
   useEffect(() => {
@@ -72,5 +78,9 @@ export function NailPreview3D({
     sceneRef.current?.update(sel, config);
   }, [sel, config]);
 
-  return <div ref={hostRef} className={className} aria-hidden="true" />;
+  useEffect(() => {
+    sceneRef.current?.setHand(hand);
+  }, [hand]);
+
+  return <div ref={hostRef} className={className} style={hand === 1 ? { transform: "scaleX(-1)" } : undefined} aria-hidden="true" />;
 }

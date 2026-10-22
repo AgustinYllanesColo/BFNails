@@ -1,9 +1,9 @@
-import { ACCENT_OPTIONS, accentMode } from "./pricing";
 import { siteConfig } from "./site";
 import { formatARS, formatCm } from "./format";
 import type { CartItem, Order, SizeSelection } from "./types";
 import { ORDER_STATUS_LABEL } from "./types";
 import { describeNails } from "./charms";
+import { allNails, describeNailList } from "./nails";
 
 /** Link wa.me con mensaje prearmado. `to` sin "+" ni espacios; por defecto, Brenda. */
 export function waLink(message: string, to: string = siteConfig.whatsapp): string {
@@ -30,13 +30,19 @@ export function describeItem(item: CartItem): string {
         s.degradeColor ? ` (degradé hacia ${s.degradeColor})` : ""
       }`
     : "";
-  const mode = accentMode(s);
-  const accent =
-    mode === "ninguno"
-      ? ""
-      : `\n  Acentos (${ACCENT_OPTIONS.find((o) => o.id === mode)?.label.toLowerCase()}): ${s.accentColor ?? s.base}${
-          s.accentExtras?.length ? ` con ${s.accentExtras.join(", ")}` : ""
-        }`;
+  // uña por uña: las que no son como el resto del set, agrupadas si llevan lo mismo
+  const groups = new Map<string, number[]>();
+  allNails(s).forEach((sp, i) => {
+    if (!sp.custom) return;
+    const key = `${sp.color}|${sp.extras.join(", ")}`;
+    groups.set(key, [...(groups.get(key) ?? []), i]);
+  });
+  const accent = [...groups.entries()]
+    .map(([key, idx]) => {
+      const [color, extras] = key.split("|");
+      return `\n  ${describeNailList(idx)}: ${color}${extras ? ` con ${extras}` : ""}`;
+    })
+    .join("");
   const charms = s.charms?.length
     ? `\n  Dijes: ${s.charms
         .map((c) => {

@@ -5,13 +5,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { BuilderSelection, SizeSelection } from "@/lib/types";
-import { ACCENT_OPTIONS, DEFAULT_SELECTION, accentMode, defaultDetailColor, quoteSelection, type BuilderConfig } from "@/lib/pricing";
+import { DEFAULT_SELECTION, defaultDetailColor, quoteSelection, type BuilderConfig } from "@/lib/pricing";
 import { presetFor } from "@/lib/data/presets";
 import { formatARS } from "@/lib/format";
 import type { Charm } from "@/lib/data/content";
 import { CharmThumb } from "@/components/charms/CharmThumb";
 import { useCharmFilter } from "@/components/charms/CharmFilter";
-import { FINGERS, defaultCharmNails, describeNails, qtyForNails, type CharmPick } from "@/lib/charms";
+import { describeNails, qtyForNails, type CharmPick } from "@/lib/charms";
+import { QUICK_PICKS, allNails, describeNailList, editNails, handOf, nailSpec, withNailDesigns } from "@/lib/nails";
+import { NailMap } from "./NailMap";
 import { useCart } from "@/lib/store/cart";
 import { flyToCart } from "@/components/motion/flyToCart";
 import { Chip } from "@/components/ui/Chip";
@@ -22,14 +24,9 @@ import { NailPreview } from "./NailPreview";
 import { cn } from "@/lib/format";
 import { CHARMS_ENABLED } from "@/lib/site";
 
-const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uñas acento", "Dijes", "Detalles", "Medidas"] as const;
+const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uña por uña", "Dijes", "Detalles", "Medidas"] as const;
 /** Técnicas que se pintan en el color que elijas. */
 const COLORED = new Set(["puntitos", "cebra", "ondas", "estrellas", "tribal"]);
-/**
- * Técnicas que pueden ir solo en las uñas acento: las pintadas y los apliques. Los brillos (glitter, cat eye,
- * aurora) y la forma de la punta (francesita) son del set entero.
- */
-const ACCENT_GROUPS = new Set(["Diseños", "3D y apliques"]);
 /** Con los dijes apagados, Detalles y Medidas suben un número. */
 const SHIFT = CHARMS_ENABLED ? 0 : 1;
 
@@ -45,14 +42,15 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
     const p = presetFor(slug);
     if (!p) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- la receta sale de la URL, que no se conoce en el render del servidor
-    setSel(p);
+    setSel(withNailDesigns(p));
     setFrom(slug);
   }, []);
 
   const startFrom = (slug: string) => {
     const p = presetFor(slug);
     if (!p) return;
-    setSel((s) => ({ ...p, notes: s.notes, referenceUrl: s.referenceUrl }));
+    setSel((s) => ({ ...withNailDesigns(p), notes: s.notes, referenceUrl: s.referenceUrl }));
+    setFocus([]);
     setFrom(slug);
   };
   const [sizes, setSizes] = useState<SizeSelection>({ mode: "standard", size: "S" });
@@ -64,34 +62,53 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
   const quote = useMemo(() => quoteSelection(sel, config), [sel, config]);
   const valid = sizesAreValid(sizes);
 
+  // técnica para todo el set: también se suma (o se saca) en las uñas que la clienta cambió, que conservan lo demás
   const toggleExtra = (id: string) =>
-    setSel((s) => ({ ...s, extras: s.extras.includes(id) ? s.extras.filter((e) => e !== id) : [...s.extras, id] }));
-  const toggleAccentExtra = (id: string) =>
     setSel((s) => {
-      const cur = s.accentExtras ?? [];
-      return { ...s, accentExtras: cur.includes(id) ? cur.filter((e) => e !== id) : [...cur, id] };
+      const on = s.extras.includes(id);
+      const flip = (list: string[]) => (on ? list.filter((e) => e !== id) : [...new Set([...list, id])]);
+      return {
+        ...s,
+        extras: flip(s.extras),
+        nailDesigns: s.nailDesigns?.map((d) => (d ? { ...d, extras: flip(d.extras ?? s.extras) } : d)),
+      };
     });
 
-  /** Reemplaza (o saca, si no queda cantidad) un dije elegido, sin moverlo de lugar en la lista. */
+  /** Uñas marcadas en "Uña por uña" (lo que se edita) y mano que muestra la vista previa. */
+  const [focus, setFocus] = useState<number[]>([]);
+  const [hand, setHand] = useState<0 | 1>(0);
+  const toggleFocus = (i: number) => {
+    setFocus((f) => (f.includes(i) ? f.filter((x) => x !== i) : [...f, i]));
+    setHand(handOf(i) as 0 | 1);
+  };
+  const focusSpecs = focus.map((i) => nailSpec(sel, i));
+  const focusColor = focusSpecs.length && focusSpecs.every((sp) => sp.color === focusSpecs[0].color) ? focusSpecs[0].color : "";
+  const toggleFocusExtra = (id: string) => {
+    const all = focusSpecs.every((sp) => sp.extras.includes(id));
+    setSel((s) => editNails(s, focus, (cur) => ({ color: cur.color, extras: all ? cur.extras.filter((e) => e !== id) : [...new Set([...cur.extras, id])] })));
+  };
+
+  /**
+   * Reemplaza un dije elegido sin moverlo de lugar en la lista. Se saca con qty 0 y sin uñas (la ×, o tocarlo de
+   * nuevo en la grilla); uno ubicable sin uñas todavía queda en la lista para que le elijan dónde va.
+   */
   const putCharm = (pick: CharmPick) =>
     setSel((s) => {
       const list = s.charms ?? [];
       const i = list.findIndex((c) => c.id === pick.id);
-      if (pick.qty <= 0) return { ...s, charms: list.filter((c) => c.id !== pick.id) };
+      if (pick.qty <= 0 && !pick.nails) return { ...s, charms: list.filter((c) => c.id !== pick.id) };
       return { ...s, charms: i < 0 ? [...list, pick] : list.map((c, k) => (k === i ? pick : c)) };
     });
-  /** Dije nuevo: los que se apoyan en la uña arrancan en las acento (o el anular); los surtidos, uno. */
+  /** Dije nuevo: no se ubica solo. Va en las uñas que estén marcadas en "Uña por uña", o en ninguna hasta que elijas. */
   const addCharm = (c: Charm) => {
     if (!c.piece) return putCharm({ id: c.id, qty: 1 });
-    const nails = defaultCharmNails(sel);
+    const nails = [...focus];
     putCharm({ id: c.id, qty: qtyForNails(nails), nails });
   };
 
-  const mode = accentMode(sel);
-  const allExtras = mode === "ninguno" ? sel.extras : [...sel.extras, ...(sel.accentExtras ?? [])];
+  const allExtras = [...new Set(allNails(sel).flatMap((sp) => sp.extras))];
   const hasColored = allExtras.some((e) => COLORED.has(e));
   const hasDegrade = allExtras.includes("degrade");
-  const accentChoices = config.extras.filter((e) => ACCENT_GROUPS.has(e.group) || e.id === "degrade");
 
   const groups = useMemo(() => {
     const m = new Map<string, BuilderConfig["extras"]>();
@@ -120,7 +137,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         {/* En el celu la mano queda fija arriba mientras elegís: si no, al bajar a los colores ya no se veía el cambio */}
         <div className="sticky top-[72px] z-20 bg-cream pt-2 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-5 after:bg-linear-to-b after:from-cream after:to-transparent md:top-[88px] lg:hidden">
           <div className="mx-auto max-w-[min(100%,calc(36svh*4/3))]">
-            <NailPreview sel={sel} config={config} />
+            <NailPreview sel={sel} config={config} hand={hand} onHand={setHand} />
           </div>
         </div>
 
@@ -242,39 +259,60 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         )}
 
         <div id="acentos" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
-          <StepHeader n={6} title={STEPS[5]} hint="Las uñas que se distinguen del resto: otro color, otro diseño. Así se arman casi todos los sets." />
-          <div className="flex flex-wrap gap-2">
-            {ACCENT_OPTIONS.map((o) => (
-              <Chip key={o.id} selected={mode === o.id} onClick={() => setSel({ ...sel, accent: o.id })}>
-                {o.label}
+          <StepHeader n={6} title={STEPS[5]} hint="Tocá una o varias uñas y cambiales el color o el diseño. Las que no toques quedan como el set." />
+          <div className="mb-3 flex flex-wrap gap-2">
+            {QUICK_PICKS.map((q) => (
+              <Chip
+                key={q.label}
+                selected={focus.length === q.nails.length && q.nails.every((i) => focus.includes(i))}
+                onClick={() => {
+                  setFocus(q.nails);
+                  setHand(handOf(q.nails[0]) as 0 | 1);
+                }}
+              >
+                {q.label}
               </Chip>
             ))}
           </div>
+          <NailMap sel={sel} config={config} selected={focus} onToggle={toggleFocus} label="Uñas del set" />
           <AnimatePresence initial={false}>
-            {mode !== "ninguno" && (
+            {focus.length > 0 && (
               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden">
                 <div className="mt-4 space-y-4 rounded-lg bg-white/70 p-4 ring-1 ring-bordo/10">
+                  <p className="text-sm font-semibold">
+                    Cambiando: <span className="text-bordo">{describeNailList(focus)}</span>
+                  </p>
                   <ColorRow
-                    label="Color de los acentos"
+                    label="Color de estas uñas"
                     bases={config.bases}
-                    value={sel.accentColor ?? sel.base}
-                    onChange={(id) => setSel({ ...sel, accentColor: id })}
+                    value={focusColor}
+                    onChange={(id) => setSel((s) => editNails(s, focus, (cur) => ({ color: id, extras: cur.extras })))}
                   />
                   <div>
-                    <p className="mb-2 text-xs font-semibold text-ink-soft">Qué llevan solo los acentos</p>
+                    <p className="mb-2 text-xs font-semibold text-ink-soft">Qué llevan estas uñas</p>
                     <div className="flex flex-wrap gap-2">
-                      {accentChoices.map((e) => (
-                        <Chip
-                          key={e.id}
-                          selected={(sel.accentExtras ?? []).includes(e.id) || sel.extras.includes(e.id)}
-                          disabled={sel.extras.includes(e.id)}
-                          onClick={() => toggleAccentExtra(e.id)}
-                          hint={sel.extras.includes(e.id) ? "en todo el set" : `+${formatARS(e.delta)}`}
-                        >
-                          {e.label}
-                        </Chip>
-                      ))}
+                      {config.extras.map((e) => {
+                        const all = focusSpecs.every((sp) => sp.extras.includes(e.id));
+                        const some = !all && focusSpecs.some((sp) => sp.extras.includes(e.id));
+                        return (
+                          <Chip key={e.id} selected={all} onClick={() => toggleFocusExtra(e.id)} hint={some ? "en algunas" : undefined}>
+                            {e.label}
+                          </Chip>
+                        );
+                      })}
                     </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setSel((s) => editNails(s, focus, () => ({ color: s.base, extras: s.extras })))}
+                    >
+                      Igual que el resto del set
+                    </Button>
+                    <Button size="sm" onClick={() => setFocus([])}>
+                      Listo
+                    </Button>
                   </div>
                 </div>
               </motion.div>
@@ -284,8 +322,29 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
 
         {CHARMS_ENABLED && (
           <div id="paso-6" className="scroll-mt-[22.5rem] lg:scroll-mt-28">
-            <StepHeader n={7} title={STEPS[6]} hint="Opcional. Elegí cuántos de cada uno." />
-            <CharmPicker charms={config.charms ?? []} picked={sel.charms ?? []} onAdd={addCharm} onChange={putCharm} />
+            <StepHeader n={7} title={STEPS[6]} hint="Opcional. Tocá un dije y elegí en qué uñas va, de cualquier mano." />
+            <CharmPicker
+              charms={config.charms ?? []}
+              picked={sel.charms ?? []}
+              onAdd={addCharm}
+              onChange={putCharm}
+              renderNails={(pick, charm) => (
+                <NailMap
+                  sel={sel}
+                  config={config}
+                  size="sm"
+                  label={`Uñas con ${charm.name}`}
+                  selected={pick.nails ?? []}
+                  marked={() => false}
+                  onToggle={(i) => {
+                    const cur = pick.nails ?? [];
+                    const nails = cur.includes(i) ? cur.filter((n) => n !== i) : [...cur, i];
+                    putCharm({ ...pick, nails, qty: qtyForNails(nails) });
+                    setHand(handOf(i) as 0 | 1);
+                  }}
+                />
+              )}
+            />
           </div>
         )}
 
@@ -309,7 +368,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
 
       <aside className="lg:sticky lg:top-28 lg:self-start">
         <div className="hidden lg:block">
-          <NailPreview sel={sel} config={config} />
+          <NailPreview sel={sel} config={config} hand={hand} onHand={setHand} />
         </div>
         <div className="mt-4 rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10">
           <p className="text-xs font-bold tracking-wider text-ink-soft uppercase">Tu set</p>
@@ -397,11 +456,13 @@ function CharmPicker({
   picked,
   onAdd,
   onChange,
+  renderNails,
 }: {
   charms: Charm[];
   picked: CharmPick[];
   onAdd: (c: Charm) => void;
   onChange: (pick: CharmPick) => void;
+  renderNails: (pick: CharmPick, charm: Charm) => React.ReactNode;
 }) {
   const { chips, visible } = useCharmFilter(charms);
   if (charms.length === 0) return <p className="text-sm text-ink-soft">Ahora no tengo dijes cargados.</p>;
@@ -423,30 +484,9 @@ function CharmPicker({
                 </div>
                 {charm.piece ? (
                   <>
-                    <div className="mt-1.5 flex flex-wrap gap-1" role="group" aria-label={`Uñas con ${charm.name}`}>
-                      {FINGERS.map((f, i) => {
-                        const on = pick.nails?.includes(i) ?? false;
-                        return (
-                          <button
-                            key={f}
-                            type="button"
-                            aria-pressed={on}
-                            onClick={() => {
-                              const nails = on ? (pick.nails ?? []).filter((n) => n !== i) : [...(pick.nails ?? []), i];
-                              onChange({ ...pick, nails, qty: qtyForNails(nails) });
-                            }}
-                            className={cn(
-                              "rounded-pill border px-2.5 py-1 text-xs font-medium transition-colors",
-                              on ? "border-bordo bg-bordo text-cream" : "border-cream-ink bg-white text-ink hover:border-bordo/60",
-                            )}
-                          >
-                            {f}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <div className="mt-2">{renderNails(pick, charm)}</div>
                     <p className="mt-1 text-xs text-ink-soft">
-                      {pick.qty > 0 ? `${pick.qty} en total: ${describeNails(pick.nails)}` : "Elegí al menos una uña"}
+                      {pick.qty > 0 ? `${pick.qty} en total: ${describeNails(pick.nails)}` : "Tocá las uñas donde va"}
                     </p>
                   </>
                 ) : (

@@ -27,6 +27,9 @@ export type SizeSelection =
   | { mode: "kit" }; // pide kit de medición / lo resuelve por WhatsApp
 
 /** Qué uñas son acento. Las 10 uñas se piensan por dedo: pulgar, índice, mayor, anular, meñique (en las dos manos). */
+/** Lo que lleva una uña distinta del resto: su color y su lista completa de técnicas. */
+export type NailDesign = { color?: string; extras?: string[] };
+
 export type AccentMode = "ninguno" | "anular" | "anular-mayor" | "pulgar-menique" | "alternadas";
 
 export type BuilderSelection = {
@@ -47,7 +50,12 @@ export type BuilderSelection = {
   accentColor?: string;
   accentExtras?: string[];
   /**
-   * Dijes elegidos. `nails`: en qué uñas va (0 pulgar … 4 meñique, en las dos manos); con uñas, qty = 2 por uña.
+   * Uña por uña: 10 lugares (0–4 mano derecha, 5–9 izquierda, de pulgar a meñique). null = como el resto del set.
+   * Reemplaza a los acentos (que quedan para los carritos y recetas viejos).
+   */
+  nailDesigns?: Array<NailDesign | null>;
+  /**
+   * Dijes elegidos. `nails`: en qué uñas va (0–9, como `nailDesigns`); qty = uno por uña.
    * Los surtidos (florcitas, glitter, stickers) no se ubican: van sin `nails` y con la cantidad que se pida.
    */
   charms?: Array<{ id: string; qty: number; nails?: number[] }>;

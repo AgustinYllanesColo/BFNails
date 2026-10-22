@@ -1,5 +1,6 @@
-import type { AccentMode, BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
+import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
 import type { Charm } from "./data/content";
+import { NAIL_COUNT, allNails } from "./nails";
 
 /**
  * Motor de precios del armador. Es una función pura: la misma config y selección
@@ -192,23 +193,16 @@ export function quoteSelection(
   if (base && base.delta !== 0)
     lines.push({ id: `base-color:${base.id}`, label: `Color: ${base.label}`, amount: base.delta });
 
-  for (const id of sel.extras) {
-    const extra = config.extras.find((e) => e.id === id);
-    if (!extra) continue;
+  // técnicas: Brenda cobra la técnica, no la uña. Las que van en las 10 uñas se nombran solas; las que van en
+  // algunas, con en cuántas (y se cobran una vez)
+  const specs = allNails(sel);
+  const used = new Map<string, number>();
+  for (const sp of specs) for (const id of new Set(sp.extras)) used.set(id, (used.get(id) ?? 0) + 1);
+  for (const extra of config.extras) {
+    const n = used.get(extra.id);
+    if (!n) continue;
     points += extra.complexity ?? 0;
-    lines.push({ id: `extra:${extra.id}`, label: extra.label, amount: extra.delta });
-  }
-  // técnicas de las uñas acento: se cobran como en el set (Brenda cobra la técnica, no la uña); si ya está
-  // en todo el set no se cobra dos veces
-  const accent = accentMode(sel);
-  if (accent !== "ninguno") {
-    for (const id of sel.accentExtras ?? []) {
-      if (sel.extras.includes(id)) continue;
-      const extra = config.extras.find((e) => e.id === id);
-      if (!extra) continue;
-      points += extra.complexity ?? 0;
-      lines.push({ id: `accent:${extra.id}`, label: `${extra.label} (acentos)`, amount: extra.delta });
-    }
+    lines.push({ id: `extra:${extra.id}`, label: n === NAIL_COUNT ? extra.label : `${extra.label} (${n} ${n === 1 ? "uña" : "uñas"})`, amount: extra.delta });
   }
 
   for (const pick of sel.charms ?? []) {
@@ -248,34 +242,5 @@ export function defaultDetailColor(base: string): string {
   return ["negro", "bordo", "chocolate", "verde"].includes(base) ? "blanco" : "bordo";
 }
 
-/** Modo de acento, con los valores viejos traducidos ("todas" = sin acento, "acento" = anular). */
-export function accentMode(sel: Pick<BuilderSelection, "accent">): AccentMode {
-  const a = sel.accent;
-  if (!a || a === "todas") return "ninguno";
-  if (a === "acento") return "anular";
-  return a;
-}
-
-/** ¿La uña i (0 pulgar … 4 meñique) es acento? */
-export function isAccentNail(mode: AccentMode, i: number): boolean {
-  switch (mode) {
-    case "anular":
-      return i === 3;
-    case "anular-mayor":
-      return i === 2 || i === 3;
-    case "pulgar-menique":
-      return i === 0 || i === 4;
-    case "alternadas":
-      return i % 2 === 1;
-    default:
-      return false;
-  }
-}
-
-export const ACCENT_OPTIONS: Array<{ id: AccentMode; label: string }> = [
-  { id: "ninguno", label: "Sin acentos" },
-  { id: "anular", label: "Anular" },
-  { id: "anular-mayor", label: "Anular y mayor" },
-  { id: "pulgar-menique", label: "Pulgar y meñique" },
-  { id: "alternadas", label: "Una sí, una no" },
-];
+// los acentos viejos (anular, pulgar y meñique…) ahora viven con el resto de la lógica uña por uña
+export { ACCENT_OPTIONS, accentMode, isAccentNail } from "./nails";

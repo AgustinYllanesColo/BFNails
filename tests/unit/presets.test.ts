@@ -18,7 +18,7 @@ describe("todo el catálogo se puede armar en el armador", () => {
     expect(p.length).toBe(d.length);
     for (const c of [p.base, p.tipColor, p.detailColor, p.degradeColor, p.accentColor].filter(Boolean))
       expect(colorIds.has(c!), `color ${c}`).toBe(true);
-    for (const e of [...p.extras, ...(p.accentExtras ?? [])]) expect(extraIds.has(e), `técnica ${e}`).toBe(true);
+    for (const e of [...p.extras, ...(p.accentExtras ?? []), ...(p.nailDesigns ?? []).flatMap((d) => d?.extras ?? [])]) expect(extraIds.has(e), `técnica ${e}`).toBe(true);
     for (const c of p.charms ?? []) {
       const charm = charms.get(c.id);
       expect(charm, `dije ${c.id}`).toBeDefined();
@@ -59,12 +59,22 @@ describe("uñas acento", () => {
     const base = { shape: "almendra", length: "medio", finish: "glossy", base: "rojo", extras: [] } as const;
     const sin = quoteSelection({ ...base, extras: [] }, cfg).subtotal;
     const con = quoteSelection({ ...base, extras: [], accent: "anular", accentExtras: ["animal-print"] }, cfg);
-    expect(con.lines.some((l) => l.id === "accent:animal-print")).toBe(true);
+    // anular de las dos manos: 2 de las 10 uñas
+    expect(con.lines.find((l) => l.id === "extra:animal-print")?.label).toBe("Animal print (2 uñas)");
     expect(con.subtotal).toBeGreaterThan(sin);
     const doble = quoteSelection({ ...base, extras: ["animal-print"], accent: "anular", accentExtras: ["animal-print"] }, cfg);
     expect(doble.lines.filter((l) => l.id.endsWith("animal-print"))).toHaveLength(1);
     // sin acentos, las técnicas de acento no cuentan
     const apagado = quoteSelection({ ...base, extras: [], accent: "ninguno", accentExtras: ["animal-print"] }, cfg);
     expect(apagado.subtotal).toBe(sin);
+  });
+
+  it("uña por uña: cada técnica se cobra una vez aunque esté en varias uñas", () => {
+    const base = { shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: [] as string[] } as const;
+    const nailDesigns = Array.from({ length: 10 }, (_, i) => (i === 1 || i === 8 ? { color: "rosa", extras: ["flor-3d"] } : null));
+    const q = quoteSelection({ ...base, nailDesigns }, cfg);
+    const flor = q.lines.filter((l) => l.id === "extra:flor-3d");
+    expect(flor).toHaveLength(1);
+    expect(flor[0].label).toBe("Flor 3D (organza) (2 uñas)");
   });
 });

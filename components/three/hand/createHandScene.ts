@@ -1,4 +1,5 @@
-import { accentMode, defaultDetailColor, isAccentNail } from "@/lib/pricing";
+import { defaultDetailColor } from "@/lib/pricing";
+import { nailSpec } from "@/lib/nails";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { BuilderSelection, Length, Shape } from "@/lib/types";
@@ -30,6 +31,8 @@ import { createBowGeometry, createFlowerCenterGeometry, createFlowerGeometry, cr
 
 export type HandScene = {
   update(sel: BuilderSelection, config: BuilderConfig): void;
+  /** qué mano se ve: 0 derecha, 1 izquierda (la misma mano espejada; el espejo lo hace quien la muestra) */
+  setHand(hand: 0 | 1): void;
   resize(): void;
   dispose(): void;
   /** se llama una vez, cuando el primer cuadro ya está dibujado */
@@ -260,8 +263,8 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   const flowerGold = track(withEnv(createGoldMaterial()));
   const flowerAccs: Accessory[] = [0, 1, 2, 3, 4].map((i) => {
     const g = new THREE.Group();
+    // sin sombra propia: la de una tela de dos caras pedía otro shader al aparecer (la página se trababa al elegirla)
     const petals = new THREE.Mesh(flowerGeo, flowerMat);
-    petals.castShadow = true;
     g.add(petals, new THREE.Mesh(flowerCenterGeo, flowerGold));
     g.visible = false;
     hand.add(g);
@@ -274,6 +277,9 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   const charmTex = new Map<string, THREE.Texture>();
   type CharmAcc = Accessory & { aspect: number; gone: boolean };
   const charmAccs = new Map<string, CharmAcc>();
+  const charmWarm = new THREE.Mesh(charmGeo, track(new THREE.MeshBasicMaterial({ map: track(solidTexture("#ffffff")), transparent: true, alphaTest: 0.35, toneMapped: false })));
+  charmWarm.visible = false;
+  hand.add(charmWarm);
   function charmTexture(url: string) {
     let t = charmTex.get(url);
     if (!t) {
@@ -315,8 +321,8 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
       const mat = track(new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.35, toneMapped: false }));
       // un punto más de luz: achicada a la uña, la foto pierde los brillos (las perlas se veían grises)
       mat.color.setScalar(1.15);
+      // calcomanía plana sobre la uña: sin sombra (con transparencia, la sombra pedía otro shader en el primer dije)
       const mesh = new THREE.Mesh(charmGeo, mat);
-      mesh.castShadow = true;
       mesh.visible = false;
       hand.add(mesh);
       const im = tex.image as { width: number; height: number } | undefined;
@@ -358,6 +364,9 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   const framing = { from: { ...FRAMING.medio }, to: { ...FRAMING.medio }, cur: { ...FRAMING.medio } };
   let firstUpdate = true;
   let lastSel: BuilderSelection | null = null;
+  /** mano a la vista: las uñas 0–4 (derecha) o 5–9 (izquierda) de la selección */
+  let viewHand: 0 | 1 = 0;
+  const at = (i: number) => viewHand * 5 + i;
   let lastConfig: BuilderConfig | null = null;
   let pending: { sel: BuilderSelection; config: BuilderConfig } | null = null;
   let kitty: HTMLImageElement | null = null;
@@ -853,16 +862,13 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     return out;
   }
 
-  /** Técnicas que lleva la uña i: las del set y, si es acento, también las suyas. */
+  /** Técnicas que lleva la uña i de la mano a la vista (las del set o las que la clienta le puso a esa uña). */
   function nailExtras(sel: BuilderSelection, i: number): string[] {
-    const mode = accentMode(sel);
-    if (mode === "ninguno" || !isAccentNail(mode, i)) return sel.extras;
-    return [...new Set([...sel.extras, ...(sel.accentExtras ?? [])])];
+    return nailSpec(sel, at(i)).extras;
   }
 
   function setDecal(n: NailState, i: number, sel: BuilderSelection, hex: { tip: string; detail: string; degrade: string; accent: string | null }, instant: boolean) {
-    const mode = accentMode(sel);
-    const isAccent = mode !== "ninguno" && isAccentNail(mode, i);
+    const isAccent = nailSpec(sel, at(i)).custom;
     const input = {
       index: i,
       shape: sel.shape,
@@ -913,8 +919,11 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     const tipHex = config.bases.find((b) => b.id === (sel.tipColor ?? "bordo"))?.hex ?? "#4a0e0e";
     const detailHex = config.bases.find((b) => b.id === (sel.detailColor ?? defaultDetailColor(sel.base)))?.hex ?? "#4a0e0e";
     const degradeHex = sel.degradeColor ? (config.bases.find((b) => b.id === sel.degradeColor)?.hex ?? "#fffdfa") : "#fffdfa";
-    // color propio de los acentos: solo si es distinto del de la base
-    const accentHex = sel.accentColor && sel.accentColor !== sel.base ? (config.bases.find((b) => b.id === sel.accentColor)?.hex ?? null) : null;
+    // color propio de cada uña: solo si es distinto del de la base
+    const ownHex = (i: number) => {
+      const c = nailSpec(sel, at(i)).color;
+      return c !== sel.base ? (config.bases.find((b) => b.id === c)?.hex ?? null) : null;
+    };
 
     // forma / largo → morph
     if (instant || sel.shape !== shape || sel.length !== length) {
@@ -987,7 +996,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     // decoración pintada
     let decalChanged = false;
     nails.forEach((n, i) => {
-      if (setDecal(n, i, sel, { tip: tipHex, detail: detailHex, degrade: degradeHex, accent: accentHex }, instant)) decalChanged = true;
+      if (setDecal(n, i, sel, { tip: tipHex, detail: detailHex, degrade: degradeHex, accent: ownHex(i) }, instant)) decalChanged = true;
     });
     if (decalChanged && !instant) {
       decalStart = now;
@@ -1046,7 +1055,10 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     for (const p of sel.charms ?? []) {
       const piece = config.charms?.find((c) => c.id === p.id)?.piece;
       if (!piece || !p.nails) continue;
-      for (const i of p.nails) if (i >= 0 && i < nails.length) perNail.set(i, [...(perNail.get(i) ?? []), piece]);
+      for (const n of p.nails) {
+        const i = n - viewHand * 5;
+        if (i >= 0 && i < nails.length) perNail.set(i, [...(perNail.get(i) ?? []), piece]);
+      }
     }
     const wanted = new Map<string, { url: string; nail: number; y: number; size: number }>();
     perNail.forEach((urls, i) => {
@@ -1110,11 +1122,29 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     track(contact.material);
     track(contact.geometry);
     hand.add(contact.mesh);
+    // Los apliques (flor, moño, corazón, dijes) arrancan ocultos y three solo compila lo visible: su primer uso
+    // compilaba el shader en el momento del toque (en un celu, más de un segundo trabado). Los compilamos ahora,
+    // visibles y diminutos; el dije de prueba se queda (oculto) para que su programa no se libere.
+    const warm = [heart, bow, ...flowerAccs.map((a) => a.object), charmWarm];
+    for (const o of warm) {
+      o.visible = true;
+      o.scale.setScalar(1e-4);
+      // todavía no están sobre la uña: sin esto la sombra los descarta por estar fuera de cuadro y no los compila
+      o.traverse((m) => (m.frustumCulled = false));
+    }
     try {
       await renderer.compileAsync(scene, camera);
     } catch {
       /* si no hay compilación paralela, se compila al dibujar */
     }
+    // un cuadro de prueba: compila también lo que compileAsync no ve (las sombras de los apliques)
+    if (disposed || lost) return;
+    renderer.render(scene, camera);
+    for (const o of warm) {
+      o.visible = false;
+      o.traverse((m) => (m.frustumCulled = true));
+    }
+    accDirty = true;
     if (disposed || lost) return;
     ready = true;
     renderer.render(scene, camera);
@@ -1197,6 +1227,11 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
 
   return {
     update,
+    setHand(hand) {
+      if (hand === viewHand) return;
+      viewHand = hand;
+      if (lastSel && lastConfig) update(lastSel, lastConfig);
+    },
     resize: () => resize(),
     onFirstFrame(cb) {
       if (firstFrameDone) {
