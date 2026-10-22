@@ -109,7 +109,7 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "verde-oliva",
     name: "Verde oliva",
-    description: "Verde oliva liso y glossy. Almendra larga, simple y distinta.",
+    description: "Verde oliva liso y glossy. Almendra media, simple y distinta.",
     images: ["/catalog/set-verde-oliva.webp", "/catalog/set-verde-oliva-2.webp"],
     shape: "almendra",
     length: "medio",
@@ -135,7 +135,7 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "pink-babyboomer",
     name: "Pink babyboomer",
-    description: "Degradé de rosa a blanco con un brillo suave. Almendra larga, delicada y para todos los días.",
+    description: "Degradé de rosa a blanco con un brillo suave. Almendra media, delicada y para todos los días.",
     images: ["/catalog/set-pink-babyboomer.webp"],
     shape: "almendra",
     length: "medio",
@@ -287,7 +287,7 @@ export const SEED_DESIGNS: Design[] = [
   {
     slug: "sunset-aurora",
     name: "Sunset aurora",
-    description: "Degradé naranja y rosa con efecto aurora. Almendra media, para todos los días.",
+    description: "Degradé naranja y rosa con efecto aurora. Almendra corta, para todos los días.",
     images: ["/catalog/set-sunset-aurora-street.webp"],
     shape: "almendra",
     length: "corto",
