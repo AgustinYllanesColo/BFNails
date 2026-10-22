@@ -130,7 +130,7 @@ export default async function DesignPage({ params }: Props) {
                 <p className="text-sm font-semibold">10 uñas + kit de colocación</p>
                 <KitItems items={kit.items} className="mt-3" />
                 <p className="text-ink-soft mt-4 text-sm">
-                  {inStock(design) ? "En stock: sale en el momento." : "A pedido: 3 a 7 días."} Retiro en estación gratis o
+                  {inStock(design) ? "En stock: sale en el momento." : "A pedido: 2 a 7 días."} Retiro en estación gratis o
                   envío por Correo Argentino.
                 </p>
               </div>

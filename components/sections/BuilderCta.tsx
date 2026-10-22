@@ -13,7 +13,7 @@ import { quoteSelection } from "@/lib/pricing";
 
 const DEMO: BuilderSelection[] = [
   { shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita"] },
-  { shape: "coffin", length: "largo", finish: "cromado", base: "bordo", extras: ["strass"] },
+  { shape: "coffin", length: "largo", finish: "glossy", base: "bordo", extras: ["strass"] },
   { shape: "almendra", length: "corto", finish: "glossy", base: "rosa", extras: ["3d", "glitter"] },
   { shape: "stiletto", length: "xl", finish: "glossy", base: "negro", extras: ["cat-eye", "strass"] },
   { shape: "cuadrada", length: "medio", finish: "mate", base: "milky", extras: ["animal-print", "personajes"] },

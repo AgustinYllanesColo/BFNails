@@ -38,7 +38,7 @@ export default function TerminosPage() {
       <section>
         <h2>5. Plazos, entregas y envíos</h2>
         <p>
-          El tiempo de producción habitual es de 3 a 7 días hábiles según la complejidad del diseño y la cantidad de pedidos. Las entregas en estación (Lanús, Banfield, Remedios de Escalada) y en moto se coordinan por WhatsApp. Los envíos por Correo Argentino tienen los plazos informados por el correo; una vez despachado el paquete, te enviamos el número de seguimiento. No nos hacemos responsables por demoras atribuibles al correo, pero te ayudamos con el reclamo.
+          El tiempo de producción habitual es de 2 a 7 días hábiles según la complejidad del diseño y la cantidad de pedidos. Las entregas en estación (Lanús, Banfield, Remedios de Escalada) y en moto se coordinan por WhatsApp. Los envíos por Correo Argentino tienen los plazos informados por el correo; una vez despachado el paquete, te enviamos el número de seguimiento. No nos hacemos responsables por demoras atribuibles al correo, pero te ayudamos con el reclamo.
         </p>
       </section>
       <section>
