@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Builder } from "@/components/builder/Builder";
 import { Heading } from "@/components/ui/Section";
 import { getBuilderConfig } from "@/lib/data/settings";
-import { getDesigns } from "@/lib/data/repo";
-import { presetVisible } from "@/lib/data/presets";
-import { designImage } from "@/lib/data/catalog";
 
 export const metadata: Metadata = {
   title: "Diseñá tu set",
@@ -15,9 +12,7 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function DisenaPage() {
-  const [config, designs] = await Promise.all([getBuilderConfig(), getDesigns()]);
-  // solo los diseños que el armador reproduce bien
-  const presets = designs.filter((d) => presetVisible(d.slug)).map((d) => ({ slug: d.slug, name: d.name, image: designImage(d, 0) }));
+  const config = await getBuilderConfig();
   return (
     <div className="pt-28 pb-24 md:pt-36">
       <div className="container-x">
@@ -27,7 +22,8 @@ export default async function DisenaPage() {
             Elegí y mirá el precio al instante. Incluye el kit de colocación.
           </p>
         </div>
-        <Builder config={config} presets={presets} />
+        {/* Sin "Partí de un diseño de Brenda" (pedido de Brenda): el armador arranca en blanco. */}
+        <Builder config={config} />
       </div>
     </div>
   );

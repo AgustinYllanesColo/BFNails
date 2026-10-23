@@ -13,7 +13,6 @@ import {
 import { formatARS } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
 import { AddDesignToCart } from "@/components/cart/AddDesignToCart";
-import { presetVisible } from "@/lib/data/presets";
 import { DesignCard } from "@/components/catalog/DesignCard";
 import { Reveal } from "@/components/motion/Reveal";
 import { KitItems } from "@/components/kit/KitItems";
@@ -116,15 +115,6 @@ export default async function DesignPage({ params }: Props) {
               </p>
 
               <AddDesignToCart design={design} config={config} />
-
-              {presetVisible(design.slug) && (
-                <p className="text-ink-soft mt-4 text-sm">
-                  ¿Lo querés con otro color o con otros acentos?{" "}
-                  <Link href={`/disena?desde=${design.slug}`} className="text-bordo font-semibold underline underline-offset-4">
-                    Modificalo en el armador
-                  </Link>
-                </p>
-              )}
 
               <div className="mt-8 border-t border-bordo/10 pt-6">
                 <p className="text-sm font-semibold">10 uñas + kit de colocación</p>
