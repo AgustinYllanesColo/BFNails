@@ -22,17 +22,17 @@ export const PRESETS: Record<string, BuilderSelection> = {
   },
   "lila-perlas": {
     shape: "cuadrada", length: "medio", finish: "glossy", base: "lila", extras: [],
-    accent: "anular-mayor", accentExtras: [],
-    charms: [{ id: "corazon-perlitas", qty: 4, nails: [2, 3, 7, 8] }],
+    accent: "anular", accentExtras: ["perlas"],
   },
   "black-snake": {
     shape: "almendra", length: "medio", finish: "glossy", base: "negro", extras: [],
-    accent: "anular", accentColor: "nude", accentExtras: [],
-    charms: [{ id: "serpiente-dorada", qty: 2, nails: [3, 8] }],
+    nailDesigns: [null, { color: "nude", extras: [] }, null, { color: "dorado", extras: ["glitter"] }, null, null, { color: "nude", extras: [] }, null, { color: "dorado", extras: ["glitter"] }, null],
+    charms: [{ id: "serpiente-dorada", qty: 2, nails: [1, 6] }],
   },
   "black-stiletto": {
     shape: "stiletto", length: "largo", finish: "glossy", base: "negro", extras: [],
-    accent: "anular-mayor", accentColor: "rosa", accentExtras: ["degrade"], degradeColor: "negro",
+    nailDesigns: [null, { color: "rosa", extras: ["degrade"] }, null, null, null, null, { color: "rosa", extras: ["degrade"] }, null, null, null],
+    degradeColor: "negro",
   },
   "black-leo": {
     shape: "almendra", length: "medio", finish: "glossy", base: "negro", extras: [],
@@ -41,14 +41,13 @@ export const PRESETS: Record<string, BuilderSelection> = {
   "french-glitter": {
     shape: "cuadrada", length: "medio", finish: "glossy", base: "nude", extras: ["francesita", "glitter"],
   },
-  "verde-oliva": { shape: "almendra", length: "medio", finish: "glossy", base: "verde", extras: [] },
+  "verde-oliva": { shape: "almendra", length: "medio", finish: "glossy", base: "oliva", extras: [] },
   violeta: { shape: "almendra", length: "medio", finish: "glossy", base: "violeta", extras: [] },
   "pink-babyboomer": {
     shape: "almendra", length: "medio", finish: "glossy", base: "rosa", extras: ["degrade", "glitter"],
   },
   "pink-wave": {
-    shape: "cuadrada", length: "largo", finish: "glossy", base: "rosa", extras: ["ondas", "glitter"], detailColor: "fucsia",
-    accent: "anular", accentExtras: ["strass"],
+    shape: "cuadrada", length: "largo", finish: "glossy", base: "rosa", extras: ["ondas", "glitter", "strass"], detailColor: "fucsia",
   },
   "milky-star": {
     shape: "almendra", length: "medio", finish: "glossy", base: "milky", extras: [],
@@ -62,15 +61,18 @@ export const PRESETS: Record<string, BuilderSelection> = {
     shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita-color"], tipColor: "amarillo",
     accent: "anular-mayor", accentColor: "naranja", accentExtras: ["degrade"], degradeColor: "rosa",
   },
-  "bordo-aura": { shape: "almendra", length: "medio", finish: "glossy", base: "bordo", extras: ["aurora"] },
+  "bordo-aura": { shape: "almendra", length: "medio", finish: "glossy", base: "bordo", extras: ["aura"] },
   "leo-star-gold": {
-    shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "strass"],
-    accent: "alternadas", accentExtras: ["animal-print", "estrellas", "cadenas"], detailColor: "rosa",
-    charms: [{ id: "cruces-piedras", qty: 2, nails: [2, 7] }],
+    shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["strass", "estrellas"], detailColor: "rosa",
+    // pulgar y meñique milky con cadenas y leopardo, índice francesita rosa con tachas, mayor blanco con destellos dorados
+    nailDesigns: [
+      { color: "milky", extras: ["cadenas", "animal-print"] }, { color: "nude", extras: ["francesita-color", "strass"] }, { color: "blanco", extras: ["estrellas"] }, null, { color: "milky", extras: ["cadenas", "animal-print"] },
+      { color: "milky", extras: ["cadenas", "animal-print"] }, { color: "nude", extras: ["francesita-color", "strass"] }, { color: "blanco", extras: ["estrellas"] }, null, { color: "milky", extras: ["cadenas", "animal-print"] },
+    ],
+    tipColor: "rosa",
   },
   "tribal-french": {
-    shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "tribal"], detailColor: "negro",
-    accent: "anular", accentExtras: ["strass"],
+    shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "tribal", "strass"], detailColor: "negro",
   },
   "black-french": {
     shape: "cuadrada", length: "largo", finish: "glossy", base: "nude", extras: ["francesita-color", "strass"], tipColor: "negro",
@@ -106,6 +108,7 @@ export function presetFor(slug: string | null | undefined): BuilderSelection | n
   return p
     ? {
         ...p,
+        art: slug,
         extras: [...p.extras],
         accentExtras: p.accentExtras ? [...p.accentExtras] : undefined,
         charms: p.charms?.map((c) => ({ ...c, nails: c.nails ? [...c.nails] : undefined })),

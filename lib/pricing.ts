@@ -70,6 +70,7 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "lila", label: "Lila", delta: 0, hex: "#c6a4e6" },
     { id: "celeste", label: "Celeste", delta: 0, hex: "#a8d5f2" },
     { id: "verde", label: "Verde", delta: 0, hex: "#6f9a6b" },
+    { id: "oliva", label: "Verde oliva", delta: 0, hex: "#9aa565" },
     { id: "chocolate", label: "Chocolate", delta: 0, hex: "#5a3a2a" },
     { id: "transparente", label: "Transparente", delta: 0, hex: "#f8f5ef" },
     { id: "fucsia", label: "Fucsia", delta: 0, hex: "#e0337f" },
@@ -90,6 +91,7 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, complexity: 1 },
     { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, complexity: 1 },
     { id: "cat-eye", group: "Brillos", label: "Cat eye", delta: 1800, complexity: 1 },
+    { id: "aura", group: "Brillos", label: "Aura", delta: 2000, complexity: 1 },
     { id: "aurora", group: "Brillos", label: "Efecto aurora / espejo", delta: 2200, complexity: 1 },
     {
       id: "strass",

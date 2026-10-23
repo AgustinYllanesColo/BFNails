@@ -59,6 +59,11 @@ export type BuilderSelection = {
    * Los surtidos (florcitas, glitter, stickers) no se ubican: van sin `nails` y con la cantidad que se pida.
    */
   charms?: Array<{ id: string; qty: number; nails?: number[] }>;
+  /**
+   * Diseño del catálogo del que parte (slug): la vista previa lo pinta con su dibujo propio (components/three/hand/art.ts)
+   * hasta que la clienta cambia técnicas o uñas; el color, la forma y el largo se pueden cambiar sin perderlo.
+   */
+  art?: string;
   notes?: string;
   referenceUrl?: string;
 };

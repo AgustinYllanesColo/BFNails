@@ -69,6 +69,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
       const flip = (list: string[]) => (on ? list.filter((e) => e !== id) : [...new Set([...list, id])]);
       return {
         ...s,
+        art: undefined,
         extras: flip(s.extras),
         nailDesigns: s.nailDesigns?.map((d) => (d ? { ...d, extras: flip(d.extras ?? s.extras) } : d)),
       };
@@ -85,7 +86,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
   const focusColor = focusSpecs.length && focusSpecs.every((sp) => sp.color === focusSpecs[0].color) ? focusSpecs[0].color : "";
   const toggleFocusExtra = (id: string) => {
     const all = focusSpecs.every((sp) => sp.extras.includes(id));
-    setSel((s) => editNails(s, focus, (cur) => ({ color: cur.color, extras: all ? cur.extras.filter((e) => e !== id) : [...new Set([...cur.extras, id])] })));
+    setSel((s) => editNails({ ...s, art: undefined }, focus, (cur) => ({ color: cur.color, extras: all ? cur.extras.filter((e) => e !== id) : [...new Set([...cur.extras, id])] })));
   };
 
   /**
@@ -286,7 +287,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
                     label="Color de estas uñas"
                     bases={config.bases}
                     value={focusColor}
-                    onChange={(id) => setSel((s) => editNails(s, focus, (cur) => ({ color: id, extras: cur.extras })))}
+                    onChange={(id) => setSel((s) => editNails({ ...s, art: undefined }, focus, (cur) => ({ color: id, extras: cur.extras })))}
                   />
                   <div>
                     <p className="mb-2 text-xs font-semibold text-ink-soft">Qué llevan estas uñas</p>
@@ -306,7 +307,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setSel((s) => editNails(s, focus, () => ({ color: s.base, extras: s.extras })))}
+                      onClick={() => setSel((s) => editNails({ ...s, art: undefined }, focus, () => ({ color: s.base, extras: s.extras })))}
                     >
                       Igual que el resto del set
                     </Button>

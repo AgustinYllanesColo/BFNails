@@ -51,7 +51,7 @@ export default function MedidasPage() {
               Si querés comprar un set en stock y no sabés qué medida te queda mejor, te dejo la tabla de talles
               universales para que midas tus uñas y elijas la que mejor te quede.
             </p>
-            <p className="text-ink-soft mt-2">Ancho de cada uña, en cm. Si estás entre dos, elegí la más chica.</p>
+            <p className="text-ink-soft mt-2">Ancho de cada uña, en cm. Si estás entre dos, elegí la más grande, no la más chica.</p>
             <div className="mt-6 overflow-hidden rounded-lg bg-white/80 ring-1 ring-bordo/10">
               <table className="w-full border-collapse text-[15px] tabular-nums">
                 <thead>

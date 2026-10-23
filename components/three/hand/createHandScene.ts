@@ -6,6 +6,7 @@ import type { BuilderSelection, Length, Shape } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
 import { FINGERS, FingerModel, SKIN_BASE, paintSkin } from "./anatomy";
 import { DECAL_H, DECAL_W, decorKey, paintDecor } from "./decor";
+import { artGems } from "./art";
 import { createCuticleGeometry, computeNail, createNailGeometry, halfWidth, nailContext, nailDims, sampleTop, type NailBuffers, type NailDims } from "./nail";
 import {
   FINISH_KEYS,
@@ -832,9 +833,15 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     [0.3, 0.94, 0.06],
   ];
 
-  function gemLayout(extrasOf: (i: number) => string[], shp: Shape, len: Length) {
+  function gemLayout(extrasOf: (i: number) => string[], shp: Shape, len: Length, art?: string) {
     const out: Array<{ key: string; nail: number; u: number; y: number; size: number }> = [];
     nails.forEach((n, i) => {
+      // diseño del catálogo con strass propios (art.ts): van donde los pone Brenda
+      const own = artGems(art, i, n.dims[len], shp);
+      if (own) {
+        own.forEach((g, k) => out.push({ key: `a${i}:${k}`, nail: i, u: g.u, y: g.y, size: g.size }));
+        return;
+      }
       const extras = extrasOf(i);
       const full = extras.includes("strass-full");
       const some = extras.includes("strass");
@@ -867,10 +874,13 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     return nailSpec(sel, at(i)).extras;
   }
 
-  function setDecal(n: NailState, i: number, sel: BuilderSelection, hex: { tip: string; detail: string; degrade: string; accent: string | null }, instant: boolean) {
+  function setDecal(n: NailState, i: number, sel: BuilderSelection, hex: { base: string; tip: string; detail: string; degrade: string; accent: string | null }, instant: boolean) {
     const isAccent = nailSpec(sel, at(i)).custom;
     const input = {
       index: i,
+      nail: at(i),
+      art: sel.art,
+      baseHex: hex.base,
       shape: sel.shape,
       dims: n.dims[sel.length],
       extras: nailExtras(sel, i),
@@ -996,7 +1006,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     // decoración pintada
     let decalChanged = false;
     nails.forEach((n, i) => {
-      if (setDecal(n, i, sel, { tip: tipHex, detail: detailHex, degrade: degradeHex, accent: ownHex(i) }, instant)) decalChanged = true;
+      if (setDecal(n, i, sel, { base: baseHex, tip: tipHex, detail: detailHex, degrade: degradeHex, accent: ownHex(i) }, instant)) decalChanged = true;
     });
     if (decalChanged && !instant) {
       decalStart = now;
@@ -1004,7 +1014,7 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     }
 
     // strass: los que siguen en su lugar se quedan; los nuevos aparecen escalonados
-    const layout = gemLayout((i) => nailExtras(sel, i), sel.shape, sel.length);
+    const layout = gemLayout((i) => nailExtras(sel, i), sel.shape, sel.length, sel.art);
     const prevSlots = new Map(gemSlots.map((g) => [g.key, g]));
     gemSlots.length = 0;
     layout.forEach((g, i) => {

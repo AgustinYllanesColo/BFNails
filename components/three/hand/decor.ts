@@ -1,6 +1,7 @@
 import type { Shape } from "@/lib/types";
 import { mulberry32 } from "./anatomy";
 import { halfWidth, type NailDims } from "./nail";
+import { paintArt } from "./art";
 
 /**
  * Decoración pintada por uña en un canvas 2D (≤ 512 px). El canvas se dibuja en centímetros
@@ -13,6 +14,12 @@ export const DECAL_H = 512;
 
 export type DecorInput = {
   index: number; // 0 pulgar … 4 meñique
+  /** uña de las 10 (0–4 derecha, 5–9 izquierda) */
+  nail: number;
+  /** diseño del catálogo con dibujo propio (art.ts); si lo tiene, reemplaza a las técnicas pintadas */
+  art?: string;
+  /** color de la base del set (el aura lo aclara en el centro) */
+  baseHex: string;
   shape: Shape;
   dims: NailDims;
   extras: string[];
@@ -30,8 +37,8 @@ export type DecorInput = {
 
 export function decorKey(i: DecorInput) {
   const relevant = i.extras.filter((e) => PAINTED.has(e)).sort();
-  if (relevant.length === 0 && !i.accentHex) return "none";
-  return [i.shape, i.dims.L.toFixed(3), relevant.join(","), i.tipHex, i.detailHex, i.degradeHex, i.isAccent ? "a" : "", i.accentHex ?? "", i.kitty ? "k" : ""].join("|");
+  if (relevant.length === 0 && !i.accentHex && !i.art) return "none";
+  return [i.shape, i.dims.L.toFixed(3), relevant.join(","), i.tipHex, i.detailHex, i.degradeHex, i.isAccent ? "a" : "", i.accentHex ?? "", i.kitty ? "k" : "", i.art ?? "", i.art ? i.nail : "", relevant.includes("aura") ? i.baseHex : ""].join("|");
 }
 
 const PAINTED = new Set([
@@ -51,6 +58,7 @@ const PAINTED = new Set([
   "perlas",
   "strass-colores",
   "cadenas",
+  "aura",
 ]);
 
 /** "#rrggbb" + alfa → rgba() */
@@ -59,7 +67,7 @@ function rgba(hex: string, a: number) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 
-function outline(ctx: CanvasRenderingContext2D, shape: Shape, d: NailDims) {
+export function outline(ctx: CanvasRenderingContext2D, shape: Shape, d: NailDims) {
   const N = 60;
   ctx.beginPath();
   for (let i = 0; i <= N; i++) {
@@ -118,6 +126,51 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
   // 0. uña acento con color propio: base opaca debajo de todo (el acabado del set sigue arriba)
   if (input.accentHex) {
     ctx.fillStyle = input.accentHex;
+    ctx.fillRect(-W, 0, W * 2, d.Lref);
+  }
+
+  // 0b. diseño del catálogo con dibujo propio: se pinta como en la foto de Brenda y no lo genérico
+  if (
+    input.art &&
+    paintArt(input.art, {
+      ctx,
+      d,
+      W,
+      px,
+      finger: i,
+      nail: input.nail,
+      shape,
+      baseHex: input.baseHex,
+      accentHex: input.accentHex,
+      tipHex: input.tipHex,
+      detailHex: detail,
+      rand,
+      outline: () => outline(ctx, shape, d),
+    })
+  ) {
+    ctx.restore();
+    return;
+  }
+
+  // 0c. aura: la base se enciende en el centro y se apaga hacia los bordes (como el Bordó aura de Brenda)
+  if (has("aura")) {
+    const baseHex = input.accentHex ?? input.baseHex;
+    const n = parseInt(baseHex.slice(1), 16);
+    const [r0, g0, b0] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    // se enciende hacia un tono cálido (como el gel iluminado desde adentro), no hacia el blanco
+    const light = (k: number) => `rgba(${Math.round(r0 + (255 - r0) * k)},${Math.round(g0 + (120 - g0) * k)},${Math.round(b0 + (70 - b0) * k)}`;
+    const cx = 0;
+    const cy = d.L * 0.5;
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, d.L * 0.55);
+    glow.addColorStop(0, `${light(0.55)},0.95)`);
+    glow.addColorStop(0.45, `${light(0.25)},0.5)`);
+    glow.addColorStop(1, `${light(0)},0)`);
+    ctx.fillStyle = glow;
+    ctx.fillRect(-W, 0, W * 2, d.Lref);
+    const shade = ctx.createRadialGradient(cx, cy, d.L * 0.3, cx, cy, d.L * 0.92);
+    shade.addColorStop(0, "rgba(0,0,0,0)");
+    shade.addColorStop(1, "rgba(0,0,0,0.62)");
+    ctx.fillStyle = shade;
     ctx.fillRect(-W, 0, W * 2, d.Lref);
   }
 

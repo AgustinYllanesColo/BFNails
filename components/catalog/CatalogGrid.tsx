@@ -28,10 +28,10 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
   const tags = useMemo(() => {
     const count = new Map<string, number>();
     designs.forEach((d) => d.tags.forEach((t) => t !== "stock" && count.set(t, (count.get(t) ?? 0) + 1)));
+    // todos los estilos, los más usados primero: ninguno se cae de la lista por tener pocos sets (cat eye tiene 2)
     return [...count.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([t]) => t)
-      .slice(0, 10);
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "es"))
+      .map(([t]) => t);
   }, [designs]);
 
   const filtered = useMemo(() => {
