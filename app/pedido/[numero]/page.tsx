@@ -11,6 +11,7 @@ import { Stars } from "@/components/motion/Stars";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { ClearCartOnMount } from "@/components/cart/ClearCartOnMount";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
+import { builderLink } from "@/lib/share";
 
 export const metadata: Metadata = { title: "Tu pedido", robots: { index: false } };
 
@@ -123,7 +124,18 @@ export default async function PedidoPage({ params, searchParams }: Props) {
           />
           <div className="rounded-lg bg-white/80 p-6 ring-1 ring-bordo/10">
             <h2 className="font-title text-2xl">Detalle de tu set</h2>
-            <pre className="mt-3 font-sans text-sm whitespace-pre-wrap text-ink-soft">{order.items.map(describeItem).join("\n\n")}</pre>
+            <pre className="mt-3 font-sans text-sm whitespace-pre-wrap text-ink-soft">{order.items.map((i) => describeItem(i, { link: false })).join("\n\n")}</pre>
+            {order.items.some((i) => i.kind === "custom") && (
+              <p className="mt-3 flex flex-wrap gap-3 text-sm">
+                {order.items.map((i) =>
+                  i.kind === "custom" ? (
+                    <a key={i.id} href={builderLink(i.selection)} className="text-bordo font-semibold underline underline-offset-4">
+                      Ver mi set en 3D
+                    </a>
+                  ) : null,
+                )}
+              </p>
+            )}
             <p className="mt-4 text-xs text-ink-soft">Guardá este link para ver el estado de tu pedido cuando quieras.</p>
           </div>
         </div>

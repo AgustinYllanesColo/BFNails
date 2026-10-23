@@ -102,6 +102,16 @@ export const PRESETS: Record<string, BuilderSelection> = {
   "gold-glitter": { shape: "cuadrada", length: "medio", finish: "glossy", base: "dorado", extras: ["cat-eye", "glitter"] },
 };
 
+/**
+ * Diseños que el armador no llega a reproducir (trabajo a mano de Brenda que no sale parecido con las técnicas de la
+ * vista previa): la receta existe, pero no se ofrecen en "Partí de un diseño" ni en "Modificalo en el armador".
+ */
+export const PRESET_HIDDEN = new Set(["leo-star-gold", "milky-pearl"]);
+
+export function presetVisible(slug: string): boolean {
+  return Boolean(PRESETS[slug]) && !PRESET_HIDDEN.has(slug);
+}
+
 export function presetFor(slug: string | null | undefined): BuilderSelection | null {
   if (!slug) return null;
   const p = PRESETS[slug];
@@ -109,6 +119,7 @@ export function presetFor(slug: string | null | undefined): BuilderSelection | n
     ? {
         ...p,
         art: slug,
+        from: slug,
         extras: [...p.extras],
         accentExtras: p.accentExtras ? [...p.accentExtras] : undefined,
         charms: p.charms?.map((c) => ({ ...c, nails: c.nails ? [...c.nails] : undefined })),

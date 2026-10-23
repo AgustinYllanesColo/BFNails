@@ -3,7 +3,7 @@ import { Builder } from "@/components/builder/Builder";
 import { Heading } from "@/components/ui/Section";
 import { getBuilderConfig } from "@/lib/data/settings";
 import { getDesigns } from "@/lib/data/repo";
-import { PRESETS } from "@/lib/data/presets";
+import { presetVisible } from "@/lib/data/presets";
 import { designImage } from "@/lib/data/catalog";
 
 export const metadata: Metadata = {
@@ -16,8 +16,8 @@ export const revalidate = 300;
 
 export default async function DisenaPage() {
   const [config, designs] = await Promise.all([getBuilderConfig(), getDesigns()]);
-  // solo los diseños que tienen receta en el armador
-  const presets = designs.filter((d) => PRESETS[d.slug]).map((d) => ({ slug: d.slug, name: d.name, image: designImage(d, 0) }));
+  // solo los diseños que el armador reproduce bien
+  const presets = designs.filter((d) => presetVisible(d.slug)).map((d) => ({ slug: d.slug, name: d.name, image: designImage(d, 0) }));
   return (
     <div className="pt-28 pb-24 md:pt-36">
       <div className="container-x">

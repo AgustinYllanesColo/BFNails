@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { BuilderSelection, SizeSelection } from "@/lib/types";
 import { DEFAULT_SELECTION, defaultDetailColor, quoteSelection, type BuilderConfig } from "@/lib/pricing";
 import { presetFor } from "@/lib/data/presets";
+import { decodeSelection } from "@/lib/share";
 import { formatARS } from "@/lib/format";
 import type { Charm } from "@/lib/data/content";
 import { CharmThumb } from "@/components/charms/CharmThumb";
@@ -36,9 +37,18 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
   const [sel, setSel] = useState<BuilderSelection>(DEFAULT_SELECTION);
   const [from, setFrom] = useState<string | null>(null);
 
-  // /disena?desde=slug: arranca desde ese diseño del catálogo (se lee en el cliente: la página sigue siendo estática)
+  // /disena?desde=slug: arranca desde ese diseño del catálogo; /disena?s=…: un set compartido (el link del pedido).
+  // Se lee en el cliente: la página sigue siendo estática.
   useEffect(() => {
-    const slug = new URLSearchParams(window.location.search).get("desde");
+    const q = new URLSearchParams(window.location.search);
+    const shared = decodeSelection(q.get("s"));
+    if (shared) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- viene de la URL, que no se conoce en el servidor
+      setSel(withNailDesigns(shared));
+      setFrom(shared.from ?? shared.art ?? null);
+      return;
+    }
+    const slug = q.get("desde");
     const p = presetFor(slug);
     if (!p) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- la receta sale de la URL, que no se conoce en el render del servidor

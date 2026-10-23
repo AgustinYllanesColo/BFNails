@@ -6,14 +6,32 @@ export const sizeSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("kit") }),
 ]);
 
+const idSchema = z.string().min(1).max(40);
+const extrasSchema = z.array(z.string().max(40)).max(20);
+
+/**
+ * La selección completa del armador. Todo lo que el armador guarda tiene que estar acá: zod descarta las claves que
+ * no conoce, y una uña suelta o un color de detalle que se pierde cambia el precio y lo que Brenda tiene que hacer.
+ */
 export const selectionSchema = z.object({
   shape: z.enum(["almendra", "coffin", "cuadrada", "ovalada", "stiletto"]),
   length: z.enum(["corto", "medio", "largo", "xl"]),
   finish: z.enum(["glossy", "mate", "cromado"]),
-  base: z.string().min(1).max(40),
-  extras: z.array(z.string().max(40)).max(20),
-  tipColor: z.string().max(40).optional(),
-  charms: z.array(z.object({ id: z.string().max(60), qty: z.number().int().min(1).max(20) })).max(20).optional(),
+  base: idSchema,
+  extras: extrasSchema,
+  tipColor: idSchema.optional(),
+  detailColor: idSchema.optional(),
+  degradeColor: idSchema.optional(),
+  accent: z.enum(["ninguno", "anular", "anular-mayor", "pulgar-menique", "alternadas", "todas", "acento"]).optional(),
+  accentColor: idSchema.optional(),
+  accentExtras: extrasSchema.optional(),
+  nailDesigns: z.array(z.object({ color: idSchema.optional(), extras: extrasSchema.optional() }).nullable()).length(10).optional(),
+  charms: z
+    .array(z.object({ id: z.string().max(60), qty: z.number().int().min(1).max(20), nails: z.array(z.number().int().min(0).max(9)).max(10).optional() }))
+    .max(20)
+    .optional(),
+  art: z.string().max(80).optional(),
+  from: z.string().max(80).optional(),
   notes: z.string().max(600).optional(),
   referenceUrl: z.string().max(500).optional(),
 });

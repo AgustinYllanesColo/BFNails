@@ -70,11 +70,13 @@ export function halfWidth(shape: Shape, y: number, d: NailDims): number {
       break;
     }
     case "stiletto": {
-      const len = Math.min(Math.max(0.95 * W, L - bed + 0.8 * W), L - minStart);
+      // los costados siguen casi rectos hasta pasar el lecho y recién ahí convergen a la punta, con el
+      // perfil apenas cóncavo de una stiletto de verdad (antes era un cono desde el lecho: se veía corta y rara)
+      const len = Math.min(Math.max(0.9 * W, L - bed + 0.35 * W), L - minStart);
       const ys = L - len;
       if (y > ys) {
         const t = (y - ys) / len;
-        hw *= Math.pow(Math.max(0, 1 - t), 0.9) * (1 - 0.06 * Math.sin(Math.PI * t));
+        hw *= Math.pow(Math.max(0, 1 - Math.pow(t, 1.45)), 0.72) * (1 - 0.05 * Math.sin(Math.PI * t));
       }
       break;
     }

@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { getOrderById, publicOrderUrl } from "@/lib/data/orders";
 import { formatARS } from "@/lib/format";
 import { adminMessages, describeItem, waLink } from "@/lib/whatsapp";
+import { builderLink } from "@/lib/share";
 import { ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } from "@/lib/types";
 import { Card, PageTitle, StatusBadge, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
 import { confirmPrice, setNotes, setOrderStatus, setTracking } from "../actions";
@@ -41,7 +42,18 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
           <Card title="Items">
-            <pre className="font-sans text-sm whitespace-pre-wrap">{order.items.map(describeItem).join("\n\n")}</pre>
+            <pre className="font-sans text-sm whitespace-pre-wrap">{order.items.map((i) => describeItem(i, { link: false })).join("\n\n")}</pre>
+            {order.items.some((i) => i.kind === "custom") && (
+              <p className="mt-3 flex flex-wrap gap-3 text-sm">
+                {order.items.map((i) =>
+                  i.kind === "custom" ? (
+                    <a key={i.id} href={builderLink(i.selection)} target="_blank" rel="noreferrer" className="text-bordo font-semibold underline underline-offset-4">
+                      Ver el set en 3D ↗
+                    </a>
+                  ) : null,
+                )}
+              </p>
+            )}
             <dl className="mt-4 space-y-1 border-t border-bordo/10 pt-3 text-sm">
               <div className="flex justify-between">
                 <dt className="text-ink-soft">Subtotal</dt>

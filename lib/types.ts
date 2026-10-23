@@ -64,6 +64,8 @@ export type BuilderSelection = {
    * hasta que la clienta cambia técnicas o uñas; el color, la forma y el largo se pueden cambiar sin perderlo.
    */
   art?: string;
+  /** Diseño del catálogo del que partió (slug), aunque después lo haya cambiado: Brenda lo ve en el pedido. */
+  from?: string;
   notes?: string;
   referenceUrl?: string;
 };
