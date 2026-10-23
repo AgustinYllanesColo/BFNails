@@ -13,7 +13,7 @@ import type { Charm } from "@/lib/data/content";
 import { CharmThumb } from "@/components/charms/CharmThumb";
 import { useCharmFilter } from "@/components/charms/CharmFilter";
 import { describeNails, qtyForNails, type CharmPick } from "@/lib/charms";
-import { QUICK_PICKS, allNails, describeNailList, editNails, handOf, nailSpec, withNailDesigns } from "@/lib/nails";
+import { NAIL_COUNT, QUICK_PICKS, allNails, describeNailList, editNails, handOf, nailSpec, withNailDesigns } from "@/lib/nails";
 import { NailMap } from "./NailMap";
 import { useCart } from "@/lib/store/cart";
 import { flyToCart } from "@/components/motion/flyToCart";
@@ -26,6 +26,7 @@ import { cn } from "@/lib/format";
 import { CHARMS_ENABLED } from "@/lib/site";
 
 const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uña por uña", "Dijes", "Medidas", "Detalles"] as const;
+const ALL_NAILS = Array.from({ length: NAIL_COUNT }, (_, i) => i);
 /** Técnicas que se pintan en el color que elijas. */
 const COLORED = new Set(["puntitos", "cebra", "ondas", "estrellas", "tribal"]);
 /** Con los dijes apagados, Medidas y Detalles suben un número. */
@@ -83,6 +84,22 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         extras: flip(s.extras),
         nailDesigns: s.nailDesigns?.map((d) => (d ? { ...d, extras: flip(d.extras ?? s.extras) } : d)),
       };
+    });
+
+  /** Uñas que llevan la técnica `id` (de las 10). */
+  const nailsWith = (id: string) => ALL_NAILS.filter((i) => nailSpec(sel, i).extras.includes(id));
+  /**
+   * Pone la técnica `id` exactamente en `nails` (como se ubican los dijes): en las 10 es del set; en menos, va
+   * uña por uña y el resto queda sin ella. Con ninguna, se saca.
+   */
+  const setExtraNails = (id: string, nails: number[]) =>
+    setSel((s) => {
+      const base = withNailDesigns(s);
+      const extras = nails.length === NAIL_COUNT ? [...new Set([...base.extras, id])] : base.extras.filter((e) => e !== id);
+      let next: BuilderSelection = { ...base, art: undefined, extras };
+      next = editNails(next, ALL_NAILS.filter((i) => nails.includes(i)), (cur) => ({ color: cur.color, extras: [...new Set([...cur.extras, id])] }));
+      next = editNails(next, ALL_NAILS.filter((i) => !nails.includes(i)), (cur) => ({ color: cur.color, extras: cur.extras.filter((e) => e !== id) }));
+      return next;
     });
 
   /** Uñas marcadas en "Uña por uña" (lo que se edita) y mano que muestra la vista previa. */
@@ -215,7 +232,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         </Step>
 
         <div>
-          <StepHeader n={5} title={STEPS[4]} hint="Sumá las que quieras." />
+          <StepHeader n={5} title={STEPS[4]} hint="Sumá las que quieras. Cada una arranca en las 10 uñas; abajo elegís en cuáles va." />
           <div className="space-y-5">
             {groups.map(([group, extras]) => (
               <div key={group}>
@@ -247,6 +264,56 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
             ))}
           </div>
         </div>
+
+        <AnimatePresence initial={false}>
+          {allExtras.length > 0 && (
+            <motion.div key="donde" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="-mt-4 overflow-hidden">
+              <div className="rounded-lg bg-white/70 p-4 ring-1 ring-bordo/10">
+                <p className="text-sm font-semibold">¿En qué uñas va cada técnica?</p>
+                <p className="mb-3 text-xs text-ink-soft">Tocá las uñas para ponerla o sacarla. Sin ninguna uña, la técnica se saca.</p>
+                <div className="space-y-4">
+                  {allExtras.map((id) => {
+                    const e = config.extras.find((x) => x.id === id);
+                    const nails = nailsWith(id);
+                    return (
+                      <div key={id} className="border-t border-bordo/10 pt-4 first:border-0 first:pt-0">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                          <p className="text-sm">
+                            <span className="font-semibold">{e?.label ?? id}</span>{" "}
+                            <span className="text-ink-soft">· {describeNailList(nails) ?? "en ninguna"}</span>
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {QUICK_PICKS.map((q) => (
+                              <Chip
+                                key={q.label}
+                                selected={nails.length === q.nails.length && q.nails.every((i) => nails.includes(i))}
+                                onClick={() => setExtraNails(id, q.nails)}
+                              >
+                                {q.label}
+                              </Chip>
+                            ))}
+                          </div>
+                        </div>
+                        <NailMap
+                          sel={sel}
+                          config={config}
+                          selected={nails}
+                          onToggle={(i) => {
+                            setExtraNails(id, nails.includes(i) ? nails.filter((x) => x !== i) : [...nails, i]);
+                            setHand(handOf(i) as 0 | 1);
+                          }}
+                          marked={() => false}
+                          label={`Uñas con ${e?.label ?? id}`}
+                          size="sm"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {(hasColored || hasDegrade) && (
           <div className="-mt-4 space-y-4 rounded-lg bg-white/70 p-4 ring-1 ring-bordo/10">

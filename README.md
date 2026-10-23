@@ -19,7 +19,22 @@ pnpm dev
 
 Sin `DATABASE_URL` el catálogo sale del seed (`lib/data/catalog.ts`) y los pedidos se guardan en `.data/orders.json`. El admin entra sin login en desarrollo.
 
-Producción en Vercel (`bf-nails.vercel.app`) se publica desde la rama `claude/peaceful-einstein-bf36wj`: lo que se pushea ahí sale al sitio. Vercel no vuelve a construir un commit que ya tuvo deploy desde otra rama, así que los cambios tienen que llegar primero a esa rama.
+## Vercel: cómo sale un cambio a `bf-nails.vercel.app`
+
+Cada push a una rama genera un **Preview** con su propia URL (la ves en Vercel → bf-nails → Deployments, o en GitHub en el
+commit). **Producción no se publica sola**: hoy el proyecto no tiene una "Production Branch" que coincida con las ramas
+del repo, así que hay dos caminos.
+
+- **Publicar un deploy ya hecho (1 minuto)**: Vercel → bf-nails → Deployments → el deploy que querés (fijate el commit)
+  → menú `⋯` → **Promote to Production**. Queda en `bf-nails.vercel.app` al instante.
+- **Que salga solo en cada push (una vez)**: Vercel → bf-nails → Settings → **Git** → "Production Branch" →
+  escribir `claude/peaceful-einstein-bf36wj` → Save. A partir de ahí, cada push a esa rama construye y publica
+  producción. (Vercel no vuelve a construir un commit que ya tuvo deploy desde otra rama: los cambios tienen que
+  llegar primero a la rama de producción.)
+
+Las variables de entorno se cargan en Settings → **Environment Variables** (marcar Production y Preview) y después
+hay que redeployar: Deployments → último → `⋯` → Redeploy. Sin `DATABASE_URL` el sitio funciona, pero los pedidos por
+la web quedan apagados ("Pedidos por la web no disponibles") y el catálogo sale del código.
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm test   # chequeos

@@ -73,6 +73,8 @@ export function nailName(i: number): string {
 export function describeNailList(nails: number[] | undefined): string | null {
   if (!nails?.length) return null;
   const set = new Set(nails);
+  if (set.size === 5 && [0, 1, 2, 3, 4].every((i) => set.has(i))) return "mano derecha";
+  if (set.size === 5 && [5, 6, 7, 8, 9].every((i) => set.has(i))) return "mano izquierda";
   const parts: string[] = [];
   for (let f = 0; f < 5; f++) {
     const r = set.has(f);
