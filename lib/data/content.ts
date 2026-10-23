@@ -48,6 +48,7 @@ export const CHARM_CATEGORIES = [
   { id: "personajes", label: "Personajes" },
   { id: "brillos", label: "Brillos y piedras" },
   { id: "surtidos", label: "Surtidos y deco" },
+  { id: "insumos", label: "Insumos" },
 ] as const;
 export type CharmCategory = (typeof CHARM_CATEGORIES)[number]["id"];
 
@@ -156,6 +157,8 @@ export const DEFAULT_CHARMS: Charm[] = [
   { id: "monitos-corazones-rosas", name: "Moñitos y corazones rosas", price: 250, category: "surtidos", image: "/dijes/monitos-corazones-rosas.webp", active: true },
   { id: "stickers-mascotas", name: "Stickers gatitos y perritos", price: 300, category: "surtidos", image: "/dijes/stickers-mascotas.webp", active: true },
   { id: "stickers-superpoderosas", name: "Stickers Chicas Superpoderosas", price: 300, category: "surtidos", image: "/dijes/stickers-superpoderosas.webp", active: true },
+  // Insumos: se suman al pedido por unidad (el kit ya trae un pegamento; este es uno extra)
+  { id: "pegamento-cherimoya", name: "Pegamento Cherimoya brush-on 10 ml", price: 3000, category: "insumos", image: "/dijes/pegamento-cherimoya.webp", active: true },
 ];
 
 /** Lo que trae el kit de colocación (según la guía de Brenda). Se edita desde Admin → Promos, dijes y kit. */
