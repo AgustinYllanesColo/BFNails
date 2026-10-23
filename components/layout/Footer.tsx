@@ -13,7 +13,7 @@ export function Footer() {
   return (
     <footer className="relative overflow-hidden bg-bordo text-cream">
       <Marquee
-        items={["press-on", "personalizadas", "soft gel en el estudio", "Remedios de Escalada", "envíos a todo el país"]}
+        items={["press-on", "personalizadas", "soft gel en el estudio", "puntos de encuentro", "envíos a todo el país"]}
         className="border-b border-cream/15 py-4 font-title text-2xl md:text-3xl"
         speed={34}
       />
