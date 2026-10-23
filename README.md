@@ -19,6 +19,8 @@ pnpm dev
 
 Sin `DATABASE_URL` el catálogo sale del seed (`lib/data/catalog.ts`) y los pedidos se guardan en `.data/orders.json`. El admin entra sin login en desarrollo.
 
+Producción en Vercel (`bf-nails.vercel.app`) se publica desde la rama `claude/peaceful-einstein-bf36wj`: lo que se pushea ahí sale al sitio. Vercel no vuelve a construir un commit que ya tuvo deploy desde otra rama, así que los cambios tienen que llegar primero a esa rama.
+
 ```bash
 pnpm lint && pnpm typecheck && pnpm test   # chequeos
 pnpm build                                  # build de producción
