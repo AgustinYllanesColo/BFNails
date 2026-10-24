@@ -1,23 +1,25 @@
 import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
 import type { Charm } from "./data/content";
-import { NAIL_COUNT, allNails } from "./nails";
+import { NAIL_COUNT, allNails, describeNailList, handOf } from "./nails";
 
 /**
  * Motor de precios del armador. Es una función pura: la misma config y selección
  * siempre da el mismo resultado. La config se edita desde el admin.
  *
- * Modelo: precio base + delta por forma/largo/acabado + extras.
- * Cada extra suma "puntos de complejidad"; los puntos definen el nivel (1–4) y
- * cada nivel agrega un recargo fijo, que es la forma de reflejar el "a ojo"
- * de Brenda de manera consistente.
+ * Modelo: precio base + delta por largo + técnicas. Cada técnica tiene precio **por mano**: se cobra por cada mano
+ * que la lleve (en 2 o más uñas de esa mano); si en una mano va en una sola uña, se cobra el precio de una uña
+ * (`nailDelta`, por defecto la mitad del precio por mano). Cada técnica suma "puntos de complejidad"; los puntos
+ * definen el nivel (1–4) y cada nivel agrega un recargo fijo ("trabajo de detalle").
  */
 
 export type Option<T extends string = string> = {
   id: T;
   label: string;
-  delta: number;
+  delta: number; // en técnicas: precio por mano
   description?: string;
   complexity?: number; // puntos
+  /** Técnicas: precio cuando en una mano va en una sola uña. Si falta, la mitad del precio por mano. */
+  nailDelta?: number;
 };
 
 export type ComplexityTier = {
@@ -51,13 +53,13 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
   lengths: [
     { id: "corto", label: "Corto", delta: 0 },
     { id: "medio", label: "Medio", delta: 0 },
-    { id: "largo", label: "Largo", delta: 1000 },
-    { id: "xl", label: "XL", delta: 2000 },
+    { id: "largo", label: "Largo", delta: 0 },
+    { id: "xl", label: "XL", delta: 1500 },
   ],
   finishes: [
     // solo brillo o mate
     { id: "glossy", label: "Brillo", delta: 0 },
-    { id: "mate", label: "Mate", delta: 500 },
+    { id: "mate", label: "Mate", delta: 0 },
   ],
   bases: [
     { id: "nude", label: "Nude", delta: 0, hex: "#e8c4b0" },
@@ -80,14 +82,8 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "dorado", label: "Dorado", delta: 0, hex: "#c9a24a" },
   ],
   extras: [
+    // blanca o del color que elijan (tipColor): una sola técnica
     { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, complexity: 1 },
-    {
-      id: "francesita-color",
-      group: "Clásicos",
-      label: "Francesita de color",
-      delta: 2000,
-      complexity: 1,
-    },
     { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, complexity: 1 },
     { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, complexity: 1 },
     { id: "cat-eye", group: "Brillos", label: "Cat eye", delta: 1800, complexity: 1 },
@@ -196,16 +192,18 @@ export function quoteSelection(
   if (base && base.delta !== 0)
     lines.push({ id: `base-color:${base.id}`, label: `Color: ${base.label}`, amount: base.delta });
 
-  // técnicas: Brenda cobra la técnica, no la uña. Las que van en las 10 uñas se nombran solas; las que van en
-  // algunas, con en cuántas (y se cobran una vez)
-  const specs = allNails(sel);
-  const used = new Map<string, number>();
-  for (const sp of specs) for (const id of new Set(sp.extras)) used.set(id, (used.get(id) ?? 0) + 1);
+  // técnicas: precio por mano. Las que van en las 10 uñas se nombran solas; las demás, con dónde van.
+  const specs = allNails(normalizeSelection(sel));
+  const where = new Map<string, number[]>();
+  specs.forEach((sp, i) => {
+    for (const id of new Set(sp.extras)) where.set(id, [...(where.get(id) ?? []), i]);
+  });
   for (const extra of config.extras) {
-    const n = used.get(extra.id);
-    if (!n) continue;
+    const nails = where.get(extra.id);
+    if (!nails?.length) continue;
     points += extra.complexity ?? 0;
-    lines.push({ id: `extra:${extra.id}`, label: n === NAIL_COUNT ? extra.label : `${extra.label} (${n} ${n === 1 ? "uña" : "uñas"})`, amount: extra.delta });
+    const label = nails.length === NAIL_COUNT ? extra.label : `${extra.label} (${describeNailList(nails)})`;
+    lines.push({ id: `extra:${extra.id}`, label, amount: extraPrice(extra, nails) });
   }
 
   for (const pick of sel.charms ?? []) {
@@ -230,6 +228,33 @@ export function quoteSelection(
     total: subtotal,
     needsConfirmation,
   };
+}
+
+/** Técnicas viejas (carritos y links guardados) traducidas a las de hoy. */
+export const LEGACY_EXTRAS: Record<string, string> = { "francesita-color": "francesita" };
+
+/** Una selección con las técnicas viejas traducidas (la francesita de color es la francesita con `tipColor`). */
+export function normalizeSelection(sel: BuilderSelection): BuilderSelection {
+  const fix = (list: string[] | undefined) => (list ? [...new Set(list.map((e) => LEGACY_EXTRAS[e] ?? e))] : list);
+  if (![sel.extras, sel.accentExtras ?? [], ...(sel.nailDesigns ?? []).map((d) => d?.extras ?? [])].some((l) => l.some((e) => e in LEGACY_EXTRAS))) return sel;
+  return {
+    ...sel,
+    extras: fix(sel.extras) ?? [],
+    accentExtras: fix(sel.accentExtras),
+    nailDesigns: sel.nailDesigns?.map((d) => (d ? { ...d, extras: fix(d.extras) } : d)),
+  };
+}
+
+/** Precio de una técnica en una sola uña de una mano. */
+export function nailPrice(extra: Pick<Option, "delta" | "nailDelta">): number {
+  return extra.nailDelta ?? Math.ceil(extra.delta / 2 / 100) * 100;
+}
+
+/** Precio de una técnica según en qué uñas va: por cada mano, el precio por mano (2 o más uñas) o el de una uña. */
+export function extraPrice(extra: Pick<Option, "delta" | "nailDelta">, nails: number[]): number {
+  const perHand = [0, 0];
+  for (const i of new Set(nails)) perHand[handOf(i)]++;
+  return perHand.reduce((acc, n) => acc + (n === 0 ? 0 : n === 1 ? nailPrice(extra) : extra.delta), 0);
 }
 
 export const DEFAULT_SELECTION: BuilderSelection = {

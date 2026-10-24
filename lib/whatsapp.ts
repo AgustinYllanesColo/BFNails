@@ -42,7 +42,7 @@ export function describeItem(item: CartItem, opts: { link?: boolean } = {}): str
   }
   const s = item.selection;
   const extras = s.extras.length
-    ? `, ${extrasLabel(s.extras)}${s.tipColor && (s.extras.includes("francesita-color") || s.extras.includes("francesita")) ? ` (punta ${label("bases", s.tipColor)})` : ""}${
+    ? `, ${extrasLabel(s.extras)}${s.tipColor && s.extras.some((e) => e === "francesita" || e === "francesita-color") ? ` (punta ${label("bases", s.tipColor)})` : ""}${
         s.detailColor ? ` (diseño en ${label("bases", s.detailColor)})` : ""
       }${s.degradeColor ? ` (degradé hacia ${label("bases", s.degradeColor)})` : ""}`
     : "";

@@ -447,7 +447,7 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     const depth = Math.min(d.L * 0.45, 0.12 * W + 0.85 * free);
     const yc = d.L - depth;
     const drop = 0.12 * W;
-    ctx.fillStyle = has("francesita-color") ? input.tipHex : "#fbf9f5";
+    ctx.fillStyle = input.tipHex;
     ctx.beginPath();
     ctx.moveTo(-W, yc - drop * 1.3);
     for (let s = 0; s <= 40; s++) {

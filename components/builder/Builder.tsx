@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { BuilderSelection, SizeSelection } from "@/lib/types";
-import { DEFAULT_SELECTION, defaultDetailColor, quoteSelection, type BuilderConfig } from "@/lib/pricing";
+import { DEFAULT_SELECTION, defaultDetailColor, extraPrice, nailPrice, quoteSelection, type BuilderConfig } from "@/lib/pricing";
 import { presetFor } from "@/lib/data/presets";
 import { decodeSelection } from "@/lib/share";
 import { formatARS } from "@/lib/format";
@@ -26,6 +26,8 @@ import { cn } from "@/lib/format";
 import { CHARMS_ENABLED } from "@/lib/site";
 
 const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uña por uña", "Dijes", "Medidas", "Detalles"] as const;
+/** Dónde va una técnica: las dos manos o una (la uña suelta se elige en la mano). */
+const HAND_PICKS = QUICK_PICKS.filter((q) => ["Las 10", "Mano derecha", "Mano izquierda"].includes(q.label)).map((q) => ({ ...q, label: q.label === "Las 10" ? "Las dos manos" : q.label }));
 const ALL_NAILS = Array.from({ length: NAIL_COUNT }, (_, i) => i);
 /** Técnicas que se pintan en el color que elijas. */
 const COLORED = new Set(["puntitos", "cebra", "ondas", "estrellas", "tribal"]);
@@ -72,19 +74,6 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
 
   const quote = useMemo(() => quoteSelection(sel, config), [sel, config]);
   const valid = sizesAreValid(sizes);
-
-  // técnica para todo el set: también se suma (o se saca) en las uñas que la clienta cambió, que conservan lo demás
-  const toggleExtra = (id: string) =>
-    setSel((s) => {
-      const on = s.extras.includes(id);
-      const flip = (list: string[]) => (on ? list.filter((e) => e !== id) : [...new Set([...list, id])]);
-      return {
-        ...s,
-        art: undefined,
-        extras: flip(s.extras),
-        nailDesigns: s.nailDesigns?.map((d) => (d ? { ...d, extras: flip(d.extras ?? s.extras) } : d)),
-      };
-    });
 
   /** Uñas que llevan la técnica `id` (de las 10). */
   const nailsWith = (id: string) => ALL_NAILS.filter((i) => nailSpec(sel, i).extras.includes(id));
@@ -136,7 +125,6 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
 
   const allExtras = [...new Set(allNails(sel).flatMap((sp) => sp.extras))];
   const hasColored = allExtras.some((e) => COLORED.has(e));
-  const hasDegrade = allExtras.includes("degrade");
 
   const groups = useMemo(() => {
     const m = new Map<string, BuilderConfig["extras"]>();
@@ -232,107 +220,83 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         </Step>
 
         <div>
-          <StepHeader n={5} title={STEPS[4]} hint="Sumá las que quieras. Cada una arranca en las 10 uñas; abajo elegís en cuáles va." />
+          <StepHeader n={5} title={STEPS[4]} hint="Sumá las que quieras. Cada una tiene precio por mano: elegí si va en las dos manos, en una o en una sola uña." />
           <div className="space-y-5">
             {groups.map(([group, extras]) => (
               <div key={group}>
                 <p className="mb-2 text-xs font-bold tracking-wider text-bordo uppercase">{group}</p>
                 <div className="flex flex-wrap gap-2">
                   {extras.map((e) => (
-                    <Chip key={e.id} selected={sel.extras.includes(e.id)} onClick={() => toggleExtra(e.id)} hint={`+${formatARS(e.delta)}`}>
+                    <Chip key={e.id} selected={allExtras.includes(e.id)} onClick={() => setExtraNails(e.id, allExtras.includes(e.id) ? [] : ALL_NAILS)} hint={`${formatARS(e.delta)}/mano`}>
                       {e.label}
                     </Chip>
                   ))}
                 </div>
                 <AnimatePresence initial={false}>
-                  {group === "Clásicos" && sel.extras.includes("francesita-color") && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden">
-                      <div className="mt-3 rounded-lg bg-white/70 p-3 ring-1 ring-bordo/10">
-                        <p className="mb-2 text-xs font-semibold text-ink-soft">Color de la punta</p>
-                        <div className="flex flex-wrap gap-2">
-                          {config.bases.map((b) => (
-                            <Chip key={b.id} selected={(sel.tipColor ?? "bordo") === b.id} onClick={() => setSel({ ...sel, tipColor: b.id })} swatch={b.hex}>
-                              {b.label}
-                            </Chip>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
+                  {extras
+                    .filter((e) => allExtras.includes(e.id))
+                    .map((e) => {
+                      const nails = nailsWith(e.id);
+                      const scope = (q: { nails: number[] }) => nails.length === q.nails.length && q.nails.every((i) => nails.includes(i));
+                      const oneNail = nails.length === 1;
+                      return (
+                        <motion.div key={e.id} initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="overflow-hidden">
+                          <div className="mt-3 space-y-3 rounded-lg bg-white/70 p-3 ring-1 ring-bordo/10">
+                            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                              <p className="text-sm">
+                                <span className="font-semibold">{e.label}</span> <span className="text-ink-soft">· {describeNailList(nails) ?? "en ninguna"}</span>
+                              </p>
+                              <p className="text-sm font-bold text-bordo">+{formatARS(extraPrice(e, nails))}</p>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {HAND_PICKS.map((q) => (
+                                <Chip key={q.label} selected={scope(q)} onClick={() => setExtraNails(e.id, q.nails)} hint={q.nails.length === NAIL_COUNT ? `${formatARS(e.delta * 2)}` : formatARS(e.delta)}>
+                                  {q.label}
+                                </Chip>
+                              ))}
+                              <Chip selected={oneNail} onClick={() => setExtraNails(e.id, [3])} hint={formatARS(nailPrice(e))}>
+                                Una uña
+                              </Chip>
+                            </div>
+                            <p className="text-xs text-ink-soft">
+                              {oneNail ? "Tocá la uña donde va." : "O tocá las uñas una por una. Por mano se cobra con 2 o más uñas; una sola uña, el precio de una uña."}
+                            </p>
+                            <NailMap
+                              sel={sel}
+                              config={config}
+                              selected={nails}
+                              onToggle={(i) => {
+                                setExtraNails(e.id, nails.includes(i) ? nails.filter((x) => x !== i) : [...nails, i]);
+                                setHand(handOf(i) as 0 | 1);
+                              }}
+                              marked={() => false}
+                              label={`Uñas con ${e.label}`}
+                              size="sm"
+                            />
+                            {e.id === "francesita" && (
+                              <ColorRow label="Color de la punta" bases={config.bases} value={sel.tipColor ?? "blanco"} onChange={(id) => setSel({ ...sel, tipColor: id })} />
+                            )}
+                            {e.id === "degrade" && (
+                              <ColorRow label="El degradé va hacia" bases={config.bases} value={sel.degradeColor ?? "blanco"} onChange={(id) => setSel({ ...sel, degradeColor: id })} />
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                 </AnimatePresence>
               </div>
             ))}
           </div>
         </div>
 
-        <AnimatePresence initial={false}>
-          {allExtras.length > 0 && (
-            <motion.div key="donde" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="-mt-4 overflow-hidden">
-              <div className="rounded-lg bg-white/70 p-4 ring-1 ring-bordo/10">
-                <p className="text-sm font-semibold">¿En qué uñas va cada técnica?</p>
-                <p className="mb-3 text-xs text-ink-soft">Tocá las uñas para ponerla o sacarla. Sin ninguna uña, la técnica se saca.</p>
-                <div className="space-y-4">
-                  {allExtras.map((id) => {
-                    const e = config.extras.find((x) => x.id === id);
-                    const nails = nailsWith(id);
-                    return (
-                      <div key={id} className="border-t border-bordo/10 pt-4 first:border-0 first:pt-0">
-                        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                          <p className="text-sm">
-                            <span className="font-semibold">{e?.label ?? id}</span>{" "}
-                            <span className="text-ink-soft">· {describeNailList(nails) ?? "en ninguna"}</span>
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {QUICK_PICKS.map((q) => (
-                              <Chip
-                                key={q.label}
-                                selected={nails.length === q.nails.length && q.nails.every((i) => nails.includes(i))}
-                                onClick={() => setExtraNails(id, q.nails)}
-                              >
-                                {q.label}
-                              </Chip>
-                            ))}
-                          </div>
-                        </div>
-                        <NailMap
-                          sel={sel}
-                          config={config}
-                          selected={nails}
-                          onToggle={(i) => {
-                            setExtraNails(id, nails.includes(i) ? nails.filter((x) => x !== i) : [...nails, i]);
-                            setHand(handOf(i) as 0 | 1);
-                          }}
-                          marked={() => false}
-                          label={`Uñas con ${e?.label ?? id}`}
-                          size="sm"
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {(hasColored || hasDegrade) && (
+        {hasColored && (
           <div className="-mt-4 space-y-4 rounded-lg bg-white/70 p-4 ring-1 ring-bordo/10">
-            {hasColored && (
-              <ColorRow
-                label="Color del diseño (puntitos, cebra, ondas, estrellitas, tribal)"
-                bases={config.bases}
-                value={sel.detailColor ?? defaultDetailColor(sel.base)}
-                onChange={(id) => setSel({ ...sel, detailColor: id })}
-              />
-            )}
-            {hasDegrade && (
-              <ColorRow
-                label="El degradé va hacia"
-                bases={config.bases}
-                value={sel.degradeColor ?? "blanco"}
-                onChange={(id) => setSel({ ...sel, degradeColor: id })}
-              />
-            )}
+            <ColorRow
+              label="Color del diseño (puntitos, cebra, ondas, estrellitas, tribal)"
+              bases={config.bases}
+              value={sel.detailColor ?? defaultDetailColor(sel.base)}
+              onChange={(id) => setSel({ ...sel, detailColor: id })}
+            />
           </div>
         )}
 

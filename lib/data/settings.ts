@@ -52,8 +52,9 @@ export async function getBuilderConfig(): Promise<BuilderConfig> {
     getCharms(),
   ]);
   if (rows.length === 0) return { ...DEFAULT_BUILDER_CONFIG, basePrice: s.basePrice, charms };
-  // La técnica genérica "charms" quedó reemplazada por los dijes de verdad (con foto y precio cada uno).
-  const of = (kind: string) => rows.filter((r) => r.kind === kind && r.id !== "charms");
+  // "charms" quedó reemplazada por los dijes de verdad; "francesita-color" se fundió en "francesita" (con color de punta).
+  const retired = new Set(["charms", "francesita-color"]);
+  const of = (kind: string) => rows.filter((r) => r.kind === kind && !retired.has(r.id));
   return {
     basePrice: s.basePrice,
     shapes: of("shape").map((r) => ({ id: r.id as BuilderConfig["shapes"][number]["id"], label: r.label, delta: r.delta, complexity: r.complexity })),
@@ -74,7 +75,7 @@ export async function getBuilderConfig(): Promise<BuilderConfig> {
  */
 function withNewDefaults(extras: BuilderConfig["extras"]): BuilderConfig["extras"] {
   const known = new Set(extras.map((e) => e.id));
-  const missing = DEFAULT_BUILDER_CONFIG.extras.filter((e) => !known.has(e.id) && e.id !== "charms");
+  const missing = DEFAULT_BUILDER_CONFIG.extras.filter((e) => !known.has(e.id));
   if (missing.length === 0) return extras;
   const out = [...extras];
   for (const m of missing) {

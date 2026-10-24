@@ -74,7 +74,6 @@ export const BASE_RECIPE: SeedRecipe = {
  */
 export const TECHNIQUE_RECIPES: Record<string, { minutes: number; usages: Usage[] }> = {
   francesita: { minutes: 15, usages: [{ supplyId: "semi", qty: 0.3 }, { supplyId: "gel-art", qty: 0.2 }] },
-  "francesita-color": { minutes: 15, usages: [{ supplyId: "semi", qty: 0.4 }, { supplyId: "gel-art", qty: 0.2 }] },
   degrade: { minutes: 20, usages: [{ supplyId: "semi", qty: 0.5 }, { supplyId: "consumibles", qty: 1 }] },
   glitter: { minutes: 8, usages: [{ supplyId: "glitter", qty: 0.3 }] },
   "cat-eye": { minutes: 10, usages: [{ supplyId: "cat-eye", qty: 0.8 }] },

@@ -10,21 +10,40 @@ describe("quoteSelection", () => {
     expect(q.lines).toHaveLength(1);
   });
 
-  it("suma deltas de largo y acabado; la forma no cambia el precio", () => {
+  it("solo el largo XL suma; la forma y el acabado no cambian el precio", () => {
     const q = quoteSelection({ ...DEFAULT_SELECTION, shape: "stiletto", length: "xl", finish: "mate" });
-    expect(q.total).toBe(12000 + 0 + 2000 + 500);
+    expect(q.total).toBe(12000 + 1500);
+    expect(quoteSelection({ ...DEFAULT_SELECTION, length: "largo", finish: "mate" }).total).toBe(12000);
     expect(DEFAULT_BUILDER_CONFIG.shapes.map((s) => s.id)).not.toContain("ovalada");
     expect(DEFAULT_BUILDER_CONFIG.finishes.map((f) => f.id)).toEqual(["glossy", "mate"]);
   });
 
   it("los extras suman precio y puntos de complejidad con recargo por nivel", () => {
     const q = quoteSelection({ ...DEFAULT_SELECTION, extras: ["blooming", "francesita", "strass", "personajes"] });
-    // base 12000 + blooming 2500 + francesita 1500 + strass 2000 + personajes 4000 = 22000
+    // en las 10 uñas cada técnica se cobra por las dos manos:
+    // base 12000 + blooming 5000 + francesita 3000 + strass 4000 + personajes 8000 = 32000
     // puntos: 1 + 1 + 1 + 3 = 6 → nivel elaborado (+2500)
     expect(q.complexity).toBe(3);
     expect(q.complexityLabel).toBe("Elaborado");
-    expect(q.total).toBe(22000 + 2500);
+    expect(q.total).toBe(32000 + 2500);
     expect(q.lines.find((l) => l.id === "complexity")?.amount).toBe(2500);
+  });
+
+  it("las técnicas se cobran por mano, y una uña sola a precio de uña", () => {
+    const francesita = DEFAULT_BUILDER_CONFIG.extras.find((e) => e.id === "francesita")!;
+    const on = (nails: number[]) => quoteSelection({ ...DEFAULT_SELECTION, nailDesigns: Array.from({ length: 10 }, (_, i) => (nails.includes(i) ? { extras: ["francesita"] } : null)) });
+    expect(on([0, 1, 2, 3, 4]).lines.find((l) => l.id === "extra:francesita")).toEqual({ id: "extra:francesita", label: "Francesita (mano derecha)", amount: 1500 });
+    expect(on([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).lines.find((l) => l.id === "extra:francesita")?.amount).toBe(3000);
+    expect(on([3]).lines.find((l) => l.id === "extra:francesita")).toEqual({ id: "extra:francesita", label: "Francesita (anular derecha)", amount: 800 });
+    expect(on([3, 8]).lines.find((l) => l.id === "extra:francesita")?.amount).toBe(1600);
+    expect(on([1, 3, 8]).lines.find((l) => l.id === "extra:francesita")?.amount).toBe(1500 + 800);
+    expect(francesita.delta).toBe(1500);
+  });
+
+  it("la francesita de color de los carritos viejos es la francesita de hoy", () => {
+    const q = quoteSelection({ ...DEFAULT_SELECTION, extras: ["francesita-color"], tipColor: "negro" });
+    expect(q.lines.find((l) => l.id === "extra:francesita")?.amount).toBe(3000);
+    expect(q.lines.filter((l) => l.id.startsWith("extra:"))).toHaveLength(1);
   });
 
   it("llega a premium con muchos puntos", () => {

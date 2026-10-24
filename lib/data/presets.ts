@@ -58,7 +58,7 @@ export const PRESETS: Record<string, BuilderSelection> = {
     accent: "anular-mayor", accentColor: "nude", accentExtras: ["animal-print"],
   },
   "sunset-french": {
-    shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita-color"], tipColor: "amarillo",
+    shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita"], tipColor: "amarillo",
     accent: "anular-mayor", accentColor: "naranja", accentExtras: ["degrade"], degradeColor: "rosa",
   },
   "bordo-aura": { shape: "almendra", length: "medio", finish: "glossy", base: "bordo", extras: ["aura"] },
@@ -66,8 +66,8 @@ export const PRESETS: Record<string, BuilderSelection> = {
     shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["strass", "estrellas"], detailColor: "rosa",
     // pulgar y meñique milky con cadenas y leopardo, índice francesita rosa con tachas, mayor blanco con destellos dorados
     nailDesigns: [
-      { color: "milky", extras: ["cadenas", "animal-print"] }, { color: "nude", extras: ["francesita-color", "strass"] }, { color: "blanco", extras: ["estrellas"] }, null, { color: "milky", extras: ["cadenas", "animal-print"] },
-      { color: "milky", extras: ["cadenas", "animal-print"] }, { color: "nude", extras: ["francesita-color", "strass"] }, { color: "blanco", extras: ["estrellas"] }, null, { color: "milky", extras: ["cadenas", "animal-print"] },
+      { color: "milky", extras: ["cadenas", "animal-print"] }, { color: "nude", extras: ["francesita", "strass"] }, { color: "blanco", extras: ["estrellas"] }, null, { color: "milky", extras: ["cadenas", "animal-print"] },
+      { color: "milky", extras: ["cadenas", "animal-print"] }, { color: "nude", extras: ["francesita", "strass"] }, { color: "blanco", extras: ["estrellas"] }, null, { color: "milky", extras: ["cadenas", "animal-print"] },
     ],
     tipColor: "rosa",
   },
@@ -75,7 +75,7 @@ export const PRESETS: Record<string, BuilderSelection> = {
     shape: "cuadrada", length: "xl", finish: "glossy", base: "nude", extras: ["francesita", "tribal", "strass"], detailColor: "negro",
   },
   "black-french": {
-    shape: "cuadrada", length: "largo", finish: "glossy", base: "nude", extras: ["francesita-color", "strass"], tipColor: "negro",
+    shape: "cuadrada", length: "largo", finish: "glossy", base: "nude", extras: ["francesita", "strass"], tipColor: "negro",
   },
   "pink-zebra": {
     shape: "almendra", length: "medio", finish: "glossy", base: "rosa", extras: ["cat-eye", "cebra"], detailColor: "rojo",

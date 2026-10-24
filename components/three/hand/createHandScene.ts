@@ -926,7 +926,8 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
     const now = performance.now();
     idleUntil = now + IDLE_MS;
     const baseHex = config.bases.find((b) => b.id === sel.base)?.hex ?? "#e8c4b0";
-    const tipHex = config.bases.find((b) => b.id === (sel.tipColor ?? "bordo"))?.hex ?? "#4a0e0e";
+    // francesita blanca salvo que elijan color de punta
+    const tipHex = sel.tipColor ? (config.bases.find((b) => b.id === sel.tipColor)?.hex ?? "#fbf9f5") : "#fbf9f5";
     const detailHex = config.bases.find((b) => b.id === (sel.detailColor ?? defaultDetailColor(sel.base)))?.hex ?? "#4a0e0e";
     const degradeHex = sel.degradeColor ? (config.bases.find((b) => b.id === sel.degradeColor)?.hex ?? "#fffdfa") : "#fffdfa";
     // color propio de cada uña: solo si es distinto del de la base

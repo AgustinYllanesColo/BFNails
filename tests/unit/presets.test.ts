@@ -55,12 +55,12 @@ describe("uñas acento", () => {
     expect(accentMode({})).toBe("ninguno");
   });
 
-  it("las técnicas de los acentos se cobran una vez y no si ya están en el set", () => {
+  it("las técnicas de los acentos se cobran por mano y no se duplican si ya están en el set", () => {
     const base = { shape: "almendra", length: "medio", finish: "glossy", base: "rojo", extras: [] } as const;
     const sin = quoteSelection({ ...base, extras: [] }, cfg).subtotal;
     const con = quoteSelection({ ...base, extras: [], accent: "anular", accentExtras: ["animal-print"] }, cfg);
     // anular de las dos manos: 2 de las 10 uñas
-    expect(con.lines.find((l) => l.id === "extra:animal-print")?.label).toBe("Animal print (2 uñas)");
+    expect(con.lines.find((l) => l.id === "extra:animal-print")?.label).toBe("Animal print (anular de las dos manos)");
     expect(con.subtotal).toBeGreaterThan(sin);
     const doble = quoteSelection({ ...base, extras: ["animal-print"], accent: "anular", accentExtras: ["animal-print"] }, cfg);
     expect(doble.lines.filter((l) => l.id.endsWith("animal-print"))).toHaveLength(1);
@@ -69,12 +69,12 @@ describe("uñas acento", () => {
     expect(apagado.subtotal).toBe(sin);
   });
 
-  it("uña por uña: cada técnica se cobra una vez aunque esté en varias uñas", () => {
+  it("uña por uña: una técnica aparece en una sola línea con dónde va", () => {
     const base = { shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: [] as string[] } as const;
     const nailDesigns = Array.from({ length: 10 }, (_, i) => (i === 1 || i === 8 ? { color: "rosa", extras: ["flor-3d"] } : null));
     const q = quoteSelection({ ...base, nailDesigns }, cfg);
     const flor = q.lines.filter((l) => l.id === "extra:flor-3d");
     expect(flor).toHaveLength(1);
-    expect(flor[0].label).toBe("Flor 3D (organza) (2 uñas)");
+    expect(flor[0].label).toBe("Flor 3D (organza) (índice derecha y anular izquierda)");
   });
 });
