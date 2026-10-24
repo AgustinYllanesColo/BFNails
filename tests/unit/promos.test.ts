@@ -31,10 +31,14 @@ describe("promos de la semana en el carrito", () => {
     expect(r.discount).toBe(20000 + 10000);
   });
 
-  it("el 4x3 se calcula con el precio de stock ya rebajado", () => {
-    const r = applyPromos([set("stock-a", 10000), set("b", 12000, 3)], rules, stock);
-    // stock: 10000 → 8000 (−2000); el más barato de los 4 es ese, gratis (−8000)
-    expect(r.discount).toBe(10000);
+  it("no se suman: se aplica la que más le conviene a la clienta", () => {
+    // 4x3 (gratis el de 10000) le gana al 20% del set en stock (2000)
+    const a = applyPromos([set("stock-a", 10000), set("b", 12000, 3)], rules, stock);
+    expect(a.lines).toEqual([{ id: "4x3", label: "Promo 4x3", amount: 10000 }]);
+    expect(a.discount).toBe(10000);
+    // 3 sets en stock caros y uno común barato: el 20% (3 × 4000) le gana a regalar el más barato (5000)
+    const b = applyPromos([set("stock-a", 20000, 3), set("c", 5000)], rules, stock);
+    expect(b.lines).toEqual([{ id: "stock", label: "Promo -20% sets en stock", amount: 12000 }]);
   });
 
   it("los sets a medida del armador no entran en las promos", () => {

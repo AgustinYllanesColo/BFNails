@@ -3,7 +3,7 @@ import { promoIsLive, type Promo } from "./data/content";
 /**
  * Las promos de la semana que tocan el precio: el descuento a los sets en stock y el 4x3. Las dos salen de las
  * tarjetas de promos (si Brenda la saca o vence, deja de aplicarse) y solo valen para los sets del catálogo, no para
- * los sets a medida del armador. El carrito, el checkout y el servidor calculan con esto mismo.
+ * los sets a medida del armador, y no se suman entre sí. El carrito, el checkout y el servidor calculan con esto mismo.
  */
 export type PromoRules = {
   /** Porcentaje de descuento a los sets en stock (0: sin promo). Sale del badge de la tarjeta: "-20%". */
@@ -27,18 +27,17 @@ export type PromoItem = { kind: "design" | "custom"; unitPrice: number; qty: num
 export type PromoLine = { id: "stock" | "4x3"; label: string; amount: number };
 
 /**
- * Descuentos del carrito. Primero el % a los sets en stock (por unidad); después el 4x3 con esos precios: se ordenan
- * todas las unidades del catálogo de la más cara a la más barata y de cada 4 se cobran las 3 más caras y la más
- * barata va gratis (8 sets: 2 gratis, y así).
+ * Descuentos del carrito. Las promos no se suman: se calcula cada una por separado y se aplica la que más le conviene
+ * a la clienta. El % va por unidad a los sets en stock; en el 4x3 se ordenan todas las unidades del catálogo de la más
+ * cara a la más barata y de cada 4 se cobran las 3 más caras y la más barata va gratis (8 sets: 2 gratis, y así).
  */
 export function applyPromos(items: PromoItem[], rules: PromoRules, isStock: (slug: string) => boolean) {
   const units: number[] = [];
   let stockOff = 0;
   for (const i of items) {
     if (i.kind !== "design" || !i.designSlug) continue;
-    const off = rules.stockPercent && isStock(i.designSlug) ? Math.round((i.unitPrice * rules.stockPercent) / 100) : 0;
-    stockOff += off * i.qty;
-    for (let n = 0; n < i.qty; n++) units.push(i.unitPrice - off);
+    if (rules.stockPercent && isStock(i.designSlug)) stockOff += Math.round((i.unitPrice * rules.stockPercent) / 100) * i.qty;
+    for (let n = 0; n < i.qty; n++) units.push(i.unitPrice);
   }
   let freeOff = 0;
   if (rules.fourForThree) {
@@ -46,9 +45,9 @@ export function applyPromos(items: PromoItem[], rules: PromoRules, isStock: (slu
     for (let k = 3; k < units.length; k += 4) freeOff += units[k];
   }
   const lines: PromoLine[] = [];
-  if (stockOff > 0) lines.push({ id: "stock", label: `Promo -${rules.stockPercent}% sets en stock`, amount: stockOff });
-  if (freeOff > 0) lines.push({ id: "4x3", label: "Promo 4x3", amount: freeOff });
-  return { lines, discount: stockOff + freeOff };
+  if (freeOff > 0 && freeOff >= stockOff) lines.push({ id: "4x3", label: "Promo 4x3", amount: freeOff });
+  else if (stockOff > 0) lines.push({ id: "stock", label: `Promo -${rules.stockPercent}% sets en stock`, amount: stockOff });
+  return { lines, discount: lines[0]?.amount ?? 0 };
 }
 
 /** Lo que un pedido ya creado tiene de descuento por promos: el pedido guarda subtotal sin descuento y total con. */
