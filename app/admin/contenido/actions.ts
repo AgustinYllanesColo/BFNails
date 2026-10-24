@@ -11,6 +11,8 @@ import { slugify } from "@/lib/format";
 function refresh() {
   revalidatePath("/");
   revalidatePath("/catalogo");
+  revalidatePath("/carrito");
+  revalidatePath("/checkout");
   revalidatePath("/dijes");
   revalidatePath("/disena");
   revalidatePath("/admin/contenido");

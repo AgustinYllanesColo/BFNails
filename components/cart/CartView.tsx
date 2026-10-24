@@ -10,13 +10,17 @@ import { Button } from "@/components/ui/Button";
 import type { CartItem } from "@/lib/types";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
+import { applyPromos, NO_PROMOS, type PromoRules } from "@/lib/promos";
 
-export function CartView() {
+export type CartPromos = { rules: PromoRules; stockSlugs: string[] };
+
+export function CartView({ promos = { rules: NO_PROMOS, stockSlugs: [] } }: { promos?: CartPromos }) {
   const { items, remove, setQty } = useCart();
   const mounted = useHydrated();
   if (!mounted) return <div className="h-40" />;
 
   const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const { lines: promoLines, discount } = applyPromos(items, promos.rules, (slug) => promos.stockSlugs.includes(slug));
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
 
   if (items.length === 0) {
@@ -129,12 +133,13 @@ export function CartView() {
             })),
             { kind: "rule", id: "r1" },
             { kind: "row", id: "sub", label: "subtotal", value: formatARS(subtotal) },
+            ...promoLines.map<ReceiptLine>((l) => ({ kind: "row", id: `promo-${l.id}`, label: l.label.toLowerCase(), value: `−${formatARS(l.amount)}`, tone: "accent" })),
             { kind: "row", id: "envio", label: "envío", value: "al pagar", tone: "muted" },
             {
               kind: "row",
               id: "total",
               label: needsConfirmation ? "DESDE" : "TOTAL",
-              value: formatARS(subtotal),
+              value: formatARS(subtotal - discount),
               tone: "bold",
             },
           ]}

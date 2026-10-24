@@ -2,6 +2,9 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { settings } from "@/lib/db/schema";
+import { promoRules, type PromoRules } from "@/lib/promos";
+import { getDesigns } from "./repo";
+import { inStock } from "./catalog";
 import { DEFAULT_CHARMS, DEFAULT_KIT, DEFAULT_PROMOS, promoIsLive, type Charm, type Kit, type Promo } from "./content";
 
 type ContentMap = { promos: Promo[]; charms: Charm[]; kit: Kit };
@@ -33,4 +36,10 @@ export async function getLivePromos(): Promise<Promo[]> {
 
 export async function getCharms(): Promise<Charm[]> {
   return (await getAllCharms()).filter((c) => c.active);
+}
+
+/** Lo que el carrito y el checkout necesitan para calcular las promos: cuáles valen y qué sets están en stock. */
+export async function getCartPromos(): Promise<{ rules: PromoRules; stockSlugs: string[] }> {
+  const [promos, designs] = await Promise.all([getLivePromos(), getDesigns()]);
+  return { rules: promoRules(promos), stockSlugs: designs.filter(inStock).map((d) => d.slug) };
 }

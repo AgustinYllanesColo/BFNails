@@ -8,6 +8,7 @@ import { DEFAULT_BUILDER_CONFIG } from "./pricing";
 import { DEFAULT_CHARMS } from "./data/content";
 import { SEED_DESIGNS } from "./data/catalog";
 import { builderLink } from "./share";
+import { orderDiscount } from "./promos";
 
 /** Nombre legible de una opción del armador (forma, largo, acabado, color o técnica); si no se conoce, el id. */
 function label(kind: "shapes" | "lengths" | "finishes" | "bases" | "extras", id: string): string {
@@ -99,6 +100,7 @@ export function orderConfirmationMessage(order: Order, orderUrl: string): string
     "",
     items,
     "",
+    ...(orderDiscount(order) ? [`Promos: -${formatARS(orderDiscount(order))}`] : []),
     `Entrega: ${order.delivery.label}${order.delivery.cost ? ` (${formatARS(order.delivery.cost)})` : ""}`,
     `Total: *${formatARS(order.total)}*`,
     pay,

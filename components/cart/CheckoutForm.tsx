@@ -14,6 +14,8 @@ import { Field, inputClass, textareaClass } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 import { PAYMENT_LABEL } from "@/lib/types";
+import { applyPromos, NO_PROMOS } from "@/lib/promos";
+import type { CartPromos } from "@/components/cart/CartView";
 
 const formSchema = z.object({
   name: z.string().trim().min(2, "Decinos tu nombre"),
@@ -27,9 +29,9 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Props = { transfer: { alias: string; holder: string }; mp: boolean; disabled?: boolean };
+type Props = { transfer: { alias: string; holder: string }; mp: boolean; disabled?: boolean; promos?: CartPromos };
 
-export function CheckoutForm({ transfer, mp, disabled }: Props) {
+export function CheckoutForm({ transfer, mp, disabled, promos = { rules: NO_PROMOS, stockSlugs: [] } }: Props) {
   const { items, clear } = useCart();
   const mounted = useHydrated();
   const [options, setOptions] = useState<ShippingOption[]>([]);
@@ -74,7 +76,8 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
   const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
   const chosen = options.find((o) => o.method === delivery);
   const shippingCost = chosen?.cost ?? 0;
-  const total = subtotal + shippingCost;
+  const { lines: promoLines, discount } = applyPromos(items, promos.rules, (slug) => promos.stockSlugs.includes(slug));
+  const total = subtotal - discount + shippingCost;
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
   const needsAddress = delivery !== "retiro";
   const needsFullAddress = delivery.startsWith("correo");
@@ -267,6 +270,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
           meta={new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
           lines={[
             ...items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: `${i.name} ×${i.qty}`, value: formatARS(i.unitPrice * i.qty) })),
+            ...promoLines.map<ReceiptLine>((l) => ({ kind: "row", id: `promo-${l.id}`, label: l.label.toLowerCase(), value: `−${formatARS(l.amount)}`, tone: "accent" })),
             { kind: "rule", id: "r1" },
             { kind: "row", id: "envio", label: chosen ? chosen.label.toLowerCase() : "envío", value: shippingCost === 0 ? "gratis" : `${motoFrom ? "desde " : ""}${formatARS(shippingCost)}` },
             { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[effectivePayment].toLowerCase(), tone: "muted" },

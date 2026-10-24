@@ -3,6 +3,7 @@ import { createHmac } from "node:crypto";
 import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
 import type { Order } from "@/lib/types";
 import { siteConfig } from "@/lib/site";
+import { orderDiscount } from "@/lib/promos";
 
 export function mpEnabled() {
   return Boolean(process.env.MP_ACCESS_TOKEN);
@@ -17,14 +18,18 @@ function client() {
 /** Crea la preferencia de Checkout Pro para una orden y devuelve id + init_point. */
 export async function createPreference(order: Order, orderUrl: string) {
   const pref = new Preference(client());
-  const items = order.items.map((i) => ({
-    id: i.kind === "design" ? i.designSlug : "custom",
-    title: i.kind === "design" ? `${i.name} (press-on)` : "Set press-on a medida",
-    quantity: i.qty,
-    unit_price: i.unitPrice,
-    currency_id: "ARS",
-    category_id: "fashion",
-  }));
+  // Con promos, MP no acepta montos negativos: va un solo ítem por lo que se paga de los sets.
+  const discount = orderDiscount(order);
+  const items = discount
+    ? [{ id: "pedido", title: `Pedido ${order.number} (press-on, con promo)`, quantity: 1, unit_price: order.subtotal - discount, currency_id: "ARS", category_id: "fashion" }]
+    : order.items.map((i) => ({
+        id: i.kind === "design" ? i.designSlug : "custom",
+        title: i.kind === "design" ? `${i.name} (press-on)` : "Set press-on a medida",
+        quantity: i.qty,
+        unit_price: i.unitPrice,
+        currency_id: "ARS",
+        category_id: "fashion",
+      }));
   if (order.delivery.cost > 0) {
     items.push({ id: "envio", title: `Envío: ${order.delivery.label}`, quantity: 1, unit_price: order.delivery.cost, currency_id: "ARS", category_id: "services" });
   }

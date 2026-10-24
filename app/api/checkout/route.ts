@@ -14,7 +14,9 @@ import {
   type NewOrder,
 } from "@/lib/data/orders";
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
-import { designImage } from "@/lib/data/catalog";
+import { designImage, inStock } from "@/lib/data/catalog";
+import { getLivePromos } from "@/lib/data/content-repo";
+import { applyPromos, promoRules } from "@/lib/promos";
 import type { CartItem } from "@/lib/types";
 
 /**
@@ -37,10 +39,11 @@ export async function POST(req: Request) {
     );
   }
   const input = parsed.data;
-  const [config, settings] = await Promise.all([getBuilderConfig(), getSettings()]);
+  const [config, settings, livePromos] = await Promise.all([getBuilderConfig(), getSettings(), getLivePromos()]);
 
   // 1. Items con precio de servidor
   const items: CartItem[] = [];
+  const stockSlugs = new Set<string>();
   let needsConfirmation = false;
   for (const it of input.items) {
     if (it.kind === "design") {
@@ -50,6 +53,7 @@ export async function POST(req: Request) {
           { error: `El diseño ${it.designSlug} ya no está disponible` },
           { status: 400 },
         );
+      if (inStock(d)) stockSlugs.add(d.slug);
       items.push({
         id: crypto.randomUUID(),
         kind: "design",
@@ -78,6 +82,8 @@ export async function POST(req: Request) {
     }
   }
   const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  // Promos de la semana (-% sets en stock, 4x3). El pedido guarda el subtotal sin descuento y el total con descuento.
+  const { discount } = applyPromos(items, promoRules(livePromos), (slug) => stockSlugs.has(slug));
 
   // 2. Envío con precio de servidor
   const postalCode = input.delivery.address?.postalCode;
@@ -115,7 +121,7 @@ export async function POST(req: Request) {
   // La moto tiene precio "desde": Brenda confirma el costo final por WhatsApp antes del pago.
   if (chosen.from) needsConfirmation = true;
 
-  const total = subtotal + chosen.cost;
+  const total = subtotal - discount + chosen.cost;
   const useMp = input.payment.method === "mercadopago" && mpEnabled() && !needsConfirmation;
 
   const draft: NewOrder = {

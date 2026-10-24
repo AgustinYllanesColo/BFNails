@@ -11,6 +11,7 @@ import { Stars } from "@/components/motion/Stars";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { ClearCartOnMount } from "@/components/cart/ClearCartOnMount";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
+import { orderDiscount } from "@/lib/promos";
 import { builderLink } from "@/lib/share";
 
 export const metadata: Metadata = { title: "Tu pedido", robots: { index: false } };
@@ -111,6 +112,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
             lines={[
               ...order.items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: `${i.name} ×${i.qty} · ${describeSizes(i.sizes).toLowerCase()}`, value: formatARS(i.unitPrice * i.qty) })),
               { kind: "rule", id: "r1" },
+              ...(orderDiscount(order) ? [{ kind: "row", id: "promos", label: "promos", value: `−${formatARS(orderDiscount(order))}`, tone: "accent" } as ReceiptLine] : []),
               { kind: "row", id: "envio", label: order.delivery.label.toLowerCase(), value: order.delivery.cost ? formatARS(order.delivery.cost) : "gratis" },
               { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[order.payment.method].toLowerCase(), tone: "muted" },
               { kind: "row", id: "estado", label: "estado", value: ORDER_STATUS_LABEL[order.status].toLowerCase(), tone: "accent" },

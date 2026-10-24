@@ -62,6 +62,8 @@ export async function saveDesign(_prev: DesignFormState, formData: FormData): Pr
     return { error: (e as Error).message };
   }
   revalidatePath("/catalogo");
+  revalidatePath("/carrito");
+  revalidatePath("/checkout");
   revalidatePath("/");
   revalidatePath("/admin/catalogo");
   redirect(`/admin/catalogo/${slug}`);

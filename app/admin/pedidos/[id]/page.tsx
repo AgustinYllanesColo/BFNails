@@ -9,6 +9,7 @@ import { ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } from "@/lib/types
 import { Card, PageTitle, StatusBadge, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
 import { confirmPrice, setNotes, setOrderStatus, setTracking } from "../actions";
 import { StatusButtons } from "@/components/admin/StatusButtons";
+import { orderDiscount } from "@/lib/promos";
 
 export default async function PedidoAdminPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
@@ -59,6 +60,12 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
                 <dt className="text-ink-soft">Subtotal</dt>
                 <dd>{formatARS(order.subtotal)}</dd>
               </div>
+              {orderDiscount(order) > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-ink-soft">Promos (-% stock / 4x3)</dt>
+                  <dd>−{formatARS(orderDiscount(order))}</dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-ink-soft">Envío · {order.delivery.label}</dt>
                 <dd>{formatARS(order.delivery.cost)}</dd>

@@ -53,7 +53,8 @@ export function PromoCard({ promo: p }: { promo: Promo }) {
   const t = THEMES[p.theme] ?? THEMES.rojo;
   const until = untilLabel(p.until);
   const external = !p.href;
-  const href = p.href || waLink(`Hola Bren! Quiero la promo "${p.title}" 🐱`);
+  const mayorista = p.id === "mayorista" || p.badge.trim().toLowerCase() === "mayorista";
+  const href = p.href || waLink(mayorista ? "Hola Bren! Me pasás info mayorista por favor 🐱" : `Hola Bren! Quiero la promo "${p.title}" 🐱`);
   return (
     <Link
       href={href}
