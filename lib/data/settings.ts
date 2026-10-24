@@ -19,7 +19,7 @@ export type SiteSettings = {
 export const DEFAULT_SETTINGS: SiteSettings = {
   basePrice: DEFAULT_BUILDER_CONFIG.basePrice,
   hourlyRate: 6000,
-  targetMargin: 0.55,
+  targetMargin: 0.25, // sobre insumos + tiempo a valor hora (ver docs/precios-catalogo.md)
   shipping: DEFAULT_SHIPPING_TABLE,
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5491128253431",
   transferAlias: process.env.NEXT_PUBLIC_TRANSFER_ALIAS ?? "brenda.f00",

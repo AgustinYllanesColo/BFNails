@@ -8,6 +8,8 @@ import * as schema from "../lib/db/schema";
 import { SEED_DESIGNS } from "../lib/data/catalog";
 import { DEFAULT_BUILDER_CONFIG } from "../lib/pricing";
 import { DEFAULT_SHIPPING_TABLE } from "../lib/shipping/table";
+import { PRESETS } from "../lib/data/presets";
+import { BASE_RECIPE, SEED_SUPPLIES, selectionRecipe, techniqueRecipe } from "../lib/data/recipes";
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -65,27 +67,37 @@ async function main() {
   const settingsRows: Array<{ key: string; value: unknown }> = [
     { key: "basePrice", value: c.basePrice },
     { key: "hourlyRate", value: 6000 },
-    { key: "targetMargin", value: 0.55 },
+    { key: "targetMargin", value: 0.25 },
     { key: "shipping", value: DEFAULT_SHIPPING_TABLE },
   ];
   for (const s of settingsRows) {
     await db.insert(schema.settings).values({ key: s.key, value: s.value }).onConflictDoNothing();
   }
 
-  // Insumos de ejemplo (a reemplazar con los reales)
-  const supplies = [
-    { name: "Tips soft gel (bolsa 500 u)", unit: "u", packCost: 9000, packQty: "500" },
-    { name: "Base rubber / gel constructor 15 ml", unit: "ml", packCost: 7500, packQty: "15" },
-    { name: "Esmalte semipermanente 10 ml", unit: "ml", packCost: 4500, packQty: "10" },
-    { name: "Top coat 15 ml", unit: "ml", packCost: 6000, packQty: "15" },
-    { name: "Pegamento para press-on 3 g", unit: "u", packCost: 1200, packQty: "1" },
-    { name: "Lima descartable", unit: "u", packCost: 2500, packQty: "25" },
-    { name: "Strass (pack 100 u)", unit: "u", packCost: 3500, packQty: "100" },
-    { name: "Caja / packaging", unit: "u", packCost: 8000, packQty: "20" },
+  // Insumos (precios de Bella Central) y recetas de costo. Los insumos se enlazan por nombre; una receta que Brenda ya
+  // editó desde el admin no se pisa.
+  const existing = await db.select({ id: schema.supplies.id, name: schema.supplies.name }).from(schema.supplies);
+  const idByName = new Map(existing.map((e) => [e.name, e.id]));
+  for (const sp of SEED_SUPPLIES) {
+    if (idByName.has(sp.name)) continue;
+    const [row] = await db
+      .insert(schema.supplies)
+      .values({ name: sp.name, unit: sp.unit, packCost: sp.packCost, packQty: String(sp.packQty), supplier: sp.supplier, notes: sp.notes })
+      .returning({ id: schema.supplies.id });
+    idByName.set(sp.name, row.id);
+  }
+  const uuidOf = new Map(SEED_SUPPLIES.map((sp) => [sp.id, idByName.get(sp.name)!]));
+  const seedRecipes = [
+    BASE_RECIPE,
+    ...c.extras.map((e) => techniqueRecipe(e.id, e.label)).filter((r) => r !== null),
+    ...SEED_DESIGNS.filter((d) => PRESETS[d.slug]).map((d) => selectionRecipe(PRESETS[d.slug], `design:${d.slug}`, `Diseño: ${d.name}`)),
   ];
-  const existing = await db.select({ name: schema.supplies.name }).from(schema.supplies);
-  const names = new Set(existing.map((e) => e.name));
-  for (const s of supplies) if (!names.has(s.name)) await db.insert(schema.supplies).values(s);
+  for (const r of seedRecipes) {
+    await db
+      .insert(schema.recipes)
+      .values({ target: r.target, label: r.label, minutes: r.minutes, usages: r.usages.map((u) => ({ supplyId: uuidOf.get(u.supplyId)!, qty: u.qty })) })
+      .onConflictDoNothing();
+  }
 
   // Admin allowlist desde ADMIN_EMAILS
   for (const email of (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)) {

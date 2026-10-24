@@ -3,6 +3,10 @@ import { eq } from "drizzle-orm";
 import { requireDb } from "./db";
 import { getDb } from "@/lib/db/client";
 import { recipes, supplies } from "@/lib/db/schema";
+import { SEED_DESIGNS } from "@/lib/data/catalog";
+import { PRESETS } from "@/lib/data/presets";
+import { BASE_RECIPE, SEED_SUPPLIES, selectionRecipe, techniqueRecipe } from "@/lib/data/recipes";
+import { DEFAULT_BUILDER_CONFIG } from "@/lib/pricing";
 
 export type Supply = {
   id: string;
@@ -25,9 +29,23 @@ export type Recipe = {
   usages: Array<{ supplyId: string; qty: number }>;
 };
 
+/** Sin base de datos, el admin muestra los insumos y recetas del seed (lib/data/recipes.ts), solo lectura. */
+export function seedSupplies(): Supply[] {
+  return SEED_SUPPLIES.map((s) => ({ id: s.id, name: s.name, unit: s.unit, packCost: s.packCost, packQty: s.packQty, unitCost: s.packCost / s.packQty, supplier: s.supplier ?? null, notes: s.notes ?? null, active: true }));
+}
+
+export function seedRecipes(): Recipe[] {
+  const list = [
+    BASE_RECIPE,
+    ...DEFAULT_BUILDER_CONFIG.extras.map((e) => techniqueRecipe(e.id, e.label)).filter((r) => r !== null),
+    ...SEED_DESIGNS.filter((d) => PRESETS[d.slug]).map((d) => selectionRecipe(PRESETS[d.slug], `design:${d.slug}`, `Diseño: ${d.name}`)),
+  ];
+  return list.map((r) => ({ id: r.target, ...r }));
+}
+
 export async function listSupplies(): Promise<Supply[]> {
   const db = getDb();
-  if (!db) return [];
+  if (!db) return seedSupplies();
   const rows = await db.select().from(supplies).orderBy(supplies.name);
   return rows.map((r) => {
     const packQty = Number(r.packQty);
@@ -48,7 +66,7 @@ export async function deleteSupply(id: string) {
 
 export async function listRecipes(): Promise<Recipe[]> {
   const db = getDb();
-  if (!db) return [];
+  if (!db) return seedRecipes();
   return db.select().from(recipes).orderBy(recipes.target);
 }
 

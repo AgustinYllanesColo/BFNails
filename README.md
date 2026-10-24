@@ -72,3 +72,7 @@ tests/e2e       scripts Playwright de flujo y capturas
 
 `precio = base + Σ deltas (forma, largo, acabado, color) + Σ extras + recargo por nivel`.
 Cada extra suma puntos de complejidad; los puntos definen el nivel (Simple / Intermedio / Elaborado / Premium) y su recargo. Todo se edita en Admin → Armador. Si la clienta escribe notas libres, el pedido nace **a confirmar** y Brenda fija el precio final antes del pago.
+
+## Precios del catálogo y costos
+
+Cada diseño tiene una receta de costo (`lib/data/recipes.ts`): insumos a precio de Bella Central más minutos de trabajo a valor hora. El precio del catálogo es el mayor entre el piso por costo (margen objetivo, 25 % por defecto) y lo que cotiza el armador para la misma receta; un test lo verifica. Admin → Costos muestra costo, margen y precio sugerido de cada diseño y técnica. El detalle y la propuesta de precios están en `docs/precios-catalogo.md`.
