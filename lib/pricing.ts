@@ -6,19 +6,27 @@ import { NAIL_COUNT, allNails, describeNailList, handOf } from "./nails";
  * Motor de precios del armador. Es una función pura: la misma config y selección
  * siempre da el mismo resultado. La config se edita desde el admin.
  *
- * Modelo: precio base + delta por largo + técnicas. Cada técnica tiene precio **por mano**: se cobra por cada mano
- * que la lleve (en 2 o más uñas de esa mano); si en una mano va en una sola uña, se cobra el precio de una uña
- * (`nailDelta`, por defecto la mitad del precio por mano). Cada técnica suma "puntos de complejidad"; los puntos
- * definen el nivel (1–4) y cada nivel agrega un recargo fijo ("trabajo de detalle").
+ * Modelo: precio base + delta por largo + técnicas. Cada técnica tiene una unidad (lista de precios de Brenda):
+ * - "mano": se cobra por cada mano que la lleve en 2 o más uñas; en una sola uña de una mano, el precio de una uña
+ *   (`nailDelta`, por defecto la mitad del precio por mano).
+ * - "uña": se cobra por cada uña que la lleve (los diseños).
+ * - "set": se cobra una vez, vaya donde vaya (apliques como los strass hasta 10).
+ * Cada técnica suma "puntos de complejidad"; los puntos definen el nivel (1–4) y cada nivel agrega un recargo fijo
+ * ("trabajo de detalle").
  */
+
+export type ExtraUnit = "mano" | "uña" | "set";
+export const UNIT_LABEL: Record<ExtraUnit, string> = { mano: "por mano", uña: "por uña", set: "por set" };
 
 export type Option<T extends string = string> = {
   id: T;
   label: string;
-  delta: number; // en técnicas: precio por mano
+  delta: number; // en técnicas: precio por unidad (mano, uña o set)
   description?: string;
   complexity?: number; // puntos
-  /** Técnicas: precio cuando en una mano va en una sola uña. Si falta, la mitad del precio por mano. */
+  /** Técnicas: cómo se cobra el delta. Si falta, por mano. */
+  unit?: ExtraUnit;
+  /** Técnicas por mano: precio cuando en una mano va en una sola uña. Si falta, la mitad del precio por mano. */
   nailDelta?: number;
 };
 
@@ -82,55 +90,33 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "dorado", label: "Dorado", delta: 0, hex: "#c9a24a" },
   ],
   extras: [
-    // blanca o del color que elijan (tipColor): una sola técnica
-    { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, complexity: 1 },
-    { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, complexity: 1 },
-    { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, complexity: 1 },
-    { id: "cat-eye", group: "Brillos", label: "Cat eye", delta: 1800, complexity: 1 },
-    { id: "aura", group: "Brillos", label: "Aura", delta: 2000, complexity: 1 },
-    { id: "aurora", group: "Brillos", label: "Efecto aurora / espejo", delta: 2200, complexity: 1 },
-    {
-      id: "strass",
-      group: "3D y apliques",
-      label: "Strass (hasta 10)",
-      delta: 2000,
-      complexity: 1,
-    },
-    { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, complexity: 2 },
-    { id: "strass-colores", group: "3D y apliques", label: "Gemas de colores", delta: 2500, complexity: 1 },
-    { id: "perlas", group: "3D y apliques", label: "Perlas", delta: 2500, complexity: 1 },
-    { id: "cadenas", group: "3D y apliques", label: "Cadenitas doradas", delta: 2500, complexity: 1 },
-    { id: "flor-3d", group: "3D y apliques", label: "Flor 3D (organza)", delta: 3500, complexity: 2 },
-    {
-      id: "3d",
-      group: "3D y apliques",
-      label: "Relieve 3D (moños, flores)",
-      delta: 3500,
-      complexity: 2,
-    },
-    { id: "animal-print", group: "Diseños", label: "Animal print", delta: 2500, complexity: 2 },
-    { id: "flores", group: "Diseños", label: "Flores a mano", delta: 3000, complexity: 2 },
-    { id: "puntitos", group: "Diseños", label: "Puntitos", delta: 1500, complexity: 1 },
-    { id: "cebra", group: "Diseños", label: "Cebra / tigre", delta: 2500, complexity: 2 },
-    { id: "ondas", group: "Diseños", label: "Ondas", delta: 2000, complexity: 1 },
-    { id: "estrellas", group: "Diseños", label: "Estrellitas", delta: 1500, complexity: 1 },
-    { id: "tribal", group: "Diseños", label: "Tribal", delta: 3000, complexity: 2 },
-    { id: "blooming", group: "Diseños", label: "Blooming", delta: 2500, complexity: 1 },
-    {
-      id: "personajes",
-      group: "Diseños",
-      label: "Personajes (Kitty & cía)",
-      delta: 4000,
-      complexity: 3,
-    },
-    { id: "a-mano", group: "Diseños", label: "Dibujo a mano alzada", delta: 4500, complexity: 3 },
-    {
-      id: "encapsulado",
-      group: "Diseños",
-      label: "Encapsulado (flores secas, foil)",
-      delta: 3000,
-      complexity: 2,
-    },
+    // lista de precios de Brenda (octubre 2026). Sin precio en la lista: valor orientativo, a confirmar.
+    { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, unit: "mano", complexity: 1 },
+    { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, unit: "mano", complexity: 1 },
+    { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, unit: "mano", complexity: 1 },
+    { id: "cat-eye", group: "Brillos", label: "Cat eye", delta: 1200, unit: "mano", complexity: 1 },
+    { id: "aura", group: "Brillos", label: "Aura", delta: 1700, unit: "mano", complexity: 1 },
+    { id: "aurora", group: "Brillos", label: "Efecto aurora / espejo", delta: 1500, unit: "mano", complexity: 1 },
+    { id: "cromado", group: "Brillos", label: "Cromado", delta: 500, unit: "uña", complexity: 1 },
+    { id: "strass", group: "3D y apliques", label: "Strass (hasta 10)", delta: 1200, unit: "set", complexity: 1 },
+    { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, unit: "set", complexity: 2 },
+    { id: "strass-colores", group: "3D y apliques", label: "Gemas de colores", delta: 2500, unit: "set", complexity: 1 },
+    { id: "perlas", group: "3D y apliques", label: "Perlado", delta: 2500, unit: "set", complexity: 1 },
+    { id: "cadenas", group: "3D y apliques", label: "Cadenitas doradas", delta: 2500, unit: "set", complexity: 1 },
+    { id: "flor-3d", group: "3D y apliques", label: "Flor 3D", delta: 1500, unit: "uña", complexity: 2 },
+    { id: "3d", group: "3D y apliques", label: "Relieve 3D (moños, flores)", delta: 1200, unit: "uña", complexity: 2 },
+    { id: "animal-print", group: "Diseños", label: "Animal print", delta: 400, unit: "uña", complexity: 2 },
+    { id: "carey", group: "Diseños", label: "Carey", delta: 450, unit: "uña", complexity: 2 },
+    { id: "flores", group: "Diseños", label: "Flores a mano alzada", delta: 600, unit: "uña", complexity: 2 },
+    { id: "puntitos", group: "Diseños", label: "Puntitos", delta: 250, unit: "uña", complexity: 1 },
+    { id: "cebra", group: "Diseños", label: "Cebra / tigre", delta: 400, unit: "uña", complexity: 2 },
+    { id: "ondas", group: "Diseños", label: "Ondas", delta: 400, unit: "uña", complexity: 1 },
+    { id: "estrellas", group: "Diseños", label: "Estrellitas", delta: 400, unit: "uña", complexity: 1 },
+    { id: "tribal", group: "Diseños", label: "Tribal", delta: 500, unit: "uña", complexity: 2 },
+    { id: "blooming", group: "Diseños", label: "Blooming", delta: 300, unit: "uña", complexity: 1 },
+    { id: "personajes", group: "Diseños", label: "Personajes (Kitty & cía)", delta: 800, unit: "uña", complexity: 3 },
+    { id: "a-mano", group: "Diseños", label: "Dibujo a mano alzada", delta: 900, unit: "uña", complexity: 3 },
+    { id: "encapsulado", group: "Diseños", label: "Encapsulado (flores secas, foil)", delta: 600, unit: "uña", complexity: 2 },
   ],
   tiers: [
     { level: 1, label: "Simple", minPoints: 0, surcharge: 0 },
@@ -250,11 +236,21 @@ export function nailPrice(extra: Pick<Option, "delta" | "nailDelta">): number {
   return extra.nailDelta ?? Math.ceil(extra.delta / 2 / 100) * 100;
 }
 
-/** Precio de una técnica según en qué uñas va: por cada mano, el precio por mano (2 o más uñas) o el de una uña. */
-export function extraPrice(extra: Pick<Option, "delta" | "nailDelta">, nails: number[]): number {
+/** Precio de una técnica según su unidad y en qué uñas va. */
+export function extraPrice(extra: Pick<Option, "delta" | "nailDelta" | "unit">, nails: number[]): number {
+  const set = new Set(nails);
+  if (set.size === 0) return 0;
+  if (extra.unit === "set") return extra.delta;
+  if (extra.unit === "uña") return extra.delta * set.size;
   const perHand = [0, 0];
-  for (const i of new Set(nails)) perHand[handOf(i)]++;
+  for (const i of set) perHand[handOf(i)]++;
   return perHand.reduce((acc, n) => acc + (n === 0 ? 0 : n === 1 ? nailPrice(extra) : extra.delta), 0);
+}
+
+/** "$400/uña", "$1.500/mano" o "$1.200" (por set), para los chips del armador. */
+export function extraUnitHint(extra: Pick<Option, "delta" | "unit">, format: (n: number) => string): string {
+  const u = extra.unit ?? "mano";
+  return u === "set" ? format(extra.delta) : `${format(extra.delta)}/${u}`;
 }
 
 export const DEFAULT_SELECTION: BuilderSelection = {

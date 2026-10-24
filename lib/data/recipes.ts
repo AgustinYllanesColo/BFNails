@@ -94,6 +94,8 @@ export const TECHNIQUE_RECIPES: Record<string, { minutes: number; usages: Usage[
   estrellas: { minutes: 10, usages: [{ supplyId: "gel-art", qty: 0.1 }] },
   tribal: { minutes: 35, usages: [{ supplyId: "gel-art", qty: 0.4 }] },
   blooming: { minutes: 20, usages: [{ supplyId: "blooming", qty: 0.5 }] },
+  carey: { minutes: 25, usages: [{ supplyId: "gel-art", qty: 0.3 }, { supplyId: "semi", qty: 0.3 }] },
+  cromado: { minutes: 10, usages: [{ supplyId: "pigmento", qty: 0.1 }] },
   personajes: { minutes: 50, usages: [{ supplyId: "gel-art", qty: 0.5 }] },
   "a-mano": { minutes: 60, usages: [{ supplyId: "gel-art", qty: 0.5 }] },
   encapsulado: { minutes: 20, usages: [{ supplyId: "foil", qty: 5 }, { supplyId: "flores-secas", qty: 4 }, { supplyId: "base-rubber", qty: 0.5 }] },

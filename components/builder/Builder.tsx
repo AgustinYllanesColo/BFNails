@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { BuilderSelection, SizeSelection } from "@/lib/types";
-import { DEFAULT_SELECTION, defaultDetailColor, extraPrice, nailPrice, quoteSelection, type BuilderConfig } from "@/lib/pricing";
+import { DEFAULT_SELECTION, defaultDetailColor, extraPrice, extraUnitHint, quoteSelection, type BuilderConfig } from "@/lib/pricing";
 import { presetFor } from "@/lib/data/presets";
 import { decodeSelection } from "@/lib/share";
 import { formatARS } from "@/lib/format";
@@ -220,14 +220,14 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
         </Step>
 
         <div>
-          <StepHeader n={5} title={STEPS[4]} hint="Sumá las que quieras. Cada una tiene precio por mano: elegí si va en las dos manos, en una o en una sola uña." />
+          <StepHeader n={5} title={STEPS[4]} hint="Sumá las que quieras. Los diseños se cobran por uña, las bases por mano y los apliques por set: elegí si va en las dos manos, en una o en una sola uña." />
           <div className="space-y-5">
             {groups.map(([group, extras]) => (
               <div key={group}>
                 <p className="mb-2 text-xs font-bold tracking-wider text-bordo uppercase">{group}</p>
                 <div className="flex flex-wrap gap-2">
                   {extras.map((e) => (
-                    <Chip key={e.id} selected={allExtras.includes(e.id)} onClick={() => setExtraNails(e.id, allExtras.includes(e.id) ? [] : ALL_NAILS)} hint={`${formatARS(e.delta)}/mano`}>
+                    <Chip key={e.id} selected={allExtras.includes(e.id)} onClick={() => setExtraNails(e.id, allExtras.includes(e.id) ? [] : ALL_NAILS)} hint={extraUnitHint(e, formatARS)}>
                       {e.label}
                     </Chip>
                   ))}
@@ -250,16 +250,16 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                               {HAND_PICKS.map((q) => (
-                                <Chip key={q.label} selected={scope(q)} onClick={() => setExtraNails(e.id, q.nails)} hint={q.nails.length === NAIL_COUNT ? `${formatARS(e.delta * 2)}` : formatARS(e.delta)}>
+                                <Chip key={q.label} selected={scope(q)} onClick={() => setExtraNails(e.id, q.nails)} hint={formatARS(extraPrice(e, q.nails))}>
                                   {q.label}
                                 </Chip>
                               ))}
-                              <Chip selected={oneNail} onClick={() => setExtraNails(e.id, [3])} hint={formatARS(nailPrice(e))}>
+                              <Chip selected={oneNail} onClick={() => setExtraNails(e.id, [3])} hint={formatARS(extraPrice(e, [3]))}>
                                 Una uña
                               </Chip>
                             </div>
                             <p className="text-xs text-ink-soft">
-                              {oneNail ? "Tocá la uña donde va." : "O tocá las uñas una por una. Por mano se cobra con 2 o más uñas; una sola uña, el precio de una uña."}
+                              {oneNail ? "Tocá la uña donde va." : e.unit === "uña" ? "O tocá las uñas una por una: se cobra por cada uña." : e.unit === "set" ? "O tocá las uñas una por una: se cobra una vez, vaya donde vaya." : "O tocá las uñas una por una. Por mano se cobra con 2 o más uñas; una sola uña, el precio de una uña."}
                             </p>
                             <NailMap
                               sel={sel}

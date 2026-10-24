@@ -28,57 +28,84 @@ Insumos, minutos y costo por set; piso con 25 % de margen; cotización del armad
 | Diseño | Técnicas | Insumos | Min. | Costo | Piso (25 %) | Armador | Hoy | Propuesto | Dif. |
 |---|---|---|---|---|---|---|---|---|---|
 | Set base (liso, 10 uñas + kit) | – | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $12.000 | $12.000 | 0 |
-| Polka flower | Francesita, Flor 3D, Puntitos | $3.814 | 91 | $12.914 | $17.500 | $24.500 | $22.000 | **$24.500** | +2.500 |
-| Pink dots | Puntitos | $3.425 | 69 | $10.325 | $14.000 | $15.000 | $17.000 | **$15.000** | -2.000 |
-| Lila perlas | Perlas | $3.411 | 65 | $9.911 | $13.500 | $15.000 | $17.000 | **$15.000** | -2.000 |
+| Polka flower | Francesita, Flor 3D, Puntitos | $3.814 | 91 | $12.914 | $17.500 | $23.000 | $22.000 | **$23.000** | +1.000 |
+| Pink dots | Puntitos | $3.425 | 69 | $10.325 | $14.000 | $13.000 | $17.000 | **$14.000** | -3.000 |
+| Lila perlas | Perlado | $3.411 | 65 | $9.911 | $13.500 | $14.500 | $17.000 | **$14.500** | -2.500 |
 | Black snake | Glitter, Dije Serpiente dorada con strass ×2 | $3.687 | 77 | $11.387 | $15.500 | $15.500 | $19.000 | **$15.500** | -3.500 |
 | Black stiletto | Degradé / babyboomer | $3.648 | 78 | $11.448 | $15.500 | $14.000 | $18.000 | **$15.500** | -2.500 |
-| Black leo | Animal print | $3.521 | 75 | $11.021 | $15.000 | $18.000 | $17.000 | **$18.000** | +1.000 |
+| Black leo | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.000 | $17.000 | **$15.000** | -2.000 |
 | Francesita glitter | Francesita, Glitter | $3.707 | 83 | $12.007 | $16.500 | $18.500 | $16.500 | **$18.500** | +2.000 |
 | Verde oliva | liso | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $13.000 | **$12.500** | -500 |
 | Violeta | liso | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $13.000 | **$12.500** | -500 |
 | Pink babyboomer | Degradé / babyboomer, Glitter | $3.903 | 88 | $12.703 | $17.000 | $19.500 | $17.000 | **$19.500** | +2.500 |
-| Pink wave | Glitter, Strass, Ondas | $3.917 | 103 | $14.217 | $19.000 | $23.500 | $21.000 | **$23.500** | +2.500 |
-| Milky star | Puntitos, Estrellitas | $3.419 | 68 | $10.219 | $14.000 | $16.500 | $16.500 | **$16.500** | 0 |
-| Leo & cherry | Animal print | $3.521 | 75 | $11.021 | $15.000 | $18.000 | $19.500 | **$18.000** | -1.500 |
+| Pink wave | Glitter, Strass, Ondas | $3.917 | 103 | $14.217 | $19.000 | $21.000 | $21.000 | **$21.000** | 0 |
+| Milky star | Puntitos, Estrellitas | $3.419 | 68 | $10.219 | $14.000 | $14.500 | $16.500 | **$14.500** | -2.000 |
+| Leo & cherry | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.000 | $19.500 | **$15.000** | -4.500 |
 | Sunset french | Francesita, Degradé / babyboomer | $3.867 | 88 | $12.667 | $17.000 | $20.000 | $17.500 | **$20.000** | +2.500 |
-| Bordó aura | Aura | $3.742 | 75 | $11.242 | $15.000 | $16.000 | $18.000 | **$16.000** | -2.000 |
-| Leo star gold | Largo: XL, Francesita, Strass, Cadenitas doradas, Animal print, Estrellitas | $6.342 | 110 | $17.342 | $23.500 | $35.000 | $23.000 | **$35.000** | +12.000 |
-| Tribal french | Largo: XL, Francesita, Strass, Tribal | $4.316 | 130 | $17.316 | $23.500 | $29.000 | $22.000 | **$29.000** | +7.000 |
-| Black french | Francesita, Strass | $3.761 | 90 | $12.761 | $17.500 | $20.000 | $21.000 | **$20.000** | -1.000 |
-| Pink zebra | Cat eye, Cebra / tigre | $4.011 | 95 | $13.511 | $18.500 | $22.000 | $18.500 | **$22.000** | +3.500 |
-| Candy gems | Francesita, Gemas de colores | $3.957 | 87 | $12.657 | $17.000 | $21.000 | $17.000 | **$21.000** | +4.000 |
-| Sunset aurora | Degradé / babyboomer, Efecto aurora / espejo | $3.832 | 90 | $12.832 | $17.500 | $21.500 | $17.000 | **$21.500** | +4.500 |
-| Milky pearl | Perlas, Dije Aro piercing ×2 | $3.706 | 74 | $11.106 | $15.000 | $17.000 | $16.500 | **$17.000** | +500 |
-| Milky gold | Francesita, Strass, Encapsulado | $4.008 | 99 | $13.908 | $19.000 | $25.500 | $16.000 | **$25.500** | +9.500 |
-| Babyboomer | Degradé / babyboomer, Strass | $3.841 | 84 | $12.241 | $16.500 | $19.000 | $14.500 | **$19.000** | +4.500 |
-| Gold glitter | Glitter, Cat eye | $3.741 | 78 | $11.541 | $15.500 | $19.000 | $13.500 | **$19.000** | +5.500 |
+| Bordó aura | Aura | $3.742 | 75 | $11.242 | $15.000 | $15.500 | $18.000 | **$15.500** | -2.500 |
+| Leo star gold | Largo: XL, Francesita, Strass, Cadenitas doradas, Animal print, Estrellitas | $6.342 | 110 | $17.342 | $23.500 | $24.500 | $23.000 | **$24.500** | +1.500 |
+| Tribal french | Largo: XL, Francesita, Strass, Tribal | $4.316 | 130 | $17.316 | $23.500 | $25.500 | $22.000 | **$25.500** | +3.500 |
+| Black french | Francesita, Strass | $3.761 | 90 | $12.761 | $17.500 | $17.500 | $21.000 | **$17.500** | -3.500 |
+| Pink zebra | Cat eye, Cebra / tigre | $4.011 | 95 | $13.511 | $18.500 | $19.500 | $18.500 | **$19.500** | +1.000 |
+| Candy gems | Francesita, Gemas de colores | $3.957 | 87 | $12.657 | $17.000 | $18.500 | $17.000 | **$18.500** | +1.500 |
+| Sunset aurora | Degradé / babyboomer, Efecto aurora / espejo | $3.832 | 90 | $12.832 | $17.500 | $20.000 | $17.000 | **$20.000** | +3.000 |
+| Milky pearl | Perlado, Dije Aro piercing ×2 | $3.706 | 74 | $11.106 | $15.000 | $16.500 | $16.500 | **$16.500** | 0 |
+| Milky gold | Francesita, Strass, Encapsulado | $4.008 | 99 | $13.908 | $19.000 | $25.000 | $16.000 | **$25.000** | +9.000 |
+| Babyboomer | Degradé / babyboomer, Strass | $3.841 | 84 | $12.241 | $16.500 | $18.500 | $14.500 | **$18.500** | +4.000 |
+| Gold glitter | Glitter, Cat eye | $3.741 | 78 | $11.541 | $15.500 | $18.000 | $13.500 | **$18.000** | +4.500 |
 
-Suma del catálogo: $441.000 hoy → $489.500 propuesto (+11 %). La suba viene de la regla nueva del armador (cada
-técnica se cobra **por mano**): un set con francesita en las 10 uñas paga $3.000 de francesita, no $1.500.
+Suma del catálogo: $441.000 hoy → $450.000 propuesto (+2 %). Suben los sets con técnicas en las 10 uñas (la
+francesita y el degradé se cobran por mano) y bajan los que tienen un diseño en pocas uñas (los diseños se cobran
+por uña).
 
-## Reglas del armador (las de Brenda)
+## Reglas del armador (lista de precios de Brenda)
 
 - **Forma**: no cambia el precio. **Largo**: solo XL suma, $1.500. **Acabado**: brillo y mate valen lo mismo.
-- **Francesita**: una sola técnica, $1.500 por mano, con el color de la punta a elección (blanca si no eligen). La
-  "francesita de color" desaparece del armador; los carritos y links viejos que la traían se leen como francesita.
-- **Degradé / babyboomer**: $2.000 por mano.
-- **Por mano y por uña**: toda técnica se cobra por cada mano que la lleve en 2 o más uñas. Si en una mano va en una
-  sola uña, se cobra el precio de una uña (por defecto la mitad del precio por mano, redondeado a $100: francesita
-  $800, degradé $1.000). En el armador, al tocar una técnica aparecen las opciones "Las dos manos", "Mano derecha",
-  "Mano izquierda" y "Una uña", más el mapa para tocar uñas sueltas y el color cuando corresponde.
-- Pendiente de confirmar con Brenda: (1) si el precio de una uña sola es la mitad del de la mano o un valor fijo;
-  (2) si **todas** las técnicas van por mano o solo francesita y degradé. Si alguna va "por set", la forma de dejarlo
-  es bajar su precio por mano a la mitad en Admin → Armador.
+- Cada técnica tiene una unidad. **Por mano**: se cobra por cada mano que la lleve en 2 o más uñas; en una sola uña de
+  una mano, el precio de una uña (la mitad, redondeado a $100). **Por uña**: por cada uña que la lleve. **Por set**:
+  una vez, vaya donde vaya. En el armador, al tocar una técnica aparecen "Las dos manos", "Mano derecha", "Mano
+  izquierda" y "Una uña", el mapa para tocar uñas sueltas, el precio según eso y el color cuando corresponde.
+
+| Técnica | Precio | Unidad | Origen |
+|---|---|---|---|
+| Francesita (blanca o de color, con color de punta) | $1.500 | por mano | lista |
+| Degradé / babyboomer | $2.000 | por mano | lista |
+| Cat eye | $1.200 | por mano | lista |
+| Aura | $1.700 | por mano | lista |
+| Efecto aurora / espejo | $1.500 | por mano | lista |
+| Glitter | $1.200 | por mano | sin precio en la lista, se mantuvo |
+| Cromado | $500 | por uña | lista |
+| Strass (hasta 10) | $1.200 | por set | lista |
+| Strass full | $5.000 | por set | sin precio en la lista, se mantuvo |
+| Gemas de colores | $2.500 | por set | sin precio en la lista, se mantuvo |
+| Perlado | $2.500 | por set | sin precio en la lista, se mantuvo |
+| Cadenitas doradas | $2.500 | por set | sin precio en la lista, se mantuvo |
+| Flor 3D | $1.500 | por uña | lista |
+| Relieve 3D (moños, flores) | $1.200 | por uña | orientativo |
+| Animal print | $400 | por uña | lista |
+| Carey | $450 | por uña | lista |
+| Cebra / tigre | $400 | por uña | lista |
+| Ondas | $400 | por uña | lista |
+| Estrellitas | $400 | por uña | lista |
+| Puntitos | $250 | por uña | lista |
+| Blooming | $300 | por uña | lista |
+| Tribal | $500 | por uña | orientativo |
+| Flores a mano alzada | $600 | por uña | orientativo |
+| Encapsulado (flores secas, foil) | $600 | por uña | orientativo |
+| Personajes (Kitty & cía) | $800 | por uña | orientativo |
+| Dibujo a mano alzada | $900 | por uña | orientativo |
+
+Los "orientativos" son técnicas que la lista nombra sin precio: quedaron en la escala de los diseños por uña (entre
+puntitos $250 y flor 3D $1.500) y se ajustan en Admin → Armador. La unidad de cada técnica vive en el código.
+Carey y cromado son nuevas: se cobran bien, pero la vista previa en 3D todavía no las dibuja.
 
 ## Lo que conviene mirar con Brenda
 
-- **Suben fuerte** por tener varias técnicas en las 10 uñas: Leo star gold $23.000 → $35.000, Milky gold $16.000 →
-  $25.500, Tribal french $22.000 → $29.000, Gold glitter $13.500 → $19.000, Babyboomer y Sunset aurora +$4.500,
-  Candy gems +$4.000. Es exactamente lo que cotiza el armador con las reglas nuevas; si parece mucho, el ajuste es
-  en el precio por mano de esas técnicas (strass, cat eye, encapsulado, aurora), no en el diseño suelto.
-- **Bajan** los sets con una sola técnica en pocas uñas: Black snake $19.000 → $15.500, Black stiletto −$2.500, Pink
-  dots, Lila perlas y Bordó aura −$2.000, Leo & cherry −$1.500.
+- **Suben**: Milky gold $16.000 → $25.000 (francesita por mano, strass y encapsulado en las 10 uñas), Gold glitter
+  $13.500 → $18.000, Babyboomer $14.500 → $18.500, Tribal french +$3.500, Sunset aurora +$3.000, Sunset french y Pink
+  babyboomer +$2.500, Francesita glitter +$2.000.
+- **Bajan**: Leo & cherry $19.500 → $15.000 (animal print en 4 uñas son $1.600), Black snake y Black french −$3.500,
+  Pink dots −$3.000, Lila perlas, Black stiletto y Bordó aura −$2.500, Black leo y Milky star −$2.000.
 - **Set base**: con estos insumos cuesta $9.300 (de los cuales $6.000 es la hora de Brenda). A $12.000 el margen es 22 %;
   subirlo a $12.500 lo deja en 25 %. Como todo el catálogo se apoya en la base, es la decisión que más mueve.
 - **Valor hora**: $6.000/h es el valor cargado en la configuración. Si Brenda considera que su hora vale más, el piso
@@ -109,6 +136,20 @@ Los precios del sitio salen de la tabla `bfnails.designs`, no del código. Para 
 UPDATE bfnails.builder_options SET delta = 0 WHERE id IN ('largo', 'mate');
 UPDATE bfnails.builder_options SET delta = 1500 WHERE id = 'xl';
 UPDATE bfnails.builder_options SET active = false WHERE id = 'francesita-color';
+-- precios por técnica según la lista (la unidad mano/uña/set la pone el código)
+UPDATE bfnails.builder_options SET delta = 1500 WHERE id IN ('francesita', 'aurora', 'flor-3d');
+UPDATE bfnails.builder_options SET delta = 1200 WHERE id IN ('cat-eye', 'strass', '3d');
+UPDATE bfnails.builder_options SET delta = 1700 WHERE id = 'aura';
+UPDATE bfnails.builder_options SET delta = 400 WHERE id IN ('animal-print', 'cebra', 'ondas', 'estrellas');
+UPDATE bfnails.builder_options SET delta = 250 WHERE id = 'puntitos';
+UPDATE bfnails.builder_options SET delta = 300 WHERE id = 'blooming';
+UPDATE bfnails.builder_options SET delta = 500 WHERE id = 'tribal';
+UPDATE bfnails.builder_options SET delta = 600 WHERE id IN ('flores', 'encapsulado');
+UPDATE bfnails.builder_options SET delta = 800 WHERE id = 'personajes';
+UPDATE bfnails.builder_options SET delta = 900 WHERE id = 'a-mano';
+UPDATE bfnails.builder_options SET label = 'Flor 3D' WHERE id = 'flor-3d';
+UPDATE bfnails.builder_options SET label = 'Perlado' WHERE id = 'perlas';
+-- carey y cromado son nuevas: aparecen solas con su precio del código hasta que se guarden desde el admin
 ```
 
 1. Insumos y recetas: `DATABASE_URL=... pnpm db:seed` (o `pnpm db:seed:sql > seed.sql` y pegarlo en el SQL editor de
@@ -117,29 +158,29 @@ UPDATE bfnails.builder_options SET active = false WHERE id = 'francesita-color';
 3. Precios (o ajustarlos uno por uno desde Admin → Catálogo):
 
 ```sql
-UPDATE bfnails.designs SET price = 24500, updated_at = now() WHERE slug = 'polka-flower';
-UPDATE bfnails.designs SET price = 15000, updated_at = now() WHERE slug = 'pink-dots';
-UPDATE bfnails.designs SET price = 15000, updated_at = now() WHERE slug = 'lila-perlas';
+UPDATE bfnails.designs SET price = 23000, updated_at = now() WHERE slug = 'polka-flower';
+UPDATE bfnails.designs SET price = 14000, updated_at = now() WHERE slug = 'pink-dots';
+UPDATE bfnails.designs SET price = 14500, updated_at = now() WHERE slug = 'lila-perlas';
 UPDATE bfnails.designs SET price = 15500, updated_at = now() WHERE slug = 'black-snake';
 UPDATE bfnails.designs SET price = 15500, updated_at = now() WHERE slug = 'black-stiletto';
-UPDATE bfnails.designs SET price = 18000, updated_at = now() WHERE slug = 'black-leo';
+UPDATE bfnails.designs SET price = 15000, updated_at = now() WHERE slug = 'black-leo';
 UPDATE bfnails.designs SET price = 18500, updated_at = now() WHERE slug = 'french-glitter';
 UPDATE bfnails.designs SET price = 12500, updated_at = now() WHERE slug = 'verde-oliva';
 UPDATE bfnails.designs SET price = 12500, updated_at = now() WHERE slug = 'violeta';
 UPDATE bfnails.designs SET price = 19500, updated_at = now() WHERE slug = 'pink-babyboomer';
-UPDATE bfnails.designs SET price = 23500, updated_at = now() WHERE slug = 'pink-wave';
-UPDATE bfnails.designs SET price = 16500, updated_at = now() WHERE slug = 'milky-star';
-UPDATE bfnails.designs SET price = 18000, updated_at = now() WHERE slug = 'leo-cherry';
+UPDATE bfnails.designs SET price = 21000, updated_at = now() WHERE slug = 'pink-wave';
+UPDATE bfnails.designs SET price = 14500, updated_at = now() WHERE slug = 'milky-star';
+UPDATE bfnails.designs SET price = 15000, updated_at = now() WHERE slug = 'leo-cherry';
 UPDATE bfnails.designs SET price = 20000, updated_at = now() WHERE slug = 'sunset-french';
-UPDATE bfnails.designs SET price = 16000, updated_at = now() WHERE slug = 'bordo-aura';
-UPDATE bfnails.designs SET price = 35000, updated_at = now() WHERE slug = 'leo-star-gold';
-UPDATE bfnails.designs SET price = 29000, updated_at = now() WHERE slug = 'tribal-french';
-UPDATE bfnails.designs SET price = 20000, updated_at = now() WHERE slug = 'black-french';
-UPDATE bfnails.designs SET price = 22000, updated_at = now() WHERE slug = 'pink-zebra';
-UPDATE bfnails.designs SET price = 21000, updated_at = now() WHERE slug = 'candy-gems';
-UPDATE bfnails.designs SET price = 21500, updated_at = now() WHERE slug = 'sunset-aurora';
-UPDATE bfnails.designs SET price = 17000, updated_at = now() WHERE slug = 'milky-pearl';
-UPDATE bfnails.designs SET price = 25500, updated_at = now() WHERE slug = 'milky-gold';
-UPDATE bfnails.designs SET price = 19000, updated_at = now() WHERE slug = 'babyboomer';
-UPDATE bfnails.designs SET price = 19000, updated_at = now() WHERE slug = 'gold-glitter';
+UPDATE bfnails.designs SET price = 15500, updated_at = now() WHERE slug = 'bordo-aura';
+UPDATE bfnails.designs SET price = 24500, updated_at = now() WHERE slug = 'leo-star-gold';
+UPDATE bfnails.designs SET price = 25500, updated_at = now() WHERE slug = 'tribal-french';
+UPDATE bfnails.designs SET price = 17500, updated_at = now() WHERE slug = 'black-french';
+UPDATE bfnails.designs SET price = 19500, updated_at = now() WHERE slug = 'pink-zebra';
+UPDATE bfnails.designs SET price = 18500, updated_at = now() WHERE slug = 'candy-gems';
+UPDATE bfnails.designs SET price = 20000, updated_at = now() WHERE slug = 'sunset-aurora';
+UPDATE bfnails.designs SET price = 16500, updated_at = now() WHERE slug = 'milky-pearl';
+UPDATE bfnails.designs SET price = 25000, updated_at = now() WHERE slug = 'milky-gold';
+UPDATE bfnails.designs SET price = 18500, updated_at = now() WHERE slug = 'babyboomer';
+UPDATE bfnails.designs SET price = 18000, updated_at = now() WHERE slug = 'gold-glitter';
 ```

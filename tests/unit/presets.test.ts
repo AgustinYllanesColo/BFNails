@@ -75,6 +75,7 @@ describe("uñas acento", () => {
     const q = quoteSelection({ ...base, nailDesigns }, cfg);
     const flor = q.lines.filter((l) => l.id === "extra:flor-3d");
     expect(flor).toHaveLength(1);
-    expect(flor[0].label).toBe("Flor 3D (organza) (índice derecha y anular izquierda)");
+    expect(flor[0].label).toBe("Flor 3D (índice derecha y anular izquierda)");
+    expect(flor[0].amount).toBe(3000);
   });
 });

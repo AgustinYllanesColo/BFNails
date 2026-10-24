@@ -5,6 +5,7 @@ import { Card, PageTitle, adminBtn, adminInput, tableClass } from "@/components/
 import { saveOptions } from "./actions";
 import { listAllOptions } from "@/lib/admin/options";
 import { formatARS } from "@/lib/format";
+import { DEFAULT_BUILDER_CONFIG, UNIT_LABEL } from "@/lib/pricing";
 
 export default async function ArmadorAdminPage() {
   await requireAdmin();
@@ -57,6 +58,7 @@ export default async function ArmadorAdminPage() {
                     </td>
                     <td>
                       <input name={`delta:${o.id}`} type="number" step={100} defaultValue={o.delta} className={adminInput + " w-32"} />
+                      {title === "Técnicas y extras" && <span className="ml-2 text-xs text-ink-soft">{UNIT_LABEL[DEFAULT_BUILDER_CONFIG.extras.find((e) => e.id === o.id)?.unit ?? "mano"]}</span>}
                     </td>
                     <td>
                       <input name={`complexity:${o.id}`} type="number" min={0} max={10} defaultValue={o.complexity ?? 0} className={adminInput + " w-20"} />

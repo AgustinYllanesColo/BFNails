@@ -61,8 +61,12 @@ export async function getBuilderConfig(): Promise<BuilderConfig> {
     lengths: of("length").map((r) => ({ id: r.id as BuilderConfig["lengths"][number]["id"], label: r.label, delta: r.delta, complexity: r.complexity })),
     finishes: of("finish").map((r) => ({ id: r.id as BuilderConfig["finishes"][number]["id"], label: r.label, delta: r.delta, complexity: r.complexity })),
     bases: of("base").map((r) => ({ id: r.id, label: r.label, delta: r.delta, hex: r.hex ?? "#e8c4b0" })),
+    // la unidad (mano / uña / set) vive en el código, por id; la base guarda precio, puntos y si está activa
     extras: withNewDefaults(
-      of("extra").map((r) => ({ id: r.id, label: r.label, delta: r.delta, complexity: r.complexity, group: r.group ?? "Otros", description: r.description ?? undefined })),
+      of("extra").map((r) => {
+        const d = DEFAULT_BUILDER_CONFIG.extras.find((e) => e.id === r.id);
+        return { id: r.id, label: r.label, delta: r.delta, complexity: r.complexity, group: r.group ?? "Otros", description: r.description ?? undefined, unit: d?.unit ?? "mano", nailDelta: d?.nailDelta };
+      }),
     ),
     tiers: DEFAULT_BUILDER_CONFIG.tiers,
     charms,

@@ -70,8 +70,8 @@ tests/e2e       scripts Playwright de flujo y capturas
 
 ## Modelo de precios del armador
 
-`precio = base + largo (solo XL) + Σ técnicas por mano + recargo por nivel`.
-Cada técnica tiene precio por mano: se cobra por cada mano donde va en 2 o más uñas, y el precio de una uña (la mitad) si en esa mano va en una sola. La francesita incluye el color de la punta. Cada técnica suma puntos de complejidad; los puntos definen el nivel (Simple / Intermedio / Elaborado / Premium) y su recargo. Todo se edita en Admin → Armador. Si la clienta escribe notas libres, el pedido nace **a confirmar** y Brenda fija el precio final antes del pago.
+`precio = base + largo (solo XL) + Σ técnicas + recargo por nivel`.
+Cada técnica se cobra según su unidad: por mano (francesita, degradé, brillos: cada mano con 2 o más uñas, y la mitad si en esa mano va en una sola), por uña (los diseños) o por set (apliques como los strass). La francesita incluye el color de la punta. Cada técnica suma puntos de complejidad; los puntos definen el nivel (Simple / Intermedio / Elaborado / Premium) y su recargo. Todo se edita en Admin → Armador. Si la clienta escribe notas libres, el pedido nace **a confirmar** y Brenda fija el precio final antes del pago.
 
 ## Precios del catálogo y costos
 

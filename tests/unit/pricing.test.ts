@@ -20,12 +20,11 @@ describe("quoteSelection", () => {
 
   it("los extras suman precio y puntos de complejidad con recargo por nivel", () => {
     const q = quoteSelection({ ...DEFAULT_SELECTION, extras: ["blooming", "francesita", "strass", "personajes"] });
-    // en las 10 uñas cada técnica se cobra por las dos manos:
-    // base 12000 + blooming 5000 + francesita 3000 + strass 4000 + personajes 8000 = 32000
-    // puntos: 1 + 1 + 1 + 3 = 6 → nivel elaborado (+2500)
+    // en las 10 uñas: blooming por uña 300×10, francesita por mano 1500×2, strass por set 1200, personajes por uña 800×10
+    // base 12000 + 3000 + 3000 + 1200 + 8000 = 27200; puntos: 1 + 1 + 1 + 3 = 6 → nivel elaborado (+2500)
     expect(q.complexity).toBe(3);
     expect(q.complexityLabel).toBe("Elaborado");
-    expect(q.total).toBe(32000 + 2500);
+    expect(q.total).toBe(27200 + 2500);
     expect(q.lines.find((l) => l.id === "complexity")?.amount).toBe(2500);
   });
 
@@ -38,6 +37,15 @@ describe("quoteSelection", () => {
     expect(on([3, 8]).lines.find((l) => l.id === "extra:francesita")?.amount).toBe(1600);
     expect(on([1, 3, 8]).lines.find((l) => l.id === "extra:francesita")?.amount).toBe(1500 + 800);
     expect(francesita.delta).toBe(1500);
+  });
+
+  it("los diseños se cobran por uña y los apliques por set", () => {
+    const on = (id: string, nails: number[]) => quoteSelection({ ...DEFAULT_SELECTION, nailDesigns: Array.from({ length: 10 }, (_, i) => (nails.includes(i) ? { extras: [id] } : null)) }).lines.find((l) => l.id === `extra:${id}`)?.amount;
+    expect(on("animal-print", [3])).toBe(400);
+    expect(on("animal-print", [0, 4, 5, 9])).toBe(1600);
+    expect(on("strass", [3])).toBe(1200);
+    expect(on("strass", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])).toBe(1200);
+    expect(on("cromado", [1, 6])).toBe(1000);
   });
 
   it("la francesita de color de los carritos viejos es la francesita de hoy", () => {
