@@ -28,33 +28,33 @@ Insumos, minutos y costo por set; piso con 25 % de margen; cotización del armad
 | Diseño | Técnicas | Insumos | Min. | Costo | Piso (25 %) | Armador | Hoy | Propuesto | Dif. |
 |---|---|---|---|---|---|---|---|---|---|
 | Set base (liso, 10 uñas + kit) | – | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $12.000 | $12.000 | 0 |
-| Polka flower | Francesita, Flor 3D, Puntitos | $3.814 | 91 | $12.914 | $17.500 | $21.000 | $21.000 | **$21.000** | 0 |
-| Pink dots | Puntitos | $3.425 | 69 | $10.325 | $14.000 | $13.500 | $14.000 | **$14.000** | 0 |
-| Lila perlas | Perlas | $3.411 | 65 | $9.911 | $13.500 | $14.500 | $14.500 | **$14.500** | 0 |
-| Black snake | Glitter, Dije Serpiente dorada con strass ×2 | $3.687 | 77 | $11.387 | $15.500 | $14.500 | $15.500 | **$15.500** | 0 |
-| Black stiletto | Largo: Largo, Degradé / babyboomer | $3.648 | 78 | $11.448 | $15.500 | $15.000 | $15.500 | **$15.500** | 0 |
-| Black leo | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.500 | $15.500 | **$15.500** | 0 |
+| Polka flower | Francesita, Flor 3D, Puntitos | $3.814 | 91 | $12.914 | $17.500 | $21.000 | $22.000 | **$21.000** | -1.000 |
+| Pink dots | Puntitos | $3.425 | 69 | $10.325 | $14.000 | $13.500 | $17.000 | **$14.000** | -3.000 |
+| Lila perlas | Perlas | $3.411 | 65 | $9.911 | $13.500 | $14.500 | $17.000 | **$14.500** | -2.500 |
+| Black snake | Glitter, Dije Serpiente dorada con strass ×2 | $3.687 | 77 | $11.387 | $15.500 | $15.500 | $19.000 | **$15.500** | -3.500 |
+| Black stiletto | Largo: Largo, Degradé / babyboomer | $3.648 | 78 | $11.448 | $15.500 | $15.000 | $18.000 | **$15.500** | -2.500 |
+| Black leo | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.500 | $17.000 | **$15.500** | -1.500 |
 | Francesita glitter | Francesita, Glitter | $3.707 | 83 | $12.007 | $16.500 | $16.000 | $16.500 | **$16.500** | 0 |
-| Verde oliva | liso | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $12.500 | **$12.500** | 0 |
-| Violeta | liso | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $12.500 | **$12.500** | 0 |
+| Verde oliva | liso | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $13.000 | **$12.500** | -500 |
+| Violeta | liso | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $13.000 | **$12.500** | -500 |
 | Pink babyboomer | Degradé / babyboomer, Glitter | $3.903 | 88 | $12.703 | $17.000 | $16.500 | $17.000 | **$17.000** | 0 |
-| Pink wave | Largo: Largo, Glitter, Strass, Ondas | $3.917 | 103 | $14.217 | $19.000 | $19.500 | $19.500 | **$19.500** | 0 |
-| Milky star | Puntitos, Estrellitas | $3.419 | 68 | $10.219 | $14.000 | $16.000 | $16.000 | **$16.000** | 0 |
-| Leo & cherry | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.500 | $15.500 | **$15.500** | 0 |
-| Sunset french | Francesita de color, Degradé / babyboomer | $3.885 | 88 | $12.685 | $17.000 | $17.000 | $17.000 | **$17.000** | 0 |
-| Bordó aura | Aura | $3.742 | 75 | $11.242 | $15.000 | $14.000 | $15.000 | **$15.000** | 0 |
-| Leo star gold | Largo: XL, Francesita de color, Strass, Cadenitas doradas, Animal print, Estrellitas | $6.349 | 110 | $17.349 | $23.500 | $27.000 | $27.000 | **$27.000** | 0 |
-| Tribal french | Largo: XL, Francesita, Strass, Tribal | $4.316 | 130 | $17.316 | $23.500 | $23.000 | $23.500 | **$23.500** | 0 |
-| Black french | Largo: Largo, Francesita de color, Strass | $3.779 | 90 | $12.779 | $17.500 | $18.000 | $18.000 | **$18.000** | 0 |
+| Pink wave | Largo: Largo, Glitter, Strass, Ondas | $3.917 | 103 | $14.217 | $19.000 | $19.500 | $21.000 | **$19.500** | -1.500 |
+| Milky star | Puntitos, Estrellitas | $3.419 | 68 | $10.219 | $14.000 | $16.000 | $16.500 | **$16.000** | -500 |
+| Leo & cherry | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.500 | $19.500 | **$15.500** | -4.000 |
+| Sunset french | Francesita de color, Degradé / babyboomer | $3.885 | 88 | $12.685 | $17.000 | $17.000 | $17.500 | **$17.000** | -500 |
+| Bordó aura | Aura | $3.742 | 75 | $11.242 | $15.000 | $14.000 | $18.000 | **$15.000** | -3.000 |
+| Leo star gold | Largo: XL, Francesita de color, Strass, Cadenitas doradas, Animal print, Estrellitas | $6.349 | 110 | $17.349 | $23.500 | $27.000 | $23.000 | **$27.000** | +4.000 |
+| Tribal french | Largo: XL, Francesita, Strass, Tribal | $4.316 | 130 | $17.316 | $23.500 | $23.000 | $22.000 | **$23.500** | +1.500 |
+| Black french | Largo: Largo, Francesita de color, Strass | $3.779 | 90 | $12.779 | $17.500 | $18.000 | $21.000 | **$18.000** | -3.000 |
 | Pink zebra | Cat eye, Cebra / tigre | $4.011 | 95 | $13.511 | $18.500 | $17.500 | $18.500 | **$18.500** | 0 |
 | Candy gems | Francesita, Gemas de colores | $3.957 | 87 | $12.657 | $17.000 | $17.000 | $17.000 | **$17.000** | 0 |
-| Sunset aurora | Degradé / babyboomer, Efecto aurora / espejo | $3.832 | 90 | $12.832 | $17.500 | $17.500 | $17.500 | **$17.500** | 0 |
-| Milky pearl | Largo: Largo, Perlas, Dije Aro piercing ×2 | $3.706 | 74 | $11.106 | $15.000 | $16.500 | $16.500 | **$16.500** | 0 |
-| Milky gold | Francesita, Strass, Encapsulado | $4.008 | 99 | $13.908 | $19.000 | $21.000 | $21.000 | **$21.000** | 0 |
-| Babyboomer | Degradé / babyboomer, Strass | $3.841 | 84 | $12.241 | $16.500 | $17.000 | $17.000 | **$17.000** | 0 |
-| Gold glitter | Glitter, Cat eye | $3.741 | 78 | $11.541 | $15.500 | $16.000 | $16.000 | **$16.000** | 0 |
+| Sunset aurora | Degradé / babyboomer, Efecto aurora / espejo | $3.832 | 90 | $12.832 | $17.500 | $17.500 | $17.000 | **$17.500** | +500 |
+| Milky pearl | Largo: Largo, Perlas, Dije Aro piercing ×2 | $3.706 | 74 | $11.106 | $15.000 | $17.500 | $16.500 | **$17.500** | +1.000 |
+| Milky gold | Francesita, Strass, Encapsulado | $4.008 | 99 | $13.908 | $19.000 | $21.000 | $16.000 | **$21.000** | +5.000 |
+| Babyboomer | Degradé / babyboomer, Strass | $3.841 | 84 | $12.241 | $16.500 | $17.000 | $14.500 | **$17.000** | +2.500 |
+| Gold glitter | Glitter, Cat eye | $3.741 | 78 | $11.541 | $15.500 | $16.000 | $13.500 | **$16.000** | +2.500 |
 
-Suma del catálogo: $441.000 hoy → $429.500 propuesto (baja 2,6 %): se corrigen hacia abajo los sets simples que estaban
+Suma del catálogo: $441.000 hoy → $430.500 propuesto (baja 2,4 %): se corrigen hacia abajo los sets simples que estaban
 caros para lo que llevan y hacia arriba los que tenían más trabajo del que cobraban.
 
 ## Lo que conviene mirar con Brenda
@@ -82,6 +82,9 @@ caros para lo que llevan y hacia arriba los que tenían más trabajo del que cob
 - `lib/admin/costs.ts`: sin base de datos, Admin → Costos muestra las recetas del seed (antes salía "sin receta").
 - `tests/unit/recipes.test.ts`: cada diseño del catálogo cubre su costo con el margen objetivo y no cobra menos que el
   armador para la misma receta.
+- Los dijes del armador y de la página de dijes tienen el precio nuevo por unidad (de $400 a $1.500; metálicos $1.000,
+  Kitty $1.300) y se pueden comprar sueltos desde `/dijes`: entran al carrito por unidad, sin medidas, y el checkout
+  los cobra con el precio del servidor. Milky pearl sube a $17.500 porque lleva dos aros piercing que ahora valen $1.000.
 
 ## Cómo llevarlo a producción
 
@@ -114,7 +117,7 @@ UPDATE bfnails.designs SET price = 18000, updated_at = now() WHERE slug = 'black
 UPDATE bfnails.designs SET price = 18500, updated_at = now() WHERE slug = 'pink-zebra';
 UPDATE bfnails.designs SET price = 17000, updated_at = now() WHERE slug = 'candy-gems';
 UPDATE bfnails.designs SET price = 17500, updated_at = now() WHERE slug = 'sunset-aurora';
-UPDATE bfnails.designs SET price = 16500, updated_at = now() WHERE slug = 'milky-pearl';
+UPDATE bfnails.designs SET price = 17500, updated_at = now() WHERE slug = 'milky-pearl';
 UPDATE bfnails.designs SET price = 21000, updated_at = now() WHERE slug = 'milky-gold';
 UPDATE bfnails.designs SET price = 17000, updated_at = now() WHERE slug = 'babyboomer';
 UPDATE bfnails.designs SET price = 16000, updated_at = now() WHERE slug = 'gold-glitter';

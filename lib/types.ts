@@ -105,6 +105,16 @@ export type CartItem =
       unitPrice: number;
       qty: number;
       sizes: SizeSelection;
+    }
+  | {
+      /** Dije suelto (sin set): se cobra por unidad y no lleva medidas. */
+      id: string;
+      kind: "charm";
+      charmId: string;
+      name: string;
+      image?: string;
+      unitPrice: number;
+      qty: number;
     };
 
 export type DeliveryMethod = "retiro" | "moto" | "correo_domicilio" | "correo_sucursal";

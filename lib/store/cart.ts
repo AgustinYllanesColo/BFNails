@@ -23,11 +23,19 @@ export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      add: (item) => set((s) => ({ items: [...s.items, { ...item, id: uid() } as CartItem] })),
+      add: (item) =>
+        set((s) => {
+          // un dije que ya está en el carrito suma cantidad en vez de repetir la fila
+          if (item.kind === "charm") {
+            const same = s.items.find((i) => i.kind === "charm" && i.charmId === item.charmId);
+            if (same) return { items: s.items.map((i) => (i.id === same.id ? { ...i, qty: Math.min(50, i.qty + item.qty) } : i)) };
+          }
+          return { items: [...s.items, { ...item, id: uid() } as CartItem] };
+        }),
       remove: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
       setQty: (id, qty) =>
         set((s) => ({
-          items: s.items.map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(10, qty)) } : i)),
+          items: s.items.map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(i.kind === "charm" ? 50 : 10, qty)) } : i)),
         })),
       clear: () => set({ items: [] }),
       subtotal: () => get().items.reduce((acc, i) => acc + i.unitPrice * i.qty, 0),

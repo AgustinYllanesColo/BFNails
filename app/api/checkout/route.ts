@@ -62,6 +62,19 @@ export async function POST(req: Request) {
         shape: it.shape ?? d.shape,
         length: it.length ?? d.length,
       });
+    } else if (it.kind === "charm") {
+      const charm = config.charms?.find((c) => c.id === it.charmId && c.active);
+      if (!charm)
+        return NextResponse.json({ error: `El dije ${it.charmId} ya no está disponible` }, { status: 400 });
+      items.push({
+        id: crypto.randomUUID(),
+        kind: "charm",
+        charmId: charm.id,
+        name: charm.name,
+        image: charm.image,
+        unitPrice: charm.price,
+        qty: it.qty,
+      });
     } else {
       const quote = quoteSelection(it.selection, config);
       needsConfirmation ||= quote.needsConfirmation;

@@ -109,7 +109,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
             title={`BF Studio · ${order.number}`}
             meta={new Date(order.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
             lines={[
-              ...order.items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: `${i.name} ×${i.qty} · ${describeSizes(i.sizes).toLowerCase()}`, value: formatARS(i.unitPrice * i.qty) })),
+              ...order.items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: i.kind === "charm" ? `dije ${i.name} ×${i.qty}` : `${i.name} ×${i.qty} · ${describeSizes(i.sizes).toLowerCase()}`, value: formatARS(i.unitPrice * i.qty) })),
               { kind: "rule", id: "r1" },
               { kind: "row", id: "envio", label: order.delivery.label.toLowerCase(), value: order.delivery.cost ? formatARS(order.delivery.cost) : "gratis" },
               { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[order.payment.method].toLowerCase(), tone: "muted" },

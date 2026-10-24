@@ -4,6 +4,7 @@ import type { Charm } from "@/lib/data/content";
 import { formatARS } from "@/lib/format";
 import { CharmThumb } from "./CharmThumb";
 import { useCharmFilter } from "./CharmFilter";
+import { AddCharmToCart } from "./AddCharmToCart";
 
 /** Grilla de dijes disponibles con su precio por unidad. */
 export function CharmsGrid({ charms }: { charms: Charm[] }) {
@@ -16,7 +17,8 @@ export function CharmsGrid({ charms }: { charms: Charm[] }) {
           <li key={c.id} className="rounded-lg bg-white/80 p-2 ring-1 ring-bordo/10">
             <CharmThumb charm={c} />
             <p className="mt-2 px-1 text-[13px] leading-tight font-semibold">{c.name}</p>
-            <p className="px-1 pb-1 text-[13px] text-ink-soft">{formatARS(c.price)} c/u</p>
+            <p className="px-1 text-[13px] text-ink-soft">{formatARS(c.price)} c/u</p>
+            <AddCharmToCart charm={c} />
           </li>
         ))}
       </ul>

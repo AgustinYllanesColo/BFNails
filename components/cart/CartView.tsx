@@ -18,12 +18,14 @@ export function CartView() {
 
   const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
+  const sets = items.filter((i) => i.kind !== "charm").reduce((a, i) => a + i.qty, 0);
+  const dijes = items.filter((i) => i.kind === "charm").reduce((a, i) => a + i.qty, 0);
 
   if (items.length === 0) {
     return (
       <div className="bg-cream-deep rounded-lg p-12 text-center">
         <p className="font-title text-3xl">Todavía no hay nada acá</p>
-        <p className="text-ink-soft mt-2">Elegí un set del catálogo o armá el tuyo.</p>
+        <p className="text-ink-soft mt-2">Elegí un set del catálogo, armá el tuyo o sumá dijes sueltos.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button href="/catalogo">Ver catálogo</Button>
           <Button href="/disena" variant="secondary">
@@ -48,8 +50,8 @@ export function CartView() {
               className="ring-bordo/10 flex gap-4 rounded-lg bg-white/70 p-4 ring-1"
             >
               <div className="bg-cream-deep relative size-24 shrink-0 overflow-hidden rounded-md">
-                {item.kind === "design" && item.image ? (
-                  <Image src={item.image} alt="" fill sizes="96px" className="object-cover" />
+                {item.kind !== "custom" && item.image ? (
+                  <Image src={item.image} alt="" fill sizes="96px" className={item.kind === "charm" ? "object-contain p-2" : "object-cover"} />
                 ) : (
                   <div className="font-title text-bordo grid h-full place-items-center text-3xl">
                     ✦
@@ -60,7 +62,7 @@ export function CartView() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-title text-xl leading-tight">{item.name}</p>
-                    <p className="text-ink-soft text-xs">{describeSizes(item.sizes)}</p>
+                    <p className="text-ink-soft text-xs">{item.kind === "charm" ? `Dije suelto · ${formatARS(item.unitPrice)} c/u` : describeSizes(item.sizes)}</p>
                     <ItemDetails item={item} />
                   </div>
                   <button
@@ -139,18 +141,13 @@ export function CartView() {
             },
           ]}
           footer={[
-            {
-              kind: "row",
-              id: "items",
-              label: "sets",
-              value: String(items.reduce((a, i) => a + i.qty, 0)),
-            },
-            {
-              kind: "row",
-              id: "kit",
-              label: "incluye c/u",
-              value: "10 uñas + kit de colocación",
-            },
+            ...(sets > 0
+              ? [
+                  { kind: "row", id: "items", label: "sets", value: String(sets) } as ReceiptLine,
+                  { kind: "row", id: "kit", label: "incluye c/u", value: "10 uñas + kit de colocación" } as ReceiptLine,
+                ]
+              : []),
+            ...(dijes > 0 ? [{ kind: "row", id: "dijes", label: "dijes sueltos", value: String(dijes) } as ReceiptLine] : []),
             ...(needsConfirmation
               ? [
                   {
@@ -181,6 +178,7 @@ export function CartView() {
 }
 
 function ItemDetails({ item }: { item: CartItem }) {
+  if (item.kind === "charm") return null;
   if (item.kind === "design") {
     if (!item.shape && !item.length) return null;
     return (

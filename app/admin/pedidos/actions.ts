@@ -49,7 +49,7 @@ export async function confirmPrice(id: string, formData: FormData) {
   if (updated && updated.payment.method === "mercadopago" && mpEnabled()) {
     try {
       // Reparte el subtotal confirmado en un único ítem para MP.
-      const forMp = { ...updated, items: [{ ...updated.items[0], kind: "design" as const, designSlug: "custom", name: `Pedido ${updated.number}`, unitPrice: subtotal, qty: 1, image: undefined }] };
+      const forMp = { ...updated, items: [{ id: updated.items[0].id, kind: "design" as const, designSlug: "custom", name: `Pedido ${updated.number}`, unitPrice: subtotal, qty: 1, sizes: { mode: "kit" as const } }] };
       const pref = await createPreference(forMp, publicOrderUrl(updated));
       updated = await updateOrder(id, { payment: { ...updated.payment, mpPreferenceId: pref.id, mpInitPoint: pref.initPoint } });
     } catch (e) {

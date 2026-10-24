@@ -108,7 +108,9 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
           items: items.map((i) =>
             i.kind === "design"
               ? { kind: "design", designSlug: i.designSlug, qty: i.qty, sizes: i.sizes, shape: i.shape, length: i.length }
-              : { kind: "custom", selection: i.selection, qty: i.qty, sizes: i.sizes },
+              : i.kind === "charm"
+                ? { kind: "charm", charmId: i.charmId, qty: i.qty }
+                : { kind: "custom", selection: i.selection, qty: i.qty, sizes: i.sizes },
           ),
         }),
       });

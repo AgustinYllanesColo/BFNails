@@ -21,7 +21,7 @@ export default async function DijesPage() {
     <div className="pt-28 pb-24 md:pt-36">
       <div className="container-x">
         <Heading as="h1">Dijes</Heading>
-        <p className="text-ink-soft mt-3 max-w-[44ch] text-lg">Lo que tengo disponible. Sumalos a tu set en el armador.</p>
+        <p className="text-ink-soft mt-3 max-w-[44ch] text-lg">Lo que tengo disponible. Sumalos a tu set en el armador o llevalos sueltos: el precio es por unidad.</p>
         <div className="mt-8">
           {charms.length ? (
             <CharmsGrid charms={charms} />

@@ -306,7 +306,7 @@ export const SEED_DESIGNS: Design[] = [
     length: "largo",
     finish: "glossy",
     complexity: 2,
-    price: 16500,
+    price: 17500,
     tags: ["milky", "charms", "3D"],
     colors: ["#f6efe6"],
   },

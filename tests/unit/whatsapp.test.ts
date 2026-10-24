@@ -71,3 +71,16 @@ describe("normalizeWhatsapp", () => {
     expect(normalizeWhatsapp("0221 15 444 5555")).toBe("5492214445555");
   });
 });
+
+describe("dijes sueltos en el pedido", () => {
+  it("un dije suelto se describe por unidad, sin medidas, y pasa la validación del checkout", async () => {
+    const { describeItem } = await import("@/lib/whatsapp");
+    const { cartItemSchema } = await import("@/lib/checkout");
+    const line = describeItem({ id: "c", kind: "charm", charmId: "cerezas", name: "Cerezas", unitPrice: 1000, qty: 3 });
+    expect(line).toContain("Dije Cerezas x3");
+    expect(line).toContain(formatARS(3000));
+    expect(line).not.toContain("Medida");
+    expect(cartItemSchema.safeParse({ kind: "charm", charmId: "cerezas", qty: 3 }).success).toBe(true);
+    expect(cartItemSchema.safeParse({ kind: "charm", charmId: "cerezas", qty: 0 }).success).toBe(false);
+  });
+});

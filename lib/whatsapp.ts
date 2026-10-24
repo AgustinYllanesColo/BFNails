@@ -31,6 +31,9 @@ export function describeSizes(sizes: SizeSelection): string {
 
 /** Detalle de un item. `link`: con el link para verlo en 3D (en el mensaje de WhatsApp; las páginas ponen su propio botón). */
 export function describeItem(item: CartItem, opts: { link?: boolean } = {}): string {
+  if (item.kind === "charm") {
+    return `• Dije ${item.name} x${item.qty} (suelto, ${formatARS(item.unitPrice)} c/u) – ${formatARS(item.unitPrice * item.qty)}`;
+  }
   const sizes = describeSizes(item.sizes);
   if (item.kind === "design") {
     const variant =
