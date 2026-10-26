@@ -3,7 +3,7 @@ import { SEED_DESIGNS } from "@/lib/data/catalog";
 import { DEFAULT_CHARMS } from "@/lib/data/content";
 import { PRESETS } from "@/lib/data/presets";
 import { BASE_RECIPE, SEED_SUPPLIES, TECHNIQUE_RECIPES, priceFromCost, recipeMaterials, selectionRecipe, techniqueRecipe } from "@/lib/data/recipes";
-import { DEFAULT_BUILDER_CONFIG, quoteSelection } from "@/lib/pricing";
+import { CATALOG_MAX_PRICE, DEFAULT_BUILDER_CONFIG, quoteSelection } from "@/lib/pricing";
 import { DEFAULT_SETTINGS } from "@/lib/data/settings";
 
 const cfg = { ...DEFAULT_BUILDER_CONFIG, charms: DEFAULT_CHARMS };
@@ -28,7 +28,7 @@ describe("recetas de costo", () => {
     expect(dos.minutes).toBeGreaterThanOrEqual(BASE_RECIPE.minutes + Math.round(TECHNIQUE_RECIPES.tribal.minutes * 0.4));
   });
 
-  it("el precio de cada diseño cubre su costo con el margen objetivo y no baja de lo que cobra el armador", () => {
+  it("el precio de cada diseño cubre su costo con el margen objetivo, no baja de lo que cobra el armador y no pasa el tope", () => {
     const { hourlyRate, targetMargin } = DEFAULT_SETTINGS;
     for (const d of SEED_DESIGNS) {
       const sel = PRESETS[d.slug];
@@ -36,7 +36,8 @@ describe("recetas de costo", () => {
       const floor = priceFromCost(recipeMaterials(r), r.minutes, hourlyRate, targetMargin);
       expect(d.price, `${d.slug}: piso por costo ${floor}`).toBeGreaterThanOrEqual(floor);
       const armador = quoteSelection(sel, cfg).total;
-      expect(d.price, `${d.slug}: el armador cobra ${armador}`).toBeGreaterThanOrEqual(armador);
+      expect(d.price, `${d.slug}: el armador cobra ${armador}`).toBeGreaterThanOrEqual(Math.min(armador, CATALOG_MAX_PRICE));
+      expect(d.price, `${d.slug}: tope del catálogo`).toBeLessThanOrEqual(CATALOG_MAX_PRICE);
     }
   });
 });

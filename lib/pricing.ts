@@ -54,6 +54,9 @@ export type BuilderConfig = {
   charms?: Charm[];
 };
 
+/** Tope de precio de un diseño del catálogo (decisión de Brenda): por más técnicas que lleve, no pasa de acá. */
+export const CATALOG_MAX_PRICE = 24000;
+
 export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
   basePrice: 12000,
   shapes: [
