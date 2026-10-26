@@ -48,16 +48,19 @@ export function withNailDesigns(sel: BuilderSelection): BuilderSelection {
   return { ...rest, nailDesigns: designs };
 }
 
-/** Cambia las uñas `idx` con `fn` (que recibe lo que llevan hoy). Si una queda igual al set, vuelve a "como el set". */
-export function editNails(sel: BuilderSelection, idx: number[], fn: (cur: NailSpec) => NailDesign): BuilderSelection {
+/**
+ * Cambia las uñas `idx` con `fn` (que recibe lo que llevan hoy y su color propio, si tienen). Si una queda igual al
+ * set, vuelve a "como el set". Sin `color` la uña sigue el color de la base aunque después lo cambien.
+ */
+export function editNails(sel: BuilderSelection, idx: number[], fn: (cur: NailSpec, ownColor: string | undefined) => NailDesign): BuilderSelection {
   const base = withNailDesigns(sel);
   const designs = [...(base.nailDesigns ?? Array(NAIL_COUNT).fill(null))];
   for (const i of idx) {
-    const next = fn(nailSpec(base, i));
-    const color = next.color ?? base.base;
+    const next = fn(nailSpec(base, i), base.nailDesigns?.[i]?.color);
+    const color = next.color === base.base ? undefined : next.color;
     const extras = next.extras ?? base.extras;
-    const same = color === base.base && extras.length === base.extras.length && extras.every((e) => base.extras.includes(e));
-    designs[i] = same ? null : { color, extras };
+    const same = color === undefined && extras.length === base.extras.length && extras.every((e) => base.extras.includes(e));
+    designs[i] = same ? null : color === undefined ? { extras } : { color, extras };
   }
   return { ...base, nailDesigns: designs };
 }

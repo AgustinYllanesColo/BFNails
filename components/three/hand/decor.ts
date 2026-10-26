@@ -42,6 +42,7 @@ export function decorKey(i: DecorInput) {
 }
 
 const PAINTED = new Set([
+  "carey",
   "francesita",
   "francesita-color",
   "degrade",
@@ -436,6 +437,66 @@ export function paintDecor(canvas: HTMLCanvasElement, input: DecorInput) {
     ]) {
       ctx.beginPath();
       ctx.arc(W * dx, d.L * dy, W * 0.03, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 9b. carey: ámbar translúcido con manchas café de bordes difusos, como el caparazón de tortuga
+  if (has("carey")) {
+    // fondo ámbar que deja ver la base
+    const amber = ctx.createLinearGradient(0, 0, 0, d.L);
+    amber.addColorStop(0, "rgba(214,140,62,0.72)");
+    amber.addColorStop(0.5, "rgba(196,116,40,0.78)");
+    amber.addColorStop(1, "rgba(222,156,76,0.7)");
+    ctx.fillStyle = amber;
+    ctx.fillRect(-W, 0, W * 2, d.Lref);
+    // manchas grandes: radiales con el centro casi negro y borde que se funde en el ámbar
+    const blobs = Math.round(5 + (d.L / W) * 2.5);
+    for (let k = 0; k < blobs; k++) {
+      const cx = (rand() - 0.5) * W * 1.1;
+      const cy = d.L * (0.05 + rand() * 0.9);
+      const rx = W * (0.16 + rand() * 0.16);
+      const ry = rx * (0.55 + rand() * 0.5);
+      const rot = rand() * Math.PI;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      ctx.scale(1, ry / rx);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+      g.addColorStop(0, "rgba(46,22,8,0.96)");
+      g.addColorStop(0.45, "rgba(78,36,12,0.85)");
+      g.addColorStop(0.8, "rgba(128,64,22,0.4)");
+      g.addColorStop(1, "rgba(160,90,34,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(0, 0, rx, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    // vetas finas y puntos chicos entre las manchas
+    for (let k = 0; k < blobs * 2; k++) {
+      const cx = (rand() - 0.5) * W;
+      const cy = d.L * rand();
+      const r = W * (0.03 + rand() * 0.05);
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0, "rgba(60,28,10,0.8)");
+      g.addColorStop(1, "rgba(60,28,10,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // reflejos cálidos: zonas más claras, miel, para que no quede chato
+    for (let k = 0; k < 3; k++) {
+      const cx = (rand() - 0.5) * W;
+      const cy = d.L * (0.15 + rand() * 0.7);
+      const r = W * (0.12 + rand() * 0.1);
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0, "rgba(246,196,110,0.5)");
+      g.addColorStop(1, "rgba(246,196,110,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.fill();
     }
   }

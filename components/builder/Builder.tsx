@@ -86,8 +86,8 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
       const base = withNailDesigns(s);
       const extras = nails.length === NAIL_COUNT ? [...new Set([...base.extras, id])] : base.extras.filter((e) => e !== id);
       let next: BuilderSelection = { ...base, art: undefined, extras };
-      next = editNails(next, ALL_NAILS.filter((i) => nails.includes(i)), (cur) => ({ color: cur.color, extras: [...new Set([...cur.extras, id])] }));
-      next = editNails(next, ALL_NAILS.filter((i) => !nails.includes(i)), (cur) => ({ color: cur.color, extras: cur.extras.filter((e) => e !== id) }));
+      next = editNails(next, ALL_NAILS.filter((i) => nails.includes(i)), (cur, own) => ({ color: own, extras: [...new Set([...cur.extras, id])] }));
+      next = editNails(next, ALL_NAILS.filter((i) => !nails.includes(i)), (cur, own) => ({ color: own, extras: cur.extras.filter((e) => e !== id) }));
       return next;
     });
 
@@ -102,7 +102,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
   const focusColor = focusSpecs.length && focusSpecs.every((sp) => sp.color === focusSpecs[0].color) ? focusSpecs[0].color : "";
   const toggleFocusExtra = (id: string) => {
     const all = focusSpecs.every((sp) => sp.extras.includes(id));
-    setSel((s) => editNails({ ...s, art: undefined }, focus, (cur) => ({ color: cur.color, extras: all ? cur.extras.filter((e) => e !== id) : [...new Set([...cur.extras, id])] })));
+    setSel((s) => editNails({ ...s, art: undefined }, focus, (cur, own) => ({ color: own, extras: all ? cur.extras.filter((e) => e !== id) : [...new Set([...cur.extras, id])] })));
   };
 
   /**
@@ -126,11 +126,14 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
   const allExtras = [...new Set(allNails(sel).flatMap((sp) => sp.extras))];
   const hasColored = allExtras.some((e) => COLORED.has(e));
 
+  // las técnicas que Brenda sacó del armador solo aparecen si el set ya las trae (una receta del catálogo), para poder sacarlas
+  const extrasKey = allExtras.join(",");
   const groups = useMemo(() => {
+    const present = new Set(extrasKey.split(","));
     const m = new Map<string, BuilderConfig["extras"]>();
-    config.extras.forEach((e) => m.set(e.group, [...(m.get(e.group) ?? []), e]));
+    config.extras.filter((e) => !e.retired || present.has(e.id)).forEach((e) => m.set(e.group, [...(m.get(e.group) ?? []), e]));
     return [...m.entries()];
-  }, [config]);
+  }, [config, extrasKey]);
 
   const addToCart = (fly = true) => {
     if (fly) flyToCart(addBtn.current);

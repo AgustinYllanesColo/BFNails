@@ -243,6 +243,11 @@ export function finishParams(finish: string, extras: string[]): FinishParams {
   return p;
 }
 
+/** Cromado en una uña: espejo metálico sobre el acabado del set (conserva glitter, cat eye y aurora si los hay). */
+export function chromeOver(p: FinishParams): FinishParams {
+  return { ...p, roughness: 0.06, metalness: 1, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 1.25, sheen: 0 };
+}
+
 export function applyFinish(m: THREE.MeshPhysicalMaterial, u: NailUniforms, p: FinishParams) {
   m.roughness = p.roughness;
   m.metalness = p.metalness;

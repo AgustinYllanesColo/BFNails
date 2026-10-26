@@ -30,8 +30,7 @@ Insumos, minutos y costo por set; piso con 25 % de margen; cotización del armad
 | Set base (liso, 10 uñas + kit) | – | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $12.000 | $12.000 | 0 |
 | Polka flower | Francesita, Flor 3D, Puntitos | $3.814 | 91 | $12.914 | $17.500 | $23.000 | $22.000 | **$23.000** | +1.000 |
 | Pink dots | Puntitos | $3.425 | 69 | $10.325 | $14.000 | $13.000 | $17.000 | **$14.000** | -3.000 |
-| Lila perlas | Perlado | $3.411 | 65 | $9.911 | $13.500 | $14.500 | $17.000 | **$14.500** | -2.500 |
-| Black snake | Glitter, Dije Serpiente dorada con strass ×2 | $3.687 | 77 | $11.387 | $15.500 | $15.500 | $19.000 | **$15.500** | -3.500 |
+| Lila perlas | Black snake | Glitter, Dije Serpiente dorada con strass ×2 | $3.687 | 77 | $11.387 | $15.500 | $15.500 | $19.000 | **$15.500** | -3.500 |
 | Black stiletto | Degradé / babyboomer | $3.648 | 78 | $11.448 | $15.500 | $14.000 | $18.000 | **$15.500** | -2.500 |
 | Black leo | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.000 | $17.000 | **$15.000** | -2.000 |
 | Francesita glitter | Francesita, Glitter | $3.707 | 83 | $12.007 | $16.500 | $18.500 | $16.500 | **$18.500** | +2.000 |
@@ -76,12 +75,8 @@ por uña).
 | Glitter | $1.200 | por mano | sin precio en la lista, se mantuvo |
 | Cromado | $500 | por uña | lista |
 | Strass (hasta 10) | $1.200 | por set | lista |
-| Strass full | $5.000 | por set | sin precio en la lista, se mantuvo |
-| Gemas de colores | $2.500 | por set | sin precio en la lista, se mantuvo |
 | Perlado | $2.500 | por set | sin precio en la lista, se mantuvo |
-| Cadenitas doradas | $2.500 | por set | sin precio en la lista, se mantuvo |
 | Flor 3D | $1.500 | por uña | lista |
-| Relieve 3D (moños, flores) | $1.200 | por uña | orientativo |
 | Animal print | $400 | por uña | lista |
 | Carey | $450 | por uña | lista |
 | Cebra / tigre | $400 | por uña | lista |
@@ -89,15 +84,12 @@ por uña).
 | Estrellitas | $400 | por uña | lista |
 | Puntitos | $250 | por uña | lista |
 | Blooming | $300 | por uña | lista |
-| Tribal | $500 | por uña | orientativo |
-| Flores a mano alzada | $600 | por uña | orientativo |
-| Encapsulado (flores secas, foil) | $600 | por uña | orientativo |
-| Personajes (Kitty & cía) | $800 | por uña | orientativo |
-| Dibujo a mano alzada | $900 | por uña | orientativo |
 
-Los "orientativos" son técnicas que la lista nombra sin precio: quedaron en la escala de los diseños por uña (entre
-puntitos $250 y flor 3D $1.500) y se ajustan en Admin → Armador. La unidad de cada técnica vive en el código.
-Carey y cromado son nuevas: se cobran bien, pero la vista previa en 3D todavía no las dibuja.
+Brenda sacó del armador tribal, flores a mano alzada, encapsulado, personajes, dibujo a mano alzada, relieve 3D,
+strass full, gemas de colores, perlado y cadenitas: no se ofrecen, pero se siguen cobrando y dibujando en las recetas
+del catálogo que las usan (Lila perlas, Milky pearl, Tribal french, Candy gems, Milky gold, Leo star gold), que por
+eso tampoco se ofrecen para modificar en el armador. Carey y cromado son nuevas y la vista previa en 3D las dibuja:
+el carey como ámbar translúcido con manchas café, el cromado como espejo metálico del color de la base, uña por uña.
 
 ## Lo que conviene mirar con Brenda
 

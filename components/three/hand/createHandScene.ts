@@ -11,6 +11,7 @@ import { createCuticleGeometry, computeNail, createNailGeometry, halfWidth, nail
 import {
   FINISH_KEYS,
   applyFinish,
+  chromeOver,
   createBowMaterial,
   createFlowerMaterial,
   createCuticleMaterial,
@@ -694,8 +695,10 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
   function applyMaterial(n: NailState) {
     n.material.color.copy(color.cur);
     n.uniforms.uCatColor.value.copy(catColor.cur);
-    n.uniforms.uSheer.value = sheer.cur;
-    applyFinish(n.material, n.uniforms, finCur);
+    // cromado: se elige por uña; esa uña es espejo metálico y sin velo translúcido
+    const chrome = lastSel ? nailSpec(lastSel, at(nails.indexOf(n))).extras.includes("cromado") : false;
+    n.uniforms.uSheer.value = chrome ? 0 : sheer.cur;
+    applyFinish(n.material, n.uniforms, chrome ? chromeOver(finCur) : finCur);
   }
 
   /** La forma de una uña en forma y largo dados: de la caché si ya se calculó (en un celular calcular las cinco
@@ -1000,9 +1003,10 @@ export function createHandScene(canvas: HTMLCanvasElement, options: HandSceneOpt
         catColor.cur.copy(cat);
         sheer.cur = sheerTo;
         finCur = { ...fin };
-        for (const n of nails) applyMaterial(n);
       }
     }
+    // el cromado por uña no pasa por la interpolación: se aplica siempre con lo que haya
+    for (const n of nails) applyMaterial(n);
 
     // decoración pintada
     let decalChanged = false;

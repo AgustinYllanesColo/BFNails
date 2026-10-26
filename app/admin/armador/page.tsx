@@ -58,7 +58,12 @@ export default async function ArmadorAdminPage() {
                     </td>
                     <td>
                       <input name={`delta:${o.id}`} type="number" step={100} defaultValue={o.delta} className={adminInput + " w-32"} />
-                      {title === "Técnicas y extras" && <span className="ml-2 text-xs text-ink-soft">{UNIT_LABEL[DEFAULT_BUILDER_CONFIG.extras.find((e) => e.id === o.id)?.unit ?? "mano"]}</span>}
+                      {title === "Técnicas y extras" && (
+                        <span className="ml-2 text-xs text-ink-soft">
+                          {UNIT_LABEL[DEFAULT_BUILDER_CONFIG.extras.find((e) => e.id === o.id)?.unit ?? "mano"]}
+                          {DEFAULT_BUILDER_CONFIG.extras.find((e) => e.id === o.id)?.retired && " · fuera del armador (solo catálogo)"}
+                        </span>
+                      )}
                     </td>
                     <td>
                       <input name={`complexity:${o.id}`} type="number" min={0} max={10} defaultValue={o.complexity ?? 0} className={adminInput + " w-20"} />

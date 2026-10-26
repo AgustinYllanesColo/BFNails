@@ -48,6 +48,13 @@ describe("quoteSelection", () => {
     expect(on("cromado", [1, 6])).toBe(1000);
   });
 
+  it("las técnicas retiradas no se ofrecen pero se siguen cobrando en las recetas del catálogo", () => {
+    const retired = DEFAULT_BUILDER_CONFIG.extras.filter((e) => e.retired).map((e) => e.id);
+    expect(retired).toEqual(expect.arrayContaining(["tribal", "perlas", "cadenas", "encapsulado", "strass-full"]));
+    for (const id of ["carey", "cromado", "francesita", "animal-print", "strass"]) expect(retired).not.toContain(id);
+    expect(quoteSelection({ ...DEFAULT_SELECTION, extras: ["tribal"] }).lines.find((l) => l.id === "extra:tribal")?.amount).toBe(5000);
+  });
+
   it("la francesita de color de los carritos viejos es la francesita de hoy", () => {
     const q = quoteSelection({ ...DEFAULT_SELECTION, extras: ["francesita-color"], tipColor: "negro" });
     expect(q.lines.find((l) => l.id === "extra:francesita")?.amount).toBe(3000);

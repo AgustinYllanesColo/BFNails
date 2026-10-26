@@ -28,6 +28,11 @@ export type Option<T extends string = string> = {
   unit?: ExtraUnit;
   /** Técnicas por mano: precio cuando en una mano va en una sola uña. Si falta, la mitad del precio por mano. */
   nailDelta?: number;
+  /**
+   * Brenda la sacó del armador: no se ofrece, pero se sigue cobrando y dibujando si viene en una receta del catálogo
+   * o en un carrito guardado.
+   */
+  retired?: boolean;
 };
 
 export type ComplexityTier = {
@@ -90,7 +95,7 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "dorado", label: "Dorado", delta: 0, hex: "#c9a24a" },
   ],
   extras: [
-    // lista de precios de Brenda (octubre 2026). Sin precio en la lista: valor orientativo, a confirmar.
+    // lista de precios de Brenda (octubre 2026). Las `retired` las sacó del armador (quedan para el catálogo).
     { id: "francesita", group: "Clásicos", label: "Francesita", delta: 1500, unit: "mano", complexity: 1 },
     { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, unit: "mano", complexity: 1 },
     { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, unit: "mano", complexity: 1 },
@@ -99,24 +104,24 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "aurora", group: "Brillos", label: "Efecto aurora / espejo", delta: 1500, unit: "mano", complexity: 1 },
     { id: "cromado", group: "Brillos", label: "Cromado", delta: 500, unit: "uña", complexity: 1 },
     { id: "strass", group: "3D y apliques", label: "Strass (hasta 10)", delta: 1200, unit: "set", complexity: 1 },
-    { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, unit: "set", complexity: 2 },
-    { id: "strass-colores", group: "3D y apliques", label: "Gemas de colores", delta: 2500, unit: "set", complexity: 1 },
-    { id: "perlas", group: "3D y apliques", label: "Perlado", delta: 2500, unit: "set", complexity: 1 },
-    { id: "cadenas", group: "3D y apliques", label: "Cadenitas doradas", delta: 2500, unit: "set", complexity: 1 },
+    { id: "strass-full", group: "3D y apliques", label: "Strass full", delta: 5000, unit: "set", complexity: 2, retired: true },
+    { id: "strass-colores", group: "3D y apliques", label: "Gemas de colores", delta: 2500, unit: "set", complexity: 1, retired: true },
+    { id: "perlas", group: "3D y apliques", label: "Perlado", delta: 2500, unit: "set", complexity: 1, retired: true },
+    { id: "cadenas", group: "3D y apliques", label: "Cadenitas doradas", delta: 2500, unit: "set", complexity: 1, retired: true },
     { id: "flor-3d", group: "3D y apliques", label: "Flor 3D", delta: 1500, unit: "uña", complexity: 2 },
-    { id: "3d", group: "3D y apliques", label: "Relieve 3D (moños, flores)", delta: 1200, unit: "uña", complexity: 2 },
+    { id: "3d", group: "3D y apliques", label: "Relieve 3D (moños, flores)", delta: 1200, unit: "uña", complexity: 2, retired: true },
     { id: "animal-print", group: "Diseños", label: "Animal print", delta: 400, unit: "uña", complexity: 2 },
     { id: "carey", group: "Diseños", label: "Carey", delta: 450, unit: "uña", complexity: 2 },
-    { id: "flores", group: "Diseños", label: "Flores a mano alzada", delta: 600, unit: "uña", complexity: 2 },
+    { id: "flores", group: "Diseños", label: "Flores a mano alzada", delta: 600, unit: "uña", complexity: 2, retired: true },
     { id: "puntitos", group: "Diseños", label: "Puntitos", delta: 250, unit: "uña", complexity: 1 },
     { id: "cebra", group: "Diseños", label: "Cebra / tigre", delta: 400, unit: "uña", complexity: 2 },
     { id: "ondas", group: "Diseños", label: "Ondas", delta: 400, unit: "uña", complexity: 1 },
     { id: "estrellas", group: "Diseños", label: "Estrellitas", delta: 400, unit: "uña", complexity: 1 },
-    { id: "tribal", group: "Diseños", label: "Tribal", delta: 500, unit: "uña", complexity: 2 },
+    { id: "tribal", group: "Diseños", label: "Tribal", delta: 500, unit: "uña", complexity: 2, retired: true },
     { id: "blooming", group: "Diseños", label: "Blooming", delta: 300, unit: "uña", complexity: 1 },
-    { id: "personajes", group: "Diseños", label: "Personajes (Kitty & cía)", delta: 800, unit: "uña", complexity: 3 },
-    { id: "a-mano", group: "Diseños", label: "Dibujo a mano alzada", delta: 900, unit: "uña", complexity: 3 },
-    { id: "encapsulado", group: "Diseños", label: "Encapsulado (flores secas, foil)", delta: 600, unit: "uña", complexity: 2 },
+    { id: "personajes", group: "Diseños", label: "Personajes (Kitty & cía)", delta: 800, unit: "uña", complexity: 3, retired: true },
+    { id: "a-mano", group: "Diseños", label: "Dibujo a mano alzada", delta: 900, unit: "uña", complexity: 3, retired: true },
+    { id: "encapsulado", group: "Diseños", label: "Encapsulado (flores secas, foil)", delta: 600, unit: "uña", complexity: 2, retired: true },
   ],
   tiers: [
     { level: 1, label: "Simple", minPoints: 0, surcharge: 0 },
