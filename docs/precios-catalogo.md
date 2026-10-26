@@ -30,7 +30,8 @@ Insumos, minutos y costo por set; piso con 25 % de margen; cotización del armad
 | Set base (liso, 10 uñas + kit) | – | $3.323 | 60 | $9.323 | $12.500 | $12.000 | $12.000 | $12.000 | 0 |
 | Polka flower | Francesita, Flor 3D, Puntitos | $3.814 | 91 | $12.914 | $17.500 | $23.000 | $22.000 | **$23.000** | +1.000 |
 | Pink dots | Puntitos | $3.425 | 69 | $10.325 | $14.000 | $13.000 | $17.000 | **$14.000** | -3.000 |
-| Lila perlas | Black snake | Glitter, Dije Serpiente dorada con strass ×2 | $3.687 | 77 | $11.387 | $15.500 | $15.500 | $19.000 | **$15.500** | -3.500 |
+| Lila perlas | Perlado | $3.411 | 65 | $9.911 | $13.500 | $14.500 | $17.000 | **$14.500** | -2.500 |
+| Black snake | Glitter, Dije Serpiente dorada con strass ×2 | $3.687 | 77 | $11.387 | $15.500 | $15.500 | $19.000 | **$15.500** | -3.500 |
 | Black stiletto | Degradé / babyboomer | $3.648 | 78 | $11.448 | $15.500 | $14.000 | $18.000 | **$15.500** | -2.500 |
 | Black leo | Animal print | $3.521 | 75 | $11.021 | $15.000 | $15.000 | $17.000 | **$15.000** | -2.000 |
 | Francesita glitter | Francesita, Glitter | $3.707 | 83 | $12.007 | $16.500 | $18.500 | $16.500 | **$18.500** | +2.000 |
@@ -52,8 +53,14 @@ Insumos, minutos y costo por set; piso con 25 % de margen; cotización del armad
 | Milky gold | Francesita, Strass, Encapsulado | $4.008 | 99 | $13.908 | $19.000 | $25.000 | $16.000 | **$25.000** | +9.000 |
 | Babyboomer | Degradé / babyboomer, Strass | $3.841 | 84 | $12.241 | $16.500 | $18.500 | $14.500 | **$18.500** | +4.000 |
 | Gold glitter | Glitter, Cat eye | $3.741 | 78 | $11.541 | $15.500 | $18.000 | $13.500 | **$18.000** | +4.500 |
+| Silver cat eye | Francesita, Glitter, Cat eye, Strass, Relieve 3D | $3.816 | 99 | $13.716 | $18.500 | $28.500 | nuevo | **$28.500** | +28.500 |
+| Pink mix | Francesita, Degradé / babyboomer, Glitter, Strass, Animal print, Ondas, Estrellitas | $4.198 | 118 | $15.998 | $21.500 | $28.000 | nuevo | **$28.000** | +28.000 |
+| Cherry french | Francesita, Estrellitas | $3.677 | 83 | $11.977 | $16.000 | $17.000 | nuevo | **$17.000** | +17.000 |
 
-Suma del catálogo: $441.000 hoy → $450.000 propuesto (+2 %). Suben los sets con técnicas en las 10 uñas (la
+Suma de los 25 diseños que ya estaban: $441.000 hoy → $450.000 propuesto (+2 %). Los tres sets nuevos (Silver cat
+eye, Pink mix y Cherry french, fotos del 26/10) entran con el precio que cotiza el armador para su receta; Silver cat
+eye y Pink mix usan el relieve 3D y varios diseños por uña, por eso quedan arriba de $28.000: conviene que Brenda los
+mire. Se cargan en la base con `pnpm db:seed` (o el SQL de `pnpm db:seed:sql`), no con los UPDATE de abajo. Suben los sets con técnicas en las 10 uñas (la
 francesita y el degradé se cobran por mano) y bajan los que tienen un diseño en pocas uñas (los diseños se cobran
 por uña).
 

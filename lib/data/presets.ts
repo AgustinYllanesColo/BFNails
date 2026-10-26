@@ -100,13 +100,37 @@ export const PRESETS: Record<string, BuilderSelection> = {
     accent: "anular", accentExtras: ["strass"],
   },
   "gold-glitter": { shape: "cuadrada", length: "medio", finish: "glossy", base: "dorado", extras: ["cat-eye", "glitter"] },
+  // pulgar, mayor y meñique nude con francesita de glitter; índice y anular cat eye plata con relieve (el anular con strass)
+  "silver-cat-eye": {
+    shape: "almendra", length: "medio", finish: "glossy", base: "nude", extras: ["francesita", "glitter"], tipColor: "blanco",
+    nailDesigns: [
+      null, { color: "celeste", extras: ["cat-eye", "3d"] }, null, { color: "celeste", extras: ["cat-eye", "3d", "strass"] }, null,
+      null, { color: "celeste", extras: ["cat-eye", "3d"] }, null, { color: "celeste", extras: ["cat-eye", "3d", "strass"] }, null,
+    ],
+  },
+  // cada uña distinta: cocodrilo rojo, estrella con strass, francesita de leopardo, babyboomer con glitter, francesita roja con estrella
+  "pink-mix": {
+    shape: "almendra", length: "medio", finish: "glossy", base: "rosa", extras: [], tipColor: "rojo", detailColor: "rosa", degradeColor: "blanco",
+    nailDesigns: [
+      { color: "rojo", extras: ["ondas"] }, { color: "naranja", extras: ["estrellas", "strass"] }, { color: "naranja", extras: ["francesita", "animal-print"] }, { color: "rosa", extras: ["degrade", "glitter"] }, { color: "nude", extras: ["francesita", "estrellas", "strass"] },
+      { color: "rojo", extras: ["ondas"] }, { color: "naranja", extras: ["estrellas", "strass"] }, { color: "naranja", extras: ["francesita", "animal-print"] }, { color: "rosa", extras: ["degrade", "glitter"] }, { color: "nude", extras: ["francesita", "estrellas", "strass"] },
+    ],
+  },
+  // francesita roja sobre nude; pulgar y anular rojos enteros; el mayor con estrella dorada
+  "cherry-french": {
+    shape: "almendra", length: "largo", finish: "glossy", base: "nude", extras: ["francesita"], tipColor: "rojo", detailColor: "dorado",
+    nailDesigns: [
+      { color: "rojo", extras: [] }, null, { extras: ["francesita", "estrellas"] }, { color: "rojo", extras: [] }, null,
+      { color: "rojo", extras: [] }, null, { extras: ["francesita", "estrellas"] }, { color: "rojo", extras: [] }, null,
+    ],
+  },
 };
 
 /**
  * Diseños que el armador no llega a reproducir (trabajo a mano de Brenda que no sale parecido con las técnicas de la
  * vista previa): la receta existe, pero no se ofrecen en "Partí de un diseño" ni en "Modificalo en el armador".
  */
-export const PRESET_HIDDEN = new Set(["leo-star-gold", "milky-pearl", "lila-perlas", "tribal-french", "candy-gems", "milky-gold"]);
+export const PRESET_HIDDEN = new Set(["leo-star-gold", "milky-pearl", "lila-perlas", "tribal-french", "candy-gems", "milky-gold", "silver-cat-eye", "pink-mix"]);
 
 export function presetVisible(slug: string): boolean {
   return Boolean(PRESETS[slug]) && !PRESET_HIDDEN.has(slug);

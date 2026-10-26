@@ -350,6 +350,48 @@ export const SEED_DESIGNS: Design[] = [
     tags: ["cat eye", "glitter", "dorado"],
     colors: ["#d4af37"],
   },
+  {
+    slug: "silver-cat-eye",
+    name: "Silver cat eye",
+    description:
+      "Nude con francesita de glitter plateado y filete cromado, alternada con cat eye plata con relieve en gel y un strass. Almendra media.",
+    images: ["/catalog/set-silver-cat-eye.webp", "/catalog/set-silver-cat-eye-2.webp"],
+    shape: "almendra",
+    length: "medio",
+    finish: "glossy",
+    complexity: 3,
+    price: 28500,
+    tags: ["cat eye", "francesita", "glitter", "3D", "strass"],
+    colors: ["#e9c3ad", "#b7c3cc", "#d9dde2"],
+  },
+  {
+    slug: "pink-mix",
+    name: "Pink mix",
+    description:
+      "Cada uña distinta en rosas y terracota: estrella con strass, francesita de leopardo, babyboomer con glitter, francesita roja con estrella y textura cocodrilo. Almendra media.",
+    images: ["/catalog/set-pink-mix.webp"],
+    shape: "almendra",
+    length: "medio",
+    finish: "glossy",
+    complexity: 3,
+    price: 28000,
+    tags: ["animal print", "francesita", "degradé", "estrellas", "strass", "rosa"],
+    colors: ["#f2a7c3", "#c9643c", "#d8243f"],
+  },
+  {
+    slug: "cherry-french",
+    name: "Cherry french",
+    description:
+      "Rojo cereza y nude: francesita roja, uñas rojas enteras y dos acentos con estrella dorada. Almendra larga, clásica y con carácter.",
+    images: ["/catalog/set-cherry-french.webp", "/catalog/set-cherry-french-2.webp"],
+    shape: "almendra",
+    length: "largo",
+    finish: "glossy",
+    complexity: 2,
+    price: 17000,
+    tags: ["francesita", "rojo", "estrellas"],
+    colors: ["#8c1414", "#e8c4b0", "#d4af37"],
+  },
 ];
 
 export const SHAPE_LABEL: Record<Design["shape"], string> = {
