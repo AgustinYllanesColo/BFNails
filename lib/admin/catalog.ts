@@ -21,6 +21,7 @@ export async function upsertDesign(input: DesignInput, originalSlug?: string) {
     finish: input.finish,
     complexity: input.complexity,
     price: input.price,
+    priceBefore: input.priceBefore ?? null,
     tags: input.tags,
     colors: input.colors ?? [],
     featured: Boolean(input.featured),

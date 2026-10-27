@@ -13,7 +13,7 @@ import type { Design } from "@/lib/types";
 export default async function AdminCatalogoPage() {
   await requireAdmin();
   const designs: Design[] = hasDb()
-    ? (await listAllDesigns()).map((r) => ({ ...r, description: r.description ?? "", shape: r.shape as Design["shape"], length: r.length as Design["length"], finish: r.finish as Design["finish"], complexity: r.complexity as Design["complexity"] }))
+    ? (await listAllDesigns()).map((r) => ({ ...r, description: r.description ?? "", shape: r.shape as Design["shape"], length: r.length as Design["length"], finish: r.finish as Design["finish"], complexity: r.complexity as Design["complexity"], priceBefore: r.priceBefore ?? undefined }))
     : await getDesigns();
   return (
     <>

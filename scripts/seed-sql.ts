@@ -20,9 +20,9 @@ const q = (v: unknown): string => {
 const out: string[] = [];
 SEED_DESIGNS.forEach((d, i) => {
   out.push(
-    `INSERT INTO bfnails.designs (slug,name,description,images,shape,length,finish,complexity,price,tags,colors,featured,active,sort) VALUES (${[
-      d.slug, d.name, d.description, d.images.length ? d.images : [], d.shape, d.length, d.finish, d.complexity, d.price, d.tags, d.colors ?? [], Boolean(d.featured), d.active ?? true, i,
-    ].map(q).join(",")}) ON CONFLICT (slug) DO UPDATE SET name=EXCLUDED.name, description=EXCLUDED.description, shape=EXCLUDED.shape, length=EXCLUDED.length, finish=EXCLUDED.finish, complexity=EXCLUDED.complexity, price=EXCLUDED.price, tags=EXCLUDED.tags, colors=EXCLUDED.colors, featured=EXCLUDED.featured, sort=EXCLUDED.sort, updated_at=now();`,
+    `INSERT INTO bfnails.designs (slug,name,description,images,shape,length,finish,complexity,price,price_before,tags,colors,featured,active,sort) VALUES (${[
+      d.slug, d.name, d.description, d.images.length ? d.images : [], d.shape, d.length, d.finish, d.complexity, d.price, d.priceBefore ?? null, d.tags, d.colors ?? [], Boolean(d.featured), d.active ?? true, i,
+    ].map(q).join(",")}) ON CONFLICT (slug) DO UPDATE SET name=EXCLUDED.name, description=EXCLUDED.description, shape=EXCLUDED.shape, length=EXCLUDED.length, finish=EXCLUDED.finish, complexity=EXCLUDED.complexity, price=EXCLUDED.price, price_before=EXCLUDED.price_before, tags=EXCLUDED.tags, colors=EXCLUDED.colors, featured=EXCLUDED.featured, sort=EXCLUDED.sort, updated_at=now();`,
   );
 });
 const c = DEFAULT_BUILDER_CONFIG;

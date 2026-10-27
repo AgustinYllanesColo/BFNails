@@ -59,6 +59,9 @@ export function DesignForm({ design }: { design?: Design }) {
           <L label="Precio (ARS)">
             <input name="price" type="number" min={0} step={100} required defaultValue={design?.price} className={adminInput} />
           </L>
+          <L label="Precio anterior (tachado, oferta)">
+            <input name="priceBefore" type="number" min={0} step={100} defaultValue={design?.priceBefore ?? ""} className={adminInput} placeholder="vacío = sin oferta" />
+          </L>
           <L label="Tags (coma; &quot;stock&quot; = entrega inmediata, &quot;talle M&quot; = en qué talle está)">
             <input name="tags" defaultValue={design?.tags.join(", ")} className={adminInput} placeholder="francesita, minimal" />
           </L>

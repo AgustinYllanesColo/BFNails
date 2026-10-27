@@ -5,7 +5,7 @@ import { cn } from "@/lib/format";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import type { Design, Length, Shape } from "@/lib/types";
-import { LENGTH_LABEL, SHAPE_LABEL, inStock, styleTags } from "@/lib/data/catalog";
+import { LENGTH_LABEL, SHAPE_LABEL, inStock, onSale, styleTags } from "@/lib/data/catalog";
 import { DesignCard } from "./DesignCard";
 import { Chip } from "@/components/ui/Chip";
 
@@ -13,6 +13,7 @@ type Sort = "destacados" | "precio-asc" | "precio-desc" | "nombre";
 
 const noop = () => () => {};
 const readUrlStock = () => new URLSearchParams(window.location.search).get("stock") === "1";
+const readUrlSale = () => new URLSearchParams(window.location.search).get("oferta") === "1";
 
 export function CatalogGrid({ designs }: { designs: Design[] }) {
   const [shape, setShape] = useState<Shape | null>(null);
@@ -24,6 +25,10 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
   const urlStock = useSyncExternalStore(noop, readUrlStock, () => false);
   const [stockPick, setStock] = useState<boolean | null>(null);
   const stock = stockPick ?? urlStock;
+  // /catalogo?oferta=1 (desde la tarjeta "$13.000"): solo los sets con precio tachado, hasta que toque "Oferta".
+  const urlSale = useSyncExternalStore(noop, readUrlSale, () => false);
+  const [salePick, setSale] = useState<boolean | null>(null);
+  const sale = salePick ?? urlSale;
 
   const tags = useMemo(() => {
     const count = new Map<string, number>();
@@ -40,7 +45,8 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
         (!shape || d.shape === shape) &&
         (!length || d.length === length) &&
         (!tag || d.tags.includes(tag)) &&
-        (!stock || inStock(d)),
+        (!stock || inStock(d)) &&
+        (!sale || onSale(d)),
     );
     switch (sort) {
       case "precio-asc":
@@ -56,9 +62,10 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
         list = [...list].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
     }
     return list;
-  }, [designs, shape, length, tag, sort, stock]);
+  }, [designs, shape, length, tag, sort, stock, sale]);
 
-  const anyFilter = shape || length || tag || stock;
+  const anyFilter = shape || length || tag || stock || sale;
+  const anySale = designs.some(onSale);
   // Ovalada no se ofrece (Bren no la hace); las demás formas se muestran siempre, tengan o no sets hoy
   const shapes = (Object.keys(SHAPE_LABEL) as Shape[]).filter((sh) => sh !== "ovalada");
 
@@ -112,6 +119,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
                   setLength(null);
                   setTag(null);
                   setStock(false);
+                  setSale(false);
                 }}
                 className="text-bordo text-xs font-semibold underline underline-offset-4"
               >
@@ -141,6 +149,20 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
           >
             En stock
           </button>
+          {anySale && (
+            <button
+              type="button"
+              onClick={() => setSale(!sale)}
+              aria-pressed={sale}
+              title="Sets con precio rebajado"
+              className={cn(
+                "rounded-pill h-8 px-3 text-xs font-semibold transition-colors duration-200",
+                sale ? "bg-red text-cream" : "bg-cream-deep text-red hover:bg-cream-ink/70",
+              )}
+            >
+              Oferta
+            </button>
+          )}
           {(
             [
               ["destacados", "Destacados"],

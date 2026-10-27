@@ -2,7 +2,7 @@ import { ViewTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Design } from "@/lib/types";
-import { LENGTH_LABEL, SHAPE_LABEL, designImage, inStock, stockSize } from "@/lib/data/catalog";
+import { LENGTH_LABEL, SHAPE_LABEL, designImage, inStock, onSale, stockSize } from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
 
@@ -34,6 +34,11 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
             />
           )}
           <div className="absolute top-3 left-3 flex gap-1.5">
+            {onSale(design) && (
+              <Badge tone="red" className="px-2" title="Oferta">
+                Oferta
+              </Badge>
+            )}
             {design.featured && (
               <Badge tone="yellow" className="px-2" title="Favorito">
                 <span aria-hidden>★</span>
@@ -57,7 +62,12 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
             {SHAPE_LABEL[design.shape]} · {LENGTH_LABEL[design.length]}
           </p>
         </div>
-        <p className="rounded-pill bg-cream-deep text-bordo shrink-0 px-3 py-1 text-sm font-bold">
+        <p className="rounded-pill bg-cream-deep text-bordo flex shrink-0 items-baseline gap-1.5 px-3 py-1 text-sm font-bold">
+          {onSale(design) && (
+            <span className="text-ink-soft text-[11px] font-semibold line-through" aria-label={`Antes ${formatARS(design.priceBefore!)}`}>
+              {formatARS(design.priceBefore!)}
+            </span>
+          )}
           {formatARS(design.price)}
         </p>
       </div>

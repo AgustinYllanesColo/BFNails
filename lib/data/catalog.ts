@@ -84,6 +84,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 13000,
+    priceBefore: 14000,
     tags: ["dibujo a mano", "fucsia", "stock", "talle M"],
     colors: ["#e3196f", "#f3c1b5"],
   },
@@ -97,6 +98,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 13000,
+    priceBefore: 15500,
     tags: ["lila", "3D", "stock", "talle S"],
     colors: ["#b9b8ec", "#f6efe6"],
   },
@@ -110,6 +112,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 3,
     price: 13000,
+    priceBefore: 15500,
     tags: ["charms", "strass", "negro", "stock", "talle L"],
     colors: ["#111111", "#b8a24a", "#f0c4b0"],
   },
@@ -123,6 +126,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 13000,
+    priceBefore: 15500,
     tags: ["degradé", "negro", "stock", "talle M"],
     colors: ["#111111", "#e8838f"],
   },
@@ -136,6 +140,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 13000,
+    priceBefore: 16000,
     tags: ["animal print", "stock", "talle S"],
     colors: ["#111111", "#f0c4b0"],
   },
@@ -149,6 +154,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 13000,
+    priceBefore: 19500,
     tags: ["francesita", "glitter", "stock", "talle S"],
     colors: ["#e9a68e", "#ffffff"],
   },
@@ -444,6 +450,11 @@ export function stockSize(design: Pick<Design, "tags">): StandardSize | null {
   if (!inStock(design)) return null;
   const t = design.tags.map((x) => x.toLowerCase()).find((x) => /^talle [sml]$/.test(x));
   return t ? (t.slice(-1).toUpperCase() as StandardSize) : null;
+}
+
+/** Sets en oferta: tienen precio anterior tachado (la tarjeta "$13.000 · Sets en stock seleccionados"). */
+export function onSale(design: Pick<Design, "price" | "priceBefore">): boolean {
+  return Boolean(design.priceBefore && design.priceBefore > design.price);
 }
 
 /** Tags que se muestran como estilos: sin "stock" ni el talle (esos tienen su propio cartel). */

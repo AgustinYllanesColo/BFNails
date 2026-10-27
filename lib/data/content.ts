@@ -65,7 +65,7 @@ export const DEFAULT_PROMOS: Promo[] = [
     image: "/catalog/set-black-snake-640.webp",
     price: 13000,
     theme: "rojo",
-    href: "/catalogo?stock=1",
+    href: "/catalogo?oferta=1",
     active: true,
   },
   {

@@ -13,6 +13,8 @@ export type Design = {
   finish: Finish;
   complexity: Complexity;
   price: number;
+  /** Precio anterior, tachado en la tarjeta: marca una oferta momentánea. */
+  priceBefore?: number;
   tags: string[];
   featured?: boolean;
   active?: boolean;

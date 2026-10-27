@@ -7,7 +7,7 @@ import type { Design, Length, Shape, SizeSelection } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
 import { designVariantPrice } from "@/lib/pricing";
 import { useCart } from "@/lib/store/cart";
-import { designImage, LENGTH_LABEL, LENGTH_MEASURE_HINT, lengthWithCm, SHAPE_LABEL, stockSize } from "@/lib/data/catalog";
+import { designImage, LENGTH_LABEL, LENGTH_MEASURE_HINT, lengthWithCm, onSale, SHAPE_LABEL, stockSize } from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
 import { SizePicker, sizesAreValid } from "./SizePicker";
 import { Button } from "@/components/ui/Button";
@@ -117,6 +117,11 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
             {formatARS(price)}
           </motion.span>
         </AnimatePresence>
+        {onSale(design) && isOriginal && (
+          <span className="text-ink-soft text-base line-through" aria-label={`Antes ${formatARS(design.priceBefore!)}`}>
+            {formatARS(design.priceBefore!)}
+          </span>
+        )}
         <span className="text-ink-soft text-sm">
           kit completo
           {isOriginal

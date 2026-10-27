@@ -34,6 +34,7 @@ async function main() {
         finish: d.finish,
         complexity: d.complexity,
         price: d.price,
+        priceBefore: d.priceBefore ?? null,
         tags: d.tags,
         colors: d.colors ?? [],
         featured: Boolean(d.featured),
@@ -42,7 +43,7 @@ async function main() {
       })
       .onConflictDoUpdate({
         target: schema.designs.slug,
-        set: { name: d.name, description: d.description, shape: d.shape, length: d.length, finish: d.finish, complexity: d.complexity, price: d.price, tags: d.tags, colors: d.colors ?? [], featured: Boolean(d.featured), sort: i, updatedAt: new Date() },
+        set: { name: d.name, description: d.description, shape: d.shape, length: d.length, finish: d.finish, complexity: d.complexity, price: d.price, priceBefore: d.priceBefore ?? null, tags: d.tags, colors: d.colors ?? [], featured: Boolean(d.featured), sort: i, updatedAt: new Date() },
       });
   }
 

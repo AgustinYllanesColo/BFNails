@@ -30,6 +30,7 @@ export const designs = bf.table("designs", {
   finish: text("finish").notNull().default("glossy"),
   complexity: integer("complexity").notNull().default(1),
   price: integer("price").notNull(),
+  priceBefore: integer("price_before"),
   tags: text("tags").array().notNull().default([]),
   colors: text("colors").array().notNull().default([]),
   featured: boolean("featured").notNull().default(false),

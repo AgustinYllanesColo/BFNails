@@ -21,6 +21,7 @@ function rowToDesign(r: typeof designsTable.$inferSelect): Design {
     finish: r.finish as Design["finish"],
     complexity: r.complexity as Design["complexity"],
     price: r.price,
+    priceBefore: r.priceBefore ?? undefined,
     tags: r.tags ?? [],
     featured: r.featured,
     active: r.active,
