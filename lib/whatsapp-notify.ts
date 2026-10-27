@@ -8,6 +8,8 @@ import "server-only";
  * - WhatsApp Cloud API (Meta): WA_CLOUD_TOKEN, WA_CLOUD_PHONE_ID y WA_NOTIFY_TO. Manda texto libre; fuera de la
  *   ventana de 24 h de una conversación abierta, Meta exige una plantilla aprobada (WA_CLOUD_TEMPLATE, un solo
  *   parámetro de texto con el mensaje).
+ * - Green API (gratis hasta 3 chats, manda desde un WhatsApp vinculado por QR como WhatsApp Web): GREENAPI_ID_INSTANCE,
+ *   GREENAPI_API_TOKEN, GREENAPI_API_URL (la URL de la instancia, ej. https://7103.api.greenapi.com) y WA_NOTIFY_TO.
  * - Telegram (gratis y al instante, mientras CallMeBot esté lleno): TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID. Brenda crea
  *   el bot con @BotFather y le escribe "/start"; el chat id se saca de getUpdates.
  * Sin configuración, `whatsappNotifyEnabled()` es false y no se manda nada.
@@ -15,7 +17,7 @@ import "server-only";
 export function whatsappNotifyEnabled(): boolean {
   const to = process.env.WA_NOTIFY_TO;
   if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) return true;
-  return Boolean(to && (process.env.CALLMEBOT_APIKEY || (process.env.WA_CLOUD_TOKEN && process.env.WA_CLOUD_PHONE_ID)));
+  return Boolean(to && (process.env.CALLMEBOT_APIKEY || (process.env.GREENAPI_ID_INSTANCE && process.env.GREENAPI_API_TOKEN) || (process.env.WA_CLOUD_TOKEN && process.env.WA_CLOUD_PHONE_ID)));
 }
 
 export async function sendWhatsapp(text: string): Promise<boolean> {
@@ -31,6 +33,17 @@ export async function sendWhatsapp(text: string): Promise<boolean> {
     return true;
   }
   const to = (process.env.WA_NOTIFY_TO ?? "").replace(/\D/g, "");
+  if (process.env.GREENAPI_ID_INSTANCE && process.env.GREENAPI_API_TOKEN) {
+    const base = (process.env.GREENAPI_API_URL ?? "https://api.green-api.com").replace(/\/$/, "");
+    const res = await fetch(`${base}/waInstance${process.env.GREENAPI_ID_INSTANCE}/sendMessage/${process.env.GREENAPI_API_TOKEN}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chatId: `${to}@c.us`, message: text }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`Green API ${res.status}: ${await res.text()}`);
+    return true;
+  }
   if (process.env.CALLMEBOT_APIKEY) {
     const url = `https://api.callmebot.com/whatsapp.php?phone=${to}&apikey=${encodeURIComponent(process.env.CALLMEBOT_APIKEY)}&text=${encodeURIComponent(text)}`;
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });

@@ -70,7 +70,16 @@ actualizarla con los precios actuales de Paq.ar cada tanto.
 3. Le responde con su **apikey** (un número). Variables: `WA_NOTIFY_TO=549<área><número>` (el de Brenda, sin
    el 15) y `CALLMEBOT_APIKEY=<apikey>`.
 
-Si CallMeBot está lleno (pasa seguido: "This Bot is full"), alternativa inmediata por **Telegram**:
+Si CallMeBot está lleno ("This Bot is full"), la alternativa por WhatsApp es **Green API** (plan Developer gratis:
+mensajes ilimitados a hasta 3 contactos). Manda desde un WhatsApp vinculado por QR, igual que WhatsApp Web:
+1. Registrarse en https://console.green-api.com (con un mail) y crear una instancia con el plan Developer.
+2. En la instancia, escanear el QR con el WhatsApp desde el que van a salir los avisos (el del estudio o el de
+   Tomás; no conviene el de Brenda, porque se mandaría a sí misma).
+3. Copiar de la instancia `idInstance`, `apiTokenInstance` y la URL de API (`apiUrl`, ej. https://7103.api.greenapi.com).
+4. Variables: `GREENAPI_ID_INSTANCE`, `GREENAPI_API_TOKEN`, `GREENAPI_API_URL` y `WA_NOTIFY_TO=549<área><número>`
+   (el de Brenda, sin el 15).
+
+Otra alternativa, por **Telegram**:
 1. Brenda abre Telegram, busca **@BotFather**, manda `/newbot`, le pone nombre ("BF Nails avisos") y usuario
    (termina en `bot`). BotFather devuelve un **token**.
 2. Brenda abre el chat con su bot nuevo y le manda `/start`.
