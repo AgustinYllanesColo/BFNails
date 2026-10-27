@@ -6,6 +6,8 @@ import { Card, PageTitle, adminBtn, adminInput, tableClass } from "@/components/
 import { saveSettings } from "./actions";
 import { mpEnabled } from "@/lib/mercadopago";
 import { supabaseConfigured } from "@/lib/supabase/server";
+import { mailEnabled } from "@/lib/mail";
+import { whatsappNotifyEnabled } from "@/lib/whatsapp-notify";
 
 export default async function ConfiguracionPage() {
   await requireAdmin();
@@ -16,7 +18,9 @@ export default async function ConfiguracionPage() {
     ["Login admin (Supabase Auth)", supabaseConfigured()],
     ["Mercado Pago", mpEnabled()],
     ["Webhook MP firmado", Boolean(process.env.MP_WEBHOOK_SECRET)],
-    ["API MiCorreo", process.env.MICORREO_ENABLED === "true"],
+    ["API MiCorreo (cotización en vivo)", process.env.MICORREO_ENABLED === "true"],
+    ["Mails de pedido (clienta y Brenda)", mailEnabled()],
+    ["WhatsApp a Brenda por cada pedido", whatsappNotifyEnabled()],
   ] as const;
 
   return (
