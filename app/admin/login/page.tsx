@@ -17,6 +17,7 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
       <div className="w-full max-w-sm rounded-lg bg-white/80 p-8 ring-1 ring-bordo/10">
         <Image src="/brand/kitty-icon.png" alt="" width={48} height={45} className="h-12 w-auto" />
         <h1 className="mt-4 font-title text-3xl">Panel de Bren</h1>
+        <p className="mt-1 text-sm text-ink-soft">{passwordLoginEnabled() ? "Entrá con la clave del panel." : "Te mandamos un link mágico a tu email."}</p>
         {error && <p className="mt-3 rounded bg-red/10 p-2 text-sm text-red">{decodeURIComponent(error)}</p>}
         {passwordLoginEnabled() && (
           <form action={loginWithPassword} className="mt-5 space-y-4">
@@ -29,11 +30,9 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
             </Button>
           </form>
         )}
-        {supabaseConfigured() ? (
-          <details className="mt-6 text-sm text-ink-soft">
-            <summary className="cursor-pointer font-semibold">Entrar con un link por mail</summary>
-            <LoginForm />
-          </details>
+        {/* con clave configurada, la clave es la única puerta; el link por mail queda solo para una instalación sin clave */}
+        {passwordLoginEnabled() ? null : supabaseConfigured() ? (
+          <LoginForm />
         ) : (
           <p className="mt-4 rounded bg-yellow/30 p-3 text-sm">
             Supabase no está configurado. En producción el admin queda cerrado; en desarrollo entrás directo.

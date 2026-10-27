@@ -5,7 +5,7 @@ import { adminUsers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { supabaseConfigured, supabaseServer } from "@/lib/supabase/server";
-import { ADMIN_COOKIE, verifyToken } from "./password";
+import { ADMIN_COOKIE, passwordLoginEnabled, verifyToken } from "./password";
 
 export type AdminSession = { email: string; name?: string; dev?: boolean };
 
@@ -17,7 +17,9 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   // 1. clave del panel (cookie firmada)
   const jar = await cookies();
   if (verifyToken(jar.get(ADMIN_COOKIE)?.value)) return { email: "bf.nailstudio@gmail.com", name: "Brenda" };
-  // 2. link mágico de Supabase
+  // con clave configurada no hay otra puerta
+  if (passwordLoginEnabled()) return null;
+  // 2. link mágico de Supabase (solo sin clave)
   if (!supabaseConfigured()) {
     if (process.env.NODE_ENV !== "production") return { email: "dev@local", name: "Dev", dev: true };
     return null;
