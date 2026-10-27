@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db/client";
 import { adminUsers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { supabaseConfigured, supabaseServer } from "@/lib/supabase/server";
+import { ADMIN_COOKIE, verifyToken } from "./password";
 
 export type AdminSession = { email: string; name?: string; dev?: boolean };
 
@@ -12,6 +14,10 @@ export type AdminSession = { email: string; name?: string; dev?: boolean };
  * en la tabla admin_users. Sin Supabase y fuera de producción: modo desarrollo.
  */
 export async function getAdminSession(): Promise<AdminSession | null> {
+  // 1. clave del panel (cookie firmada)
+  const jar = await cookies();
+  if (verifyToken(jar.get(ADMIN_COOKIE)?.value)) return { email: "bf.nailstudio@gmail.com", name: "Brenda" };
+  // 2. link mágico de Supabase
   if (!supabaseConfigured()) {
     if (process.env.NODE_ENV !== "production") return { email: "dev@local", name: "Dev", dev: true };
     return null;

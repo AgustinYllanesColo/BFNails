@@ -48,7 +48,7 @@ pnpm build                                  # build de producción
    - `DATABASE_URL`: Dashboard → Connect → Transaction pooler (puerto 6543), con la contraseña de la base. `SUPABASE_SERVICE_ROLE_KEY`: Project Settings → API Keys → service_role (solo en Vercel, nunca en el cliente).
    - Para una base nueva: `pnpm db:migrate` aplica `drizzle/*.sql` y `pnpm db:seed` (o `pnpm db:seed:sql` para generar el SQL) carga catálogo, opciones del armador, configuración e insumos de ejemplo.
    - En Authentication → Providers activar **Email** (magic link). En Authentication → URL configuration agregar `https://<dominio>/admin/auth/callback`.
-   - `ADMIN_EMAILS=bren@...,tomas@...` define quién entra al panel.
+   - `ADMIN_EMAILS=bren@...` define quién entra al panel con link por mail. `ADMIN_PASSWORD` habilita además la entrada con clave (la cookie dura 30 días; cambiar la clave cierra todas las sesiones).
 2. **Mercado Pago**: desde la cuenta personal de Brenda en [mercadopago.com.ar/developers](https://www.mercadopago.com.ar/developers) → "Tus integraciones" → crear aplicación (Checkout Pro). Copiar `MP_ACCESS_TOKEN` (primero el de prueba, después el de producción). En Webhooks configurar `https://<dominio>/api/webhooks/mercadopago` con el evento **Pagos** y copiar la clave en `MP_WEBHOOK_SECRET`.
 3. **Transferencias**: `NEXT_PUBLIC_TRANSFER_ALIAS`, `NEXT_PUBLIC_TRANSFER_HOLDER` (o desde Admin → Configuración).
 4. **WhatsApp**: `NEXT_PUBLIC_WHATSAPP_NUMBER=549 + área + número` (o desde Admin → Configuración).
