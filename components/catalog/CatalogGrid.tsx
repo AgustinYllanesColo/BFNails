@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/format";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { Design, Length, Shape } from "@/lib/types";
 import { LENGTH_LABEL, SHAPE_LABEL, inStock, onSale, styleTags } from "@/lib/data/catalog";
@@ -11,9 +12,6 @@ import { Chip } from "@/components/ui/Chip";
 
 type Sort = "destacados" | "precio-asc" | "precio-desc" | "nombre";
 
-const noop = () => () => {};
-const readUrlStock = () => new URLSearchParams(window.location.search).get("stock") === "1";
-const readUrlSale = () => new URLSearchParams(window.location.search).get("oferta") === "1";
 
 export function CatalogGrid({ designs }: { designs: Design[] }) {
   const [shape, setShape] = useState<Shape | null>(null);
@@ -22,13 +20,19 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
   const [sort, setSort] = useState<Sort>("destacados");
   // Solo los sets listos para entrega inmediata (tag "stock"); va junto al orden, no entre los estilos.
   // /catalogo?stock=1 (desde la promo) llega con el filtro puesto hasta que la clienta lo toca.
-  const urlStock = useSyncExternalStore(noop, readUrlStock, () => false);
-  const [stockPick, setStock] = useState<boolean | null>(null);
-  const stock = stockPick ?? urlStock;
+  // Los filtros por URL se leen con useSearchParams: así también responden cuando se llega desde la misma página
+  // (la tarjeta de promo está en /catalogo) y la URL cambia sin remontar la grilla.
+  const params = useSearchParams();
+  const urlStock = params.get("stock") === "1";
+  const urlSale = params.get("oferta") === "1";
+  // Lo que tocó la clienta manda sobre la URL, pero solo hasta que la URL cambie (tocó una promo ya en el catálogo).
+  const [stockPick, setStockPick] = useState<{ url: boolean; val: boolean } | null>(null);
+  const stock = stockPick && stockPick.url === urlStock ? stockPick.val : urlStock;
+  const setStock = (val: boolean) => setStockPick({ url: urlStock, val });
   // /catalogo?oferta=1 (desde la tarjeta "$13.000"): solo los sets con precio tachado, hasta que toque "Oferta".
-  const urlSale = useSyncExternalStore(noop, readUrlSale, () => false);
-  const [salePick, setSale] = useState<boolean | null>(null);
-  const sale = salePick ?? urlSale;
+  const [salePick, setSalePick] = useState<{ url: boolean; val: boolean } | null>(null);
+  const sale = salePick && salePick.url === urlSale ? salePick.val : urlSale;
+  const setSale = (val: boolean) => setSalePick({ url: urlSale, val });
 
   const tags = useMemo(() => {
     const count = new Map<string, number>();

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getDesigns } from "@/lib/data/repo";
 import { getLivePromos } from "@/lib/data/content-repo";
 import { Promos } from "@/components/sections/Promos";
@@ -35,7 +36,9 @@ export default async function CatalogoPage() {
       <Promos promos={promos} />
       <div className="container-x relative">
         <h2 className="sr-only">Diseños</h2>
-        <CatalogGrid designs={designs} />
+        <Suspense fallback={null}>
+          <CatalogGrid designs={designs} />
+        </Suspense>
       </div>
     </div>
   );

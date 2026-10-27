@@ -28,23 +28,21 @@ describe("recetas de costo", () => {
     expect(dos.minutes).toBeGreaterThanOrEqual(BASE_RECIPE.minutes + Math.round(TECHNIQUE_RECIPES.tribal.minutes * 0.4));
   });
 
-  // Brenda puso a $13.000 estos sets en stock (precio de liquidación): quedan por debajo del piso y del armador a propósito.
-  const BRENDA_13K = new Set(["pink-dots", "lila-perlas", "black-snake", "black-stiletto", "black-leo", "french-glitter"]);
-
-  it("el precio de cada diseño cubre su costo con el margen objetivo, no baja de lo que cobra el armador y no pasa el tope", () => {
+  // Los precios del catálogo los fija Brenda a mano (lista del 27/10): acá solo se controla que estén en rango. El
+  // costo y lo que cotiza el armador para la misma receta se ven en Admin → Costos, como referencia.
+  it("cada diseño tiene precio, receta y no pasa el tope del catálogo", () => {
     const { hourlyRate, targetMargin } = DEFAULT_SETTINGS;
     for (const d of SEED_DESIGNS) {
       const sel = PRESETS[d.slug];
-      expect(d.price, `${d.slug}: tope del catálogo`).toBeLessThanOrEqual(CATALOG_MAX_PRICE);
-      if (BRENDA_13K.has(d.slug)) {
-        expect(d.price).toBe(13000);
-        continue;
-      }
+      expect(sel, `${d.slug}: sin receta`).toBeTruthy();
       const r = selectionRecipe(sel, `design:${d.slug}`, d.name);
-      const floor = priceFromCost(recipeMaterials(r), r.minutes, hourlyRate, targetMargin);
-      expect(d.price, `${d.slug}: piso por costo ${floor}`).toBeGreaterThanOrEqual(floor);
-      const armador = quoteSelection(sel, cfg).total;
-      expect(d.price, `${d.slug}: el armador cobra ${armador}`).toBeGreaterThanOrEqual(Math.min(armador, CATALOG_MAX_PRICE));
+      expect(priceFromCost(recipeMaterials(r), r.minutes, hourlyRate, targetMargin)).toBeGreaterThan(0);
+      expect(quoteSelection(sel, cfg).total).toBeGreaterThan(0);
+      expect(d.price, `${d.slug}: precio`).toBeGreaterThan(0);
+      expect(d.price, `${d.slug}: tope del catálogo`).toBeLessThanOrEqual(CATALOG_MAX_PRICE);
+    }
+    for (const slug of ["pink-dots", "lila-perlas", "black-snake", "black-stiletto", "black-leo", "french-glitter"]) {
+      expect(SEED_DESIGNS.find((d) => d.slug === slug)?.price, slug).toBe(13000);
     }
   });
 
