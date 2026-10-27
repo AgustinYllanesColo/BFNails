@@ -262,7 +262,7 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
                               </Chip>
                             </div>
                             <p className="text-xs text-ink-soft">
-                              {oneNail ? "Tocá la uña donde va." : e.unit === "uña" ? "O tocá las uñas una por una: se cobra por cada uña." : e.unit === "set" ? "O tocá las uñas una por una: se cobra una vez, vaya donde vaya." : "O tocá las uñas una por una. Por mano se cobra con 2 o más uñas; una sola uña, el precio de una uña."}
+                              {oneNail ? "Tocá la uña donde va." : e.unit === "uña" ? "O tocá las uñas una por una: se cobra por cada uña." : e.unit === "set" ? "O tocá las uñas una por una: se cobra una vez, vaya donde vaya." : "O tocá las uñas una por una: el precio es por mano y cada uña vale la quinta parte."}
                             </p>
                             <NailMap
                               sel={sel}

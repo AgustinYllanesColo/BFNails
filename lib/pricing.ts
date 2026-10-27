@@ -1,14 +1,14 @@
 import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
 import type { Charm } from "./data/content";
-import { NAIL_COUNT, allNails, describeNailList, handOf } from "./nails";
+import { NAIL_COUNT, allNails, describeNailList } from "./nails";
 
 /**
  * Motor de precios del armador. Es una función pura: la misma config y selección
  * siempre da el mismo resultado. La config se edita desde el admin.
  *
  * Modelo: precio base + delta por largo + técnicas. Cada técnica tiene una unidad (lista de precios de Brenda):
- * - "mano": se cobra por cada mano que la lleve en 2 o más uñas; en una sola uña de una mano, el precio de una uña
- *   (`nailDelta`, por defecto la mitad del precio por mano).
+ * - "mano": el precio es por mano (5 uñas) y cada uña vale la quinta parte: se cobra proporcional a cuántas uñas
+ *   la llevan (una uña = precio por mano ÷ 5, las 10 uñas = dos manos).
  * - "uña": se cobra por cada uña que la lleve (los diseños).
  * - "set": se cobra una vez, vaya donde vaya (apliques como los strass hasta 10).
  * Cada técnica suma "puntos de complejidad"; los puntos definen el nivel (1–4) y cada nivel agrega un recargo fijo
@@ -26,8 +26,6 @@ export type Option<T extends string = string> = {
   complexity?: number; // puntos
   /** Técnicas: cómo se cobra el delta. Si falta, por mano. */
   unit?: ExtraUnit;
-  /** Técnicas por mano: precio cuando en una mano va en una sola uña. Si falta, la mitad del precio por mano. */
-  nailDelta?: number;
   /**
    * Brenda la sacó del armador: no se ofrece, pero se sigue cobrando y dibujando si viene en una receta del catálogo
    * o en un carrito guardado.
@@ -58,7 +56,7 @@ export type BuilderConfig = {
 export const CATALOG_MAX_PRICE = 24000;
 
 export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
-  basePrice: 12000,
+  basePrice: 13000,
   shapes: [
     // Bren hace estas cuatro (ovalada no) y todas salen lo mismo
     { id: "almendra", label: "Almendra", delta: 0 },
@@ -103,7 +101,7 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
     { id: "degrade", group: "Clásicos", label: "Degradé / babyboomer", delta: 2000, unit: "mano", complexity: 1 },
     { id: "glitter", group: "Brillos", label: "Glitter", delta: 1200, unit: "mano", complexity: 1 },
     { id: "cat-eye", group: "Brillos", label: "Cat eye", delta: 1200, unit: "mano", complexity: 1 },
-    { id: "aura", group: "Brillos", label: "Aura", delta: 1700, unit: "mano", complexity: 1 },
+    { id: "aura", group: "Brillos", label: "Aura", delta: 1500, unit: "mano", complexity: 1 },
     { id: "aurora", group: "Brillos", label: "Efecto aurora / espejo", delta: 1500, unit: "mano", complexity: 1 },
     { id: "cromado", group: "Brillos", label: "Cromado", delta: 500, unit: "uña", complexity: 1 },
     { id: "strass", group: "3D y apliques", label: "Strass (hasta 10)", delta: 1200, unit: "set", complexity: 1 },
@@ -239,20 +237,22 @@ export function normalizeSelection(sel: BuilderSelection): BuilderSelection {
   };
 }
 
-/** Precio de una técnica en una sola uña de una mano. */
-export function nailPrice(extra: Pick<Option, "delta" | "nailDelta">): number {
-  return extra.nailDelta ?? Math.ceil(extra.delta / 2 / 100) * 100;
+/** Uñas por mano: una técnica "por mano" vale su delta en 5 uñas y la quinta parte en cada una. */
+export const NAILS_PER_HAND = 5;
+
+/** Precio de una técnica por mano en una sola uña (la quinta parte del precio por mano). */
+export function nailPrice(extra: Pick<Option, "delta">): number {
+  return Math.round(extra.delta / NAILS_PER_HAND);
 }
 
 /** Precio de una técnica según su unidad y en qué uñas va. */
-export function extraPrice(extra: Pick<Option, "delta" | "nailDelta" | "unit">, nails: number[]): number {
-  const set = new Set(nails);
-  if (set.size === 0) return 0;
+export function extraPrice(extra: Pick<Option, "delta" | "unit">, nails: number[]): number {
+  const n = new Set(nails).size;
+  if (n === 0) return 0;
   if (extra.unit === "set") return extra.delta;
-  if (extra.unit === "uña") return extra.delta * set.size;
-  const perHand = [0, 0];
-  for (const i of set) perHand[handOf(i)]++;
-  return perHand.reduce((acc, n) => acc + (n === 0 ? 0 : n === 1 ? nailPrice(extra) : extra.delta), 0);
+  if (extra.unit === "uña") return extra.delta * n;
+  // por mano: proporcional a las uñas que la llevan (5 uñas = una mano, 10 = las dos)
+  return Math.round((extra.delta * n) / NAILS_PER_HAND);
 }
 
 /** "$400/uña", "$1.500/mano" o "$1.200" (por set), para los chips del armador. */

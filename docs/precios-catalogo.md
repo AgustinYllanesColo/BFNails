@@ -1,3 +1,8 @@
+> **Actualización (27/10):** el set base pasó a **$13.000**, Aura a **$1.500 por mano** y las técnicas por mano se
+> cobran proporcional a las uñas (cada uña vale la quinta parte del precio por mano). Con eso los precios del catálogo
+> subieron para no quedar por debajo de lo que cotiza el armador para la misma receta (tope $24.000); los valores
+> vigentes son los de `lib/data/catalog.ts` y la base. Las tablas de abajo son el análisis original.
+
 # Precios del catálogo: cómo se calculan
 
 Propuesta de precios para los 25 diseños del catálogo, armada con tres patas: **insumos** (lo que cuesta lo que lleva
@@ -68,8 +73,8 @@ por uña).
 ## Reglas del armador (lista de precios de Brenda)
 
 - **Forma**: no cambia el precio. **Largo**: solo XL suma, $1.500. **Acabado**: brillo y mate valen lo mismo.
-- Cada técnica tiene una unidad. **Por mano**: se cobra por cada mano que la lleve en 2 o más uñas; en una sola uña de
-  una mano, el precio de una uña (la mitad, redondeado a $100). **Por uña**: por cada uña que la lleve. **Por set**:
+- Cada técnica tiene una unidad. **Por mano**: el precio es por mano de 5 uñas y cada uña vale la quinta parte, así
+  que se cobra proporcional a cuántas uñas la llevan (una uña = precio ÷ 5; las 10 uñas = dos manos). **Por uña**: por cada uña que la lleve. **Por set**:
   una vez, vaya donde vaya. En el armador, al tocar una técnica aparecen "Las dos manos", "Mano derecha", "Mano
   izquierda" y "Una uña", el mapa para tocar uñas sueltas, el precio según eso y el color cuando corresponde.
 
@@ -78,7 +83,7 @@ por uña).
 | Francesita (blanca o de color, con color de punta) | $1.500 | por mano | lista |
 | Degradé / babyboomer | $2.000 | por mano | lista |
 | Cat eye | $1.200 | por mano | lista |
-| Aura | $1.700 | por mano | lista |
+| Aura | $1.500 | por mano | lista |
 | Efecto aurora / espejo | $1.500 | por mano | lista |
 | Glitter | $1.200 | por mano | sin precio en la lista, se mantuvo |
 | Cromado | $500 | por uña | lista |

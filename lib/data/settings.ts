@@ -65,7 +65,7 @@ export async function getBuilderConfig(): Promise<BuilderConfig> {
     extras: withNewDefaults(
       of("extra").map((r) => {
         const d = DEFAULT_BUILDER_CONFIG.extras.find((e) => e.id === r.id);
-        return { id: r.id, label: r.label, delta: r.delta, complexity: r.complexity, group: r.group ?? "Otros", description: r.description ?? undefined, unit: d?.unit ?? "mano", nailDelta: d?.nailDelta, retired: d?.retired };
+        return { id: r.id, label: r.label, delta: r.delta, complexity: r.complexity, group: r.group ?? "Otros", description: r.description ?? undefined, unit: d?.unit ?? "mano", retired: d?.retired };
       }),
     ),
     tiers: DEFAULT_BUILDER_CONFIG.tiers,
