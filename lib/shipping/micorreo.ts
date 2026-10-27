@@ -94,7 +94,7 @@ export class MiCorreoProvider implements ShippingProvider {
       customerId: await this.getCustomerId(token),
       postalCodeOrigin: this.env.originPostalCode,
       postalCodeDestination: input.postalCode.replace(/\D/g, "").slice(0, 4),
-      deliveredType: "D",
+      // sin deliveredType, el manual devuelve domicilio ("D") y sucursal ("S") en la misma respuesta
       dimensions: { weight: input.weightGrams ?? 100, height: 5, width: 15, length: 20 },
     };
     const res = await this.fetch(`${this.env.baseUrl}/rates`, {
