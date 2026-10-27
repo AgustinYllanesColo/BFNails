@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getOrderById, publicOrderUrl, updateOrder } from "@/lib/data/orders";
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
-import type { OrderStatus } from "@/lib/types";
+import { mpSurcharge, type OrderStatus } from "@/lib/types";
 
 const STATUSES: OrderStatus[] = ["a_confirmar", "pendiente_pago", "pagado", "en_produccion", "listo", "enviado", "entregado", "cancelado"];
 
@@ -38,13 +38,15 @@ export async function setNotes(id: string, formData: FormData) {
  */
 export async function confirmPrice(id: string, formData: FormData) {
   await requireAdmin();
-  const total = z.coerce.number().int().min(0).max(5_000_000).parse(formData.get("total"));
+  const base = z.coerce.number().int().min(0).max(5_000_000).parse(formData.get("total"));
   const order = await getOrderById(id);
   if (!order) throw new Error("Pedido no encontrado");
+  // El total que carga Brenda es sin recargo; si paga con MP se le suma el 10%.
+  const total = base + (order.payment.method === "mercadopago" ? mpSurcharge(base) : 0);
   const items = order.items.map((i) =>
     i.kind === "custom" ? { ...i, quote: { ...i.quote, needsConfirmation: false } } : i,
   );
-  const subtotal = total - order.delivery.cost;
+  const subtotal = base - order.delivery.cost;
   let updated = await updateOrder(id, { total, subtotal, items, needsConfirmation: false, status: "pendiente_pago" });
   if (updated && updated.payment.method === "mercadopago" && mpEnabled()) {
     try {

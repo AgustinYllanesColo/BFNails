@@ -116,6 +116,18 @@ export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   efectivo: "Efectivo al recibir",
 };
 
+/** Recargo por pagar con Mercado Pago: cubre la comisión de acreditación al instante. */
+export const MP_SURCHARGE_RATE = 0.1;
+
+export function mpSurcharge(amount: number): number {
+  return Math.round(amount * MP_SURCHARGE_RATE);
+}
+
+/** El recargo no tiene columna propia: es lo que el total tiene por encima de subtotal + envío. */
+export function orderSurcharge(order: { total: number; subtotal: number; delivery: { cost: number } }): number {
+  return Math.max(0, order.total - order.subtotal - order.delivery.cost);
+}
+
 export type OrderStatus =
   | "a_confirmar"
   | "pendiente_pago"

@@ -1,7 +1,7 @@
 import "server-only";
 import { createHmac } from "node:crypto";
 import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
-import type { Order } from "@/lib/types";
+import { orderSurcharge, type Order } from "@/lib/types";
 import { siteConfig } from "@/lib/site";
 
 export function mpEnabled() {
@@ -27,6 +27,10 @@ export async function createPreference(order: Order, orderUrl: string) {
   }));
   if (order.delivery.cost > 0) {
     items.push({ id: "envio", title: `Envío: ${order.delivery.label}`, quantity: 1, unit_price: order.delivery.cost, currency_id: "ARS", category_id: "services" });
+  }
+  const surcharge = orderSurcharge(order);
+  if (surcharge > 0) {
+    items.push({ id: "recargo-mp", title: "Recargo pago con Mercado Pago (10%)", quantity: 1, unit_price: surcharge, currency_id: "ARS", category_id: "services" });
   }
   const res = await pref.create({
     body: {
