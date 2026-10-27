@@ -70,5 +70,13 @@ actualizarla con los precios actuales de Paq.ar cada tanto.
 3. Le responde con su **apikey** (un número). Variables: `WA_NOTIFY_TO=549<área><número>` (el de Brenda, sin
    el 15) y `CALLMEBOT_APIKEY=<apikey>`.
 
-Con eso cada pedido nuevo y cada pago acreditado le llegan a Brenda por WhatsApp y por mail, y a la clienta
-por mail.
+Si CallMeBot está lleno (pasa seguido: "This Bot is full"), alternativa inmediata por **Telegram**:
+1. Brenda abre Telegram, busca **@BotFather**, manda `/newbot`, le pone nombre ("BF Nails avisos") y usuario
+   (termina en `bot`). BotFather devuelve un **token**.
+2. Brenda abre el chat con su bot nuevo y le manda `/start`.
+3. Abrir en el navegador `https://api.telegram.org/bot<TOKEN>/getUpdates`: el número que aparece en
+   `"chat":{"id":...}` es el **chat id**.
+4. Variables: `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.
+
+Con eso cada pedido nuevo y cada pago acreditado le llegan a Brenda por WhatsApp (o Telegram) y por mail, y a la
+clienta por mail.

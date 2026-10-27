@@ -8,15 +8,28 @@ import "server-only";
  * - WhatsApp Cloud API (Meta): WA_CLOUD_TOKEN, WA_CLOUD_PHONE_ID y WA_NOTIFY_TO. Manda texto libre; fuera de la
  *   ventana de 24 h de una conversación abierta, Meta exige una plantilla aprobada (WA_CLOUD_TEMPLATE, un solo
  *   parámetro de texto con el mensaje).
+ * - Telegram (gratis y al instante, mientras CallMeBot esté lleno): TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID. Brenda crea
+ *   el bot con @BotFather y le escribe "/start"; el chat id se saca de getUpdates.
  * Sin configuración, `whatsappNotifyEnabled()` es false y no se manda nada.
  */
 export function whatsappNotifyEnabled(): boolean {
   const to = process.env.WA_NOTIFY_TO;
+  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) return true;
   return Boolean(to && (process.env.CALLMEBOT_APIKEY || (process.env.WA_CLOUD_TOKEN && process.env.WA_CLOUD_PHONE_ID)));
 }
 
 export async function sendWhatsapp(text: string): Promise<boolean> {
   if (!whatsappNotifyEnabled()) return false;
+  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+    const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: text.replace(/\*/g, ""), disable_web_page_preview: true }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`Telegram ${res.status}: ${await res.text()}`);
+    return true;
+  }
   const to = (process.env.WA_NOTIFY_TO ?? "").replace(/\D/g, "");
   if (process.env.CALLMEBOT_APIKEY) {
     const url = `https://api.callmebot.com/whatsapp.php?phone=${to}&apikey=${encodeURIComponent(process.env.CALLMEBOT_APIKEY)}&text=${encodeURIComponent(text)}`;
