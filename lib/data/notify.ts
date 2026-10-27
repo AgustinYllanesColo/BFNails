@@ -53,6 +53,14 @@ async function safely(label: string, fn: () => Promise<unknown>, enabled = mailE
   }
 }
 
+/** Cómo está el pago al momento de crear el pedido, para que el aviso no parezca una venta cobrada. */
+function paymentState(order: Order): string {
+  if (order.status === "a_confirmar") return "A CONFIRMAR precio (todavía no pagó)";
+  if (order.payment.method === "mercadopago") return "PENDIENTE DE PAGO por Mercado Pago (te aviso cuando se acredite)";
+  if (order.payment.method === "transferencia") return "PENDIENTE DE PAGO por transferencia (esperá el comprobante)";
+  return "Paga en EFECTIVO al recibir";
+}
+
 /** Resumen corto para el WhatsApp de Brenda. */
 function shortItems(order: Order): string {
   return order.items.map((i) => `${i.qty}× ${i.kind === "custom" ? "Set a medida" : i.kind === "charm" ? `Dije ${i.name}` : i.name}`).join(", ");
@@ -82,15 +90,15 @@ export async function notifyOrderCreated(order: Order) {
     "pedido creado (WhatsApp)",
     () =>
       sendWhatsapp(
-        `🐱 Nuevo pedido *${order.number}* de ${order.customer.name} (${order.customer.whatsapp}): ${shortItems(order)}. ${order.delivery.label}. Total ${formatARS(order.total)}, ${PAYMENT_LABEL[order.payment.method]}${order.status === "a_confirmar" ? " · A CONFIRMAR precio" : ""}. ${siteConfig.url}/admin/pedidos/${order.id}`,
+        `🐱 Nuevo pedido *${order.number}* de ${order.customer.name} (${order.customer.whatsapp}): ${shortItems(order)}. ${order.delivery.label}. Total ${formatARS(order.total)}.\n⏳ ${paymentState(order)}.\n${siteConfig.url}/admin/pedidos/${order.id}`,
       ),
     whatsappNotifyEnabled(),
   );
   await safely("pedido creado (admin)", () =>
     sendMail({
       to: notifyEmails(),
-      subject: `Nuevo pedido ${order.number} · ${order.customer.name} · ${formatARS(order.total)}`,
-      text: [`Nuevo pedido ${order.number} de ${order.customer.name} (WhatsApp ${order.customer.whatsapp}${order.customer.email ? `, ${order.customer.email}` : ""}).`, `Estado: ${order.status}.`, "", summaryText(order), "", `Pedido: ${url}`, `Admin: ${siteConfig.url}/admin/pedidos/${order.id}`].join("\n"),
+      subject: `Nuevo pedido ${order.number} (${order.status === "a_confirmar" ? "a confirmar" : order.payment.method === "efectivo" ? "efectivo al recibir" : "pendiente de pago"}) · ${order.customer.name} · ${formatARS(order.total)}`,
+      text: [`Nuevo pedido ${order.number} de ${order.customer.name} (WhatsApp ${order.customer.whatsapp}${order.customer.email ? `, ${order.customer.email}` : ""}).`, `Estado: ${paymentState(order)}.`, "", summaryText(order), "", `Pedido: ${url}`, `Admin: ${siteConfig.url}/admin/pedidos/${order.id}`].join("\n"),
       replyTo: order.customer.email,
     }),
   );
@@ -111,7 +119,7 @@ export async function notifyOrderPaid(order: Order) {
   );
   await safely(
     "pago confirmado (WhatsApp)",
-    () => sendWhatsapp(`✨ Venta confirmada *${order.number}*: se acreditó ${formatARS(order.total)} de ${order.customer.name} (${PAYMENT_LABEL[order.payment.method]}). ${shortItems(order)}. ${siteConfig.url}/admin/pedidos/${order.id}`),
+    () => sendWhatsapp(`✅ PAGO ACREDITADO · pedido *${order.number}*: ${formatARS(order.total)} de ${order.customer.name} (${PAYMENT_LABEL[order.payment.method]}). ${shortItems(order)}. Ya se puede hacer.\n${siteConfig.url}/admin/pedidos/${order.id}`),
     whatsappNotifyEnabled(),
   );
   await safely("pago confirmado (admin)", () =>

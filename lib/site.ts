@@ -14,7 +14,7 @@ export const siteConfig = {
   /** Zonas de moto y retiro (sur del conurbano). */
   zones: ["Remedios de Escalada", "Lanús", "Banfield", "Lomas de Zamora"],
   transfer: {
-    alias: process.env.NEXT_PUBLIC_TRANSFER_ALIAS ?? "brenda.f00",
+    alias: process.env.NEXT_PUBLIC_TRANSFER_ALIAS ?? "brenda.fyoy",
     holder: process.env.NEXT_PUBLIC_TRANSFER_HOLDER ?? "Brenda",
   },
   /** Servicio presencial: aparece en una sección chica de la home y manda a WhatsApp o Instagram. */
