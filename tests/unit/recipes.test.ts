@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SEED_DESIGNS } from "@/lib/data/catalog";
+import { SEED_DESIGNS, inStock, stockSize } from "@/lib/data/catalog";
 import { DEFAULT_CHARMS } from "@/lib/data/content";
 import { PRESETS } from "@/lib/data/presets";
 import { BASE_RECIPE, SEED_SUPPLIES, TECHNIQUE_RECIPES, priceFromCost, recipeMaterials, selectionRecipe, techniqueRecipe } from "@/lib/data/recipes";
@@ -28,16 +28,29 @@ describe("recetas de costo", () => {
     expect(dos.minutes).toBeGreaterThanOrEqual(BASE_RECIPE.minutes + Math.round(TECHNIQUE_RECIPES.tribal.minutes * 0.4));
   });
 
+  // Brenda puso a $13.000 estos sets en stock (precio de liquidación): quedan por debajo del piso y del armador a propósito.
+  const BRENDA_13K = new Set(["pink-dots", "lila-perlas", "black-snake", "black-stiletto", "black-leo", "french-glitter"]);
+
   it("el precio de cada diseño cubre su costo con el margen objetivo, no baja de lo que cobra el armador y no pasa el tope", () => {
     const { hourlyRate, targetMargin } = DEFAULT_SETTINGS;
     for (const d of SEED_DESIGNS) {
       const sel = PRESETS[d.slug];
+      expect(d.price, `${d.slug}: tope del catálogo`).toBeLessThanOrEqual(CATALOG_MAX_PRICE);
+      if (BRENDA_13K.has(d.slug)) {
+        expect(d.price).toBe(13000);
+        continue;
+      }
       const r = selectionRecipe(sel, `design:${d.slug}`, d.name);
       const floor = priceFromCost(recipeMaterials(r), r.minutes, hourlyRate, targetMargin);
       expect(d.price, `${d.slug}: piso por costo ${floor}`).toBeGreaterThanOrEqual(floor);
       const armador = quoteSelection(sel, cfg).total;
       expect(d.price, `${d.slug}: el armador cobra ${armador}`).toBeGreaterThanOrEqual(Math.min(armador, CATALOG_MAX_PRICE));
-      expect(d.price, `${d.slug}: tope del catálogo`).toBeLessThanOrEqual(CATALOG_MAX_PRICE);
     }
+  });
+
+  it("los sets en stock dicen en qué talle están", () => {
+    for (const d of SEED_DESIGNS.filter(inStock)) expect(stockSize(d), d.slug).toMatch(/^[SML]$/);
+    expect(SEED_DESIGNS.filter(inStock).map((d) => d.slug)).not.toContain("cherry-french");
+    expect(SEED_DESIGNS.filter(inStock).map((d) => d.slug)).not.toContain("pink-mix");
   });
 });

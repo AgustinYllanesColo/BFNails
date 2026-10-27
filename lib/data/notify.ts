@@ -5,6 +5,7 @@ import { formatARS } from "@/lib/format";
 import { describeItem } from "@/lib/whatsapp";
 import { siteConfig } from "@/lib/site";
 import { mailEnabled, notifyEmails, sendMail } from "@/lib/mail";
+import { sendWhatsapp, whatsappNotifyEnabled } from "@/lib/whatsapp-notify";
 import { publicOrderUrl } from "./orders";
 
 /**
@@ -43,13 +44,18 @@ ${body}
 </div></body></html>`;
 }
 
-async function safely(label: string, fn: () => Promise<unknown>) {
-  if (!mailEnabled()) return;
+async function safely(label: string, fn: () => Promise<unknown>, enabled = mailEnabled()) {
+  if (!enabled) return;
   try {
     await fn();
   } catch (err) {
-    console.error(`[mail] ${label} falló`, err);
+    console.error(`[aviso] ${label} falló`, err);
   }
+}
+
+/** Resumen corto para el WhatsApp de Brenda. */
+function shortItems(order: Order): string {
+  return order.items.map((i) => `${i.qty}× ${i.kind === "custom" ? "Set a medida" : i.kind === "charm" ? `Dije ${i.name}` : i.name}`).join(", ");
 }
 
 /** Pedido creado: número de pedido a la clienta y aviso a Brenda. */
@@ -71,6 +77,14 @@ export async function notifyOrderCreated(order: Order) {
       text: [`Hola ${first}! Recibí tu pedido ${order.number}.`, "", summaryText(order), "", next, `Seguilo acá: ${url}`].join("\n"),
       html: html(`Recibí tu pedido, ${esc(first)}`, [esc(next)], order, url),
     }),
+  );
+  await safely(
+    "pedido creado (WhatsApp)",
+    () =>
+      sendWhatsapp(
+        `🐱 Nuevo pedido *${order.number}* de ${order.customer.name} (${order.customer.whatsapp}): ${shortItems(order)}. ${order.delivery.label}. Total ${formatARS(order.total)}, ${PAYMENT_LABEL[order.payment.method]}${order.status === "a_confirmar" ? " · A CONFIRMAR precio" : ""}. ${siteConfig.url}/admin/pedidos/${order.id}`,
+      ),
+    whatsappNotifyEnabled(),
   );
   await safely("pedido creado (admin)", () =>
     sendMail({
@@ -94,6 +108,11 @@ export async function notifyOrderPaid(order: Order) {
       text: [`Hola ${first}! ${msg}`, "", summaryText(order), "", `Seguilo acá: ${url}`].join("\n"),
       html: html(`¡Gracias, ${esc(first)}! Tu set está en marcha`, [esc(msg)], order, url),
     }),
+  );
+  await safely(
+    "pago confirmado (WhatsApp)",
+    () => sendWhatsapp(`✨ Venta confirmada *${order.number}*: se acreditó ${formatARS(order.total)} de ${order.customer.name} (${PAYMENT_LABEL[order.payment.method]}). ${shortItems(order)}. ${siteConfig.url}/admin/pedidos/${order.id}`),
+    whatsappNotifyEnabled(),
   );
   await safely("pago confirmado (admin)", () =>
     sendMail({

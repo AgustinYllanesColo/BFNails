@@ -13,7 +13,10 @@ export type MiCorreoEnv = {
   baseUrl: string;
   user: string;
   password: string;
-  customerId: string;
+  /** Id de cliente MiCorreo. Si falta, se obtiene una vez con `account` vía POST /users/validate. */
+  customerId?: string;
+  /** Email y clave de la cuenta MiCorreo (la del sitio), para obtener el customerId. */
+  account?: { email: string; password: string };
   originPostalCode: string;
   fetchImpl?: typeof fetch;
   now?: () => number;
@@ -36,13 +39,15 @@ export class MiCorreoProvider implements ShippingProvider {
 
   static fromProcessEnv(): MiCorreoProvider | null {
     if (process.env.MICORREO_ENABLED !== "true") return null;
-    const { MICORREO_BASE_URL, MICORREO_USER, MICORREO_PASSWORD, MICORREO_CUSTOMER_ID, MICORREO_ORIGIN_POSTAL_CODE } = process.env;
-    if (!MICORREO_USER || !MICORREO_PASSWORD || !MICORREO_CUSTOMER_ID) return null;
+    const { MICORREO_BASE_URL, MICORREO_USER, MICORREO_PASSWORD, MICORREO_CUSTOMER_ID, MICORREO_ACCOUNT_EMAIL, MICORREO_ACCOUNT_PASSWORD, MICORREO_ORIGIN_POSTAL_CODE } = process.env;
+    if (!MICORREO_USER || !MICORREO_PASSWORD) return null;
+    if (!MICORREO_CUSTOMER_ID && !(MICORREO_ACCOUNT_EMAIL && MICORREO_ACCOUNT_PASSWORD)) return null;
     return new MiCorreoProvider({
       baseUrl: MICORREO_BASE_URL ?? "https://api.correoargentino.com.ar/micorreo/v1",
       user: MICORREO_USER,
       password: MICORREO_PASSWORD,
       customerId: MICORREO_CUSTOMER_ID,
+      account: MICORREO_ACCOUNT_EMAIL && MICORREO_ACCOUNT_PASSWORD ? { email: MICORREO_ACCOUNT_EMAIL, password: MICORREO_ACCOUNT_PASSWORD } : undefined,
       originPostalCode: MICORREO_ORIGIN_POSTAL_CODE ?? "1824",
     });
   }
@@ -66,11 +71,27 @@ export class MiCorreoProvider implements ShippingProvider {
     return data.token;
   }
 
+  /** customerId: el configurado o, la primera vez, el que devuelve /users/validate para la cuenta MiCorreo. */
+  private async getCustomerId(token: string): Promise<string> {
+    if (this.env.customerId) return this.env.customerId;
+    if (!this.env.account) throw new Error("MiCorreo: falta customerId o la cuenta para obtenerlo");
+    const res = await this.fetch(`${this.env.baseUrl}/users/validate`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: this.env.account.email, password: this.env.account.password }),
+    });
+    if (!res.ok) throw new Error(`MiCorreo users/validate ${res.status}`);
+    const data = (await res.json()) as { customerId?: string };
+    if (!data.customerId) throw new Error("MiCorreo: users/validate no devolvió customerId");
+    this.env.customerId = data.customerId;
+    return data.customerId;
+  }
+
   async quote(input: QuoteInput): Promise<ShippingOption[]> {
     if (!input.postalCode) return [];
     const token = await this.getToken();
     const body = {
-      customerId: this.env.customerId,
+      customerId: await this.getCustomerId(token),
       postalCodeOrigin: this.env.originPostalCode,
       postalCodeDestination: input.postalCode.replace(/\D/g, "").slice(0, 4),
       deliveredType: "D",

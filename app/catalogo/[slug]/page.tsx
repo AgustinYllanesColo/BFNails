@@ -7,6 +7,8 @@ import { getDesign, getDesigns } from "@/lib/data/repo";
 import { getBuilderConfig } from "@/lib/data/settings";
 import {
   inStock,
+  stockSize,
+  styleTags,
   FINISH_LABEL,
   designImage,
 } from "@/lib/data/catalog";
@@ -98,8 +100,8 @@ export default async function DesignPage({ params }: Props) {
             <Reveal>
               <div className="flex flex-wrap gap-2">
                 {design.featured && <Badge tone="yellow">★ favorito</Badge>}
-                {inStock(design) && <Badge tone="green">Entrega inmediata</Badge>}
-                {design.tags.filter((t) => t !== "stock").map((t) => (
+                {inStock(design) && <Badge tone="green">Entrega inmediata{stockSize(design) ? ` · talle ${stockSize(design)}` : ""}</Badge>}
+                {styleTags(design).map((t) => (
                   <Badge key={t} tone="cream" className="normal-case">
                     {t}
                   </Badge>
@@ -120,7 +122,7 @@ export default async function DesignPage({ params }: Props) {
                 <p className="text-sm font-semibold">10 uñas + kit de colocación</p>
                 <KitItems items={kit.items} className="mt-3" />
                 <p className="text-ink-soft mt-4 text-sm">
-                  {inStock(design) ? "En stock: sale en el momento." : "A pedido: 2 a 7 días."} Retiro en estación gratis o
+                  {inStock(design) ? `En stock${stockSize(design) ? ` en talle ${stockSize(design)}` : ""}: sale en el momento. Otro talle o medida personalizada, a pedido en 2 a 7 días.` : "A pedido: 2 a 7 días."} Retiro en estación gratis o
                   envío por Correo Argentino.
                 </p>
               </div>

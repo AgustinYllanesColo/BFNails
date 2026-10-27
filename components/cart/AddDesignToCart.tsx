@@ -7,7 +7,7 @@ import type { Design, Length, Shape, SizeSelection } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
 import { designVariantPrice } from "@/lib/pricing";
 import { useCart } from "@/lib/store/cart";
-import { designImage, LENGTH_LABEL, LENGTH_MEASURE_HINT, lengthWithCm, SHAPE_LABEL } from "@/lib/data/catalog";
+import { designImage, LENGTH_LABEL, LENGTH_MEASURE_HINT, lengthWithCm, SHAPE_LABEL, stockSize } from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
 import { SizePicker, sizesAreValid } from "./SizePicker";
 import { Button } from "@/components/ui/Button";
@@ -23,7 +23,8 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
   const router = useRouter();
   const [shape, setShape] = useState<Shape>(design.shape);
   const [length, setLength] = useState<Length>(design.length);
-  const [sizes, setSizes] = useState<SizeSelection>({ mode: "standard", size: "S" });
+  // si el set está en stock en un talle, arranca en ese talle
+  const [sizes, setSizes] = useState<SizeSelection>({ mode: "standard", size: stockSize(design) ?? "S" });
   const [added, setAdded] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
   const valid = sizesAreValid(sizes);

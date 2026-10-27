@@ -2,7 +2,7 @@ import { ViewTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Design } from "@/lib/types";
-import { LENGTH_LABEL, SHAPE_LABEL, designImage, inStock } from "@/lib/data/catalog";
+import { LENGTH_LABEL, SHAPE_LABEL, designImage, inStock, stockSize } from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
 
@@ -42,7 +42,7 @@ export function DesignCard({ design, priority }: { design: Design; priority?: bo
             )}
             {inStock(design) && (
               <Badge tone="green" className="px-2 sm:px-2.5" title="Entrega inmediata">
-                En stock
+                En stock{stockSize(design) ? ` · ${stockSize(design)}` : ""}
               </Badge>
             )}
           </div>

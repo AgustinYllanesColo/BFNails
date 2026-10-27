@@ -1,4 +1,4 @@
-import type { Design } from "@/lib/types";
+import type { Design, StandardSize } from "@/lib/types";
 
 /**
  * Seed del catálogo con las fotos reales de Bren (public/catalog, recortadas a 4:5). Cuando hay DB, esto es el
@@ -19,7 +19,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 3,
     price: 24000,
-    tags: ["cat eye", "francesita", "glitter", "3D", "strass", "stock"],
+    tags: ["cat eye", "francesita", "glitter", "3D", "strass", "stock", "talle L"],
     featured: true,
     colors: ["#e9c3ad", "#b7c3cc", "#d9dde2"],
   },
@@ -34,7 +34,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 3,
     price: 24000,
-    tags: ["animal print", "francesita", "degradé", "estrellas", "strass", "rosa", "stock"],
+    tags: ["animal print", "francesita", "degradé", "estrellas", "strass", "rosa"],
     featured: true,
     colors: ["#f2a7c3", "#c9643c", "#d8243f"],
   },
@@ -49,7 +49,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 17000,
-    tags: ["francesita", "rojo", "estrellas", "stock"],
+    tags: ["francesita", "rojo", "estrellas"],
     featured: true,
     colors: ["#8c1414", "#e8c4b0", "#d4af37"],
   },
@@ -70,7 +70,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 3,
     price: 24000,
-    tags: ["francesita", "dibujo a mano", "3D", "charms", "stock"],
+    tags: ["francesita", "dibujo a mano", "3D", "charms", "stock", "talle M"],
     featured: true,
     colors: ["#f3c1a5", "#ffffff", "#1d1d1d", "#f27fb6"],
   },
@@ -83,8 +83,8 @@ export const SEED_DESIGNS: Design[] = [
     length: "medio",
     finish: "glossy",
     complexity: 2,
-    price: 14000,
-    tags: ["dibujo a mano", "fucsia", "stock"],
+    price: 13000,
+    tags: ["dibujo a mano", "fucsia", "stock", "talle M"],
     colors: ["#e3196f", "#f3c1b5"],
   },
   {
@@ -96,8 +96,8 @@ export const SEED_DESIGNS: Design[] = [
     length: "medio",
     finish: "glossy",
     complexity: 2,
-    price: 15500,
-    tags: ["lila", "3D", "stock"],
+    price: 13000,
+    tags: ["lila", "3D", "stock", "talle S"],
     colors: ["#b9b8ec", "#f6efe6"],
   },
   {
@@ -109,8 +109,8 @@ export const SEED_DESIGNS: Design[] = [
     length: "medio",
     finish: "glossy",
     complexity: 3,
-    price: 15500,
-    tags: ["charms", "strass", "negro", "stock"],
+    price: 13000,
+    tags: ["charms", "strass", "negro", "stock", "talle L"],
     colors: ["#111111", "#b8a24a", "#f0c4b0"],
   },
   {
@@ -122,8 +122,8 @@ export const SEED_DESIGNS: Design[] = [
     length: "largo",
     finish: "glossy",
     complexity: 2,
-    price: 15500,
-    tags: ["degradé", "negro", "stock"],
+    price: 13000,
+    tags: ["degradé", "negro", "stock", "talle M"],
     colors: ["#111111", "#e8838f"],
   },
   {
@@ -135,8 +135,8 @@ export const SEED_DESIGNS: Design[] = [
     length: "medio",
     finish: "glossy",
     complexity: 2,
-    price: 16000,
-    tags: ["animal print", "stock"],
+    price: 13000,
+    tags: ["animal print", "stock", "talle S"],
     colors: ["#111111", "#f0c4b0"],
   },
   {
@@ -148,8 +148,8 @@ export const SEED_DESIGNS: Design[] = [
     length: "medio",
     finish: "glossy",
     complexity: 2,
-    price: 19500,
-    tags: ["francesita", "glitter", "stock"],
+    price: 13000,
+    tags: ["francesita", "glitter", "stock", "talle S"],
     colors: ["#e9a68e", "#ffffff"],
   },
   {
@@ -162,7 +162,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 1,
     price: 13000,
-    tags: ["verde", "stock"],
+    tags: ["verde", "stock", "talle S"],
     colors: ["#9aa565"],
   },
   {
@@ -175,7 +175,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 1,
     price: 13000,
-    tags: ["lila", "stock"],
+    tags: ["lila", "stock", "talle M"],
     colors: ["#9a5ad9"],
   },
   {
@@ -243,7 +243,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 20000,
-    tags: ["francesita", "degradé", "stock"],
+    tags: ["francesita", "degradé", "stock", "talle M"],
     featured: true,
     colors: ["#f5c400", "#f2a7c3"],
   },
@@ -258,7 +258,7 @@ export const SEED_DESIGNS: Design[] = [
     finish: "glossy",
     complexity: 2,
     price: 16000,
-    tags: ["aura", "bordó", "stock"],
+    tags: ["aura", "bordó", "stock", "talle M"],
     featured: true,
     colors: ["#4a0e0e", "#8c1610"],
   },
@@ -437,6 +437,18 @@ export const FINISH_LABEL: Record<Design["finish"], string> = {
 /** Sets hechos en medidas universales que ya están listos (tag "stock" desde el admin). */
 export function inStock(design: Pick<Design, "tags">): boolean {
   return design.tags.some((t) => t.toLowerCase() === "stock");
+}
+
+/** Talle en el que está en stock un set (tag "talle S|M|L"); null si no está en stock o no tiene talle cargado. */
+export function stockSize(design: Pick<Design, "tags">): StandardSize | null {
+  if (!inStock(design)) return null;
+  const t = design.tags.map((x) => x.toLowerCase()).find((x) => /^talle [sml]$/.test(x));
+  return t ? (t.slice(-1).toUpperCase() as StandardSize) : null;
+}
+
+/** Tags que se muestran como estilos: sin "stock" ni el talle (esos tienen su propio cartel). */
+export function styleTags(design: Pick<Design, "tags">): string[] {
+  return design.tags.filter((t) => t.toLowerCase() !== "stock" && !/^talle [sml]$/i.test(t));
 }
 
 export const COMPLEXITY_LABEL: Record<Design["complexity"], string> = {

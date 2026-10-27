@@ -58,11 +58,12 @@ export type Kit = { items: KitItem[]; images: string[] };
 /** Ejemplos para ver cómo quedan: se reemplazan apenas se guardan las promos desde el admin. */
 export const DEFAULT_PROMOS: Promo[] = [
   {
-    id: "stock-20",
-    badge: "-20%",
-    title: "Sets en stock",
-    text: "Descuento en los sets listos para entrega inmediata.",
-    image: "/catalog/set-polka-flower-640.webp",
+    id: "stock-13k",
+    badge: "$13.000",
+    title: "Sets en stock seleccionados",
+    text: "Pink dots, Lila perlas, Black snake, Black stiletto, Black leo y Francesita glitter, listos para entrega inmediata.",
+    image: "/catalog/set-black-snake-640.webp",
+    price: 13000,
     theme: "rojo",
     href: "/catalogo?stock=1",
     active: true,

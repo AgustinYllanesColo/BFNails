@@ -52,12 +52,13 @@ pnpm build                                  # build de producción
 2. **Mercado Pago**: desde la cuenta personal de Brenda en [mercadopago.com.ar/developers](https://www.mercadopago.com.ar/developers) → "Tus integraciones" → crear aplicación (Checkout Pro). Copiar `MP_ACCESS_TOKEN` (primero el de prueba, después el de producción). En Webhooks configurar `https://<dominio>/api/webhooks/mercadopago` con el evento **Pagos** y copiar la clave en `MP_WEBHOOK_SECRET`.
 3. **Transferencias**: `NEXT_PUBLIC_TRANSFER_ALIAS`, `NEXT_PUBLIC_TRANSFER_HOLDER` (o desde Admin → Configuración).
 4. **WhatsApp**: `NEXT_PUBLIC_WHATSAPP_NUMBER=549 + área + número` (o desde Admin → Configuración).
-5. **Correo Argentino**: cotizar en [MiCorreo](https://www.correoargentino.com.ar/MiCorreo) y cargar la tabla por zona en Admin → Configuración. Si más adelante Correo entrega credenciales de API, setear `MICORREO_ENABLED=true` + `MICORREO_USER/PASSWORD/CUSTOMER_ID` y la cotización pasa a ser en vivo sin tocar código.
+5. **Correo Argentino**: cotizar en [MiCorreo](https://www.correoargentino.com.ar/MiCorreo) y cargar la tabla por zona en Admin → Configuración. Si más adelante Correo entrega credenciales de API, setear `MICORREO_ENABLED=true` + `MICORREO_USER/PASSWORD` (los tokens de API que manda Correo, distintos para test y producción) y `MICORREO_CUSTOMER_ID`, o en su lugar `MICORREO_ACCOUNT_EMAIL/PASSWORD` (la cuenta MiCorreo del sitio: el customerId se obtiene solo con `/users/validate`). La cotización pasa a ser en vivo sin tocar código.
 6. **Mails de pedidos** (número de pedido a la clienta y aviso a Brenda al crear el pedido y al acreditarse el pago): un proveedor, el primero que esté:
    - Resend: `RESEND_API_KEY` y `MAIL_FROM="BF Nails Studio <pedidos@<dominio verificado>>"`.
    - SMTP (Gmail con contraseña de aplicación): `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER=<gmail>`, `SMTP_PASS=<contraseña de aplicación>`.
    - `ORDER_NOTIFY_EMAILS=bren@...,tomas@...` (si falta, usa `ADMIN_EMAILS`). Sin proveedor, los pedidos funcionan igual y no se manda nada.
-7. **Vercel**: importar el repo, cargar las variables, `NEXT_PUBLIC_SITE_URL=https://<dominio>`.
+7. **WhatsApp a Brenda** por cada pedido y cada pago acreditado (además del mail): `WA_NOTIFY_TO=549...` y, o bien `CALLMEBOT_APIKEY` (gratis: Brenda manda "I allow callmebot to send me messages" al número de CallMeBot y recibe su clave), o bien la Cloud API de Meta (`WA_CLOUD_TOKEN`, `WA_CLOUD_PHONE_ID`, y `WA_CLOUD_TEMPLATE` si hace falta plantilla).
+8. **Vercel**: importar el repo, cargar las variables, `NEXT_PUBLIC_SITE_URL=https://<dominio>`.
 
 ## Estructura
 
