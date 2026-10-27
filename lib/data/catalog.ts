@@ -413,6 +413,21 @@ export const LENGTH_LABEL: Record<Design["length"], string> = {
   xl: "XL",
 };
 
+/** Largo de cada opción, en cm: se mide desde donde empieza la uña hasta la punta. */
+export const LENGTH_CM: Record<Design["length"], number> = {
+  corto: 1,
+  medio: 2,
+  largo: 4,
+  xl: 5,
+};
+
+/** "Corto (1 cm)": el largo con su medida, para las opciones del armador y de la ficha. */
+export function lengthWithCm(length: Design["length"], label: string = LENGTH_LABEL[length]): string {
+  return `${label} (${LENGTH_CM[length]} cm)`;
+}
+
+export const LENGTH_MEASURE_HINT = "Medilo desde donde empieza tu uña hasta el largo que quieras.";
+
 export const FINISH_LABEL: Record<Design["finish"], string> = {
   glossy: "Brillo",
   mate: "Mate",

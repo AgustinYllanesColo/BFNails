@@ -14,6 +14,7 @@ import {
   type NewOrder,
 } from "@/lib/data/orders";
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
+import { notifyOrderCreated } from "@/lib/data/notify";
 import { designImage } from "@/lib/data/catalog";
 import type { CartItem } from "@/lib/types";
 
@@ -154,6 +155,8 @@ export async function POST(req: Request) {
 
   let order = await createOrder(draft);
   const url = publicOrderUrl(order);
+  // Mail con el número de pedido a la clienta y aviso a Brenda (si el mail falla, el pedido sigue igual)
+  await notifyOrderCreated(order);
 
   if (useMp) {
     try {

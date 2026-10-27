@@ -65,7 +65,7 @@ export const checkoutSchema = z.object({
       .string()
       .trim()
       .regex(/^\+?[\d\s-]{8,20}$/, "Un número de WhatsApp válido, con característica"),
-    email: z.string().trim().email("Email inválido").optional().or(z.literal("")),
+    email: z.string().trim().email("Email inválido"),
   }),
   delivery: z.object({
     method: z.enum(["retiro", "moto", "correo_domicilio", "correo_sucursal"]),

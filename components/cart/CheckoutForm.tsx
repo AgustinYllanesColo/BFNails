@@ -18,7 +18,7 @@ import { PAYMENT_LABEL } from "@/lib/types";
 const formSchema = z.object({
   name: z.string().trim().min(2, "Decinos tu nombre"),
   whatsapp: z.string().trim().regex(/^\+?[\d\s-]{8,20}$/, "Con característica, ej: 11 2345 6789"),
-  email: z.string().trim().email("Email inválido").optional().or(z.literal("")),
+  email: z.string().trim().email("Un email válido: ahí te mando el número de pedido"),
   street: z.string().trim().optional(),
   city: z.string().trim().optional(),
   province: z.string().trim().optional(),
@@ -99,7 +99,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          customer: { name: v.name, whatsapp: v.whatsapp, email: v.email || undefined },
+          customer: { name: v.name, whatsapp: v.whatsapp, email: v.email },
           delivery: {
             method: delivery,
             address: needsAddress ? { street: v.street, city: v.city, province: v.province, postalCode: v.postalCode, notes: v.notes } : undefined,
@@ -150,7 +150,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
             <Field label="WhatsApp" htmlFor="whatsapp" hint="Por acá te confirmo todo." error={form.formState.errors.whatsapp?.message}>
               <input id="whatsapp" className={inputClass} inputMode="tel" autoComplete="tel" placeholder="11 2345 6789" {...form.register("whatsapp")} />
             </Field>
-            <Field label="Email (opcional)" htmlFor="email" error={form.formState.errors.email?.message} className="md:col-span-2">
+            <Field label="Email" htmlFor="email" hint="Te mando el número de pedido y te aviso cuando se acredite el pago." error={form.formState.errors.email?.message} className="md:col-span-2">
               <input id="email" className={inputClass} type="email" autoComplete="email" {...form.register("email")} />
             </Field>
           </div>

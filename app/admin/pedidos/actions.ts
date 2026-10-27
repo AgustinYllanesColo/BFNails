@@ -6,13 +6,17 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { getOrderById, publicOrderUrl, updateOrder } from "@/lib/data/orders";
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
 import type { OrderStatus } from "@/lib/types";
+import { notifyOrderPaid } from "@/lib/data/notify";
 
 const STATUSES: OrderStatus[] = ["a_confirmar", "pendiente_pago", "pagado", "en_produccion", "listo", "enviado", "entregado", "cancelado"];
 
 export async function setOrderStatus(id: string, status: OrderStatus) {
   await requireAdmin();
   if (!STATUSES.includes(status)) throw new Error("Estado inválido");
-  await updateOrder(id, { status });
+  const before = await getOrderById(id);
+  const updated = await updateOrder(id, { status });
+  // Brenda confirma una transferencia o un efectivo: mismo aviso que cuando acredita Mercado Pago
+  if (updated && status === "pagado" && before && (before.status === "pendiente_pago" || before.status === "a_confirmar")) await notifyOrderPaid(updated);
   revalidatePath(`/admin/pedidos/${id}`);
   revalidatePath("/admin/pedidos");
   revalidatePath("/admin");

@@ -7,7 +7,7 @@ import type { Design, Length, Shape, SizeSelection } from "@/lib/types";
 import type { BuilderConfig } from "@/lib/pricing";
 import { designVariantPrice } from "@/lib/pricing";
 import { useCart } from "@/lib/store/cart";
-import { designImage, LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
+import { designImage, LENGTH_LABEL, LENGTH_MEASURE_HINT, lengthWithCm, SHAPE_LABEL } from "@/lib/data/catalog";
 import { formatARS } from "@/lib/format";
 import { SizePicker, sizesAreValid } from "./SizePicker";
 import { Button } from "@/components/ui/Button";
@@ -83,7 +83,7 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
         <p className="mb-3 text-sm font-semibold">
           Largo{" "}
           <span className="text-ink-soft font-normal">
-            · el diseño viene en {LENGTH_LABEL[design.length].toLowerCase()}
+            · el diseño viene en {LENGTH_LABEL[design.length].toLowerCase()} · {LENGTH_MEASURE_HINT.toLowerCase()}
           </span>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -94,7 +94,7 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
               onClick={() => setLength(o.id)}
               hint={hint(config.lengths, o.id, design.length)}
             >
-              {o.label}
+              {lengthWithCm(o.id, o.label)}
             </Chip>
           ))}
         </div>

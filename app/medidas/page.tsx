@@ -3,6 +3,8 @@ import { Heading } from "@/components/ui/Section";
 import { FINGERS, SIZE_ORDER, STANDARD_SIZES } from "@/lib/data/sizes";
 import { Button } from "@/components/ui/Button";
 import { formatCm } from "@/lib/format";
+import { LENGTH_CM, LENGTH_LABEL, LENGTH_MEASURE_HINT } from "@/lib/data/catalog";
+import type { Length } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Medidas",
@@ -84,6 +86,23 @@ export default function MedidasPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section id="largos" aria-labelledby="largos-t" className="container-x max-w-3xl scroll-mt-24 pt-14 md:pt-20">
+        <Heading>
+          <span id="largos-t">Largos</span>
+        </Heading>
+        <p className="text-ink-soft mt-3">
+          Los largos del catálogo y del armador, en cm. {LENGTH_MEASURE_HINT}
+        </p>
+        <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {(Object.keys(LENGTH_CM) as Length[]).map((l) => (
+            <li key={l} className="rounded-lg bg-white/80 p-4 text-center ring-1 ring-bordo/10">
+              <span className="font-title text-bordo block text-2xl">{LENGTH_CM[l]} cm</span>
+              <span className="text-ink-soft mt-1 block text-sm font-semibold">{LENGTH_LABEL[l]}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section

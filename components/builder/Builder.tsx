@@ -24,6 +24,7 @@ import { SizePicker, sizesAreValid } from "@/components/cart/SizePicker";
 import { NailPreview } from "./NailPreview";
 import { cn } from "@/lib/format";
 import { CHARMS_ENABLED } from "@/lib/site";
+import { LENGTH_MEASURE_HINT, lengthWithCm } from "@/lib/data/catalog";
 
 const STEPS = ["Forma", "Largo", "Acabado", "Color base", "Técnicas", "Uña por uña", "Dijes", "Medidas", "Detalles"] as const;
 /** Dónde va una técnica: las dos manos o una (la uña suelta se elige en la mano). */
@@ -198,10 +199,10 @@ export function Builder({ config, presets = [] }: { config: BuilderConfig; prese
           ))}
         </Step>
 
-        <Step n={2} title={STEPS[1]} hint="Corto y medio son los más cómodos para el día a día.">
+        <Step n={2} title={STEPS[1]} hint={`${LENGTH_MEASURE_HINT} Corto y medio son los más cómodos para el día a día.`}>
           {config.lengths.map((o) => (
             <Chip key={o.id} selected={sel.length === o.id} onClick={() => setSel({ ...sel, length: o.id })} hint={o.delta ? `+${formatARS(o.delta)}` : undefined}>
-              {o.label}
+              {lengthWithCm(o.id, o.label)}
             </Chip>
           ))}
         </Step>

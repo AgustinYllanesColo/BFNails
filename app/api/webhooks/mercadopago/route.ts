@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPayment, verifyWebhookSignature } from "@/lib/mercadopago";
 import { getOrderByNumber, updateOrder } from "@/lib/data/orders";
+import { notifyOrderPaid } from "@/lib/data/notify";
 
 /**
  * Webhook de Mercado Pago (evento "payment"). Valida la firma, consulta el pago
@@ -34,7 +35,9 @@ export async function POST(req: Request) {
 
     const status = payment.status;
     if (status === "approved" && order.status !== "pagado" && order.status !== "en_produccion" && order.status !== "listo" && order.status !== "enviado" && order.status !== "entregado") {
-      await updateOrder(order.id, { status: "pagado", payment: { ...order.payment, mpPaymentId: String(payment.id) } });
+      const paid = await updateOrder(order.id, { status: "pagado", payment: { ...order.payment, mpPaymentId: String(payment.id) } });
+      // venta confirmada: mail a la clienta (en marcha) y a Brenda (número de pedido)
+      if (paid) await notifyOrderPaid(paid);
     } else if ((status === "rejected" || status === "cancelled") && order.status === "pendiente_pago") {
       await updateOrder(order.id, { payment: { ...order.payment, mpPaymentId: String(payment.id) } });
     } else if (!order.payment.mpPaymentId) {
