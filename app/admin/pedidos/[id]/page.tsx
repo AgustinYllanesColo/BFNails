@@ -5,7 +5,7 @@ import { getOrderById, publicOrderUrl } from "@/lib/data/orders";
 import { formatARS } from "@/lib/format";
 import { adminMessages, describeItem, waLink } from "@/lib/whatsapp";
 import { builderLink } from "@/lib/share";
-import { ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } from "@/lib/types";
+import { ORDER_STATUS_LABEL, PAYMENT_LABEL, orderSurcharge, type OrderStatus } from "@/lib/types";
 import { Card, PageTitle, StatusBadge, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
 import { confirmPrice, setNotes, setOrderStatus, setTracking } from "../actions";
 import { StatusButtons } from "@/components/admin/StatusButtons";
@@ -63,6 +63,12 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
                 <dt className="text-ink-soft">Envío · {order.delivery.label}</dt>
                 <dd>{formatARS(order.delivery.cost)}</dd>
               </div>
+              {orderSurcharge(order) > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-ink-soft">Recargo Mercado Pago</dt>
+                  <dd>{formatARS(orderSurcharge(order))}</dd>
+                </div>
+              )}
               <div className="flex justify-between font-bold">
                 <dt>Total</dt>
                 <dd className="text-bordo">{formatARS(order.total)}</dd>
@@ -86,7 +92,7 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
           {order.status === "a_confirmar" && (
             <Card title="Confirmar precio final">
               <p className="mb-3 text-sm text-ink-soft">
-                Este pedido tiene notas libres. Fijá el total (con envío incluido) y pasa a pendiente de pago. Si eligió Mercado Pago se genera el link.
+                Este pedido tiene notas libres. Fijá el total (con envío incluido, sin recargo) y pasa a pendiente de pago. Si eligió Mercado Pago se suma el 10% y se genera el link.
               </p>
               <form action={confirmPrice.bind(null, order.id)} className="flex flex-wrap items-end gap-3">
                 <label className="text-sm">

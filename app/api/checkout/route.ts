@@ -16,7 +16,7 @@ import {
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
 import { notifyOrderCreated } from "@/lib/data/notify";
 import { designImage } from "@/lib/data/catalog";
-import type { CartItem } from "@/lib/types";
+import { mpSurcharge, type CartItem } from "@/lib/types";
 
 /**
  * Crea la orden. Los precios se recalculan en el servidor (nunca se confía en el
@@ -129,8 +129,10 @@ export async function POST(req: Request) {
   // La moto tiene precio "desde": Brenda confirma el costo final por WhatsApp antes del pago.
   if (chosen.from) needsConfirmation = true;
 
-  const total = subtotal + chosen.cost;
   const useMp = input.payment.method === "mercadopago" && mpEnabled() && !needsConfirmation;
+  // Con precio a confirmar, el recargo se suma cuando Brenda fija el total final.
+  const surcharge = input.payment.method === "mercadopago" && !needsConfirmation ? mpSurcharge(subtotal + chosen.cost) : 0;
+  const total = subtotal + chosen.cost + surcharge;
 
   const draft: NewOrder = {
     token: newToken(),

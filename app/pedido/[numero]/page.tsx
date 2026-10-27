@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getOrderByNumber, publicOrderUrl } from "@/lib/data/orders";
 import { getSettings } from "@/lib/data/settings";
-import { ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } from "@/lib/types";
+import { ORDER_STATUS_LABEL, PAYMENT_LABEL, orderSurcharge, type OrderStatus } from "@/lib/types";
 import { formatARS, cn } from "@/lib/format";
 import { describeItem, describeSizes, orderConfirmationMessage, waLink } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/Button";
@@ -113,6 +113,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
               { kind: "rule", id: "r1" },
               { kind: "row", id: "envio", label: order.delivery.label.toLowerCase(), value: order.delivery.cost ? formatARS(order.delivery.cost) : "gratis" },
               { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[order.payment.method].toLowerCase(), tone: "muted" },
+              ...(orderSurcharge(order) > 0 ? [{ kind: "row", id: "recargo", label: "recargo mp 10%", value: formatARS(orderSurcharge(order)) } as ReceiptLine] : []),
               { kind: "row", id: "estado", label: "estado", value: ORDER_STATUS_LABEL[order.status].toLowerCase(), tone: "accent" },
               { kind: "row", id: "total", label: order.needsConfirmation ? "DESDE" : "TOTAL", value: formatARS(order.total), tone: "bold" },
             ]}

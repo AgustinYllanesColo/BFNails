@@ -13,7 +13,7 @@ import type { ShippingOption } from "@/lib/shipping/types";
 import { Field, inputClass, textareaClass } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
-import { PAYMENT_LABEL } from "@/lib/types";
+import { PAYMENT_LABEL, mpSurcharge } from "@/lib/types";
 
 const formSchema = z.object({
   name: z.string().trim().min(2, "Decinos tu nombre"),
@@ -74,7 +74,6 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
   const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
   const chosen = options.find((o) => o.method === delivery);
   const shippingCost = chosen?.cost ?? 0;
-  const total = subtotal + shippingCost;
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
   const needsAddress = delivery !== "retiro";
   const needsFullAddress = delivery.startsWith("correo");
@@ -82,6 +81,8 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
   const motoFrom = chosen?.from === true;
   // Si la entrega deja de admitir efectivo, el método efectivo cae al siguiente disponible.
   const effectivePayment: PaymentMethod = !cashAllowed && payment === "efectivo" ? (mp ? "mercadopago" : "transferencia") : payment;
+  const surcharge = effectivePayment === "mercadopago" && !needsConfirmation ? mpSurcharge(subtotal + shippingCost) : 0;
+  const total = subtotal + shippingCost + surcharge;
 
   const correoOptions = useMemo(() => options.filter((o) => o.method.startsWith("correo")), [options]);
 
@@ -238,7 +239,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
               selected={effectivePayment === "mercadopago"}
               onClick={() => setPayment("mercadopago")}
               title="Mercado Pago"
-              description={mp ? "Tarjetas, dinero en cuenta, cuotas. Te redirigimos a pagar." : "Todavía no está activo. Elegí transferencia."}
+              description={mp ? "Tarjetas, dinero en cuenta, cuotas. Tiene un 10% de recargo." : "Todavía no está activo. Elegí transferencia."}
               disabled={!mp}
             />
             <OptionCard selected={effectivePayment === "transferencia"} onClick={() => setPayment("transferencia")} title="Transferencia" description={`Al alias ${transfer.alias} (${transfer.holder}). Mandás el comprobante por WhatsApp.`} />
@@ -272,6 +273,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
             { kind: "rule", id: "r1" },
             { kind: "row", id: "envio", label: chosen ? chosen.label.toLowerCase() : "envío", value: shippingCost === 0 ? "gratis" : `${motoFrom ? "desde " : ""}${formatARS(shippingCost)}` },
             { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[effectivePayment].toLowerCase(), tone: "muted" },
+            ...(surcharge > 0 ? [{ kind: "row", id: "recargo", label: "recargo mp 10%", value: formatARS(surcharge) } as ReceiptLine] : []),
             { kind: "row", id: "total", label: needsConfirmation || motoFrom ? "DESDE" : "TOTAL", value: formatARS(total), tone: "bold" },
           ]}
           footer={[
