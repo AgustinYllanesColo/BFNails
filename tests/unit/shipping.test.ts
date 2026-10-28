@@ -11,6 +11,11 @@ describe("zoneForPostalCode", () => {
     expect(zoneForPostalCode("5000")).toBe("interior"); // Córdoba
     expect(zoneForPostalCode("2000")).toBe("interior"); // Rosario
     expect(zoneForPostalCode("9410")).toBe("interior"); // Ushuaia
+    expect(zoneForPostalCode("8000")).toBe("bsas"); // Bahía Blanca
+    expect(zoneForPostalCode("2900")).toBe("bsas"); // San Nicolás
+    expect(zoneForPostalCode("6300")).toBe("interior"); // Santa Rosa, La Pampa
+    expect(zoneForPostalCode("8300")).toBe("interior"); // Neuquén
+    expect(zoneForPostalCode("8400")).toBe("interior"); // Bariloche
   });
   it("devuelve null si no es un CP válido", () => {
     expect(zoneForPostalCode("12")).toBeNull();

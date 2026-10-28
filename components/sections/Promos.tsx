@@ -49,11 +49,16 @@ export function Promos({ promos, title = "Promos de la semana" }: { promos: Prom
   );
 }
 
+/** Las promos que van al catálogo bajan directo a las uñas (#disenos), no dejan a la clienta mirando las tarjetas. */
+function withGridAnchor(href: string): string {
+  return href.startsWith("/catalogo") && !href.includes("#") ? `${href}#disenos` : href;
+}
+
 export function PromoCard({ promo: p }: { promo: Promo }) {
   const t = THEMES[p.theme] ?? THEMES.rojo;
   const until = untilLabel(p.until);
   const external = !p.href;
-  const href = p.href || waLink(`Hola Bren! Quiero la promo "${p.title}" 🐱`);
+  const href = p.href ? withGridAnchor(p.href) : waLink(`Hola Bren! Quiero la promo "${p.title}" 🐱`);
   return (
     <Link
       href={href}
