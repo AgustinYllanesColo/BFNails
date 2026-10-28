@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // las fotos del catálogo suben directo a Blob; esto cubre las de promos/dijes/kit que todavía pasan por el action
+  experimental: { serverActions: { bodySizeLimit: "4mb" } },
   async redirects() {
     return [{ source: "/talles", destination: "/medidas", permanent: true }];
   },
@@ -14,6 +16,7 @@ const nextConfig: NextConfig = {
     localPatterns: [{ pathname: "/api/placeholder", search: "" }, { pathname: "/**" }],
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
+      { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },

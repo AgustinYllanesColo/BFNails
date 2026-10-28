@@ -1,5 +1,6 @@
 import "server-only";
 import { eq } from "drizzle-orm";
+import { put } from "@vercel/blob";
 import { requireDb } from "./db";
 import { designs } from "@/lib/db/schema";
 import { supabaseAdmin } from "@/lib/supabase/server";
@@ -47,13 +48,16 @@ export async function listAllDesigns() {
   return db.select().from(designs).orderBy(designs.sort, designs.name);
 }
 
-const BUCKET = "designs";
-
-/** Sube una imagen al bucket público `designs` y devuelve la URL pública. */
+/** Sube una imagen a Vercel Blob (o al bucket público `designs` de Supabase si no hay Blob) y devuelve la URL pública. */
 export async function uploadDesignImage(file: File, slug: string): Promise<string> {
-  const sb = supabaseAdmin();
   const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
   const path = `${slug}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(path, file, { access: "public", contentType: file.type || "image/jpeg", cacheControlMaxAge: 60 * 60 * 24 * 365 });
+    return blob.url;
+  }
+  const BUCKET = "designs";
+  const sb = supabaseAdmin();
   const buf = Buffer.from(await file.arrayBuffer());
   // Crea el bucket si no existe (idempotente)
   await sb.storage.createBucket(BUCKET, { public: true, fileSizeLimit: 8 * 1024 * 1024 }).catch(() => {});

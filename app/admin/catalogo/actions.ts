@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
-import { deleteDesign, upsertDesign, uploadDesignImage } from "@/lib/admin/catalog";
+import { deleteDesign, upsertDesign } from "@/lib/admin/catalog";
 import { slugify } from "@/lib/format";
 
 const schema = z.object({
@@ -23,7 +23,7 @@ const schema = z.object({
   featured: z.coerce.boolean().default(false),
   active: z.coerce.boolean().default(true),
   sort: z.coerce.number().int().default(0),
-  images: z.string().default(""), // URLs existentes, una por línea
+  images: z.string().default(""), // URLs de las fotos (ya subidas desde el navegador), una por línea
 });
 
 export type DesignFormState = { error?: string } | undefined;
@@ -37,9 +37,6 @@ export async function saveDesign(_prev: DesignFormState, formData: FormData): Pr
   const slug = slugify(d.slug || d.name);
   const images = d.images.split("\n").map((s) => s.trim()).filter(Boolean);
   try {
-    for (const f of formData.getAll("newImages")) {
-      if (f instanceof File && f.size > 0) images.push(await uploadDesignImage(f, slug));
-    }
     await upsertDesign(
       {
         slug,
@@ -61,9 +58,12 @@ export async function saveDesign(_prev: DesignFormState, formData: FormData): Pr
       d.originalSlug || undefined,
     );
   } catch (e) {
+    const msg = String((e as { cause?: { message?: string } }).cause?.message ?? (e as Error).message);
+    if (/duplicate key|unique/i.test(msg)) return { error: `Ya hay un diseño con la URL "${slug}". Cambiá el nombre o el slug.` };
     return { error: (e as Error).message };
   }
   revalidatePath("/catalogo");
+  revalidatePath(`/catalogo/${slug}`);
   revalidatePath("/");
   revalidatePath("/admin/catalogo");
   redirect(`/admin/catalogo/${slug}`);

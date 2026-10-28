@@ -19,6 +19,7 @@ export type Design = {
   featured?: boolean;
   active?: boolean;
   colors?: string[]; // paleta para placeholder y filtros
+  sort?: number; // orden en el catálogo (menor primero)
 };
 
 export type StandardSize = "S" | "M" | "L";

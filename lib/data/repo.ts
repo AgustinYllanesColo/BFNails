@@ -26,6 +26,7 @@ function rowToDesign(r: typeof designsTable.$inferSelect): Design {
     featured: r.featured,
     active: r.active,
     colors: r.colors ?? [],
+    sort: r.sort,
   };
 }
 
