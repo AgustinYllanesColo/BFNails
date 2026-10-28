@@ -8,7 +8,8 @@ import { createServerClient } from "@supabase/ssr";
 export async function proxy(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return NextResponse.next();
+  // con clave del panel no se usa la sesión de Supabase: no hace falta ir a buscarla en cada request
+  if (!url || !key || process.env.ADMIN_PASSWORD) return NextResponse.next();
 
   let res = NextResponse.next({ request: req });
   const supabase = createServerClient(url, key, {
