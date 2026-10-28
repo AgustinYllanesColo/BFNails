@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { getPayment, verifyWebhookSignature } from "@/lib/mercadopago";
-import { getOrderByNumber, updateOrder } from "@/lib/data/orders";
+import { NextResponse, after } from "next/server";
+import { verifyWebhookSignature } from "@/lib/mercadopago";
+import { reconcilePayment } from "@/lib/data/payments";
 import { notifyOrderPaid } from "@/lib/data/notify";
 
 /**
@@ -21,29 +21,22 @@ export async function POST(req: Request) {
       dataId,
       secret,
     });
-    if (!ok) return NextResponse.json({ error: "firma inválida" }, { status: 401 });
+    if (!ok) {
+      console.warn("[mp webhook] firma inválida", { type, dataId });
+      return NextResponse.json({ error: "firma inválida" }, { status: 401 });
+    }
   }
 
   if (type !== "payment" || !dataId) return NextResponse.json({ ok: true, ignored: true });
 
   try {
-    const payment = await getPayment(dataId);
-    const number = payment.external_reference;
-    if (!number) return NextResponse.json({ ok: true, ignored: "sin external_reference" });
-    const order = await getOrderByNumber(number);
-    if (!order) return NextResponse.json({ ok: true, ignored: "orden no encontrada" });
-
-    const status = payment.status;
-    if (status === "approved" && order.status !== "pagado" && order.status !== "en_produccion" && order.status !== "listo" && order.status !== "enviado" && order.status !== "entregado") {
-      const paid = await updateOrder(order.id, { status: "pagado", payment: { ...order.payment, mpPaymentId: String(payment.id) } });
-      // venta confirmada: mail a la clienta (en marcha) y a Brenda (número de pedido)
-      if (paid) await notifyOrderPaid(paid);
-    } else if ((status === "rejected" || status === "cancelled") && order.status === "pendiente_pago") {
-      await updateOrder(order.id, { payment: { ...order.payment, mpPaymentId: String(payment.id) } });
-    } else if (!order.payment.mpPaymentId) {
-      await updateOrder(order.id, { payment: { ...order.payment, mpPaymentId: String(payment.id) } });
+    const res = await reconcilePayment(dataId);
+    // venta confirmada: mail a la clienta (en marcha) y a Brenda, después de responderle a MP
+    if (res.justPaid) {
+      const paid = res.justPaid;
+      after(() => notifyOrderPaid(paid));
     }
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, ignored: res.ignored });
   } catch (err) {
     console.error("[mp webhook]", err);
     // 500 hace que MP reintente

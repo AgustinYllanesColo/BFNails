@@ -39,6 +39,7 @@ export const selectionSchema = z.object({
 export const cartItemSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("design"),
+    ref: z.string().max(40).optional(),
     designSlug: z.string().min(1).max(80),
     qty: z.number().int().min(1).max(10),
     sizes: sizeSchema,
@@ -47,12 +48,14 @@ export const cartItemSchema = z.discriminatedUnion("kind", [
   }),
   z.object({
     kind: z.literal("custom"),
+    ref: z.string().max(40).optional(),
     selection: selectionSchema,
     qty: z.number().int().min(1).max(10),
     sizes: sizeSchema,
   }),
   z.object({
     kind: z.literal("charm"),
+    ref: z.string().max(40).optional(),
     charmId: z.string().min(1).max(60),
     qty: z.number().int().min(1).max(50),
   }),
@@ -64,7 +67,8 @@ export const checkoutSchema = z.object({
     whatsapp: z
       .string()
       .trim()
-      .regex(/^\+?[\d\s-]{8,20}$/, "Un número de WhatsApp válido, con característica"),
+      .regex(/^\+?[\d\s-]{8,20}$/, "Un número de WhatsApp válido, con característica")
+      .refine((v) => v.replace(/\D/g, "").length >= 8, "Un número de WhatsApp válido, con característica"),
     email: z.string().trim().email("Email inválido"),
   }),
   delivery: z.object({
@@ -81,6 +85,8 @@ export const checkoutSchema = z.object({
   }),
   payment: z.object({ method: z.enum(["mercadopago", "transferencia", "efectivo"]) }),
   items: z.array(cartItemSchema).min(1, "El carrito está vacío").max(20),
+  /** Total que vio la clienta: si el del servidor es mayor (cambió un precio), se frena y se le avisa. */
+  expectedTotal: z.number().int().min(0).optional(),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

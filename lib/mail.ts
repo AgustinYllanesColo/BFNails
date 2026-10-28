@@ -34,6 +34,7 @@ export async function sendMail(mail: Mail): Promise<boolean> {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ from: mailFrom(), to, subject: mail.subject, text: mail.text, html: mail.html, reply_to: mail.replyTo }),
+      signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
     return true;
@@ -44,6 +45,10 @@ export async function sendMail(mail: Mail): Promise<boolean> {
     port,
     secure: port === 465,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    // los defaults de nodemailer son de minutos: un SMTP colgado no puede dejar esperando al pedido
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
   });
   await transport.sendMail({ from: mailFrom(), to, subject: mail.subject, text: mail.text, html: mail.html, replyTo: mail.replyTo });
   return true;

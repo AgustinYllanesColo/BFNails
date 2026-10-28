@@ -2,7 +2,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { orders as ordersTable } from "@/lib/db/schema";
 import type { Order, OrderStatus } from "@/lib/types";
@@ -156,6 +156,25 @@ export async function updateOrder(id: string, patch: Partial<Omit<Order, "id" | 
     set.mpInitPoint = patch.payment.mpInitPoint;
   }
   const [row] = await db.update(ordersTable).set(set).where(eq(ordersTable.id, id)).returning();
+  return row ? rowToOrder(row) : null;
+}
+
+/**
+ * Marca un pedido como pagado solo si todavía no lo estaba, en una sola operación: Mercado Pago suele mandar la misma
+ * notificación dos veces a la vez y así solo una de las dos lo pasa a pagado (y avisa). Devuelve null si ya estaba.
+ */
+export async function markOrderPaid(id: string, mpPaymentId: string): Promise<Order | null> {
+  const db = getDb();
+  if (!db) {
+    const current = await getOrderById(id);
+    if (!current || !["pendiente_pago", "a_confirmar", "cancelado"].includes(current.status)) return null;
+    return updateOrder(id, { status: "pagado", payment: { ...current.payment, mpPaymentId } });
+  }
+  const [row] = await db
+    .update(ordersTable)
+    .set({ status: "pagado", mpPaymentId, updatedAt: new Date() })
+    .where(and(eq(ordersTable.id, id), inArray(ordersTable.status, ["pendiente_pago", "a_confirmar", "cancelado"])))
+    .returning();
   return row ? rowToOrder(row) : null;
 }
 

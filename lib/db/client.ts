@@ -44,7 +44,8 @@ function resetDb(sql: postgres.Sql) {
   if (globalForDb.__bfSql !== sql) return; // ya se rearmó
   globalForDb.__bfDb = undefined;
   globalForDb.__bfSql = undefined;
-  sql.end({ timeout: 0 }).catch(() => {});
+  // deja terminar unos segundos lo que está en curso en esa conexión antes de cerrarla
+  sql.end({ timeout: 5 }).catch(() => {});
 }
 
 /** Devuelve la DB si hay DATABASE_URL; si no, null y la app usa datos locales. */
@@ -58,12 +59,15 @@ export function getDb(): Db | null {
   const client = withQueryTimeout(
     postgres(url, {
       prepare: false, // el transaction pooler no soporta prepared statements
+      // sin pipelining: postgres.js manda hasta 100 consultas seguidas por la misma conexión y el pooler de Supabase en
+      // modo transacción pierde respuestas así (consultas colgadas, páginas con error 500). Una por conexión a la vez.
+      max_pipeline: 0,
       max: 5,
       connect_timeout: 10,
       // cerrar las conexiones ociosas antes de que el pooler o un congelamiento de la función las deje muertas
       idle_timeout: 20,
       max_lifetime: 60 * 5,
-    }),
+    } as postgres.Options<Record<string, never>>), // max_pipeline existe en postgres.js pero no está en sus tipos
   );
   globalForDb.__bfSql = client;
   globalForDb.__bfDb = drizzle(client, { schema });

@@ -4,6 +4,18 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // las fotos del catálogo suben directo a Blob; esto cubre las de promos/dijes/kit que todavía pasan por el action
   experimental: { serverActions: { bodySizeLimit: "4mb" } },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [{ source: "/talles", destination: "/medidas", permanent: true }];
   },

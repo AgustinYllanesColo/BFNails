@@ -1,4 +1,4 @@
-import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape } from "./types";
+import type { BuilderSelection, Complexity, Design, Finish, Length, Quote, Shape, SizeSelection } from "./types";
 import type { Charm } from "./data/content";
 import { NAIL_COUNT, allNails, describeNailList } from "./nails";
 
@@ -136,12 +136,16 @@ export const DEFAULT_BUILDER_CONFIG: BuilderConfig = {
  * Precio de un diseño del catálogo en otra forma o largo: al precio del diseño se le suma la
  * diferencia de delta entre lo elegido y lo que trae el diseño (una forma más cara suma, una
  * más barata no descuenta por debajo del precio del diseño).
+ *
+ * El precio de oferta (con `priceBefore` tachado) es el del set en stock: forma y largo originales y, si el set tiene
+ * talle cargado, ese talle. Pedirlo en otra forma, largo o talle es hacerlo a pedido y vuelve al precio de lista.
  */
 export function designVariantPrice(
-  design: Pick<Design, "price" | "shape" | "length">,
+  design: Pick<Design, "price" | "shape" | "length"> & Partial<Pick<Design, "priceBefore" | "tags">>,
   shape: Shape | undefined,
   length: Length | undefined,
   config: BuilderConfig = DEFAULT_BUILDER_CONFIG,
+  sizes?: SizeSelection,
 ): number {
   const delta = <T extends string>(list: Option<T>[], id: T | undefined, base: T) => {
     const d = (x: T) => list.find((o) => o.id === x)?.delta ?? 0;
@@ -149,7 +153,32 @@ export function designVariantPrice(
   };
   const extra =
     delta(config.shapes, shape, design.shape) + delta(config.lengths, length, design.length);
-  return design.price + Math.max(0, extra);
+  const onSale = Boolean(design.priceBefore && design.priceBefore > design.price);
+  const sameShape = !shape || shape === design.shape;
+  const sameLength = !length || length === design.length;
+  const stockTalle = design.tags?.map((t) => t.toLowerCase()).find((t) => /^talle [sml]$/.test(t))?.slice(-1).toUpperCase();
+  const sameSize = !sizes || !stockTalle || (sizes.mode === "standard" && sizes.size === stockTalle);
+  const base = onSale && !(sameShape && sameLength && sameSize) ? design.priceBefore! : design.price;
+  return base + Math.max(0, extra);
+}
+
+/**
+ * Promo "4x3" (llevá 4 sets del catálogo, pagá 3): de cada 4 sets, el más barato va de regalo. Se ordenan todas las
+ * unidades de mayor a menor precio y sale gratis cada cuarta (la 4ª, la 8ª…). Devuelve cuántas unidades gratis le
+ * tocan a cada ítem (por `key`) y el descuento total. Misma función en el carrito y en el servidor.
+ */
+export function fourForThree(items: { key: string; kind: string; unitPrice: number; qty: number }[]): { free: Map<string, number>; discount: number } {
+  const units = items
+    .filter((i) => i.kind === "design")
+    .flatMap((i) => Array.from({ length: i.qty }, () => ({ key: i.key, price: i.unitPrice })))
+    .sort((a, b) => b.price - a.price);
+  const free = new Map<string, number>();
+  let discount = 0;
+  for (let n = 3; n < units.length; n += 4) {
+    free.set(units[n].key, (free.get(units[n].key) ?? 0) + 1);
+    discount += units[n].price;
+  }
+  return { free, discount };
 }
 
 export function tierForPoints(points: number, tiers: ComplexityTier[]): ComplexityTier {

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getOrderById, publicOrderUrl, updateOrder } from "@/lib/data/orders";
@@ -16,7 +17,7 @@ export async function setOrderStatus(id: string, status: OrderStatus) {
   const before = await getOrderById(id);
   const updated = await updateOrder(id, { status });
   // Brenda confirma una transferencia o un efectivo: mismo aviso que cuando acredita Mercado Pago
-  if (updated && status === "pagado" && before && (before.status === "pendiente_pago" || before.status === "a_confirmar")) await notifyOrderPaid(updated);
+  if (updated && status === "pagado" && before && (before.status === "pendiente_pago" || before.status === "a_confirmar")) after(() => notifyOrderPaid(updated));
   revalidatePath(`/admin/pedidos/${id}`);
   revalidatePath("/admin/pedidos");
   revalidatePath("/admin");
@@ -45,6 +46,7 @@ export async function confirmPrice(id: string, formData: FormData) {
   const base = z.coerce.number().int().min(0).max(5_000_000).parse(formData.get("total"));
   const order = await getOrderById(id);
   if (!order) throw new Error("Pedido no encontrado");
+  if (order.status !== "a_confirmar") throw new Error("Este pedido ya tiene precio confirmado");
   // El total que carga Brenda es sin recargo; si paga con MP se le suma el 10%.
   const total = base + (order.payment.method === "mercadopago" ? mpSurcharge(base) : 0);
   const items = order.items.map((i) =>

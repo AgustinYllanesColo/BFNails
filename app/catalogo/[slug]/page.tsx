@@ -25,6 +25,16 @@ type Props = { params: Promise<{ slug: string }> };
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
 export const revalidate = 300;
 
+// Con los slugs de antemano la página queda en caché (ISR) y no consulta la base en cada visita; un diseño nuevo se
+// genera la primera vez que alguien lo abre. Si la base no responde en el build, se generan todos a demanda.
+export async function generateStaticParams() {
+  try {
+    return (await getDesigns()).map((d) => ({ slug: d.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const design = await getDesign(slug);

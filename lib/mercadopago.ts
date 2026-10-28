@@ -1,5 +1,5 @@
 import "server-only";
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
 import { orderSurcharge, type Order } from "@/lib/types";
 import { siteConfig } from "@/lib/site";
@@ -17,7 +17,8 @@ function client() {
 /** Crea la preferencia de Checkout Pro para una orden y devuelve id + init_point. */
 export async function createPreference(order: Order, orderUrl: string) {
   const pref = new Preference(client());
-  const items = order.items.map((i) => ({
+  // las unidades de regalo (4x3) van a $0 y MP no acepta ítems sin precio: quedan en el pedido, no en el cobro
+  const items = order.items.filter((i) => i.unitPrice > 0).map((i) => ({
     id: i.kind === "design" ? i.designSlug : i.kind === "charm" ? `dije-${i.charmId}` : "custom",
     title: i.kind === "design" ? `${i.name} (press-on)` : i.kind === "charm" ? `Dije ${i.name}` : "Set press-on a medida",
     quantity: i.qty,
@@ -79,6 +80,7 @@ export function verifyWebhookSignature(opts: {
   ) as { ts?: string; v1?: string };
   if (!parts.ts || !parts.v1) return false;
   const manifest = `id:${dataId.toLowerCase()};${xRequestId ? `request-id:${xRequestId};` : ""}ts:${parts.ts};`;
-  const expected = createHmac("sha256", secret).update(manifest).digest("hex");
-  return expected === parts.v1;
+  const expected = Buffer.from(createHmac("sha256", secret).update(manifest).digest("hex"));
+  const got = Buffer.from(parts.v1);
+  return expected.length === got.length && timingSafeEqual(expected, got);
 }

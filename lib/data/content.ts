@@ -182,6 +182,11 @@ export function promoIsLive(p: Promo, now = new Date()): boolean {
   return Number.isNaN(end.getTime()) || end >= now;
 }
 
+/** ¿Está vigente la promo "4x3" (llevá 4 sets del catálogo, pagá 3)? Se reconoce por id o por el cartel. */
+export function fourForThreeLive(promos: Promo[], now = new Date()): boolean {
+  return promos.some((p) => promoIsLive(p, now) && (p.id === "4x3" || /^\s*4\s*x\s*3\s*$/i.test(p.badge)));
+}
+
 /** Precio de los dijes elegidos (los que ya no existen no suman). */
 export function charmsTotal(picked: Array<{ id: string; qty: number }> | undefined, charms: Charm[]): number {
   return (picked ?? []).reduce((acc, p) => acc + (charms.find((c) => c.id === p.id)?.price ?? 0) * p.qty, 0);

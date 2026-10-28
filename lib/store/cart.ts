@@ -13,6 +13,8 @@ type CartState = {
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
   clear: () => void;
+  /** Precios nuevos que mandó el servidor (id del ítem → precio unitario). */
+  reprice: (prices: Record<string, number>) => void;
   subtotal: () => number;
   count: () => number;
 };
@@ -38,6 +40,7 @@ export const useCart = create<CartState>()(
           items: s.items.map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(i.kind === "charm" ? 50 : 10, qty)) } : i)),
         })),
       clear: () => set({ items: [] }),
+      reprice: (prices) => set((s) => ({ items: s.items.map((i) => (prices[i.id] != null ? { ...i, unitPrice: prices[i.id] } : i)) })),
       subtotal: () => get().items.reduce((acc, i) => acc + i.unitPrice * i.qty, 0),
       count: () => get().items.reduce((acc, i) => acc + i.qty, 0),
     }),
