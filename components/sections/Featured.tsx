@@ -9,7 +9,7 @@ export function Featured({ designs }: { designs: Design[] }) {
     <Section id="destacados">
       <div className="container-x">
         <Reveal className="mb-8 md:mb-10">
-          <Heading>Catálogo</Heading>
+          <Heading>Catálogo de uñas</Heading>
         </Reveal>
         <Reveal stagger={0.08} className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4">
           {designs.map((d, i) => (
@@ -18,7 +18,7 @@ export function Featured({ designs }: { designs: Design[] }) {
         </Reveal>
         <Reveal className="mt-12 text-center">
           <Button href="/catalogo" variant="secondary" size="lg">
-            Ver todo el catálogo
+            Ver todas las uñas
           </Button>
         </Reveal>
       </div>

@@ -34,6 +34,10 @@ export const FAQ_ITEMS: Array<{ q: string; a: string; link?: { href: string; lab
     link: { href: siteConfig.tutorial, label: "Ver el tutorial" },
   },
   {
+    q: "¿Puedo pedir maquillaje y uñas juntos?",
+    a: "Sí. Sumás todo al mismo carrito y lo coordinamos en un solo pedido.",
+  },
+  {
     q: "¿Atendés de forma presencial?",
     a: "Sí, atiendo en Remedios de Escalada, a 4 cuadras de la estación. Si las press-on no son lo tuyo, los servicios que realizo son soft gel, kapping o semipermanente, con turno previo a coordinar por WhatsApp o Instagram.",
   },
@@ -71,7 +75,9 @@ export function Faq({ items = FAQ_ITEMS, compact = false }: { items?: typeof FAQ
                     )}
                     aria-hidden
                   >
-                    +
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="size-3.5">
+                      <path d="M8 3v10M3 8h10" />
+                    </svg>
                   </span>
                 </button>
                 <AnimatePresence initial={false}>

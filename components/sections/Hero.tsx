@@ -6,6 +6,8 @@ import { gsap } from "gsap";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { HeroPhotos } from "@/components/motion/HeroPhotos";
 import { Button } from "@/components/ui/Button";
+import { MakeupVisual } from "@/components/makeup/MakeupArt";
+import { DEFAULT_MAKEUP, type MakeupProduct } from "@/lib/data/makeup";
 
 /**
  * Hero: el logo real de BF Studio, grande y centrado, sobre un halo cálido, con fotos reales de sets
@@ -20,9 +22,27 @@ import { Button } from "@/components/ui/Button";
  * La intro es CSS (`hero-in-*` en globals.css) y arranca desde el primer cuadro pintado: con GSAP el
  * contenido llegaba visible del servidor, se escondía al hidratar y volvía a aparecer (parpadeo al recargar).
  */
-/** Lo que vende, en el orden en que se lee: una por vez detrás de "Press-on". */
-const WORDS = ["personalizadas", "a tu talle", "hechas a mano", "reutilizables"];
+/**
+ * Debajo de "Uñas y maquillaje" rota lo que vende cada línea, alternando: uñas en bordó, maquillaje en labial.
+ * Frases cortas y de hechos (lo que hay en la tienda), nada de promesas.
+ */
+const WORDS: Array<{ text: string; tone: "nails" | "makeup" }> = [
+  { text: "press-on a tu talle", tone: "nails" },
+  { text: "labiales, glosses y máscaras", tone: "makeup" },
+  { text: "hechas a mano por mí", tone: "nails" },
+  { text: "rubores, bases y brochas", tone: "makeup" },
+];
 const WORD_MS = 2600;
+
+/** Stickers de maquillaje entre las fotos de uñas: el dibujo de cada producto, hasta tener fotos. */
+const MAKEUP_STICKERS: Array<{ id: string; pos: string; rotate: number; depth: number; bob: number; delay: number }> = [
+  { id: "lip-gloss-brillo", pos: "left-[-2%] top-[45%] w-[clamp(64px,18vw,88px)] md:left-[13%] md:top-[70%] md:w-[clamp(96px,8vw,128px)]", rotate: -9, depth: -30, bob: 7.6, delay: 560 },
+  { id: "mascara-sky-high", pos: "right-[-2%] top-[48%] w-[clamp(64px,18vw,88px)] md:right-[12%] md:top-[71%] md:w-[clamp(96px,8vw,128px)]", rotate: 8, depth: -40, bob: 6.8, delay: 650 },
+  { id: "rubor-crema-magic-color", pos: "hidden md:block md:left-[22%] md:top-[11%] md:w-[clamp(84px,6.5vw,108px)]", rotate: 10, depth: -22, bob: 8.4, delay: 470 },
+];
+const STICKER_PRODUCTS = MAKEUP_STICKERS.map((s) => ({ ...s, product: DEFAULT_MAKEUP.find((m) => m.id === s.id) })).filter(
+  (s): s is typeof s & { product: MakeupProduct } => Boolean(s.product),
+);
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
@@ -80,6 +100,7 @@ export function Hero() {
         <div className="absolute top-1/2 left-1/2 size-[90vw] max-w-[1100px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(242,167,195,0.3)_0%,rgba(201,160,99,0.12)_38%,rgba(254,247,231,0)_66%)]" />
       </div>
       <HeroPhotos className="-z-10" />
+      <MakeupStickers />
 
       {/* Logo real: flota apenas, en CSS */}
       <div data-hero-logo className="hero-in-logo relative z-10 w-[min(88vw,760px)]">
@@ -104,25 +125,27 @@ export function Hero() {
       </div>
 
       {/* Copy + CTAs */}
-      <div data-hero-copy className="hero-in-copy relative mt-6 max-w-xl px-5 text-center md:mt-8">
-        <h1 className="font-display text-ink text-4xl md:text-5xl">
+      <div data-hero-copy className="hero-in-copy relative mt-6 max-w-3xl px-5 text-center md:mt-8">
+        <h1 className="text-ink">
           <span className="sr-only">
-            Press-on personalizadas, a tu talle, hechas a mano y reutilizables
+            Uñas y maquillaje: press-on a tu talle hechas a mano, labiales, glosses, máscaras, rubores, bases y brochas
           </span>
-          <span aria-hidden>
-            Press-on{" "}
-            {/* Todas las palabras apiladas en la misma celda: el ancho es el de la más larga y nada salta */}
-            <span className="grid overflow-hidden pb-[0.12em] text-center">
+          <span aria-hidden className="block">
+            <span className="font-display block text-[2.6rem] leading-[1.02] md:text-6xl">
+              Uñas y <span className="text-lip">maquillaje</span>
+            </span>
+            {/* Todas las frases apiladas en la misma celda: el alto es fijo y nada salta */}
+            <span className="font-title mt-2 grid overflow-hidden pb-[0.12em] text-center text-xl md:mt-3 md:text-2xl">
               {WORDS.map((w, i) => (
                 <span
-                  key={i === word ? `${w}-on` : w}
+                  key={i === word ? `${w.text}-on` : w.text}
                   className={
                     i === word
-                      ? "text-bordo hero-word [grid-area:1/1]"
+                      ? `hero-word [grid-area:1/1] ${w.tone === "makeup" ? "text-lip" : "text-bordo"}`
                       : "invisible [grid-area:1/1]"
                   }
                 >
-                  {w}
+                  {w.text}
                 </span>
               ))}
             </span>
@@ -130,13 +153,13 @@ export function Hero() {
         </h1>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Magnetic>
-            <Button href="/catalogo" size="lg" data-cursor="ver">
-              Ver catálogo
+            <Button href="/maquillaje" size="lg" data-cursor="ver" className="bg-lip! hover:bg-bordo!">
+              Ver maquillaje
             </Button>
           </Magnetic>
           <Magnetic>
-            <Button href="/disena" size="lg" variant="secondary" data-cursor="armar">
-              Diseñá tu set
+            <Button href="/catalogo" size="lg" variant="secondary" data-cursor="ver">
+              Ver uñas
             </Button>
           </Magnetic>
         </div>
@@ -153,5 +176,43 @@ export function Hero() {
         </span>
       </div>
     </section>
+  );
+}
+
+/**
+ * Dos o tres productos de maquillaje como stickers (placa rubor con borde blanco), con la misma entrada y flotación que
+ * las fotos de uñas: salen de atrás del logo y flotan. Decorativos.
+ */
+function MakeupStickers() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      {STICKER_PRODUCTS.map((s, i) => (
+        <div key={s.id} className={`absolute ${s.pos}`}>
+          <div data-depth={s.depth}>
+            <div
+              className="hero-deal"
+              style={{ ["--fx" as string]: "0px", ["--fy" as string]: "-14svh", animationDelay: `${s.delay}ms` }}
+            >
+              <div
+                className="hero-bob"
+                style={{
+                  animation: `hero-bob ${s.bob}s ease-in-out ${-i * 2.1}s infinite`,
+                  ["--sway" as string]: `${s.rotate > 0 ? -2.5 : 2.5}deg`,
+                }}
+              >
+                <div
+                  className="ring-lip/10 rounded-[18px] bg-white p-1.5 shadow-[0_18px_40px_-18px_rgba(142,31,61,0.5)] ring-1 md:rounded-[22px] md:p-2"
+                  style={{ transform: `rotate(${s.rotate}deg)` }}
+                >
+                  <div className="overflow-hidden rounded-[13px] md:rounded-[16px]">
+                    <MakeupVisual product={s.product} sizes="(min-width: 768px) 128px, 92px" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

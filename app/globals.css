@@ -460,3 +460,38 @@ html.has-cursor .cursor-root {
     animation-delay: 0s !important;
   }
 }
+
+/* ---------- Home: las dos tiendas (puertas Maquillaje / Uñas) ---------- */
+/* Cada sticker tiene su posición de reposo (--x/--y/--r) y, con mouse, se abre en abanico (--hx/--hy/--hr). */
+.door {
+  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.door:active {
+  transform: scale(0.985);
+}
+.door:focus-visible {
+  outline: 3px solid var(--bordo);
+  outline-offset: 4px;
+}
+.door-sticker {
+  transform: translate3d(var(--x, 0), var(--y, 0), 0) rotate(var(--r, 0deg));
+  transition: transform 650ms var(--ease-out-expo);
+}
+.door-arrow {
+  transition: transform 400ms var(--ease-out-expo);
+}
+@media (hover: hover) and (pointer: fine) {
+  .door:hover .door-sticker {
+    transform: translate3d(var(--hx, 0), var(--hy, 0), 0) rotate(var(--hr, 0deg));
+  }
+  .door:hover .door-arrow {
+    transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .door,
+  .door-sticker,
+  .door-arrow {
+    transition: none;
+  }
+}

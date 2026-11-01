@@ -126,7 +126,7 @@ export function HowItWorks({ kit }: { kit?: Kit }) {
     <section ref={root} className="relative overflow-hidden bg-bordo py-20 text-cream md:py-28">
       <div className="container-x grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
         <div className="lg:sticky lg:top-28 lg:self-start">
-          <h2 className="font-display text-balance text-[clamp(2rem,4.4vw,3.25rem)] leading-[1]">Cómo funciona</h2>
+          <h2 className="font-display text-balance text-[clamp(2rem,4.4vw,3.25rem)] leading-[1]">Cómo funcionan las press-on</h2>
           <p className="mt-5 max-w-sm text-cream/75">
             A pedido, entre 3 y 7 días. Te aviso por WhatsApp.
           </p>

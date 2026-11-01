@@ -7,17 +7,24 @@ import { nav, siteConfig } from "@/lib/site";
 import { Marquee } from "@/components/motion/Marquee";
 import { waLink } from "@/lib/whatsapp";
 
+/** Las dos tiendas (y el armador) van en "Comprá"; el resto del menú, en "Navegá". */
+const SHOP = [
+  { href: "/maquillaje", label: "Maquillaje", badge: "Nuevo" },
+  { href: "/catalogo", label: "Uñas" },
+  { href: "/disena", label: "Diseñá tu set" },
+];
+
 export function Footer() {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin")) return null;
   return (
     <footer className="relative overflow-hidden bg-bordo text-cream">
       <Marquee
-        items={["press-on", "personalizadas", "soft gel en el estudio", "puntos de encuentro", "envíos a todo el país"]}
+        items={["maquillaje", "uñas press-on", "soft gel en el estudio", "puntos de encuentro", "envíos a todo el país"]}
         className="border-b border-cream/15 py-4 font-title text-2xl md:text-3xl"
         speed={34}
       />
-      <div className="container-x grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="container-x grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           {/* El logo va a color sobre una placa crema, como un sticker: en blanco puro la Kitty quedaba como una mancha */}
           <span className="inline-block -rotate-2 rounded-[24px] bg-cream px-5 py-4 shadow-[0_14px_30px_-16px_rgba(0,0,0,0.55)]">
@@ -26,9 +33,24 @@ export function Footer() {
           <p className="mt-6 max-w-sm text-cream/80">{siteConfig.description}</p>
         </div>
         <div>
+          <p className="mb-4 text-xs font-bold tracking-[0.2em] uppercase opacity-70">Comprá</p>
+          <ul className="space-y-2 text-lg">
+            {SHOP.map((n) => (
+              <li key={n.href} className="flex items-center gap-2">
+                <Link href={n.href} className="hover:underline underline-offset-4">
+                  {n.label}
+                </Link>
+                {n.badge && (
+                  <span className="rounded-pill bg-blush px-2 py-0.5 text-[11px] font-bold text-lip">{n.badge}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
           <p className="mb-4 text-xs font-bold tracking-[0.2em] uppercase opacity-70">Navegá</p>
           <ul className="space-y-2 text-lg">
-            {nav.map((n) => (
+            {nav.filter((n) => !SHOP.some((s) => s.href === n.href)).map((n) => (
               <li key={n.href}>
                 <Link href={n.href} className="hover:underline underline-offset-4">
                   {n.label}
