@@ -7,6 +7,8 @@ import Image from "next/image";
 import { ordersEnabled } from "@/lib/data/orders";
 import { Button } from "@/components/ui/Button";
 import { waLink } from "@/lib/whatsapp";
+import { getLivePromos } from "@/lib/data/content-repo";
+import { fourForThreeLive } from "@/lib/data/content";
 
 export const metadata: Metadata = { title: "Pagar" };
 
@@ -14,7 +16,7 @@ export const metadata: Metadata = { title: "Pagar" };
 export const revalidate = 300;
 
 export default async function CheckoutPage() {
-  const s = await getSettings();
+  const [s, promos] = await Promise.all([getSettings(), getLivePromos()]);
   return (
     <div className="pt-28 pb-24 md:pt-36">
       <div className="container-x">
@@ -33,7 +35,7 @@ export default async function CheckoutPage() {
             </Button>
           </div>
         )}
-        <CheckoutForm transfer={{ alias: s.transferAlias, holder: s.transferHolder }} mp={mpEnabled()} disabled={!ordersEnabled()} />
+        <CheckoutForm transfer={{ alias: s.transferAlias, holder: s.transferHolder }} mp={mpEnabled()} disabled={!ordersEnabled()} promo4x3={fourForThreeLive(promos)} />
       </div>
     </div>
   );

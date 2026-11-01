@@ -10,13 +10,17 @@ import { Button } from "@/components/ui/Button";
 import { isLooseItem, maxQtyFor, type CartItem } from "@/lib/types";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
+import { fourForThree } from "@/lib/pricing";
 
-export function CartView() {
+export function CartView({ promo4x3 }: { promo4x3?: boolean }) {
   const { items, remove, setQty } = useCart();
   const mounted = useHydrated();
   if (!mounted) return <div className="h-40" />;
 
-  const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const gross = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const promoDiscount = promo4x3 ? fourForThree(items.map((i) => ({ key: i.id, kind: i.kind, unitPrice: i.unitPrice, qty: i.qty }))).discount : 0;
+  const subtotal = gross - promoDiscount;
+  const catalogSets = items.filter((i) => i.kind === "design").reduce((a, i) => a + i.qty, 0);
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
   const sets = items.filter((i) => !isLooseItem(i)).reduce((a, i) => a + i.qty, 0);
   const dijes = items.filter((i) => i.kind === "charm").reduce((a, i) => a + i.qty, 0);
@@ -145,6 +149,7 @@ export function CartView() {
               label: `${i.name} ×${i.qty}`,
               value: formatARS(i.unitPrice * i.qty),
             })),
+            ...(promoDiscount > 0 ? [{ kind: "row", id: "4x3", label: "promo 4x3 (1 de regalo c/4)", value: `−${formatARS(promoDiscount)}`, tone: "accent" } as ReceiptLine] : []),
             { kind: "rule", id: "r1" },
             { kind: "row", id: "sub", label: "subtotal", value: formatARS(subtotal) },
             { kind: "row", id: "envio", label: "envío", value: "al pagar", tone: "muted" },
@@ -165,6 +170,7 @@ export function CartView() {
               : []),
             ...(dijes > 0 ? [{ kind: "row", id: "dijes", label: "dijes sueltos", value: String(dijes) } as ReceiptLine] : []),
             ...(maquillaje > 0 ? [{ kind: "row", id: "maquillaje", label: "maquillaje", value: String(maquillaje) } as ReceiptLine] : []),
+            ...(promo4x3 && catalogSets % 4 === 3 ? [{ kind: "text", id: "4x3-hint", text: "✦ sumá 1 set más del catálogo y el más barato es de regalo (4x3)" } as ReceiptLine] : []),
             ...(needsConfirmation
               ? [
                   {

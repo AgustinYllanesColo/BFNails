@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/format";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import type { Design, Length, Shape } from "@/lib/types";
@@ -68,14 +68,25 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
     return list;
   }, [designs, shape, length, tag, sort, stock, sale]);
 
+  // Alto de la barra de filtros fija (desde md): las promos que bajan a #disenos dejan ese lugar para no tapar las uñas
+  const barRef = useRef<HTMLDivElement>(null);
+  const [filtersH, setFiltersH] = useState<number | null>(null);
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setFiltersH(84 + el.offsetHeight + 12));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const anyFilter = shape || length || tag || stock || sale;
   const anySale = designs.some(onSale);
   // Ovalada no se ofrece (Bren no la hace); las demás formas se muestran siempre, tengan o no sets hoy
   const shapes = (Object.keys(SHAPE_LABEL) as Shape[]).filter((sh) => sh !== "ovalada");
 
   return (
-    <div>
-      <div className="bg-cream/90 z-30 -mx-4 mb-8 space-y-3 px-4 py-3 md:sticky md:top-[84px] md:backdrop-blur-md">
+    <div style={filtersH ? ({ "--filters-h": `${filtersH}px` } as React.CSSProperties) : undefined}>
+      <div ref={barRef} className="bg-cream/90 z-30 -mx-4 mb-8 space-y-3 px-4 py-3 md:sticky md:top-[84px] md:backdrop-blur-md">
         <div className="flex flex-wrap gap-2">
           <span className="text-ink-soft mr-1 self-center text-xs font-bold tracking-wider uppercase">
             Forma
@@ -134,7 +145,9 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      {/* destino de las promos (#disenos): caen acá, con las uñas a la vista y no los filtros (en el celu ocupan toda
+          la pantalla). El margen deja lugar al header y, desde md, a la barra de filtros fija */}
+      <div id="disenos" className="mb-4 flex scroll-mt-24 flex-wrap items-center justify-between gap-3 md:scroll-mt-[var(--filters-h,260px)]">
         <p className="text-ink-soft text-sm">
           {filtered.length} {filtered.length === 1 ? "diseño" : "diseños"}
         </p>

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
+import { reconcilePayment } from "@/lib/data/payments";
+import { notifyOrderPaid } from "@/lib/data/notify";
 import { getOrderByNumber, publicOrderUrl } from "@/lib/data/orders";
 import { getSettings } from "@/lib/data/settings";
 import { ORDER_STATUS_LABEL, PAYMENT_LABEL, orderSurcharge, type OrderStatus } from "@/lib/types";
@@ -17,13 +20,25 @@ export const metadata: Metadata = { title: "Tu pedido", robots: { index: false }
 
 const FLOW: OrderStatus[] = ["pendiente_pago", "pagado", "en_produccion", "listo", "enviado", "entregado"];
 
-type Props = { params: Promise<{ numero: string }>; searchParams: Promise<{ t?: string; pago?: string }> };
+type Props = { params: Promise<{ numero: string }>; searchParams: Promise<{ t?: string; pago?: string; payment_id?: string; collection_id?: string }> };
 
 export default async function PedidoPage({ params, searchParams }: Props) {
   const { numero } = await params;
-  const { t, pago } = await searchParams;
-  const order = await getOrderByNumber(numero.toUpperCase());
+  const { t, pago, payment_id, collection_id } = await searchParams;
+  let order = await getOrderByNumber(numero.toUpperCase());
   if (!order || !t || t !== order.token) notFound();
+  // Vuelve de Mercado Pago: se confirma el pago acá mismo, sin esperar al webhook (si tarda o no llega)
+  const mpPaymentId = payment_id || collection_id;
+  if (pago && mpPaymentId && /^\d+$/.test(mpPaymentId) && order.payment.method === "mercadopago" && order.status === "pendiente_pago") {
+    try {
+      const res = await reconcilePayment(mpPaymentId);
+      if (res.order?.id === order.id) order = res.order;
+      const paid = res.justPaid;
+      if (paid) after(() => notifyOrderPaid(paid));
+    } catch (err) {
+      console.error("[pedido] no se pudo confirmar el pago", err);
+    }
+  }
   const settings = await getSettings();
   const url = publicOrderUrl(order);
   const message = orderConfirmationMessage(order, url);
@@ -53,6 +68,9 @@ export default async function PedidoPage({ params, searchParams }: Props) {
           )}
         </h1>
 
+        {pago === "ok" && !isPaid && order.status === "pendiente_pago" && (
+          <p className="mt-4 rounded-md bg-yellow/30 p-3 text-sm">Estamos confirmando tu pago con Mercado Pago. En unos minutos se actualiza solo y te llega el mail.</p>
+        )}
         {pago === "error" && <p className="mt-4 rounded-md bg-red/10 p-3 text-sm text-red">El pago no se completó. Podés reintentar o elegir transferencia.</p>}
         {pago === "pendiente" && <p className="mt-4 rounded-md bg-yellow/30 p-3 text-sm">Mercado Pago está procesando tu pago. Te aviso por WhatsApp cuando se acredite.</p>}
 
@@ -95,7 +113,7 @@ export default async function PedidoPage({ params, searchParams }: Props) {
             <Button href={wa} target="_blank" rel="noreferrer" variant="leopard" size="lg" data-cursor="wsp">
               Abrir WhatsApp
             </Button>
-            {order.payment.method === "mercadopago" && !isPaid && order.payment.mpInitPoint && (
+            {order.payment.method === "mercadopago" && !isPaid && pago !== "ok" && pago !== "pendiente" && order.payment.mpInitPoint && (
               <Button href={order.payment.mpInitPoint} variant="secondary" size="lg" className="ring-cream text-cream hover:bg-cream hover:text-bordo">
                 Pagar con Mercado Pago
               </Button>

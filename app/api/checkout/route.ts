@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { checkoutSchema, normalizeWhatsapp } from "@/lib/checkout";
 import { getDesign } from "@/lib/data/repo";
 import { getBuilderConfig, getSettings } from "@/lib/data/settings";
-import { getAllMakeup } from "@/lib/data/content-repo";
 import { checkMakeupLines } from "@/lib/data/makeup";
-import { quoteSelection, designVariantPrice } from "@/lib/pricing";
+import { quoteSelection, designVariantPrice, fourForThree } from "@/lib/pricing";
 import { quoteFromTable } from "@/lib/shipping/table";
 import { quoteShipping } from "@/lib/shipping";
 import {
@@ -18,6 +17,8 @@ import {
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
 import { notifyOrderCreated } from "@/lib/data/notify";
 import { designImage } from "@/lib/data/catalog";
+import { getAllMakeup, getLivePromos } from "@/lib/data/content-repo";
+import { fourForThreeLive } from "@/lib/data/content";
 import { mpSurcharge, type CartItem } from "@/lib/types";
 
 /**
@@ -42,22 +43,24 @@ export async function POST(req: Request) {
   const input = parsed.data;
   // el maquillaje se lee una sola vez y solo si el carrito lo trae (todo, también lo pausado, para nombrarlo en el error)
   const makeupLines = input.items.flatMap((i) => (i.kind === "makeup" ? [i] : []));
-  const [config, settings, makeup] = await Promise.all([
+  const [config, settings, promos, makeup] = await Promise.all([
     getBuilderConfig(),
     getSettings(),
+    getLivePromos(),
     makeupLines.length ? getAllMakeup() : Promise.resolve([]),
   ]);
   // stock: se suman las filas repetidas del mismo producto antes de comparar
   const makeupError = checkMakeupLines(makeupLines, makeup);
   if (makeupError) return NextResponse.json({ error: makeupError }, { status: 400 });
 
-  // 1. Items con precio de servidor
+  // 1. Items con precio de servidor (ref = id del ítem en el carrito, para devolverle precios nuevos si cambiaron)
   const items: CartItem[] = [];
+  const refs = new Map<string, string>();
   let needsConfirmation = false;
   for (const it of input.items) {
     if (it.kind === "design") {
       const d = await getDesign(it.designSlug);
-      if (!d)
+      if (!d || d.active === false)
         return NextResponse.json(
           { error: `El diseño ${it.designSlug} ya no está disponible` },
           { status: 400 },
@@ -68,7 +71,7 @@ export async function POST(req: Request) {
         designSlug: d.slug,
         name: d.name,
         image: designImage(d, 0),
-        unitPrice: designVariantPrice(d, it.shape, it.length, config),
+        unitPrice: designVariantPrice(d, it.shape, it.length, config, it.sizes),
         qty: it.qty,
         sizes: it.sizes,
         shape: it.shape ?? d.shape,
@@ -114,6 +117,22 @@ export async function POST(req: Request) {
       });
     }
   }
+  input.items.forEach((it, n) => it.ref && items[n] && refs.set(items[n].id, it.ref));
+  const repriced = Object.fromEntries(items.flatMap((i) => (refs.has(i.id) ? [[refs.get(i.id)!, i.unitPrice]] : [])));
+
+  // 4x3: de cada 4 sets del catálogo, el más barato va de regalo. Las unidades gratis quedan como una fila aparte a $0,
+  // así Brenda ve qué tiene que hacer y el pedido, los mails y Mercado Pago cierran solos.
+  if (fourForThreeLive(promos)) {
+    const { free } = fourForThree(items.map((i) => ({ key: i.id, kind: i.kind, unitPrice: i.unitPrice, qty: i.qty })));
+    for (const [id, n] of free) {
+      const i = items.findIndex((x) => x.id === id);
+      const it = items[i];
+      if (it.kind !== "design") continue;
+      items.push({ ...it, id: crypto.randomUUID(), name: `${it.name} (regalo 4x3)`, unitPrice: 0, qty: n });
+      if (it.qty === n) items.splice(i, 1);
+      else items[i] = { ...it, qty: it.qty - n };
+    }
+  }
   const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
 
   // 2. Envío con precio de servidor
@@ -156,6 +175,12 @@ export async function POST(req: Request) {
   // Con precio a confirmar, el recargo se suma cuando Brenda fija el total final.
   const surcharge = input.payment.method === "mercadopago" && !needsConfirmation ? mpSurcharge(subtotal + chosen.cost) : 0;
   const total = subtotal + chosen.cost + surcharge;
+  if (input.expectedTotal != null && total > input.expectedTotal) {
+    return NextResponse.json(
+      { error: `Se actualizó un precio: el total ahora es ${total.toLocaleString("es-AR")}. Revisalo y confirmá de nuevo.`, repriced, total },
+      { status: 409 },
+    );
+  }
 
   const draft: NewOrder = {
     token: newToken(),
@@ -180,8 +205,9 @@ export async function POST(req: Request) {
 
   let order = await createOrder(draft);
   const url = publicOrderUrl(order);
-  // Mail con el número de pedido a la clienta y aviso a Brenda (si el mail falla, el pedido sigue igual)
-  await notifyOrderCreated(order);
+  // Mail con el número de pedido a la clienta y aviso a Brenda, después de responder: un mail lento no puede trabar la
+  // compra (la clienta reintentaba y quedaban pedidos repetidos). Si falla, el pedido sigue igual.
+  after(() => notifyOrderCreated(order));
 
   if (useMp) {
     try {

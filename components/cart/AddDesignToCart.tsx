@@ -29,8 +29,8 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
   const btn = useRef<HTMLButtonElement>(null);
   const valid = sizesAreValid(sizes);
   const price = useMemo(
-    () => designVariantPrice(design, shape, length, config),
-    [design, shape, length, config],
+    () => designVariantPrice(design, shape, length, config, sizes),
+    [design, shape, length, config, sizes],
   );
   const isOriginal = shape === design.shape && length === design.length;
 
@@ -117,7 +117,7 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
             {formatARS(price)}
           </motion.span>
         </AnimatePresence>
-        {onSale(design) && isOriginal && (
+        {onSale(design) && price === design.price && (
           <span className="text-ink-soft text-base line-through" aria-label={`Antes ${formatARS(design.priceBefore!)}`}>
             {formatARS(design.priceBefore!)}
           </span>
@@ -129,6 +129,12 @@ export function AddDesignToCart({ design, config }: { design: Design; config: Bu
             : ` · ${SHAPE_LABEL[shape].toLowerCase()} ${LENGTH_LABEL[length].toLowerCase()}`}
         </span>
       </div>
+      {onSale(design) && price !== design.price && (
+        <p className="text-ink-soft -mt-2 text-xs">
+          El precio de oferta ({formatARS(design.price)}) es el del set en stock
+          {stockSize(design) ? `, talle ${stockSize(design)}` : ""}, en su forma y largo. Así lo hago a pedido.
+        </p>
+      )}
 
       <div className="flex flex-wrap gap-3">
         <Button ref={btn} onClick={() => onAdd()} size="lg" disabled={!valid} data-cursor="sumar">

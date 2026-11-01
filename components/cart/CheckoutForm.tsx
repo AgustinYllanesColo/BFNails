@@ -15,6 +15,7 @@ import { Field, inputClass, textareaClass } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 import { PAYMENT_LABEL, mpSurcharge } from "@/lib/types";
+import { fourForThree } from "@/lib/pricing";
 
 const formSchema = z.object({
   name: z.string().trim().min(2, "Decinos tu nombre"),
@@ -28,10 +29,10 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Props = { transfer: { alias: string; holder: string }; mp: boolean; disabled?: boolean };
+type Props = { transfer: { alias: string; holder: string }; mp: boolean; disabled?: boolean; promo4x3?: boolean };
 
-export function CheckoutForm({ transfer, mp, disabled }: Props) {
-  const { items, clear } = useCart();
+export function CheckoutForm({ transfer, mp, disabled, promo4x3 }: Props) {
+  const { items, clear, reprice } = useCart();
   const mounted = useHydrated();
   const [options, setOptions] = useState<ShippingOption[]>([]);
   const [delivery, setDelivery] = useState<DeliveryMethod>("retiro");
@@ -72,7 +73,10 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postalCode]);
 
-  const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const gross = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  // misma cuenta que el servidor: de cada 4 sets del catálogo, el más barato de regalo
+  const promoDiscount = promo4x3 ? fourForThree(items.map((i) => ({ key: i.id, kind: i.kind, unitPrice: i.unitPrice, qty: i.qty }))).discount : 0;
+  const subtotal = gross - promoDiscount;
   const chosen = options.find((o) => o.method === delivery);
   const shippingCost = chosen?.cost ?? 0;
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
@@ -109,17 +113,20 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
           payment: { method: effectivePayment },
           items: items.map((i) =>
             i.kind === "design"
-              ? { kind: "design", designSlug: i.designSlug, qty: i.qty, sizes: i.sizes, shape: i.shape, length: i.length }
+              ? { kind: "design", ref: i.id, designSlug: i.designSlug, qty: i.qty, sizes: i.sizes, shape: i.shape, length: i.length }
               : i.kind === "charm"
-                ? { kind: "charm", charmId: i.charmId, qty: i.qty }
+                ? { kind: "charm", ref: i.id, charmId: i.charmId, qty: i.qty }
                 : i.kind === "makeup"
-                  ? { kind: "makeup", makeupId: i.makeupId, qty: i.qty }
-                  : { kind: "custom", selection: i.selection, qty: i.qty, sizes: i.sizes },
+                  ? { kind: "makeup", ref: i.id, makeupId: i.makeupId, qty: i.qty }
+                  : { kind: "custom", ref: i.id, selection: i.selection, qty: i.qty, sizes: i.sizes },
           ),
+          expectedTotal: total,
         }),
       });
       // una respuesta que no es JSON (caída, timeout del servidor) no debe mostrar un error técnico
-      const data = (await res.json().catch(() => ({}))) as { redirect?: string; error?: string };
+      const data = (await res.json().catch(() => ({}))) as { redirect?: string; error?: string; repriced?: Record<string, number> };
+      // cambió un precio desde que lo sumó al carrito: se actualiza el carrito y la clienta confirma con el total nuevo
+      if (res.status === 409 && data.repriced) reprice(data.repriced);
       if (!res.ok || !data.redirect) throw new Error(data.error ?? "No pudimos crear el pedido. Probá de nuevo en un rato.");
       clear();
       window.location.assign(data.redirect);
@@ -274,6 +281,7 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
           meta={new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
           lines={[
             ...items.map<ReceiptLine>((i) => ({ kind: "row", id: i.id, label: `${i.name} ×${i.qty}`, value: formatARS(i.unitPrice * i.qty) })),
+            ...(promoDiscount > 0 ? [{ kind: "row", id: "4x3", label: "promo 4x3 (1 de regalo c/4)", value: `−${formatARS(promoDiscount)}`, tone: "accent" } as ReceiptLine] : []),
             { kind: "rule", id: "r1" },
             { kind: "row", id: "envio", label: chosen ? chosen.label.toLowerCase() : "envío", value: shippingCost === 0 ? "gratis" : `${motoFrom ? "desde " : ""}${formatARS(shippingCost)}` },
             { kind: "row", id: "pago", label: "pago", value: PAYMENT_LABEL[effectivePayment].toLowerCase(), tone: "muted" },
