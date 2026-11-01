@@ -103,6 +103,12 @@ export async function deleteCharm(formData: FormData) {
 // ("use server": solo se exportan funciones async; las etiquetas de cada forma viven en page.tsx)
 
 const MAKEUP_FORMS = [
+  "suelto",
+  "doble",
+  "racimo",
+  "set-lapices",
+  "rubor-barra",
+  "duo-cejas",
   "labial",
   "gloss",
   "barra",
