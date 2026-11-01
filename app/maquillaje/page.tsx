@@ -6,12 +6,15 @@ import { MakeupGrid } from "@/components/makeup/MakeupGrid";
 import { MakeupArt } from "@/components/makeup/MakeupArt";
 import { Heading } from "@/components/ui/Section";
 import { cn } from "@/lib/format";
+import { MakeupJsonLd } from "@/components/seo/MakeupJsonLd";
+import { pageMetadata } from "@/components/seo/page-metadata";
 
-export const metadata: Metadata = {
-  title: "Catálogo de maquillaje",
+export const metadata: Metadata = pageMetadata({
+  title: "Maquillaje en Lanús, envíos a todo el país",
   description:
-    "Maquillaje en BF Nails Studio: rostro, ojos, pestañas, cejas, labios y brochas. Pocas unidades de cada uno; viaja con tus uñas o solo.",
-};
+    "Maquillaje de rostro, ojos, pestañas, cejas y labios, y brochas, con precio en pesos. Retiro en Remedios de Escalada, Lanús o Banfield y envíos a todo el país.",
+  path: "/maquillaje",
+});
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
 export const revalidate = 300;
@@ -34,6 +37,7 @@ export default async function MaquillajePage() {
 
   return (
     <div className="pb-24">
+      <MakeupJsonLd products={products} />
       {/* Banda rosa: el maquillaje tiene su propio mundo dentro del sitio */}
       <section className="bg-blush relative isolate overflow-hidden rounded-b-[clamp(28px,5vw,56px)] pt-24 pb-9 md:pt-36 md:pb-16">
         <svg aria-hidden viewBox="0 0 400 400" className="text-blush-soft pointer-events-none absolute -top-40 -right-40 -z-10 size-[360px] md:-top-24 md:-right-24 md:size-[560px]">
@@ -48,7 +52,7 @@ export default async function MaquillajePage() {
             </Heading>
             <p className="text-bordo mt-4 max-w-[52ch] leading-relaxed text-pretty md:mt-5 md:text-lg">
               Además de uñas, ahora también vendo maquillaje: para rostro, ojos, pestañas, cejas y labios, y brochas
-              para aplicarlos.
+              para aplicarlos. Desde Remedios de Escalada (Lanús), con envíos a todo el país.
             </p>
             {/* en el celular, una sola frase: los productos tienen que verse en la primera pantalla */}
             <p className="text-bordo mt-3 hidden max-w-[52ch] text-base leading-relaxed text-pretty md:block">
@@ -86,9 +90,16 @@ export default async function MaquillajePage() {
           <MakeupGrid products={products} />
         </Suspense>
 
+        {/* datos de compra en texto visible (también en el celular): qué precio es, cómo llega */}
+        <p className="text-ink-soft mt-12 max-w-[68ch] text-sm leading-relaxed text-pretty">
+          Precios por unidad, en pesos argentinos. Retiro gratis en estación (Remedios de Escalada, Lanús o Banfield),
+          moto en Escalada, Lomas, Banfield y Lanús, o envío a todo el país por Correo Argentino. Pagás con Mercado
+          Pago, transferencia o en efectivo si retirás o te lo lleva la moto.
+        </p>
+
         <Link
           href="/catalogo"
-          className="group bg-cream-deep text-bordo mt-16 flex flex-wrap items-center justify-between gap-3 rounded-lg px-6 py-5 transition-colors duration-200 hover:bg-cream-ink/60 md:px-8"
+          className="group bg-cream-deep text-bordo mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg px-6 py-5 transition-colors duration-200 hover:bg-cream-ink/60 md:px-8"
         >
           <span className="font-title text-xl md:text-2xl">¿Y las uñas?</span>
           <span className="inline-flex items-center gap-2 text-sm font-semibold">

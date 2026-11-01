@@ -1,6 +1,5 @@
-import { CHARMS_ENABLED } from "@/lib/site";
 import type { MetadataRoute } from "next";
-import { siteConfig } from "@/lib/site";
+import { CHARMS_ENABLED, siteConfig } from "@/lib/site";
 import { getDesigns } from "@/lib/data/repo";
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.

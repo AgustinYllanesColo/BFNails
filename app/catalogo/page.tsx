@@ -7,11 +7,14 @@ import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { MakeupBanner } from "@/components/makeup/MakeupBanner";
+import { pageMetadata } from "@/components/seo/page-metadata";
 
-export const metadata: Metadata = {
-  title: "Catálogo de uñas",
-  description: "Todos los sets de uñas press-on de BF Nails Studio, personalizados, con su precio.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Uñas press-on personalizadas en Lanús",
+  description:
+    "Sets de uñas press-on con kit de colocación y precio en pesos. Retiro en Remedios de Escalada, Lanús o Banfield, moto en zona sur y envíos a todo el país.",
+  path: "/catalogo",
+});
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
 export const revalidate = 300;
