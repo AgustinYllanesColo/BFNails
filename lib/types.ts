@@ -117,7 +117,22 @@ export type CartItem =
       image?: string;
       unitPrice: number;
       qty: number;
+    }
+  | {
+      /** Producto de maquillaje: se cobra por unidad y no lleva medidas. */
+      id: string;
+      kind: "makeup";
+      makeupId: string;
+      name: string;
+      image?: string;
+      unitPrice: number;
+      qty: number;
     };
+
+/** Ítems que no son un set de uñas (no llevan medidas). */
+export function isLooseItem(item: CartItem): item is Extract<CartItem, { kind: "charm" | "makeup" }> {
+  return item.kind === "charm" || item.kind === "makeup";
+}
 
 export type DeliveryMethod = "retiro" | "moto" | "correo_domicilio" | "correo_sucursal";
 export type PaymentMethod = "mercadopago" | "transferencia" | "efectivo";

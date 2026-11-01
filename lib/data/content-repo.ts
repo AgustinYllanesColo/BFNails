@@ -2,10 +2,11 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { settings } from "@/lib/db/schema";
+import { DEFAULT_MAKEUP, type MakeupProduct } from "./makeup";
 import { DEFAULT_CHARMS, DEFAULT_KIT, DEFAULT_PROMOS, promoIsLive, type Charm, type Kit, type Promo } from "./content";
 
-type ContentMap = { promos: Promo[]; charms: Charm[]; kit: Kit };
-const DEFAULTS: ContentMap = { promos: DEFAULT_PROMOS, charms: DEFAULT_CHARMS, kit: DEFAULT_KIT };
+type ContentMap = { promos: Promo[]; charms: Charm[]; kit: Kit; makeup: MakeupProduct[] };
+const DEFAULTS: ContentMap = { promos: DEFAULT_PROMOS, charms: DEFAULT_CHARMS, kit: DEFAULT_KIT, makeup: DEFAULT_MAKEUP };
 
 async function read<K extends keyof ContentMap>(key: K): Promise<ContentMap[K]> {
   const db = getDb();
@@ -33,4 +34,17 @@ export async function getLivePromos(): Promise<Promo[]> {
 
 export async function getCharms(): Promise<Charm[]> {
   return (await getAllCharms()).filter((c) => c.active);
+}
+
+export const getAllMakeup = () => read("makeup");
+
+/** Maquillaje visible en la tienda (los agotados también: se muestran como "Agotado"). */
+export async function getMakeup(): Promise<MakeupProduct[]> {
+  return (await getAllMakeup()).filter((m) => m.active);
+}
+
+export async function getFeaturedMakeup(limit = 6): Promise<MakeupProduct[]> {
+  const all = await getMakeup();
+  const featured = all.filter((m) => m.featured);
+  return (featured.length ? featured : all).slice(0, limit);
 }

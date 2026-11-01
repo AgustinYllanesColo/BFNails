@@ -31,8 +31,12 @@ export const siteConfig = {
  */
 export const CHARMS_ENABLED = true;
 
-export const nav = [
-  { href: "/catalogo", label: "Catálogo" },
+/** `highlight`: el botón que se destaca en el menú (el maquillaje, mientras sea lo nuevo). */
+export type NavItem = { href: string; label: string; highlight?: string };
+
+export const nav: NavItem[] = [
+  { href: "/maquillaje", label: "Maquillaje", highlight: "Nuevo" },
+  { href: "/catalogo", label: "Uñas" },
   { href: "/disena", label: "Diseñá tu set" },
   ...(CHARMS_ENABLED ? [{ href: "/dijes", label: "Dijes" }] : []),
   { href: "/medidas", label: "Medidas" },

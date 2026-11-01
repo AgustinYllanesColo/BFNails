@@ -14,6 +14,11 @@
   --leopard: #c9a063;
   --leopard-dark: #8a5a2b;
   --white: #fffdf8;
+  /* Maquillaje: rosa rubor (superficies), rosa intenso (acentos) y labial (texto/acción sobre rosa) */
+  --blush: #f6c3d6;
+  --blush-soft: #fbe3ec;
+  --rose: #d9466f;
+  --lip: #8e1f3d;
 
   --radius-sm: 10px;
   --radius: 18px;
@@ -49,6 +54,10 @@
   --color-leopard: var(--leopard);
   --color-leopard-dark: var(--leopard-dark);
   --color-white: var(--white);
+  --color-blush: var(--blush);
+  --color-blush-soft: var(--blush-soft);
+  --color-rose: var(--rose);
+  --color-lip: var(--lip);
 
   --font-display: var(--font-display), "Shrikhand", Georgia, serif;
   --font-sans: var(--font-sans), "Space Grotesk", system-ui, sans-serif;

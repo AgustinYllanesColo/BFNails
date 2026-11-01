@@ -30,12 +30,17 @@ export const useCart = create<CartState>()(
             const same = s.items.find((i) => i.kind === "charm" && i.charmId === item.charmId);
             if (same) return { items: s.items.map((i) => (i.id === same.id ? { ...i, qty: Math.min(50, i.qty + item.qty) } : i)) };
           }
+          // lo mismo con el maquillaje (el tope por stock lo pone quien agrega; el servidor lo vuelve a validar)
+          if (item.kind === "makeup") {
+            const same = s.items.find((i) => i.kind === "makeup" && i.makeupId === item.makeupId);
+            if (same) return { items: s.items.map((i) => (i.id === same.id ? { ...i, qty: Math.min(20, i.qty + item.qty) } : i)) };
+          }
           return { items: [...s.items, { ...item, id: uid() } as CartItem] };
         }),
       remove: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
       setQty: (id, qty) =>
         set((s) => ({
-          items: s.items.map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(i.kind === "charm" ? 50 : 10, qty)) } : i)),
+          items: s.items.map((i) => (i.id === id ? { ...i, qty: Math.max(1, Math.min(i.kind === "charm" ? 50 : i.kind === "makeup" ? 20 : 10, qty)) } : i)),
         })),
       clear: () => set({ items: [] }),
       subtotal: () => get().items.reduce((acc, i) => acc + i.unitPrice * i.qty, 0),
