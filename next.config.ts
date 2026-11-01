@@ -4,7 +4,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // las fotos del catálogo suben directo a Blob; esto cubre las de promos, dijes, kit y maquillaje que pasan por el
   // action (el validador acepta hasta 8 MB; 10 MB deja lugar al multipart)
-  experimental: { serverActions: { bodySizeLimit: "10mb" } },
+  experimental: {
+    serverActions: { bodySizeLimit: "10mb" },
+    // Sin caché de Turbopack en el build: en Vercel se restauró la de un deploy viejo y salió el CSS de antes
+    // (sin los colores del maquillaje). Cada build compila de cero.
+    turbopackFileSystemCacheForBuild: false,
+  },
   async headers() {
     return [
       {

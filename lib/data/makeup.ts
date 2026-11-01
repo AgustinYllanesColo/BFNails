@@ -14,6 +14,9 @@ export const MAKEUP_CATEGORIES = [
   { id: "cejas", label: "Cejas" },
   { id: "labios", label: "Labios" },
   { id: "brochas", label: "Brochas" },
+  // Combos: varios productos juntos a un precio. Se cargan desde el admin con la categoría "Combos"; el filtro aparece
+  // apenas hay uno disponible.
+  { id: "combos", label: "Combos" },
 ] as const;
 export type MakeupCategory = (typeof MAKEUP_CATEGORIES)[number]["id"];
 
@@ -38,6 +41,7 @@ export const MAKEUP_FORMS = [
   "set-lapices",
   "rubor-barra",
   "duo-cejas",
+  "combo",
 ] as const;
 export type MakeupForm = (typeof MAKEUP_FORMS)[number];
 

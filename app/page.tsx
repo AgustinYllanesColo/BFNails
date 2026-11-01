@@ -45,7 +45,7 @@ export default async function HomePage() {
         </div>
       </div>
       <Doors makeup={makeup} nailsCount={designs.length} />
-      <MakeupShowcase products={featuredMakeup} />
+      <MakeupShowcase products={featuredMakeup} all={makeup} />
       <Promos promos={promos} />
       <Featured designs={featured} />
       <BuilderCta />

@@ -9,7 +9,9 @@ import { MAKEUP_DOOR_PICKS } from "./Doors";
  * La línea nueva, en su propio mundo (fondo rubor): título, una intro corta, accesos directos a cada categoría y los
  * productos destacados. En el celular los productos se deslizan de costado (como las promos); desde md van en grilla.
  */
-export function MakeupShowcase({ products: featured }: { products: MakeupProduct[] }) {
+export function MakeupShowcase({ products: featured, all }: { products: MakeupProduct[]; all: MakeupProduct[] }) {
+  // solo las categorías que tienen algo (Combos aparece cuando se carga el primero)
+  const categories = MAKEUP_CATEGORIES.filter((c) => all.some((p) => p.category === c.id));
   // Los que ya están en la puerta de Maquillaje no se repiten acá (salvo que sean los únicos destacados).
   const fresh = featured.filter((p) => !MAKEUP_DOOR_PICKS.includes(p.id));
   const products = fresh.length > 0 ? fresh : featured;
@@ -27,7 +29,7 @@ export function MakeupShowcase({ products: featured }: { products: MakeupProduct
         </div>
         <nav aria-label="Categorías de maquillaje">
           <ul className="flex flex-wrap gap-2 lg:justify-end">
-            {MAKEUP_CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <li key={c.id}>
                 <Link
                   href={`/maquillaje?cat=${c.id}`}

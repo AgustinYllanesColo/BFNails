@@ -682,7 +682,36 @@ function Brush({ c, cd, cl, label }: Palette) {
   );
 }
 
+/** Combo: caja de regalo con moño, en el color del producto, y un labial y un gloss asomando. */
+function GiftBox({ c, cd, cl, cap, label }: Palette) {
+  return (
+    <g>
+      {/* lo que asoma de la caja */}
+      <g transform="rotate(-12 38 34)">
+        <rect x="32" y="16" width="12" height="26" rx="3" fill={cap} {...line} />
+        <path d="M33 16 L38 6 L43 16 Z" fill="#c42b3c" {...line} />
+      </g>
+      <g transform="rotate(10 62 32)">
+        <rect x="57" y="12" width="11" height="30" rx="4" fill={PAPER} fillOpacity=".7" {...line} />
+        <rect x="59" y="22" width="7" height="17" rx="3" fill="#f08fb0" />
+      </g>
+      {/* caja */}
+      <rect x="18" y="40" width="64" height="50" rx="5" fill={c} {...line} />
+      <rect x="14" y="34" width="72" height="13" rx="4" fill={cd} {...line} />
+      <path d="M22 52 V84" {...shine} opacity={0.4} />
+      {/* cinta */}
+      <rect x="45" y="34" width="10" height="56" fill={cl} stroke={OUTLINE} strokeWidth="1.6" />
+      {/* moño */}
+      <path d="M50 35 C40 22 28 26 34 34 C38 39 46 37 50 35 Z" fill={cl} {...line} />
+      <path d="M50 35 C60 22 72 26 66 34 C62 39 54 37 50 35 Z" fill={cl} {...line} />
+      <circle cx="50" cy="35" r="4" fill={GOLD} {...line} />
+      <Label text={label} x={50} y={70} w={30} h={11} max={6.4} fill={ink(c)} />
+    </g>
+  );
+}
+
 const FORMS: Record<MakeupForm, (p: Palette) => React.ReactElement> = {
+  combo: GiftBox,
   labial: Lipstick,
   gloss: Gloss,
   mascara: Mascara,
@@ -742,6 +771,7 @@ const BY_CATEGORY: Record<MakeupProduct["category"], MakeupForm> = {
   cejas: "gel",
   labios: "labial",
   brochas: "brocha",
+  combos: "combo",
 };
 
 /**

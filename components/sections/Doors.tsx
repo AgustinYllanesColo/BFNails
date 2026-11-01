@@ -100,8 +100,6 @@ function NailsDoor({ count }: { count: number }) {
       href="/catalogo"
       className="door group bg-bordo text-cream relative isolate flex min-h-[440px] flex-col overflow-hidden rounded-[28px] p-6 md:min-h-[540px] md:p-10"
     >
-      {/* cinta leopardo de canto, el acento de la marca */}
-      <span aria-hidden className="leopard-bg absolute inset-x-0 bottom-0 -z-10 h-3 md:h-4" />
       <div>
         <h2 className="font-display text-[clamp(3rem,7vw,5.25rem)] leading-[0.95]">Uñas</h2>
         <p className="text-cream/90 mt-3 max-w-[32ch] text-[17px] leading-snug font-semibold">
@@ -136,10 +134,6 @@ function NailsDoor({ count }: { count: number }) {
                 quality={85}
                 className="aspect-[4/5] w-full rounded-[13px] object-cover"
               />
-              {/* cinta leopardo pegando la foto del medio */}
-              {i === 1 && (
-                <span className="leopard-bg absolute -top-3 left-1/2 h-6 w-16 -translate-x-1/2 -rotate-6 rounded-[3px] opacity-95 shadow-[0_4px_8px_-4px_rgba(0,0,0,0.4)]" />
-              )}
             </span>
           </span>
         ))}

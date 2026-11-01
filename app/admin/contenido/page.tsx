@@ -18,6 +18,7 @@ const THEMES = [
 
 /** Forma del producto (define el dibujo mientras no hay foto). Solo se elige al crearlo. */
 const MAKEUP_FORM_LABEL: Record<MakeupForm, string> = {
+  combo: "Combo (caja de regalo)",
   labial: "Labial",
   gloss: "Gloss",
   barra: "Barra",
