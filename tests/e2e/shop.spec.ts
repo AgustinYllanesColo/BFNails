@@ -26,7 +26,7 @@ test("armador: el precio sube al sumar técnicas y el set va al carrito", async 
   await page.getByRole("button", { name: /^Francesita/ }).click();
   await expect(page.getByText("Color de la punta")).toBeVisible();
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
-  await expect(page.getByRole("link", { name: /Carrito, 1 set/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Carrito, 1 producto/ })).toBeVisible();
   expect(errors).toEqual([]);
 });
 

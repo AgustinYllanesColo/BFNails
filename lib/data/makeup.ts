@@ -61,7 +61,7 @@ export type MakeupProduct = {
   active: boolean;
 };
 
-const p = (x: Omit<MakeupProduct, "active" | "isNew"> & { isNew?: boolean }): MakeupProduct => ({ isNew: true, active: true, ...x });
+const p = (x: Omit<MakeupProduct, "active" | "isNew"> & { isNew?: boolean }): MakeupProduct => ({ isNew: false, active: true, ...x });
 
 export const DEFAULT_MAKEUP: MakeupProduct[] = [
   // Rostro

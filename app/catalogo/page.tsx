@@ -6,9 +6,10 @@ import { Promos } from "@/components/sections/Promos";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
+import { MakeupBanner } from "@/components/makeup/MakeupBanner";
 
 export const metadata: Metadata = {
-  title: "Catálogo",
+  title: "Catálogo de uñas",
   description: "Todos los sets de uñas press-on de BF Nails Studio, personalizados, con su precio.",
 };
 
@@ -20,9 +21,10 @@ export default async function CatalogoPage() {
   return (
     <div className="relative isolate pt-28 pb-24 md:pt-36">
       <div className="container-x relative">
+        <MakeupBanner className="mb-6 md:mb-8" />
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <Heading as="h1">Catálogo</Heading>
+            <Heading as="h1">Catálogo de uñas</Heading>
             <p className="mt-4 text-ink-soft">
               Uñas disponibles en stock para entrega inmediata, con kit de aplicación incluido. Y si no sabés qué
               pedir, también te dejo algunas opciones hechas por mí para que elijas más rápido.

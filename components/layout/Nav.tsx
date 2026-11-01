@@ -57,23 +57,31 @@ export function Nav() {
         <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
           {nav.map((item) => {
             const active = pathname === item.href || pathname?.startsWith(item.href + "/");
+            const hi = Boolean(item.highlight);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative rounded-pill px-4 py-2 text-sm font-semibold transition-colors",
-                  active ? "text-bordo" : "text-ink hover:text-bordo",
+                  "relative inline-flex items-center gap-1.5 rounded-pill px-4 py-2 text-sm font-semibold transition-colors",
+                  hi
+                    ? "text-lip hover:text-bordo"
+                    : active
+                      ? "text-bordo"
+                      : "text-ink hover:text-bordo",
                 )}
               >
+                {/* el destacado (maquillaje) lleva su pastilla rosa siempre; la activa se desliza por encima */}
+                {hi && !active && <span aria-hidden className="absolute inset-0 -z-20 rounded-pill bg-blush/70 ring-1 ring-rose/25" />}
                 {active && (
                   <motion.span
                     layoutId="nav-pill"
-                    className="absolute inset-0 -z-10 rounded-pill bg-bordo/10"
+                    className={cn("absolute inset-0 -z-10 rounded-pill", hi ? "bg-blush ring-1 ring-rose/40" : "bg-bordo/10")}
                     transition={{ type: "spring", stiffness: 400, damping: 32 }}
                   />
                 )}
                 {item.label}
+                {item.highlight && <NewPill>{item.highlight}</NewPill>}
               </Link>
             );
           })}
@@ -117,26 +125,53 @@ export function Nav() {
             aria-label="Menú"
           >
             <ul className="flex flex-col">
-              {nav.map((item, i) => (
-                <motion.li
-                  key={item.href}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 * i }}
-                >
-                  <Link
-                    href={item.href}
-                    className="flex items-center justify-between rounded-md px-4 py-4 font-title text-3xl text-ink hover:bg-cream-deep"
+              {[...nav]
+                .sort((a, b) => Number(Boolean(b.highlight)) - Number(Boolean(a.highlight)))
+                .map((item, i) => (
+                  <motion.li
+                    key={item.href}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.04 * i, duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                    className={item.highlight ? "mb-2" : undefined}
                   >
-                    {item.label}
-                    <Star size={18} className="text-bordo" />
-                  </Link>
-                </motion.li>
-              ))}
+                    {item.highlight ? (
+                      <Link
+                        href={item.href}
+                        className="bg-blush text-lip ring-rose/25 relative flex items-center justify-between overflow-hidden rounded-md px-4 py-5 ring-1 transition-transform duration-150 active:scale-[0.97]"
+                      >
+                        <span className="flex items-center gap-3">
+                          <span className="font-title text-4xl">{item.label}</span>
+                          <NewPill>{item.highlight}</NewPill>
+                        </span>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                      </Link>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className="flex items-center justify-between rounded-md px-4 py-3.5 font-title text-3xl text-ink transition-transform duration-150 hover:bg-cream-deep active:scale-[0.97]"
+                      >
+                        {item.label}
+                        <Star size={18} className="text-bordo" />
+                      </Link>
+                    )}
+                  </motion.li>
+                ))}
             </ul>
           </motion.nav>
         )}
       </AnimatePresence>
     </header>
+  );
+}
+
+/** Pastillita "Nuevo" del ítem destacado del menú. */
+function NewPill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-pill bg-lip text-cream inline-flex items-center px-1.5 py-0.5 font-sans text-[10px] leading-none font-bold tracking-wide uppercase">
+      {children}
+    </span>
   );
 }

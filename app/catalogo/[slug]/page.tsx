@@ -55,7 +55,7 @@ export default async function DesignPage({ params }: Props) {
       <div className="container-x">
         <nav className="text-ink-soft mb-6 text-sm" aria-label="Migas">
           <Link href="/catalogo" className="hover:text-bordo">
-            Catálogo
+            Catálogo de uñas
           </Link>{" "}
           / <span className="text-ink">{design.name}</span>
         </nav>
