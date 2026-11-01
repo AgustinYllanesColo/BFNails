@@ -34,6 +34,9 @@ export function describeItem(item: CartItem, opts: { link?: boolean } = {}): str
   if (item.kind === "charm") {
     return `• Dije ${item.name} x${item.qty} (suelto, ${formatARS(item.unitPrice)} c/u) – ${formatARS(item.unitPrice * item.qty)}`;
   }
+  if (item.kind === "makeup") {
+    return `• Maquillaje ${item.name} x${item.qty} (${formatARS(item.unitPrice)} c/u) – ${formatARS(item.unitPrice * item.qty)}`;
+  }
   const sizes = describeSizes(item.sizes);
   if (item.kind === "design") {
     const variant =

@@ -56,6 +56,11 @@ export const cartItemSchema = z.discriminatedUnion("kind", [
     charmId: z.string().min(1).max(60),
     qty: z.number().int().min(1).max(50),
   }),
+  z.object({
+    kind: z.literal("makeup"),
+    makeupId: z.string().min(1).max(80),
+    qty: z.number().int().min(1).max(20),
+  }),
 ]);
 
 export const checkoutSchema = z.object({

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { checkoutSchema, normalizeWhatsapp } from "@/lib/checkout";
 import { getDesign } from "@/lib/data/repo";
 import { getBuilderConfig, getSettings } from "@/lib/data/settings";
+import { getMakeup } from "@/lib/data/content-repo";
 import { quoteSelection, designVariantPrice } from "@/lib/pricing";
 import { quoteFromTable } from "@/lib/shipping/table";
 import { quoteShipping } from "@/lib/shipping";
@@ -39,6 +40,8 @@ export async function POST(req: Request) {
   }
   const input = parsed.data;
   const [config, settings] = await Promise.all([getBuilderConfig(), getSettings()]);
+  // el maquillaje se lee una sola vez y solo si el carrito lo trae
+  const makeup = input.items.some((i) => i.kind === "makeup") ? await getMakeup() : [];
 
   // 1. Items con precio de servidor
   const items: CartItem[] = [];
@@ -74,6 +77,24 @@ export async function POST(req: Request) {
         name: charm.name,
         image: charm.image,
         unitPrice: charm.price,
+        qty: it.qty,
+      });
+    } else if (it.kind === "makeup") {
+      const product = makeup.find((m) => m.id === it.makeupId && m.active);
+      if (!product)
+        return NextResponse.json({ error: `El producto ${it.makeupId} ya no está disponible` }, { status: 400 });
+      if (product.stock != null && it.qty > product.stock)
+        return NextResponse.json(
+          { error: `De ${product.name} quedan ${product.stock} unidades` },
+          { status: 400 },
+        );
+      items.push({
+        id: crypto.randomUUID(),
+        kind: "makeup",
+        makeupId: product.id,
+        name: product.name,
+        image: product.image,
+        unitPrice: product.price,
         qty: it.qty,
       });
     } else {

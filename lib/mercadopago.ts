@@ -18,8 +18,22 @@ function client() {
 export async function createPreference(order: Order, orderUrl: string) {
   const pref = new Preference(client());
   const items = order.items.map((i) => ({
-    id: i.kind === "design" ? i.designSlug : i.kind === "charm" ? `dije-${i.charmId}` : "custom",
-    title: i.kind === "design" ? `${i.name} (press-on)` : i.kind === "charm" ? `Dije ${i.name}` : "Set press-on a medida",
+    id:
+      i.kind === "design"
+        ? i.designSlug
+        : i.kind === "charm"
+          ? `dije-${i.charmId}`
+          : i.kind === "makeup"
+            ? `maquillaje-${i.makeupId}`
+            : "custom",
+    title:
+      i.kind === "design"
+        ? `${i.name} (press-on)`
+        : i.kind === "charm"
+          ? `Dije ${i.name}`
+          : i.kind === "makeup"
+            ? `${i.name} (maquillaje)`
+            : "Set press-on a medida",
     quantity: i.qty,
     unit_price: i.unitPrice,
     currency_id: "ARS",

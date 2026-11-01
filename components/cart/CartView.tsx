@@ -7,7 +7,7 @@ import { useCart } from "@/lib/store/cart";
 import { formatARS } from "@/lib/format";
 import { describeSizes } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/Button";
-import type { CartItem } from "@/lib/types";
+import { isLooseItem, type CartItem } from "@/lib/types";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
 
@@ -18,8 +18,9 @@ export function CartView() {
 
   const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
-  const sets = items.filter((i) => i.kind !== "charm").reduce((a, i) => a + i.qty, 0);
+  const sets = items.filter((i) => !isLooseItem(i)).reduce((a, i) => a + i.qty, 0);
   const dijes = items.filter((i) => i.kind === "charm").reduce((a, i) => a + i.qty, 0);
+  const maquillaje = items.filter((i) => i.kind === "makeup").reduce((a, i) => a + i.qty, 0);
 
   if (items.length === 0) {
     return (
@@ -51,7 +52,11 @@ export function CartView() {
             >
               <div className="bg-cream-deep relative size-24 shrink-0 overflow-hidden rounded-md">
                 {item.kind !== "custom" && item.image ? (
-                  <Image src={item.image} alt="" fill sizes="96px" className={item.kind === "charm" ? "object-contain p-2" : "object-cover"} />
+                  <Image src={item.image} alt="" fill sizes="96px" className={isLooseItem(item) ? "object-contain p-2" : "object-cover"} />
+                ) : item.kind === "makeup" ? (
+                  <div className="grid h-full place-items-center">
+                    <span className="bg-blush-soft size-12 rounded-md" aria-hidden />
+                  </div>
                 ) : (
                   <div className="font-title text-bordo grid h-full place-items-center text-3xl">
                     ✦
@@ -62,7 +67,11 @@ export function CartView() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-title text-xl leading-tight">{item.name}</p>
-                    <p className="text-ink-soft text-xs">{item.kind === "charm" ? `Dije suelto · ${formatARS(item.unitPrice)} c/u` : describeSizes(item.sizes)}</p>
+                    <p className="text-ink-soft text-xs">{item.kind === "charm"
+                        ? `Dije suelto · ${formatARS(item.unitPrice)} c/u`
+                        : item.kind === "makeup"
+                          ? `Maquillaje · ${formatARS(item.unitPrice)} c/u`
+                          : describeSizes(item.sizes)}</p>
                     <ItemDetails item={item} />
                   </div>
                   <button
@@ -148,6 +157,7 @@ export function CartView() {
                 ]
               : []),
             ...(dijes > 0 ? [{ kind: "row", id: "dijes", label: "dijes sueltos", value: String(dijes) } as ReceiptLine] : []),
+            ...(maquillaje > 0 ? [{ kind: "row", id: "maquillaje", label: "maquillaje", value: String(maquillaje) } as ReceiptLine] : []),
             ...(needsConfirmation
               ? [
                   {
@@ -178,7 +188,7 @@ export function CartView() {
 }
 
 function ItemDetails({ item }: { item: CartItem }) {
-  if (item.kind === "charm") return null;
+  if (isLooseItem(item)) return null;
   if (item.kind === "design") {
     if (!item.shape && !item.length) return null;
     return (

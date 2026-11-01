@@ -56,6 +56,23 @@ describe("mails de pedido", () => {
     expect(m.html).toContain("wa.me/5491126361427");
   });
 
+  it("el maquillaje va con su nombre, precio por unidad y sin medidas", () => {
+    const m = customerCreatedMail(
+      {
+        ...order,
+        items: [{ id: "m", kind: "makeup", makeupId: "rubor-crema-magic-color", name: "Rubor en crema", unitPrice: 3400, qty: 2 }],
+        subtotal: 6800,
+        total: 13300,
+      },
+      url,
+    );
+    expect(m.html).toContain("Rubor en crema");
+    expect(m.html).toContain(`Maquillaje · ${formatARS(3400)} c/u`);
+    expect(m.html).toContain(formatARS(6800));
+    expect(m.html).toContain("💄");
+    expect(m.html).not.toContain("Medida");
+  });
+
   it("escapa el nombre de la clienta", () => {
     const m = customerCreatedMail({ ...order, customer: { ...order.customer, name: "<b>Mali</b>" } }, url);
     expect(m.html).not.toContain("<b>Mali</b>");

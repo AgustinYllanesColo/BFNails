@@ -84,3 +84,39 @@ describe("dijes sueltos en el pedido", () => {
     expect(cartItemSchema.safeParse({ kind: "charm", charmId: "cerezas", qty: 0 }).success).toBe(false);
   });
 });
+
+describe("maquillaje en el pedido", () => {
+  it("un producto de maquillaje se describe por unidad, sin medidas", async () => {
+    const { describeItem } = await import("@/lib/whatsapp");
+    const line = describeItem({ id: "m", kind: "makeup", makeupId: "rubor-crema-magic-color", name: "Rubor en crema", unitPrice: 3400, qty: 2 });
+    expect(line).toContain("Maquillaje Rubor en crema x2");
+    expect(line).toContain(`${formatARS(3400)} c/u`);
+    expect(line).toContain(formatARS(6800));
+    expect(line).not.toContain("Medida");
+  });
+
+  it("el checkout acepta maquillaje con id y cantidad 1..20, y nada más", async () => {
+    const { cartItemSchema, checkoutSchema } = await import("@/lib/checkout");
+    const ok = cartItemSchema.safeParse({ kind: "makeup", makeupId: "rubor-crema-magic-color", qty: 3, unitPrice: 1 });
+    expect(ok.success).toBe(true);
+    // el precio del cliente se descarta: el servidor lo vuelve a leer
+    expect(ok.success && "unitPrice" in ok.data).toBe(false);
+    expect(cartItemSchema.safeParse({ kind: "makeup", makeupId: "rubor-crema-magic-color", qty: 20 }).success).toBe(true);
+    expect(cartItemSchema.safeParse({ kind: "makeup", makeupId: "rubor-crema-magic-color", qty: 21 }).success).toBe(false);
+    expect(cartItemSchema.safeParse({ kind: "makeup", makeupId: "rubor-crema-magic-color", qty: 0 }).success).toBe(false);
+    expect(cartItemSchema.safeParse({ kind: "makeup", makeupId: "rubor-crema-magic-color", qty: 1.5 }).success).toBe(false);
+    expect(cartItemSchema.safeParse({ kind: "makeup", makeupId: "", qty: 1 }).success).toBe(false);
+    expect(cartItemSchema.safeParse({ kind: "makeup", makeupId: "x".repeat(81), qty: 1 }).success).toBe(false);
+    expect(cartItemSchema.safeParse({ kind: "makeup", qty: 1 }).success).toBe(false);
+    const checkout = checkoutSchema.safeParse({
+      customer: { name: "Mica", whatsapp: "11 5555-1234", email: "mica@example.com" },
+      delivery: { method: "retiro" },
+      payment: { method: "transferencia" },
+      items: [
+        { kind: "makeup", makeupId: "mascara-sky-high", qty: 1 },
+        { kind: "charm", charmId: "cerezas", qty: 2 },
+      ],
+    });
+    expect(checkout.success).toBe(true);
+  });
+});
