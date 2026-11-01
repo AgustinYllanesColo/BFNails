@@ -62,26 +62,24 @@ export function Nav() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative inline-flex items-center gap-1.5 rounded-pill px-4 py-2 text-sm font-semibold transition-colors",
-                  hi
-                    ? "text-lip hover:text-bordo"
-                    : active
-                      ? "text-bordo"
-                      : "text-ink hover:text-bordo",
+                  "relative inline-flex items-center gap-1.5 rounded-pill px-4 py-2 text-sm font-semibold transition-colors duration-200",
+                  active ? "text-cream" : hi ? "text-lip hover:text-bordo" : "text-ink hover:text-bordo",
                 )}
               >
-                {/* el destacado (maquillaje) lleva su pastilla rosa siempre; la activa se desliza por encima */}
+                {/* el destacado (maquillaje) lleva su pastilla rosa clara cuando no es la página actual; la actual va
+                    llena (labial si es maquillaje, bordó si no) y se desliza de un ítem al otro */}
                 {hi && !active && <span aria-hidden className="absolute inset-0 -z-20 rounded-pill bg-blush/70 ring-1 ring-rose/25" />}
                 {active && (
                   <motion.span
                     layoutId="nav-pill"
-                    className={cn("absolute inset-0 -z-10 rounded-pill", hi ? "bg-blush ring-1 ring-rose/40" : "bg-bordo/10")}
+                    className={cn("absolute inset-0 -z-10 rounded-pill", hi ? "bg-lip" : "bg-bordo")}
                     transition={{ type: "spring", stiffness: 400, damping: 32 }}
                   />
                 )}
                 {item.label}
-                {item.highlight && <NewPill>{item.highlight}</NewPill>}
+                {item.highlight && <NewPill inverted={active}>{item.highlight}</NewPill>}
               </Link>
             );
           })}
@@ -127,7 +125,9 @@ export function Nav() {
             <ul className="flex flex-col">
               {[...nav]
                 .sort((a, b) => Number(Boolean(b.highlight)) - Number(Boolean(a.highlight)))
-                .map((item, i) => (
+                .map((item, i) => {
+                  const active = pathname === item.href || pathname?.startsWith(item.href + "/");
+                  return (
                   <motion.li
                     key={item.href}
                     initial={{ opacity: 0, x: -8 }}
@@ -138,11 +138,15 @@ export function Nav() {
                     {item.highlight ? (
                       <Link
                         href={item.href}
-                        className="bg-blush text-lip ring-rose/25 relative flex items-center justify-between overflow-hidden rounded-md px-4 py-5 ring-1 transition-transform duration-150 active:scale-[0.97]"
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "relative flex items-center justify-between overflow-hidden rounded-md px-4 py-5 transition-transform duration-150 active:scale-[0.97]",
+                          active ? "bg-lip text-cream" : "bg-blush text-lip ring-rose/25 ring-1",
+                        )}
                       >
                         <span className="flex items-center gap-3">
                           <span className="font-title text-4xl">{item.label}</span>
-                          <NewPill>{item.highlight}</NewPill>
+                          <NewPill inverted={active}>{item.highlight}</NewPill>
                         </span>
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                           <path d="M5 12h14M13 6l6 6-6 6" />
@@ -151,14 +155,19 @@ export function Nav() {
                     ) : (
                       <Link
                         href={item.href}
-                        className="flex items-center justify-between rounded-md px-4 py-3.5 font-title text-3xl text-ink transition-transform duration-150 hover:bg-cream-deep active:scale-[0.97]"
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "flex items-center justify-between rounded-md px-4 py-3.5 font-title text-3xl transition-transform duration-150 active:scale-[0.97]",
+                          active ? "bg-bordo text-cream" : "text-ink hover:bg-cream-deep",
+                        )}
                       >
                         {item.label}
-                        <Star size={18} className="text-bordo" />
+                        <Star size={18} className={active ? "text-cream" : "text-bordo"} />
                       </Link>
                     )}
                   </motion.li>
-                ))}
+                  );
+                })}
             </ul>
           </motion.nav>
         )}
@@ -167,10 +176,15 @@ export function Nav() {
   );
 }
 
-/** Pastillita "Nuevo" del ítem destacado del menú. */
-function NewPill({ children }: { children: React.ReactNode }) {
+/** Pastillita "Nuevo" del ítem destacado del menú; invertida cuando el ítem es la página actual (fondo labial). */
+function NewPill({ children, inverted }: { children: React.ReactNode; inverted?: boolean }) {
   return (
-    <span className="rounded-pill bg-lip text-cream inline-flex items-center px-1.5 py-0.5 font-sans text-[10px] leading-none font-bold tracking-wide uppercase">
+    <span
+      className={cn(
+        "rounded-pill inline-flex items-center px-1.5 py-0.5 font-sans text-[10px] leading-none font-bold tracking-wide uppercase",
+        inverted ? "bg-cream text-lip" : "bg-lip text-cream",
+      )}
+    >
       {children}
     </span>
   );

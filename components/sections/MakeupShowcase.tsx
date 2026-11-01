@@ -3,12 +3,16 @@ import { MAKEUP_CATEGORIES, type MakeupProduct } from "@/lib/data/makeup";
 import { MakeupCard } from "@/components/makeup/MakeupCard";
 import { Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
+import { MAKEUP_DOOR_PICKS } from "./Doors";
 
 /**
  * La línea nueva, en su propio mundo (fondo rubor): título, una intro corta, accesos directos a cada categoría y los
  * productos destacados. En el celular los productos se deslizan de costado (como las promos); desde md van en grilla.
  */
-export function MakeupShowcase({ products }: { products: MakeupProduct[] }) {
+export function MakeupShowcase({ products: featured }: { products: MakeupProduct[] }) {
+  // Los que ya están en la puerta de Maquillaje no se repiten acá (salvo que sean los únicos destacados).
+  const fresh = featured.filter((p) => !MAKEUP_DOOR_PICKS.includes(p.id));
+  const products = fresh.length > 0 ? fresh : featured;
   if (products.length === 0) return null;
   return (
     <section id="maquillaje" aria-labelledby="makeup-t" className="bg-blush-soft text-lip relative overflow-hidden py-20 md:py-28">
@@ -18,8 +22,7 @@ export function MakeupShowcase({ products }: { products: MakeupProduct[] }) {
             <span id="makeup-t">Llegó el maquillaje</span>
           </Heading>
           <p className="mt-5 max-w-[46ch] text-lg leading-relaxed">
-            Bases, rubores, máscaras, glosses, delineadores y brochas, elegidos por mí para el día a día. Los sumás al
-            mismo carrito que tus uñas.
+            Bases, rubores, máscaras, glosses, delineadores y brochas. Los sumás al mismo carrito que tus uñas.
           </p>
         </div>
         <nav aria-label="Categorías de maquillaje">

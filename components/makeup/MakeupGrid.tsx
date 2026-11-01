@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { MAKEUP_CATEGORIES, makeupInStock, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
 import { Chip } from "@/components/ui/Chip";
-import { MakeupCard } from "./MakeupCard";
+import { MakeupCard, makeupTilt } from "./MakeupCard";
 
 /**
  * Grilla del maquillaje con filtro por categoría. La categoría vive en la URL (?cat=labios): se puede compartir
@@ -77,7 +77,7 @@ export function MakeupGrid({ products }: { products: MakeupProduct[] }) {
               exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1], delay: reduce ? 0 : Math.min(i * 0.025, 0.2) }}
             >
-              <MakeupCard product={p} priority={i < 4} />
+              <MakeupCard product={p} priority={i < 4} tilt={makeupTilt(p.id)} />
             </motion.li>
           ))}
         </AnimatePresence>

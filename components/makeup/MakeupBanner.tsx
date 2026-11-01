@@ -7,7 +7,7 @@ import { MakeupArt } from "./MakeupArt";
 const LIPSTICK = { id: "banner-labial", name: "", category: "labios", form: "labial", price: 0, hex: "#b5384f", active: true } satisfies MakeupProduct;
 const GLOSS = { id: "banner-gloss", name: "", category: "labios", form: "gloss", price: 0, hex: "#f08fb0", active: true } satisfies MakeupProduct;
 
-/** Aviso chico, arriba del catálogo de uñas, que lleva al maquillaje. */
+/** Aviso chico, junto al botón "Diseñá tu set" del catálogo de uñas, que lleva al maquillaje. */
 export function MakeupBanner({ className }: { className?: string }) {
   return (
     <Link
@@ -33,7 +33,7 @@ export function MakeupBanner({ className }: { className?: string }) {
       </span>
       <span className="min-w-0 text-sm leading-tight">
         <span className="font-bold">Nuevo: maquillaje.</span>{" "}
-        <span className="text-bordo/85 hidden sm:inline">Bases, máscaras, glosses y brochas.</span>
+        <span className="text-bordo hidden sm:inline">Bases, máscaras, glosses y brochas.</span>
       </span>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5">
         <path d="M5 12h14M13 6l6 6-6 6" />

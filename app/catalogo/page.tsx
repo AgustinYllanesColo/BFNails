@@ -21,18 +21,19 @@ export default async function CatalogoPage() {
   return (
     <div className="relative isolate pt-28 pb-24 md:pt-36">
       <div className="container-x relative">
-        <MakeupBanner className="mb-6 md:mb-8" />
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-          <div className="max-w-2xl">
-            <Heading as="h1">Catálogo de uñas</Heading>
-            <p className="mt-4 text-ink-soft">
-              Uñas disponibles en stock para entrega inmediata, con kit de aplicación incluido. Y si no sabés qué
-              pedir, también te dejo algunas opciones hechas por mí para que elijas más rápido.
-            </p>
+        <div className="mb-10 max-w-2xl">
+          <Heading as="h1">Catálogo de uñas</Heading>
+          <p className="mt-4 text-ink-soft">
+            Uñas disponibles en stock para entrega inmediata, con kit de aplicación incluido. Y si no sabés qué
+            pedir, también te dejo algunas opciones hechas por mí para que elijas más rápido.
+          </p>
+          {/* debajo de la intro: el armador y el aviso del maquillaje, que no compite con el título */}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Button href="/disena" variant="secondary">
+              Diseñá tu set
+            </Button>
+            <MakeupBanner />
           </div>
-          <Button href="/disena" variant="secondary">
-            Diseñá tu set
-          </Button>
         </div>
       </div>
       <Promos promos={promos} />

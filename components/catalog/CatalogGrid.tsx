@@ -148,7 +148,7 @@ export function CatalogGrid({ designs }: { designs: Design[] }) {
             title="Sets listos para entrega inmediata"
             className={cn(
               "rounded-pill h-8 px-3 text-xs font-semibold transition-colors duration-200",
-              stock ? "bg-emerald-700 text-cream" : "bg-cream-deep text-emerald-700 hover:bg-cream-ink/70",
+              stock ? "bg-emerald-700 text-cream" : "bg-cream-deep text-emerald-800 hover:bg-cream-ink/70",
             )}
           >
             En stock

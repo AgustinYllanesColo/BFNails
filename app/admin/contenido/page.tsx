@@ -30,6 +30,12 @@ const MAKEUP_FORM_LABEL: Record<MakeupForm, string> = {
   gel: "Gel",
   brocha: "Brocha",
   brochas: "Set de brochas",
+  suelto: "Polvo suelto",
+  doble: "Doble punta",
+  racimo: "Pestañas en racimo",
+  "set-lapices": "Set de lápices",
+  "rubor-barra": "Rubor en barra",
+  "duo-cejas": "Dúo para cejas",
 };
 
 export default async function ContenidoPage() {
@@ -55,6 +61,16 @@ export default async function ContenidoPage() {
         </Card>
 
         <Card title="Maquillaje">
+          <p role="note" className="mb-4 flex items-start gap-2 rounded bg-yellow/30 p-3 text-sm text-ink ring-1 ring-yellow/60">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mt-px shrink-0 text-bordo">
+              <path d="M12 3 2.5 20h19L12 3Z" />
+              <path d="M12 10v4.5M12 17.5v.01" />
+            </svg>
+            <span>
+              <strong className="font-bold">Precios provisorios (el doble del costo).</strong> Revisalos uno por uno antes
+              de publicar.
+            </span>
+          </p>
           <p className="mb-4 text-sm text-ink-soft">
             Precio por unidad. Stock vacío = sin control; 0 = agotado (se ve, pero no se puede comprar). Los disponibles se
             ven en /maquillaje; los destacados, también en la home.

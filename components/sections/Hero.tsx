@@ -34,11 +34,14 @@ const WORDS: Array<{ text: string; tone: "nails" | "makeup" }> = [
 ];
 const WORD_MS = 2600;
 
-/** Stickers de maquillaje entre las fotos de uñas: el dibujo de cada producto, hasta tener fotos. */
+/**
+ * Stickers de maquillaje entre las fotos de uñas: el dibujo de cada producto, hasta tener fotos. Son otros que los de
+ * la puerta de Maquillaje y los destacados de la vitrina, así la home no repite.
+ */
 const MAKEUP_STICKERS: Array<{ id: string; pos: string; rotate: number; depth: number; bob: number; delay: number }> = [
-  { id: "lip-gloss-brillo", pos: "left-[-2%] top-[45%] w-[clamp(64px,18vw,88px)] md:left-[13%] md:top-[70%] md:w-[clamp(96px,8vw,128px)]", rotate: -9, depth: -30, bob: 7.6, delay: 560 },
-  { id: "mascara-sky-high", pos: "right-[-2%] top-[48%] w-[clamp(64px,18vw,88px)] md:right-[12%] md:top-[71%] md:w-[clamp(96px,8vw,128px)]", rotate: 8, depth: -40, bob: 6.8, delay: 650 },
-  { id: "rubor-crema-magic-color", pos: "hidden md:block md:left-[22%] md:top-[11%] md:w-[clamp(84px,6.5vw,108px)]", rotate: 10, depth: -22, bob: 8.4, delay: 470 },
+  { id: "labial-matte-barra", pos: "left-[-2%] top-[45%] w-[clamp(64px,18vw,88px)] md:left-[13%] md:top-[70%] md:w-[clamp(96px,8vw,128px)]", rotate: -9, depth: -30, bob: 7.6, delay: 560 },
+  { id: "pestanas-50d-naez", pos: "right-[-2%] top-[48%] w-[clamp(64px,18vw,88px)] md:right-[12%] md:top-[71%] md:w-[clamp(96px,8vw,128px)]", rotate: 8, depth: -40, bob: 6.8, delay: 650 },
+  { id: "set-brochas", pos: "hidden md:block md:left-[22%] md:top-[11%] md:w-[clamp(84px,6.5vw,108px)]", rotate: 10, depth: -22, bob: 8.4, delay: 470 },
 ];
 const STICKER_PRODUCTS = MAKEUP_STICKERS.map((s) => ({ ...s, product: DEFAULT_MAKEUP.find((m) => m.id === s.id) })).filter(
   (s): s is typeof s & { product: MakeupProduct } => Boolean(s.product),

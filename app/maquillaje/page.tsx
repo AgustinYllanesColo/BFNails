@@ -35,35 +35,44 @@ export default async function MaquillajePage() {
   return (
     <div className="pb-24">
       {/* Banda rosa: el maquillaje tiene su propio mundo dentro del sitio */}
-      <section className="bg-blush relative isolate overflow-hidden rounded-b-[clamp(28px,5vw,56px)] pt-28 pb-12 md:pt-36 md:pb-16">
+      <section className="bg-blush relative isolate overflow-hidden rounded-b-[clamp(28px,5vw,56px)] pt-24 pb-9 md:pt-36 md:pb-16">
         <svg aria-hidden viewBox="0 0 400 400" className="text-blush-soft pointer-events-none absolute -top-40 -right-40 -z-10 size-[360px] md:-top-24 md:-right-24 md:size-[560px]">
           <circle cx="200" cy="200" r="200" fill="currentColor" />
         </svg>
+        {/* cinta leopardo de canto, el mismo acento que la puerta de Uñas: las dos líneas son la misma marca */}
+        <span aria-hidden className="leopard-bg absolute inset-x-0 bottom-0 -z-10 h-2 md:h-2.5" />
         <div className="container-x grid items-center gap-10 md:grid-cols-[1.15fr_0.85fr]">
           <div className="max-w-xl">
             <Heading as="h1" className="text-lip text-[clamp(2.5rem,6vw,4.5rem)]">
               Catálogo de maquillaje
             </Heading>
-            <p className="text-bordo mt-5 max-w-[52ch] leading-relaxed text-pretty md:text-lg">
-              Además de uñas, ahora traje maquillaje: productos que uso y me gustan, para rostro, ojos, pestañas, cejas
-              y labios, y brochas para aplicarlos.
+            <p className="text-bordo mt-4 max-w-[52ch] leading-relaxed text-pretty md:mt-5 md:text-lg">
+              Además de uñas, ahora también vendo maquillaje: para rostro, ojos, pestañas, cejas y labios, y brochas
+              para aplicarlos.
             </p>
-            <p className="text-bordo/85 mt-3 max-w-[52ch] text-[15px] leading-relaxed text-pretty md:text-base">
-              Tengo pocas unidades de cada uno. Los sumás al carrito con tu set de uñas o solos, y te llegan con el
-              mismo envío o los retirás en los mismos puntos.
+            {/* en el celular, una sola frase: los productos tienen que verse en la primera pantalla */}
+            <p className="text-bordo mt-3 hidden max-w-[52ch] text-base leading-relaxed text-pretty md:block">
+              Hay pocas unidades de cada uno. Los sumás al carrito con tu set de uñas o solos, y te llegan con el mismo
+              envío o los retirás en los mismos puntos.
             </p>
           </div>
           {hero.length === 3 && (
-            <div className="-mt-2 flex justify-center md:mt-0" aria-hidden>
+            <div className="hidden justify-center md:flex" aria-hidden>
               {hero.map((p, i) => (
                 <div
                   key={p.id}
                   className={cn(
-                    "relative -mx-3 aspect-[4/5] w-[clamp(96px,13vw,190px)] overflow-hidden rounded-lg bg-blush-soft shadow-[0_18px_40px_-20px_rgba(142,31,61,0.55)] ring-4 ring-white",
+                    "relative -mx-3 w-[clamp(96px,13vw,190px)]",
                     TILT[i],
                   )}
                 >
-                  <MakeupArt product={p} />
+                  <div className="bg-blush-soft relative aspect-[4/5] overflow-hidden rounded-lg shadow-[0_18px_40px_-20px_rgba(142,31,61,0.55)] ring-4 ring-white">
+                    <MakeupArt product={p} />
+                  </div>
+                  {/* cinta leopardo pegando el del medio, como la foto del medio en la puerta de Uñas */}
+                  {i === 1 && (
+                    <span className="leopard-bg absolute -top-3 left-1/2 h-6 w-16 -translate-x-1/2 -rotate-6 rounded-[3px] opacity-95 shadow-[0_4px_8px_-4px_rgba(0,0,0,0.4)]" />
+                  )}
                 </div>
               ))}
             </div>
@@ -71,7 +80,7 @@ export default async function MaquillajePage() {
         </div>
       </section>
 
-      <div className="container-x mt-10 md:mt-14">
+      <div className="container-x mt-6 md:mt-14">
         <h2 className="sr-only">Productos</h2>
         <Suspense fallback={null}>
           <MakeupGrid products={products} />

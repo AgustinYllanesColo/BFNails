@@ -19,8 +19,11 @@ export function Doors({ makeup, nailsCount }: { makeup: MakeupProduct[]; nailsCo
   );
 }
 
-/** Tres productos de formas distintas, para que el abanico se lea como "maquillaje" de un vistazo. */
-const MAKEUP_PICKS = ["lip-gloss-brillo", "rubor-crema-magic-color", "mascara-sky-high"];
+/**
+ * Tres productos de formas distintas, para que el abanico se lea como "maquillaje" de un vistazo. Distintos de los
+ * stickers del hero y de los destacados de la vitrina, para que la home no repita el mismo producto.
+ */
+export const MAKEUP_DOOR_PICKS = ["base-liquida-ruby", "lip-glaze-super-stay-matte", "brocha-city"];
 
 /** Posición de reposo y de hover de cada sticker (izquierda, centro, derecha). */
 const FAN = [
@@ -30,9 +33,10 @@ const FAN = [
 ];
 
 function MakeupDoor({ makeup }: { makeup: MakeupProduct[] }) {
-  const picks = MAKEUP_PICKS.map((id) => makeup.find((m) => m.id === id)).filter((m): m is MakeupProduct => Boolean(m));
-  // si Brenda borró alguno de los elegidos, completa con los primeros que haya
-  const stickers = [...picks, ...makeup.filter((m) => !picks.includes(m))].slice(0, 3);
+  const picks = MAKEUP_DOOR_PICKS.map((id) => makeup.find((m) => m.id === id)).filter((m): m is MakeupProduct => Boolean(m));
+  // si Brenda borró alguno de estos, completa con los primeros que haya (mejor si no están destacados)
+  const rest = [...makeup.filter((m) => !m.featured), ...makeup.filter((m) => m.featured)];
+  const stickers = [...picks, ...rest.filter((m) => !picks.includes(m))].slice(0, 3);
   return (
     <Link
       href="/maquillaje"
