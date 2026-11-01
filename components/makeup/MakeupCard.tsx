@@ -51,39 +51,49 @@ export function MakeupCard({ product, priority, tilt }: { product: MakeupProduct
     .slice(0, 2);
 
   return (
-    <article className="group flex h-full flex-col">
+    // id: ancla de cada producto (/maquillaje#<id>, la usan los datos estructurados); scroll-mt para que la barra fija no lo tape
+    <article id={product.id} className="group flex h-full scroll-mt-28 flex-col">
       <div
         className={cn(
           "relative",
           tilt != null &&
-            "rotate-[var(--tilt)] transition-[rotate] duration-500 ease-[var(--ease-out-expo)] group-focus-within:rotate-0 group-hover:rotate-0 motion-reduce:transition-none",
+            "rotate-[var(--tilt)] transition-[rotate] duration-300 ease-[var(--ease-out-expo)] group-focus-within:rotate-0 group-hover:rotate-0 motion-reduce:transition-none",
         )}
         style={tilt != null ? ({ "--tilt": `${tilt}deg` } as React.CSSProperties) : undefined}
       >
         <MakeupVisual
           product={product}
           priority={priority}
-          className={soldOut ? "opacity-60 saturate-50" : "transition-transform duration-500 ease-[var(--ease-out-expo)] group-hover:-translate-y-1"}
+          className={
+            soldOut
+              ? "opacity-60 saturate-50"
+              : "transition-transform duration-300 ease-[var(--ease-out-expo)] motion-safe:group-hover:-translate-y-1"
+          }
         />
         {badges.length > 0 && <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">{badges}</div>}
       </div>
       <div className="mt-3 flex flex-1 flex-col">
-        <h3 className="text-ink text-[17px] leading-tight font-bold tracking-tight text-pretty">{product.name}</h3>
+        {/* nombres largos del admin: se parten donde haga falta y no pasan de tres renglones (el completo queda en el title) */}
+        <h3 className="text-ink line-clamp-3 text-[17px] leading-tight font-bold tracking-tight text-pretty [overflow-wrap:anywhere]" title={product.name}>
+          {product.name}
+        </h3>
         {(product.brand || product.description) && (
-          <p className="text-ink-soft mt-1 line-clamp-2 text-[13px] leading-snug" title={product.description}>
+          <p className="text-ink-soft mt-1 line-clamp-2 text-[13px] leading-snug [overflow-wrap:anywhere]" title={product.description}>
             {product.brand && <span className="text-lip font-semibold">{product.brand}</span>}
             {product.brand && product.description && " · "}
             {product.description}
           </p>
         )}
         <div className="mt-auto pt-3">
-          <p className="rounded-pill text-lip ring-lip/10 mb-2.5 bg-white ring-1 inline-flex items-baseline gap-1.5 px-3 py-1 text-sm font-bold tabular-nums">
+          <p className="rounded-pill text-lip ring-lip/10 mb-2.5 inline-flex max-w-full flex-wrap items-baseline gap-x-1.5 bg-white px-3 py-1 text-sm font-bold tabular-nums ring-1">
             {sale && (
-              <span className="text-ink-soft text-[11px] font-semibold line-through" aria-label={`Antes ${formatARS(product.priceBefore!)}`}>
+              <s className="text-ink-soft text-[11px] font-semibold">
+                <span className="sr-only">Antes </span>
                 {formatARS(product.priceBefore!)}
-              </span>
+              </s>
             )}
-            {formatARS(product.price)}
+            {sale && <span className="sr-only">, ahora </span>}
+            <span className="whitespace-nowrap">{formatARS(product.price)}</span>
           </p>
           <AddMakeupToCart product={product} />
         </div>

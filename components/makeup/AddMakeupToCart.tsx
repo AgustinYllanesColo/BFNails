@@ -22,10 +22,9 @@ export function AddMakeupToCart({ product, className }: { product: MakeupProduct
   const max = makeupMaxQty(product);
   const soldOut = max === 0;
   const full = !soldOut && hydrated && inCart >= max;
-  const disabled = soldOut || full;
 
   const onAdd = () => {
-    if (disabled) return;
+    if (soldOut || full) return;
     flyToCart(btn.current, product.image);
     add({ kind: "makeup", makeupId: product.id, name: product.name, image: product.image, unitPrice: product.price, qty: 1 });
     setAdded(true);
@@ -34,33 +33,43 @@ export function AddMakeupToCart({ product, className }: { product: MakeupProduct
   };
 
   const label = soldOut ? "Agotado" : added ? "¡Sumado!" : full ? "Ya tenés todas" : "Sumar al carrito";
+  // Lo que se anuncia al sumar: cambia con cada unidad, así el lector de pantalla lo vuelve a leer.
+  const announce = added ? `Sumaste ${product.name}. Tenés ${inCart} en el carrito${full ? ", no quedan más" : ""}.` : "";
 
   return (
-    <button
-      ref={btn}
-      type="button"
-      onClick={onAdd}
-      disabled={disabled}
-      aria-label={soldOut ? `${product.name}: agotado` : full ? `${product.name}: ya está todo el stock en tu carrito` : `Sumar ${product.name} al carrito`}
-      data-cursor={disabled ? undefined : "sumar"}
-      className={cn(
-        "rounded-pill inline-flex h-10 w-full items-center justify-center gap-1.5 text-[13px] font-semibold",
-        "transition-[transform,background-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97]",
-        "focus-visible:ring-lip/30 focus-visible:ring-4 focus-visible:outline-none",
-        disabled
-          ? "bg-cream-deep text-ink-soft cursor-not-allowed active:scale-100"
-          : added
-            ? "bg-lip text-cream"
-            : "bg-bordo text-cream hover:bg-lip",
-        className,
-      )}
-    >
-      {!disabled && (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          {added ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M12 5v14M5 12h14" />}
-        </svg>
-      )}
-      <span aria-live="polite">{label}</span>
-    </button>
+    <>
+      <button
+        ref={btn}
+        type="button"
+        onClick={onAdd}
+        // agotado: no se puede tocar. Lleno: queda enfocable (si se deshabilita bajo el foco, el teclado pierde su lugar)
+        disabled={soldOut}
+        aria-disabled={full || undefined}
+        data-cursor={soldOut || full ? undefined : "sumar"}
+        className={cn(
+          "rounded-pill inline-flex h-11 w-full scroll-mt-28 scroll-mb-6 items-center justify-center gap-1.5 text-[13px] font-semibold",
+          "transition-[transform,background-color,color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]",
+          "focus-visible:outline-bordo focus-visible:outline-2 focus-visible:outline-offset-2",
+          soldOut || full
+            ? "bg-cream-deep text-ink-soft cursor-not-allowed"
+            : added
+              ? "bg-lip text-cream active:scale-[0.97]"
+              : "bg-bordo text-cream hover:bg-lip active:scale-[0.97]",
+          className,
+        )}
+      >
+        {!soldOut && !full && (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0">
+            {added ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M12 5v14M5 12h14" />}
+          </svg>
+        )}
+        {/* el texto visible va primero en el nombre (lo que se dice en voz alta coincide con lo que se ve) */}
+        <span>{label}</span>
+        <span className="sr-only">: {product.name}</span>
+      </button>
+      <span role="status" className="sr-only">
+        {announce}
+      </span>
+    </>
   );
 }

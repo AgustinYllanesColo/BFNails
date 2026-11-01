@@ -7,8 +7,8 @@ import { cn } from "@/lib/format";
  * Dibujo del producto mientras no haya foto: una "calcomanía" del envase según su forma, pintada con el color
  * del producto (`hex`), con contorno bordó, borde blanco de sticker y sombra suave, sobre fondo rosa.
  * Todas las formas comparten trazo (2 px bordó), brillo blanco y paleta de envases, para que se lean como una serie.
- * Para que dos productos de la misma forma no se vean iguales, cada uno lleva su marca (o una palabra del nombre)
- * escrita en el envase, y el color de la tapa y una leve inclinación salen del id.
+ * Para que dos productos de la misma forma no se vean iguales, el color de la tapa, los destellos y una leve
+ * inclinación salen del id; si el producto tiene marca (o nombre de línea real), va escrita en el envase.
  */
 
 const OUTLINE = "#4a0e0e";
@@ -69,24 +69,18 @@ type Palette = {
   count: number;
 };
 
-/** Palabras que no distinguen un producto de otro (para elegir el texto del envase cuando no hay marca). */
-const GENERIC = new Set(
-  "de del la el los las para con en y a por x lapiz lápiz labial labiales lip delineador delineadores mascara máscara pestañas polvo rubor base gloss glaze brocha brochas gel cejas ojos barra set".split(" "),
-);
-const LABEL_HINT: Record<string, string> = {
-  "delineador-ojos": "Black",
-  "mascara-pestanas": "Classic",
-  "lip-gloss-brillo-2": "Tono 2",
+/**
+ * Nombre de línea de los productos sin marca, tal como figura en el ticket de compra (Bella Central, 01/11).
+ * Solo nombres reales: si un producto no tiene marca ni línea, el envase va sin texto (no se inventa una "marca").
+ */
+const PRODUCT_LINE: Record<string, string> = {
+  "mascara-sky-high": "Sky High",
   "lip-glaze-super-stay-matte": "Super Stay",
-  "lip-liner": "Lip Liner",
-  "delineador-labio": "Labio",
+  "lapiz-labial-lip-contour": "Lip Contour",
+  "brocha-city": "City",
 };
 function labelFor(p: MakeupProduct): string {
-  if (p.brand) return p.brand;
-  if (LABEL_HINT[p.id]) return LABEL_HINT[p.id];
-  const words = p.name.replace(/[·×]/g, " ").split(/\s+/).filter(Boolean);
-  const keep = words.filter((w) => !GENERIC.has(w.toLowerCase()));
-  return (keep.length ? keep.slice(0, 2) : words.slice(0, 1)).join(" ");
+  return p.brand?.trim() || PRODUCT_LINE[p.id] || "";
 }
 
 /**
@@ -94,7 +88,8 @@ function labelFor(p: MakeupProduct): string {
  * lo parte en dos renglones cuando así entra más grande.
  */
 function Label({ text, x, y, w, h = 7, max = 6, fill, rotate = 0 }: { text: string; x: number; y: number; w: number; h?: number; max?: number; fill: string; rotate?: number }) {
-  const t = text.toUpperCase();
+  const t = text.trim().toUpperCase();
+  if (!t) return null;
   const K = 0.68; // ancho medio de una mayúscula en em
   const one = Math.min(max, w / (Math.max(t.length, 2) * K), h);
   let lines = [t];
@@ -739,17 +734,35 @@ function Sparkles({ seed }: { seed: number }) {
   );
 }
 
-/** Dibujo del producto (4:5). Ocupa todo el contenedor. */
-export function MakeupArt({ product, className }: { product: MakeupProduct; className?: string }) {
+/** Dibujo de respaldo para una forma que este archivo no conoce (dato nuevo del admin): el más parecido de su categoría. */
+const BY_CATEGORY: Record<MakeupProduct["category"], MakeupForm> = {
+  rostro: "base",
+  ojos: "delineador",
+  pestanas: "mascara",
+  cejas: "gel",
+  labios: "labial",
+  brochas: "brocha",
+};
+
+/**
+ * Dibujo del producto (4:5). Ocupa todo el contenedor. Es decorativo por defecto (el nombre ya está escrito al lado);
+ * con `label` se anuncia como imagen con ese texto.
+ */
+export function MakeupArt({ product, className, label }: { product: MakeupProduct; className?: string; label?: string }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
-  const c = product.hex ?? "#d9466f";
+  // un hex mal cargado desde el admin ("rojo", "#12") pintaría el envase de negro: se usa el rosa de la marca
+  const c = product.hex && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(product.hex.trim()) ? product.hex.trim() : "#d9466f";
   const h = hash(product.id);
   const count = Number(/[×x]\s?(\d{1,2})\b/i.exec(product.name)?.[1] ?? 0);
   const palette: Palette = { c, cd: darker(c), cl: lighter(c), uid, label: labelFor(product), cap: CAPS[(h >>> 4) % CAPS.length], count };
   const tilt = ((h >>> 9) % 9) - 4; // −4° a 4°, fijo por producto
-  const Form = FORMS[product.form] ?? Lipstick;
+  const Form = FORMS[product.form] ?? FORMS[BY_CATEGORY[product.category]] ?? Lipstick;
   return (
-    <svg viewBox="0 0 100 125" role="img" aria-label={product.name} className={cn("absolute inset-0 size-full", className)}>
+    <svg
+      viewBox="0 0 100 125"
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true, focusable: false })}
+      className={cn("absolute inset-0 size-full", className)}
+    >
       <defs>
         {/* borde blanco de sticker + sombra corta con desenfoque */}
         <filter id={`st-${uid}`} x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
@@ -776,17 +789,22 @@ export function MakeupArt({ product, className }: { product: MakeupProduct; clas
   );
 }
 
-/** Foto del producto si la hay; si no, el dibujo. Fondo rosa, proporción 4:5. */
+/**
+ * Foto del producto si la hay; si no, el dibujo. Fondo rosa, proporción 4:5. Decorativa por defecto: en la tarjeta,
+ * el nombre ya es el título y repetirlo como alt lo hace leer dos veces. Pasá `alt` cuando la imagen va sola.
+ */
 export function MakeupVisual({
   product,
   sizes = "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw",
   priority,
   className,
+  alt = "",
 }: {
   product: MakeupProduct;
   sizes?: string;
   priority?: boolean;
   className?: string;
+  alt?: string;
 }) {
   return (
     <div className={cn("bg-blush ring-lip/5 relative aspect-[4/5] overflow-hidden rounded-lg ring-1", className)}>
@@ -794,7 +812,7 @@ export function MakeupVisual({
         <div className="bg-blush-soft absolute inset-0">
           <Image
             src={product.image}
-            alt={product.name}
+            alt={alt}
             fill
             sizes={sizes}
             preload={priority}
@@ -804,7 +822,7 @@ export function MakeupVisual({
           />
         </div>
       ) : (
-        <MakeupArt product={product} />
+        <MakeupArt product={product} label={alt || undefined} />
       )}
     </div>
   );
