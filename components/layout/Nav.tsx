@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { nav } from "@/lib/site";
 import { cn } from "@/lib/format";
@@ -18,6 +18,21 @@ export function Nav() {
   const setOpen = (v: boolean | ((prev: boolean) => boolean)) =>
     setOpenAt((prev) => ((typeof v === "function" ? v(prev === pathname) : v) ? pathname : null));
   const [scrolled, setScrolled] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
+
+  // Menú abierto (desplegable, no modal): el foco entra al primer ítem; Escape lo cierra y devuelve el foco al botón.
+  useEffect(() => {
+    if (!open) return;
+    menuRef.current?.querySelector<HTMLElement>("a[href]")?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpenAt(null);
+      toggleRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -88,8 +103,10 @@ export function Nav() {
         <div className="flex items-center gap-2">
           <CartButton />
           <button
+            ref={toggleRef}
             type="button"
             onClick={() => setOpen((v) => !v)}
+            aria-controls="menu-movil"
             className="grid size-11 place-items-center rounded-pill bg-bordo text-cream md:hidden"
             aria-expanded={open}
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
@@ -115,6 +132,8 @@ export function Nav() {
       <AnimatePresence>
         {open && (
           <motion.nav
+            ref={menuRef}
+            id="menu-movil"
             initial={{ opacity: 0, y: -12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.98 }}
@@ -138,6 +157,7 @@ export function Nav() {
                     {item.highlight ? (
                       <Link
                         href={item.href}
+                        onClick={() => setOpenAt(null)}
                         aria-current={active ? "page" : undefined}
                         className={cn(
                           "relative flex items-center justify-between overflow-hidden rounded-md px-4 py-5 transition-transform duration-150 active:scale-[0.97]",
@@ -155,6 +175,7 @@ export function Nav() {
                     ) : (
                       <Link
                         href={item.href}
+                        onClick={() => setOpenAt(null)}
                         aria-current={active ? "page" : undefined}
                         className={cn(
                           "flex items-center justify-between rounded-md px-4 py-3.5 font-title text-3xl transition-transform duration-150 active:scale-[0.97]",
@@ -177,15 +198,20 @@ export function Nav() {
 }
 
 /** Pastillita "Nuevo" del ítem destacado del menú; invertida cuando el ítem es la página actual (fondo labial). */
-function NewPill({ children, inverted }: { children: React.ReactNode; inverted?: boolean }) {
+function NewPill({ children, inverted }: { children: string; inverted?: boolean }) {
+  // el lector de pantalla oye "Maquillaje, nuevo" (sin la separación leería "MaquillajeNuevo")
   return (
-    <span
-      className={cn(
-        "rounded-pill inline-flex items-center px-1.5 py-0.5 font-sans text-[10px] leading-none font-bold tracking-wide uppercase",
-        inverted ? "bg-cream text-lip" : "bg-lip text-cream",
-      )}
-    >
-      {children}
-    </span>
+    <>
+      <span className="sr-only">{`, ${children.toLowerCase()}`}</span>
+      <span
+        aria-hidden
+        className={cn(
+          "rounded-pill inline-flex items-center px-1.5 py-0.5 font-sans text-[10px] leading-none font-bold tracking-wide uppercase",
+          inverted ? "bg-cream text-lip" : "bg-lip text-cream",
+        )}
+      >
+        {children}
+      </span>
+    </>
   );
 }

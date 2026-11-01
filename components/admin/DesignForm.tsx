@@ -100,7 +100,7 @@ export function DesignForm({ design }: { design?: Design }) {
             <textarea name="images" defaultValue={design?.images.join("\n")} className={adminInput + " h-20 py-2 text-xs"} />
           </L>
           <L label="Subir nuevas">
-            <input type="file" name="newImages" accept="image/*" multiple className="text-sm" />
+            <input type="file" name="newImages" accept="image/jpeg,image/png,image/webp,image/avif" multiple className="text-sm" />
           </L>
           <p className="mt-2 text-[11px] text-ink-soft">Ideal: cuadradas, 1200×1200, buena luz. La primera es la portada.</p>
         </div>

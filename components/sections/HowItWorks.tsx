@@ -108,7 +108,7 @@ export function HowItWorks({ kit }: { kit?: Kit }) {
     const el = root.current;
     if (!el) return;
     const mm = gsap.matchMedia();
-    mm.add("all", () => {
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
       const line = el.querySelector<SVGLineElement>("[data-line]");
       // si se recargó con la sección ya en pantalla, la línea queda entera (no se achica y vuelve a crecer)
       if (line && el.getBoundingClientRect().top > window.innerHeight * 0.6) {

@@ -42,7 +42,7 @@ export function MakeupShowcase({ products: featured }: { products: MakeupProduct
       </div>
 
       <ul
-        className="mt-10 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:none] md:container-x md:mt-12 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible lg:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
+        className="mt-10 flex snap-x snap-mandatory scroll-px-4 overscroll-x-contain gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:none] md:container-x md:mt-12 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible lg:[grid-template-columns:repeat(var(--cols),minmax(0,1fr))]"
         style={{ "--cols": Math.min(products.length, 6) } as React.CSSProperties}
       >
         {products.map((p, i) => (

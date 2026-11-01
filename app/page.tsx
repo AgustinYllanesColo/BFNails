@@ -33,7 +33,7 @@ export default async function HomePage() {
   const featured = (designs.some((d) => d.featured) ? designs.filter((d) => d.featured) : designs).slice(0, FEATURED_NAILS);
   return (
     <>
-      <Hero />
+      <Hero makeup={makeup} />
       {/* La banda rotada es más ancha que la pantalla: el contenedor la recorta para que no haya scroll horizontal */}
       <div className="relative z-10 -my-3 overflow-x-clip py-3">
         <div className="-mx-[4vw] w-[108vw] -rotate-[1.5deg]">

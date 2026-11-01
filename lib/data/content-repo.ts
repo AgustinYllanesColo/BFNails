@@ -2,7 +2,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { settings } from "@/lib/db/schema";
-import { DEFAULT_MAKEUP, type MakeupProduct } from "./makeup";
+import { DEFAULT_MAKEUP, normalizeMakeupList, toPublicMakeup, type MakeupProduct } from "./makeup";
 import { DEFAULT_CHARMS, DEFAULT_KIT, DEFAULT_PROMOS, promoIsLive, type Charm, type Kit, type Promo } from "./content";
 
 type ContentMap = { promos: Promo[]; charms: Charm[]; kit: Kit; makeup: MakeupProduct[] };
@@ -36,11 +36,14 @@ export async function getCharms(): Promise<Charm[]> {
   return (await getAllCharms()).filter((c) => c.active);
 }
 
-export const getAllMakeup = () => read("makeup");
+/** Todo el maquillaje, para el admin y el checkout. Lo guardado se normaliza (datos viejos o rotos). */
+export async function getAllMakeup(): Promise<MakeupProduct[]> {
+  return normalizeMakeupList(await read("makeup")) ?? DEFAULT_MAKEUP;
+}
 
-/** Maquillaje visible en la tienda (los agotados también: se muestran como "Agotado"). */
+/** Maquillaje visible en la tienda (los agotados también: se muestran como "Agotado"). Sin datos internos. */
 export async function getMakeup(): Promise<MakeupProduct[]> {
-  return (await getAllMakeup()).filter((m) => m.active);
+  return (await getAllMakeup()).filter((m) => m.active).map(toPublicMakeup);
 }
 
 export async function getFeaturedMakeup(limit = 6): Promise<MakeupProduct[]> {

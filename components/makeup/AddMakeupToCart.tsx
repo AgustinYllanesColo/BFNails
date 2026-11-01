@@ -26,7 +26,7 @@ export function AddMakeupToCart({ product, className }: { product: MakeupProduct
   const onAdd = () => {
     if (soldOut || full) return;
     flyToCart(btn.current, product.image);
-    add({ kind: "makeup", makeupId: product.id, name: product.name, image: product.image, unitPrice: product.price, qty: 1 });
+    add({ kind: "makeup", makeupId: product.id, name: product.name, image: product.image, unitPrice: product.price, qty: 1, maxQty: makeupMaxQty(product) });
     setAdded(true);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setAdded(false), 1400);

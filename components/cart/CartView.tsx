@@ -7,7 +7,7 @@ import { useCart } from "@/lib/store/cart";
 import { formatARS } from "@/lib/format";
 import { describeSizes } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/Button";
-import { isLooseItem, type CartItem } from "@/lib/types";
+import { isLooseItem, maxQtyFor, type CartItem } from "@/lib/types";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
 
@@ -26,11 +26,14 @@ export function CartView() {
     return (
       <div className="bg-cream-deep rounded-lg p-12 text-center">
         <p className="font-title text-3xl">Todavía no hay nada acá</p>
-        <p className="text-ink-soft mt-2">Elegí un set del catálogo, armá el tuyo o sumá dijes sueltos.</p>
+        <p className="text-ink-soft mt-2">Elegí un set del catálogo, armá el tuyo, sumá dijes sueltos o maquillaje.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button href="/catalogo">Ver catálogo</Button>
           <Button href="/disena" variant="secondary">
             Diseñá tu set
+          </Button>
+          <Button href="/maquillaje" variant="secondary">
+            Ver maquillaje
           </Button>
         </div>
       </div>
@@ -88,12 +91,13 @@ export function CartView() {
                     <button
                       type="button"
                       onClick={() => setQty(item.id, item.qty - 1)}
-                      className="size-9 font-bold transition-transform active:scale-75"
-                      aria-label="Menos"
+                      disabled={item.qty <= 1}
+                      className="size-9 font-bold transition-transform active:scale-75 disabled:opacity-30 disabled:active:scale-100"
+                      aria-label={`Una menos de ${item.name}`}
                     >
                       −
                     </button>
-                    <span className="relative inline-block h-5 w-6 overflow-hidden text-center text-sm font-semibold">
+                    <span className="relative inline-block h-5 w-6 overflow-hidden text-center text-sm font-semibold" aria-hidden>
                       <AnimatePresence initial={false} mode="popLayout">
                         <motion.span
                           key={item.qty}
@@ -107,11 +111,14 @@ export function CartView() {
                         </motion.span>
                       </AnimatePresence>
                     </span>
+                    <span className="sr-only" aria-live="polite">{`Cantidad: ${item.qty}`}</span>
                     <button
                       type="button"
                       onClick={() => setQty(item.id, item.qty + 1)}
-                      className="size-9 font-bold transition-transform active:scale-75"
-                      aria-label="Más"
+                      disabled={item.qty >= maxQtyFor(item)}
+                      title={item.qty >= maxQtyFor(item) ? (item.kind === "makeup" && item.maxQty != null ? "No hay más en stock" : "Llegaste al máximo por pedido") : undefined}
+                      className="size-9 font-bold transition-transform active:scale-75 disabled:opacity-30 disabled:active:scale-100"
+                      aria-label={`Una más de ${item.name}`}
                     >
                       +
                     </button>

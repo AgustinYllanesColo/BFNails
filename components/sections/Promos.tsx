@@ -38,7 +38,7 @@ export function Promos({ promos, title = "Promos de la semana" }: { promos: Prom
           <span id="promos-t">{title}</span>
         </Heading>
       </div>
-      <ul className="flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:none] md:container-x md:grid md:grid-cols-2 md:gap-5 md:overflow-visible lg:grid-cols-3">
+      <ul className="flex snap-x snap-mandatory scroll-px-4 overscroll-x-contain gap-3 overflow-x-auto px-4 pb-3 [scrollbar-width:none] md:container-x md:grid md:grid-cols-2 md:gap-5 md:overflow-visible lg:grid-cols-3">
         {promos.map((p) => (
           <li key={p.id} className="w-[86%] max-w-[400px] shrink-0 snap-start md:w-auto md:max-w-none">
             <PromoCard promo={p} />
@@ -60,7 +60,7 @@ export function PromoCard({ promo: p }: { promo: Promo }) {
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
       className={cn(
-        "group block h-full rounded-[20px] shadow-[0_18px_40px_-24px_rgba(74,14,14,0.55)] transition-transform duration-300 ease-[var(--ease-out-expo)] hover:-translate-y-1",
+        "group focus-visible:outline-bordo block h-full rounded-[20px] shadow-[0_18px_40px_-24px_rgba(74,14,14,0.55)] transition-transform duration-300 ease-[var(--ease-out-expo)] hover:-translate-y-1 focus-visible:outline-3 focus-visible:outline-offset-4 active:scale-[0.98]",
       )}
     >
       <span className={cn("relative flex h-full min-h-[208px] overflow-hidden rounded-[20px]", t.card)}>

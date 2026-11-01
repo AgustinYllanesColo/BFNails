@@ -17,27 +17,29 @@ export const MAKEUP_CATEGORIES = [
 ] as const;
 export type MakeupCategory = (typeof MAKEUP_CATEGORIES)[number]["id"];
 
-/** Forma del producto: define el dibujo que se muestra mientras no hay foto. */
-export type MakeupForm =
-  | "brochas"
-  | "brocha"
-  | "lapiz"
-  | "delineador"
-  | "mascara"
-  | "pestanas"
-  | "polvo"
-  | "rubor"
-  | "gloss"
-  | "labial"
-  | "barra"
-  | "base"
-  | "gel"
-  | "suelto"
-  | "doble"
-  | "racimo"
-  | "set-lapices"
-  | "rubor-barra"
-  | "duo-cejas";
+/** Formas del producto: definen el dibujo que se muestra mientras no hay foto. Lista única (admin y validación). */
+export const MAKEUP_FORMS = [
+  "brochas",
+  "brocha",
+  "lapiz",
+  "delineador",
+  "mascara",
+  "pestanas",
+  "polvo",
+  "rubor",
+  "gloss",
+  "labial",
+  "barra",
+  "base",
+  "gel",
+  "suelto",
+  "doble",
+  "racimo",
+  "set-lapices",
+  "rubor-barra",
+  "duo-cejas",
+] as const;
+export type MakeupForm = (typeof MAKEUP_FORMS)[number];
 
 export type MakeupProduct = {
   id: string;
@@ -94,7 +96,7 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
   p({ id: "gel-cejas-pink21", name: "Gel para cejas", brand: "Pink21", description: "Peina y fija las cejas todo el día.", category: "cejas", form: "gel", price: 3500, stock: 3, hex: "#c9b8a8", code: "CS6418" }),
   // Labios
   p({ id: "lip-gloss-brillo", name: "Lip gloss con brillo", description: "Brillo jugoso con destellos.", category: "labios", form: "gloss", price: 3800, stock: 2, hex: "#f08fb0", code: "CS6696", featured: true }),
-  p({ id: "lip-gloss-brillo-2", name: "Lip gloss con brillo · tono 2", description: "Brillo jugoso con destellos.", category: "labios", form: "gloss", price: 3300, stock: 1, hex: "#f2705e", code: "CS6695" }),
+  p({ id: "lip-gloss-brillo-2", name: "Lip gloss con brillo · tono 2", description: "Brillo con destellos, en tono coral.", category: "labios", form: "gloss", price: 3300, stock: 1, hex: "#f2705e", code: "CS6695" }),
   p({ id: "lip-glaze-super-stay-matte", name: "Lip glaze Super Stay Matte", description: "Labial líquido mate de larga duración.", category: "labios", form: "gloss", price: 3400, stock: 3, hex: "#7d1a2e", code: "TEI8469" }),
   p({ id: "labial-matte-barra", name: "Labial matte en barra", description: "Color pleno y acabado mate.", category: "labios", form: "labial", price: 3300, stock: 2, hex: "#c42b3c", code: "TEI8560" }),
   p({ id: "lapiz-labial-lip-contour", name: "Lápiz labial Lip Contour", description: "Contorno y relleno en un mismo lápiz.", category: "labios", form: "lapiz", price: 2300, stock: 3, hex: "#c98a84", code: "TEI8235" }),
@@ -112,4 +114,78 @@ export function makeupInStock(m: MakeupProduct): boolean {
 /** Tope de unidades que se pueden pedir de un producto. */
 export function makeupMaxQty(m: Pick<MakeupProduct, "stock">): number {
   return m.stock == null ? 20 : Math.max(0, Math.min(20, m.stock));
+}
+
+/** Lo que llega al navegador: sin el código del proveedor (es solo para Brenda, en el admin). */
+export function toPublicMakeup(m: MakeupProduct): MakeupProduct {
+  const { code: _code, ...rest } = m;
+  void _code;
+  return rest;
+}
+
+const CATEGORY_IDS = new Set<string>(MAKEUP_CATEGORIES.map((c) => c.id));
+const FORM_IDS = new Set<string>(MAKEUP_FORMS);
+const isNat = (v: unknown): v is number => typeof v === "number" && Number.isInteger(v) && v >= 0;
+const optStr = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
+
+/**
+ * Lo guardado en `settings.makeup` puede venir de una versión anterior (sin campos nuevos) o roto.
+ * Devuelve null si no es una lista (se usa el valor por defecto); si es una lista, completa lo que falta
+ * y descarta las filas que no se pueden vender (sin id, nombre, categoría válida o precio).
+ */
+export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
+  if (!Array.isArray(value)) return null;
+  const out: MakeupProduct[] = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== "object") continue;
+    const r = raw as Record<string, unknown>;
+    if (typeof r.id !== "string" || !r.id || typeof r.name !== "string" || !r.name) continue;
+    if (typeof r.category !== "string" || !CATEGORY_IDS.has(r.category) || !isNat(r.price)) continue;
+    out.push({
+      id: r.id,
+      name: r.name,
+      brand: optStr(r.brand),
+      description: optStr(r.description),
+      category: r.category as MakeupCategory,
+      form: typeof r.form === "string" && FORM_IDS.has(r.form) ? (r.form as MakeupForm) : "labial",
+      price: r.price,
+      priceBefore: isNat(r.priceBefore) && r.priceBefore > r.price ? r.priceBefore : undefined,
+      stock: isNat(r.stock) ? r.stock : undefined,
+      image: optStr(r.image),
+      hex: optStr(r.hex),
+      code: optStr(r.code),
+      featured: r.featured === true,
+      isNew: r.isNew === true,
+      active: r.active !== false,
+    });
+  }
+  return out;
+}
+
+const units = (n: number) => `${n === 1 ? "queda" : "quedan"} ${n} ${n === 1 ? "unidad" : "unidades"}`;
+
+/**
+ * Valida las líneas de maquillaje de un pedido contra el catálogo (todos los productos, también los pausados,
+ * para poder nombrarlos). Suma las filas repetidas del mismo producto antes de comparar con el stock.
+ * Devuelve el mensaje de error para la clienta, o null si está todo bien.
+ */
+export function checkMakeupLines(lines: { makeupId: string; qty: number }[], all: MakeupProduct[]): string | null {
+  const totals = new Map<string, number>();
+  for (const l of lines) totals.set(l.makeupId, (totals.get(l.makeupId) ?? 0) + l.qty);
+  for (const [id, qty] of totals) {
+    const product = all.find((m) => m.id === id);
+    if (!product || !product.active)
+      return product
+        ? `${product.name} ya no está disponible. Sacalo del carrito para seguir.`
+        : "Un producto de maquillaje ya no está disponible. Sacalo del carrito para seguir.";
+    // un precio 0 es un producto cargado sin precio todavía: no se vende gratis
+    if (product.price <= 0) return `El producto ${product.name} todavía no tiene precio. Sacalo del carrito para seguir.`;
+    const max = makeupMaxQty(product);
+    if (product.stock === 0) return `${product.name} se agotó. Sacalo del carrito para seguir.`;
+    if (qty > max)
+      return product.stock != null && product.stock <= 20
+        ? `De ${product.name} ${units(product.stock)}. Bajá la cantidad en el carrito.`
+        : `De ${product.name} se pueden pedir hasta ${max} unidades. Bajá la cantidad en el carrito.`;
+  }
+  return null;
 }

@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Fotos desde el admin (maquillaje, diseños, promos): el validador acepta hasta 8 MB; 10 MB deja lugar al multipart.
+  experimental: { serverActions: { bodySizeLimit: "10mb" } },
   async redirects() {
     return [{ source: "/talles", destination: "/medidas", permanent: true }];
   },

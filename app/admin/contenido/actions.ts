@@ -6,7 +6,8 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { uploadDesignImage } from "@/lib/admin/catalog";
 import { getAllCharms, getAllMakeup, getAllPromos, getKit, writeContent } from "@/lib/data/content-repo";
 import type { Charm, Promo } from "@/lib/data/content";
-import { MAKEUP_CATEGORIES, type MakeupCategory, type MakeupForm, type MakeupProduct } from "@/lib/data/makeup";
+import type { MakeupProduct } from "@/lib/data/makeup";
+import { parseMakeupForm } from "@/lib/admin/makeup-form";
 import { slugify } from "@/lib/format";
 
 function refresh() {
@@ -100,46 +101,11 @@ export async function deleteCharm(formData: FormData) {
 
 /* ---------- Maquillaje ---------- */
 
-// ("use server": solo se exportan funciones async; las etiquetas de cada forma viven en page.tsx)
-
-const MAKEUP_FORMS = [
-  "suelto",
-  "doble",
-  "racimo",
-  "set-lapices",
-  "rubor-barra",
-  "duo-cejas",
-  "labial",
-  "gloss",
-  "barra",
-  "base",
-  "polvo",
-  "rubor",
-  "delineador",
-  "lapiz",
-  "mascara",
-  "pestanas",
-  "gel",
-  "brocha",
-  "brochas",
-] as const satisfies readonly MakeupForm[];
-
-const makeupSchema = z.object({
-  id: optStr(80),
-  name: z.string().trim().min(2).max(80),
-  brand: optStr(60),
-  description: optStr(200),
-  category: z.enum(MAKEUP_CATEGORIES.map((c) => c.id) as [MakeupCategory, ...MakeupCategory[]]),
-  form: z.enum(MAKEUP_FORMS).optional(),
-  price: z.coerce.number().int().min(0).max(1_000_000),
-  priceBefore: optNum,
-  stock: optNum,
-  hex: optStr(9),
-});
-
 export async function saveMakeup(formData: FormData) {
   await requireAdmin();
-  const d = makeupSchema.parse(Object.fromEntries(formData.entries()));
+  const parsed = parseMakeupForm(formData);
+  if (!parsed.success) throw new Error("Revisá los datos del producto: " + parsed.error.issues.map((i) => i.path.join(".")).join(", "));
+  const d = parsed.data;
   const all = await getAllMakeup();
   const prev = all.find((m) => m.id === d.id);
   const id = prev?.id ?? `${slugify(d.name)}-${Date.now().toString(36)}`;
@@ -160,7 +126,8 @@ export async function saveMakeup(formData: FormData) {
 
 export async function deleteMakeup(formData: FormData) {
   await requireAdmin();
-  const id = String(formData.get("id"));
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
   await writeContent("makeup", (await getAllMakeup()).filter((m) => m.id !== id));
   refresh();
 }

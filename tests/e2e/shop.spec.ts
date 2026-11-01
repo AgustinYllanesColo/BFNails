@@ -80,7 +80,7 @@ test("maquillaje: filtrar por labios, sumar al carrito y verlo en el carrito", a
   await expect(page).toHaveURL(/cat=labios/);
   await expect(page.getByText("Lip liner").first()).toBeVisible();
   await expect(page.getByText("Base líquida")).toHaveCount(0);
-  await page.getByRole("button", { name: /Sumar Lip liner al carrito/ }).click();
+  await page.getByRole("button", { name: /Sumar al carrito\s?: Lip liner$/ }).click();
   await expect(page.getByRole("link", { name: /Carrito, 1 producto/ })).toBeVisible();
   await page.goto("/carrito", { waitUntil: "networkidle" });
   await expect(page.getByText("Lip liner").first()).toBeVisible();

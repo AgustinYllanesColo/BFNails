@@ -2,7 +2,7 @@ import type { CartItem, Order, OrderStatus } from "@/lib/types";
 import { PAYMENT_LABEL } from "@/lib/types";
 import { formatARS } from "@/lib/format";
 import { siteConfig } from "@/lib/site";
-import { describeItem, describeSizes } from "@/lib/whatsapp";
+import { describeItem, describeSizes, hasNailSet } from "@/lib/whatsapp";
 import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
 
 /**
@@ -202,7 +202,9 @@ export function customerCreatedMail(order: Order, url: string) {
 
 export function customerPaidMail(order: Order, url: string) {
   const name = first(order);
-  const msg = "Recibí el pago y tu set ya está en marcha. Te aviso por WhatsApp cuando esté listo para entregar o enviar.";
+  const msg = hasNailSet(order)
+    ? "Recibí el pago y tu set ya está en marcha. Te aviso por WhatsApp cuando esté listo para entregar o enviar."
+    : "Recibí el pago y ya preparo tu pedido. Te aviso por WhatsApp cuando esté listo para entregar o enviar.";
   return {
     subject: `Pago confirmado · pedido ${order.number} en marcha`,
     text: [`Hola ${name}! ${msg}`, "", summaryText(order), "", `Seguilo acá: ${url}`].join("\n"),

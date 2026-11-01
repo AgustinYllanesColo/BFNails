@@ -1,4 +1,8 @@
+"use client";
+
+import { useRef } from "react";
 import { cn } from "@/lib/format";
+import { useOffscreenPause } from "./useOffscreenPause";
 
 type Props = {
   items: string[];
@@ -10,8 +14,12 @@ type Props = {
 
 export function Marquee({ items, className, speed = 28, reverse, separator }: Props) {
   const row = [...items, ...items];
+  const ref = useRef<HTMLDivElement>(null);
+  // Fuera de pantalla la cinta se congela (data-paused). Con reduced-motion sigue andando a propósito (decisión previa, ver tests/e2e/smoke)
+  useOffscreenPause(ref);
   return (
     <div
+      ref={ref}
       className={cn("relative flex overflow-hidden whitespace-nowrap select-none", className)}
       aria-hidden
     >

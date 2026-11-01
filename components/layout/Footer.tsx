@@ -93,7 +93,7 @@ export function Footer() {
           </p>
         </div>
       </div>
-      <div className="container-x flex flex-col items-start justify-between gap-3 border-t border-cream/15 py-6 text-xs text-cream/60 md:flex-row md:items-center">
+      <div className="container-x flex flex-col items-start justify-between gap-3 border-t border-cream/15 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-xs text-cream/60 md:flex-row md:items-center">
         <span>© {new Date().getFullYear()} BF Nails Studio · Remedios de Escalada, Buenos Aires</span>
         <nav className="flex flex-wrap gap-x-5 gap-y-1" aria-label="Legales">
           <Link href="/terminos" className="hover:text-cream">

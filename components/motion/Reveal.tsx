@@ -36,7 +36,7 @@ export function Reveal({
     // esconderlo al hidratar y volver a mostrarlo hacía que la página pareciera trabada.
     if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return;
     const mm = gsap.matchMedia();
-    mm.add("all", () => {
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
       const targets = stagger != null ? Array.from(el.children) : el;
       gsap.set(targets, { autoAlpha: 0, y });
       const tween = gsap.to(targets, {

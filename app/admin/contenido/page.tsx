@@ -3,7 +3,8 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { hasDb } from "@/lib/db/client";
 import { getAllCharms, getAllMakeup, getAllPromos, getKit } from "@/lib/data/content-repo";
 import type { Charm, Promo } from "@/lib/data/content";
-import { MAKEUP_CATEGORIES, type MakeupForm, type MakeupProduct } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, MAKEUP_FORMS, type MakeupForm, type MakeupProduct } from "@/lib/data/makeup";
+import { IMAGE_TYPES, MAKEUP_LIMITS } from "@/lib/admin/makeup-form";
 import { Card, PageTitle, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
 import { PromoCard } from "@/components/sections/Promos";
 import { deleteCharm, deleteMakeup, deletePromo, saveCharm, saveKit, saveMakeup, savePromo } from "./actions";
@@ -116,7 +117,7 @@ export default async function ContenidoPage() {
                   </label>
                 ))}
               </div>
-              <input type="file" name="newImages" accept="image/*" multiple className="text-sm" />
+              <input type="file" name="newImages" accept={IMAGE_TYPES.join(",")} multiple className="text-sm" />
               <button className={adminBtn}>Guardar kit</button>
             </div>
           </form>
@@ -167,7 +168,7 @@ function PromoForm({ promo }: { promo?: Promo }) {
           <input name="href" defaultValue={promo?.href} className={adminInput} />
         </L>
         <div className="flex flex-wrap items-center gap-4 text-sm">
-          <input type="file" name="image" accept="image/*" />
+          <input type="file" name="image" accept={IMAGE_TYPES.join(",")} />
           {promo?.image && (
             <label className="flex items-center gap-1">
               <input type="checkbox" name="removeImage" /> quitar foto
@@ -214,7 +215,7 @@ function CharmForm({ charm }: { charm?: Charm }) {
           <input name="name" required defaultValue={charm?.name} className={adminInput} />
         </L>
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <input type="file" name="image" accept="image/*" />
+          <input type="file" name="image" accept={IMAGE_TYPES.join(",")} />
           {charm?.image && (
             <label className="flex items-center gap-1">
               <input type="checkbox" name="removeImage" /> quitar foto
@@ -258,10 +259,10 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
         {!product && <p className="font-title text-lg">Nuevo producto</p>}
         <div className="grid gap-3 md:grid-cols-[1fr_160px_160px]">
           <L label="Nombre">
-            <input name="name" required defaultValue={product?.name} className={adminInput} />
+            <input name="name" required minLength={2} maxLength={MAKEUP_LIMITS.name} defaultValue={product?.name} className={adminInput} />
           </L>
           <L label="Marca">
-            <input name="brand" defaultValue={product?.brand} className={adminInput} />
+            <input name="brand" maxLength={MAKEUP_LIMITS.brand} defaultValue={product?.brand} className={adminInput} />
           </L>
           <L label="Categoría">
             <select name="category" defaultValue={product?.category ?? "labios"} className={adminInput}>
@@ -274,17 +275,17 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
           </L>
         </div>
         <L label="Descripción (una línea)">
-          <input name="description" defaultValue={product?.description} className={adminInput} />
+          <input name="description" maxLength={MAKEUP_LIMITS.description} defaultValue={product?.description} className={adminInput} />
         </L>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           <L label="Precio c/u">
-            <input name="price" type="number" step={100} required defaultValue={product?.price} className={adminInput} />
+            <input name="price" type="number" min={0} max={MAKEUP_LIMITS.price} step={1} required defaultValue={product?.price} className={adminInput} />
           </L>
           <L label="Precio antes">
-            <input name="priceBefore" type="number" step={100} defaultValue={product?.priceBefore} className={adminInput} />
+            <input name="priceBefore" type="number" min={0} max={MAKEUP_LIMITS.price} step={1} defaultValue={product?.priceBefore} className={adminInput} />
           </L>
           <L label="Stock">
-            <input name="stock" type="number" min={0} defaultValue={product?.stock} className={adminInput} />
+            <input name="stock" type="number" min={0} max={MAKEUP_LIMITS.stock} step={1} defaultValue={product?.stock} className={adminInput} />
           </L>
           <L label="Color">
             <input name="hex" type="color" defaultValue={product?.hex ?? "#d9667c"} className={adminInput + " p-1"} />
@@ -292,9 +293,9 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
           {!product && (
             <L label="Forma">
               <select name="form" defaultValue="labial" className={adminInput}>
-                {Object.entries(MAKEUP_FORM_LABEL).map(([v, l]) => (
+                {MAKEUP_FORMS.map((v) => (
                   <option key={v} value={v}>
-                    {l}
+                    {MAKEUP_FORM_LABEL[v]}
                   </option>
                 ))}
               </select>
@@ -302,7 +303,7 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <input type="file" name="image" accept="image/*" />
+          <input type="file" name="image" accept={IMAGE_TYPES.join(",")} aria-label="Foto del producto" />
           {product?.image && (
             <label className="flex items-center gap-1">
               <input type="checkbox" name="removeImage" /> quitar foto

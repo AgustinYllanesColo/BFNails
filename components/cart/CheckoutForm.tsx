@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useHydrated } from "@/lib/hooks";
 import { useForm, useWatch } from "react-hook-form";
@@ -112,17 +113,18 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
               : i.kind === "charm"
                 ? { kind: "charm", charmId: i.charmId, qty: i.qty }
                 : i.kind === "makeup"
-                  ? { kind: "makeup", makeupId: i.makeupId, qty: Math.min(i.qty, 20) }
+                  ? { kind: "makeup", makeupId: i.makeupId, qty: i.qty }
                   : { kind: "custom", selection: i.selection, qty: i.qty, sizes: i.sizes },
           ),
         }),
       });
-      const data = (await res.json()) as { redirect?: string; error?: string };
-      if (!res.ok || !data.redirect) throw new Error(data.error ?? "No pudimos crear el pedido");
+      // una respuesta que no es JSON (caída, timeout del servidor) no debe mostrar un error técnico
+      const data = (await res.json().catch(() => ({}))) as { redirect?: string; error?: string };
+      if (!res.ok || !data.redirect) throw new Error(data.error ?? "No pudimos crear el pedido. Probá de nuevo en un rato.");
       clear();
       window.location.assign(data.redirect);
     } catch (err) {
-      setServerError((err as Error).message);
+      setServerError(err instanceof TypeError ? "No hay conexión. Revisá tu internet y probá de nuevo." : (err as Error).message);
       setSubmitting(false);
     }
   });
@@ -283,7 +285,19 @@ export function CheckoutForm({ transfer, mp, disabled }: Props) {
             { kind: "text", id: "thanks", text: "✦ hecho a mano en lanús ✦", align: "center" },
           ]}
         />
-        {serverError && <p className="mt-3 text-sm font-medium text-red">{serverError}</p>}
+        {serverError && (
+          <p role="alert" className="mt-3 text-sm font-medium text-red">
+            {serverError}
+            {/carrito/i.test(serverError) && (
+              <>
+                {" "}
+                <Link href="/carrito" className="underline underline-offset-2">
+                  Ir al carrito
+                </Link>
+              </>
+            )}
+          </p>
+        )}
         <Button type="submit" size="lg" className="mt-5 w-full" disabled={submitting || disabled}>
           {disabled ? "Pedidos por la web no disponibles" : submitting ? "Creando tu pedido…" : needsConfirmation || motoFrom ? "Enviar pedido" : effectivePayment === "mercadopago" ? "Pagar con Mercado Pago" : "Confirmar pedido"}
         </Button>

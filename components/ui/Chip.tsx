@@ -20,7 +20,7 @@ export function Chip({ selected, onClick, children, className, hint, swatch, dis
       disabled={disabled}
       aria-pressed={selected}
       className={cn(
-        "inline-flex items-center gap-2 rounded-pill border px-4 py-2 text-sm font-medium transition-all duration-300 ease-[var(--ease-out-expo)] active:scale-95 disabled:opacity-40",
+        "inline-flex items-center gap-2 rounded-pill border px-4 py-2 text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-[var(--ease-out-expo)] active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bordo disabled:opacity-40",
         selected
           ? "border-bordo bg-bordo text-cream shadow-[0_8px_20px_-10px_rgba(74,14,14,0.7)]"
           : "border-cream-ink bg-white/60 text-ink hover:border-bordo/60 hover:bg-white",

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useOffscreenPause } from "@/components/motion/useOffscreenPause";
 import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/Button";
 import { Magnetic } from "@/components/motion/Magnetic";
@@ -26,10 +27,16 @@ const DEMO: BuilderSelection[] = [
  */
 export function BuilderCta() {
   const [i, setI] = useState(0);
+  const root = useRef<HTMLElement>(null);
+  const inView = useOffscreenPause(root);
+  // Rota solo con la sección en pantalla y la pestaña visible; con reduced-motion queda en el primer diseño
   useEffect(() => {
-    const id = setInterval(() => setI((v) => (v + 1) % DEMO.length), 2600);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => {
+      if (inView.current && document.visibilityState === "visible") setI((v) => (v + 1) % DEMO.length);
+    }, 2600);
     return () => clearInterval(id);
-  }, []);
+  }, [inView]);
   const sel = DEMO[i];
   const quote = quoteSelection(sel, DEFAULT_BUILDER_CONFIG);
   const labels = [
@@ -39,7 +46,7 @@ export function BuilderCta() {
   ].filter(Boolean);
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-28">
+    <section ref={root} className="relative overflow-hidden py-20 md:py-28">
       <div className="container-x grid min-w-0 items-center gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
         <Reveal className="min-w-0">
           <h2 className="font-display text-balance text-[clamp(2rem,4.4vw,3.25rem)] leading-[1]">Diseñá tu set</h2>

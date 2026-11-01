@@ -495,3 +495,23 @@ html.has-cursor .cursor-root {
     transition: none;
   }
 }
+
+/* ---------- Home: tacto y animaciones fuera de pantalla ---------- */
+/* Sin el destello gris/azul del navegador al tocar: cada control tiene su propio :active. manipulation saca la
+   espera del doble toque (zoom) en links y botones. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+a,
+button,
+summary,
+label,
+[role="button"] {
+  touch-action: manipulation;
+}
+/* Bloques con animaciones en bucle (hero, cintas): useOffscreenPause marca data-paused cuando no se ven y se congelan,
+   así el compositor no sigue moviendo capas que nadie mira. */
+[data-paused="true"],
+[data-paused="true"] * {
+  animation-play-state: paused !important;
+}
