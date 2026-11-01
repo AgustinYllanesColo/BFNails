@@ -71,3 +71,25 @@ test("efectivo solo se habilita con retiro o moto", async ({ page }) => {
   await page.getByRole("button", { name: /Correo Argentino a sucursal/ }).click();
   await expect(cash).toBeDisabled();
 });
+
+test("maquillaje: filtrar por labios, sumar al carrito y verlo en el carrito", async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto("/maquillaje", { waitUntil: "networkidle" });
+  await expect(page.getByRole("heading", { level: 1, name: /Catálogo de maquillaje/ })).toBeVisible();
+  await page.getByRole("button", { name: /^Labios/ }).click();
+  await expect(page).toHaveURL(/cat=labios/);
+  await expect(page.getByText("Lip liner").first()).toBeVisible();
+  await expect(page.getByText("Base líquida")).toHaveCount(0);
+  await page.getByRole("button", { name: /Sumar Lip liner al carrito/ }).click();
+  await expect(page.getByRole("link", { name: /Carrito, 1 producto/ })).toBeVisible();
+  await page.goto("/carrito", { waitUntil: "networkidle" });
+  await expect(page.getByText("Lip liner").first()).toBeVisible();
+  await expect(page.getByText(/Maquillaje · \$\s?1\.900 c\/u/).first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("menú: Maquillaje va primero y lleva a su catálogo", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("link", { name: /Ver maquillaje/ }).first().click();
+  await expect(page).toHaveURL(/\/maquillaje/);
+});
