@@ -276,8 +276,8 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
             </select>
           </L>
         </div>
-        <L label="Descripción (una línea, va en la tarjeta)">
-          <input name="description" maxLength={MAKEUP_LIMITS.description} defaultValue={product?.description} className={adminInput} />
+        <L label="Descripción corta (va en la tarjeta; si es larga, la tarjeta muestra el principio)">
+          <textarea name="description" maxLength={MAKEUP_LIMITS.description} rows={2} defaultValue={product?.description} className={adminInput + " h-16 py-2"} />
         </L>
         <L label="Descripción ampliada (se ve al tocar el producto: corta y sencilla)">
           <textarea

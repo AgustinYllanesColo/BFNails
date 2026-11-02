@@ -109,7 +109,7 @@ export function MakeupCard({ product, priority, tilt: tiltProp }: { product: Mak
           </button>
         </h3>
         {(product.brand || product.description) && (
-          <p className={cn("text-ink-soft mt-1 text-[13px] leading-snug [overflow-wrap:anywhere]", product.category !== "combos" && "line-clamp-2")} title={product.description}>
+          <p className={cn("text-ink-soft mt-1 text-[13px] leading-snug [overflow-wrap:anywhere]", product.category === "combos" ? "line-clamp-6" : "line-clamp-2")} title={product.description}>
             {product.brand && <span className="text-lip font-semibold">{product.brand}</span>}
             {product.brand && product.description && " · "}
             {product.description}

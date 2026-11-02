@@ -7,7 +7,7 @@ const optInt = (max: number) => z.preprocess(blank, z.coerce.number().int().min(
 const optStr = (max: number) => z.preprocess(blank, z.string().trim().max(max).optional());
 
 /** Límites del formulario de maquillaje (los inputs del admin usan los mismos). */
-export const MAKEUP_LIMITS = { name: 80, brand: 60, description: 200, details: 600, price: 1_000_000, stock: 9999 } as const;
+export const MAKEUP_LIMITS = { name: 80, brand: 60, description: 1000, details: 4000, price: 1_000_000, stock: 9999 } as const;
 
 const makeupSchema = z
   .object({

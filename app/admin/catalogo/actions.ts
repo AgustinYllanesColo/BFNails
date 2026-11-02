@@ -11,7 +11,7 @@ const schema = z.object({
   originalSlug: z.string().optional(),
   slug: z.string().trim().max(80).optional(),
   name: z.string().trim().min(2).max(80),
-  description: z.string().trim().max(600).default(""),
+  description: z.string().trim().max(4000).default(""),
   shape: z.enum(["almendra", "coffin", "cuadrada", "ovalada", "stiletto"]),
   length: z.enum(["corto", "medio", "largo", "xl"]),
   finish: z.enum(["glossy", "mate", "cromado"]),
