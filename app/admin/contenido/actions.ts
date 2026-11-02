@@ -37,7 +37,7 @@ const promoSchema = z.object({
   id: optStr(80),
   badge: z.string().trim().min(1).max(20),
   title: z.string().trim().min(2).max(80),
-  text: optStr(160),
+  text: optStr(400),
   price: optNum,
   priceBefore: optNum,
   href: optStr(300),

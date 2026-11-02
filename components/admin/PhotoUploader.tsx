@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { cn } from "@/lib/format";
+import { shrinkVideo } from "@/lib/admin/shrink-video";
 
-type Photo = { id: string; url?: string; preview: string; progress: number; error?: string };
+type Photo = { id: string; url?: string; preview: string; progress: number; error?: string; video: boolean; poster?: string; status?: string };
 
 const MAX_SIDE = 1600;
+const VIDEO_RE = /\.(mp4|webm|mov|m4v)(?:[?#]|$)/i;
 
 /** Achica la foto en el navegador (las del celu pesan 3–8 MB) para que suba rápido. Si no puede, sube la original. */
 async function shrink(file: File): Promise<Blob> {
@@ -26,30 +28,75 @@ async function shrink(file: File): Promise<Blob> {
 }
 
 /**
- * Fotos de un diseño: elegís o arrastrás varias de una, se suben todas en paralelo y quedan en orden (la primera es
- * la portada). Las URLs viajan al server action en un input oculto `name`, una por línea.
+ * Fotos (y, con `allowVideo`, videos) de una publicación: elegís o arrastrás varias de una, se suben todas en paralelo
+ * y quedan en orden. El orden se cambia arrastrando una miniatura sobre otra o con las flechas; la primera foto es la
+ * portada. Las URLs viajan al server action en un input oculto `name`, una por línea.
  */
-export function PhotoUploader({ name, initial, folder, onBusyChange }: { name: string; initial: string[]; folder: string; onBusyChange?: (busy: boolean) => void }) {
-  const [photos, setPhotos] = useState<Photo[]>(() => initial.map((url) => ({ id: url, url, preview: url, progress: 100 })));
+export function PhotoUploader({
+  name,
+  initial,
+  folder,
+  onBusyChange,
+  allowVideo = false,
+  max,
+}: {
+  name: string;
+  initial: string[];
+  folder: string;
+  onBusyChange?: (busy: boolean) => void;
+  allowVideo?: boolean;
+  max?: number;
+}) {
+  const [photos, setPhotos] = useState<Photo[]>(() =>
+    initial.map((url) => ({ id: url, url, preview: url, progress: 100, video: VIDEO_RE.test(url) })),
+  );
   const [dragging, setDragging] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const busy = photos.some((p) => !p.url && !p.error);
+  const cover = photos.find((p) => !p.video && p.url)?.id;
+  const full = max != null && photos.length >= max;
 
   useEffect(() => onBusyChange?.(busy), [busy, onBusyChange]);
 
   const patch = (id: string, p: Partial<Photo>) => setPhotos((list) => list.map((x) => (x.id === id ? { ...x, ...p } : x)));
 
   function addFiles(files: FileList | File[]) {
-    const list = Array.from(files).filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
-    const added = list.map((f) => ({ file: f, photo: { id: crypto.randomUUID(), preview: URL.createObjectURL(f), progress: 0 } as Photo }));
+    let list = Array.from(files).filter(
+      (f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name) || (allowVideo && (f.type.startsWith("video/") || VIDEO_RE.test(f.name))),
+    );
+    if (max != null) list = list.slice(0, Math.max(0, max - photos.length));
+    const added = list.map((f) => {
+      const video = f.type.startsWith("video/") || VIDEO_RE.test(f.name);
+      return { file: f, photo: { id: crypto.randomUUID(), preview: URL.createObjectURL(f), progress: 0, video } as Photo };
+    });
     setPhotos((cur) => [...cur, ...added.map((a) => a.photo)]);
     // todas a la vez
     for (const { file, photo } of added) {
       (async () => {
         try {
+          const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+          if (photo.video) {
+            // el video se achica acá (queda en ~1 MB y se ve en todos los celus) y después se sube; tarda lo que dura
+            patch(photo.id, { status: "Preparando…" });
+            const out = await shrinkVideo(file, (p) => patch(photo.id, { progress: p / 2 }));
+            patch(photo.id, { status: "Subiendo…" });
+            const res = await upload(`${folder}/video-${stamp}.${out.ext}`, out.video, {
+              access: "public",
+              handleUploadUrl: "/api/admin/upload",
+              contentType: out.video.type,
+              onUploadProgress: ({ percentage }) => patch(photo.id, { progress: 50 + percentage / 2 }),
+            });
+            // cuadro fijo: es la portada si el producto no tiene ninguna foto
+            const poster = out.poster
+              ? (await upload(`${folder}/video-${stamp}.webp`, out.poster, { access: "public", handleUploadUrl: "/api/admin/upload", contentType: "image/webp" }).catch(() => null))?.url
+              : undefined;
+            patch(photo.id, { url: res.url, poster, progress: 100, status: undefined });
+            return;
+          }
           const blob = await shrink(file);
           const ext = blob.type === "image/webp" ? "webp" : (file.name.split(".").pop() ?? "jpg").toLowerCase();
-          const res = await upload(`${folder}/${Date.now()}.${ext}`, blob, {
+          const res = await upload(`${folder}/${stamp}.${ext}`, blob, {
             access: "public",
             handleUploadUrl: "/api/admin/upload",
             contentType: blob.type || file.type || "image/jpeg",
@@ -58,7 +105,7 @@ export function PhotoUploader({ name, initial, folder, onBusyChange }: { name: s
           patch(photo.id, { url: res.url, progress: 100 });
         } catch (e) {
           console.error("[fotos]", e);
-          patch(photo.id, { error: "No se pudo subir. Quitala y probá de nuevo." });
+          patch(photo.id, { error: (photo.video && (e as Error).message) || "No se pudo subir. Quitala y probá de nuevo.", status: undefined });
         }
       })();
     }
@@ -67,70 +114,115 @@ export function PhotoUploader({ name, initial, folder, onBusyChange }: { name: s
   function remove(id: string) {
     setPhotos((list) => list.filter((p) => p.id !== id));
   }
-  function move(id: string, dir: -1 | 1) {
+  function moveTo(id: string, to: number) {
     setPhotos((list) => {
       const i = list.findIndex((p) => p.id === id);
-      const j = i + dir;
-      if (i < 0 || j < 0 || j >= list.length) return list;
+      if (i < 0 || to < 0 || to >= list.length || i === to) return list;
       const next = [...list];
-      [next[i], next[j]] = [next[j], next[i]];
+      const [item] = next.splice(i, 1);
+      next.splice(to, 0, item);
       return next;
     });
   }
 
+  const what = allowVideo ? "fotos o videos" : "fotos";
+
   return (
     <div>
       <input type="hidden" name={name} value={photos.flatMap((p) => (p.url ? [p.url] : [])).join("\n")} />
+      {allowVideo && <input type="hidden" name="videoPoster" value={photos.find((p) => p.video && p.url)?.poster ?? ""} />}
       {photos.length > 0 && (
-        <div className="mb-3 grid grid-cols-3 gap-2">
+        <ol className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
           {photos.map((p, i) => (
-            <div key={p.id} className="group relative aspect-square overflow-hidden rounded-md bg-cream-deep">
-              {/* eslint-disable-next-line @next/next/no-img-element -- vista previa local (blob:) mientras sube */}
-              <img src={p.preview} alt="" className={cn("size-full object-cover", !p.url && "opacity-60")} />
-              {i === 0 && p.url && <span className="absolute top-1 left-1 rounded bg-bordo px-1.5 py-0.5 text-[10px] font-bold text-cream">Portada</span>}
+            <li
+              key={p.id}
+              draggable={!!p.url}
+              onDragStart={(e) => {
+                setDragId(p.id);
+                e.dataTransfer.effectAllowed = "move";
+              }}
+              onDragEnd={() => setDragId(null)}
+              onDragOver={(e) => {
+                if (!dragId) return;
+                e.preventDefault();
+                e.stopPropagation();
+                if (dragId !== p.id) moveTo(dragId, i);
+              }}
+              onDrop={(e) => {
+                if (!dragId) return;
+                e.preventDefault();
+                e.stopPropagation();
+                setDragId(null);
+              }}
+              className={cn(
+                "group bg-cream-deep relative aspect-square overflow-hidden rounded-md",
+                p.url && "cursor-grab active:cursor-grabbing",
+                dragId === p.id && "ring-bordo opacity-50 ring-2",
+              )}
+            >
+              {p.video ? (
+                <video src={p.preview} muted playsInline preload="metadata" className={cn("pointer-events-none size-full object-cover", !p.url && "opacity-60")} />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element -- vista previa local (blob:) mientras sube */
+                <img src={p.preview} alt="" draggable={false} className={cn("size-full object-cover", !p.url && "opacity-60")} />
+              )}
+              <span className="absolute top-1 left-1 flex gap-1">
+                <span className="text-ink rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-bold tabular-nums">{i + 1}</span>
+                {p.id === cover && <span className="bg-bordo text-cream rounded px-1.5 py-0.5 text-[10px] font-bold">Portada</span>}
+                {p.video && <span className="bg-ink text-cream rounded px-1.5 py-0.5 text-[10px] font-bold">▶ Video</span>}
+              </span>
+              {p.status && !p.error && <span className="text-ink absolute inset-x-1 bottom-4 rounded bg-white/90 px-1 text-center text-[10px] font-semibold">{p.status}</span>}
               {!p.url && !p.error && (
                 <div className="absolute inset-x-1 bottom-1 h-1.5 overflow-hidden rounded bg-white/70">
-                  <div className="h-full bg-bordo transition-[width]" style={{ width: `${Math.max(5, p.progress)}%` }} />
+                  <div className="bg-bordo h-full transition-[width]" style={{ width: `${Math.max(5, p.progress)}%` }} />
                 </div>
               )}
-              {p.error && <div className="absolute inset-0 grid place-items-center bg-red/80 p-1 text-center text-[10px] font-semibold text-white">{p.error}</div>}
+              {p.error && <div className="bg-red/80 absolute inset-0 grid place-items-center p-1 text-center text-[10px] font-semibold text-white">{p.error}</div>}
               <div className="absolute top-1 right-1 flex gap-1">
-                <button type="button" onClick={() => remove(p.id)} className="grid size-6 place-items-center rounded-full bg-white/90 text-xs font-bold text-red shadow" aria-label="Quitar foto">
+                <button type="button" onClick={() => remove(p.id)} className="text-red grid size-6 place-items-center rounded-full bg-white/90 text-xs font-bold shadow" aria-label={`Quitar ${p.video ? "video" : "foto"} ${i + 1}`}>
                   ✕
                 </button>
               </div>
               {p.url && photos.length > 1 && (
                 <div className="absolute right-1 bottom-1 left-1 flex justify-between">
-                  <button type="button" disabled={i === 0} onClick={() => move(p.id, -1)} className="grid size-6 place-items-center rounded-full bg-white/90 text-xs shadow disabled:opacity-0" aria-label="Mover antes">
+                  <button type="button" disabled={i === 0} onClick={() => moveTo(p.id, i - 1)} className="grid size-7 place-items-center rounded-full bg-white/90 text-xs shadow disabled:opacity-0" aria-label={`Mover ${i + 1} antes`}>
                     ←
                   </button>
-                  <button type="button" disabled={i === photos.length - 1} onClick={() => move(p.id, 1)} className="grid size-6 place-items-center rounded-full bg-white/90 text-xs shadow disabled:opacity-0" aria-label="Mover después">
+                  <button type="button" disabled={i === photos.length - 1} onClick={() => moveTo(p.id, i + 1)} className="grid size-7 place-items-center rounded-full bg-white/90 text-xs shadow disabled:opacity-0" aria-label={`Mover ${i + 1} después`}>
                     →
                   </button>
                 </div>
               )}
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
       )}
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => (e.preventDefault(), setDragging(true))}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          addFiles(e.dataTransfer.files);
-        }}
-        className={cn("w-full rounded-md border-2 border-dashed border-bordo/30 px-3 py-5 text-sm font-semibold text-bordo transition-colors hover:bg-bordo/5", dragging && "bg-bordo/10")}
-      >
-        + Agregar fotos <span className="block text-xs font-normal text-ink-soft">Podés elegir varias de una (o arrastrarlas acá)</span>
-      </button>
+      {photos.length > 1 && <p className="text-ink-soft -mt-1 mb-3 text-xs">Para cambiar el orden, arrastrá una miniatura o usá las flechas. La primera foto es la portada.</p>}
+      {!full && (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            if (dragId) return;
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            if (dragId) return;
+            e.preventDefault();
+            setDragging(false);
+            addFiles(e.dataTransfer.files);
+          }}
+          className={cn("border-bordo/30 text-bordo hover:bg-bordo/5 w-full rounded-md border-2 border-dashed px-3 py-5 text-sm font-semibold transition-colors", dragging && "bg-bordo/10")}
+        >
+          + Agregar {what} <span className="text-ink-soft block text-xs font-normal">Podés elegir varias de una (o arrastrarlas acá){max != null ? ` · hasta ${max}` : ""}</span>
+        </button>
+      )}
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={allowVideo ? "image/*,video/*" : "image/*"}
         multiple
         hidden
         onChange={(e) => {

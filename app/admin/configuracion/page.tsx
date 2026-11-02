@@ -46,7 +46,7 @@ export default async function ConfiguracionPage() {
           <Card title="Entregas y envíos">
             <div className="grid gap-4 md:grid-cols-2">
               <L label="Retiro: qué dice" hint="Dónde y cómo se retira.">
-                <input name="pickupDescription" defaultValue={s.shipping.pickup.description} className={adminInput} />
+                <input name="pickupDescription" maxLength={600} defaultValue={s.shipping.pickup.description} className={adminInput} />
               </L>
               <div className="space-y-3">
                 <label className={adminCheck}>
@@ -57,7 +57,7 @@ export default async function ConfiguracionPage() {
                     <input name="motoCost" type="number" inputMode="numeric" min={0} step={1} defaultValue={s.shipping.moto.cost} className={adminInput} />
                   </L>
                   <L label="Moto: qué dice">
-                    <input name="motoDescription" defaultValue={s.shipping.moto.description} className={adminInput} />
+                    <input name="motoDescription" maxLength={600} defaultValue={s.shipping.moto.description} className={adminInput} />
                   </L>
                 </div>
               </div>

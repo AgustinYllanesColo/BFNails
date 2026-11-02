@@ -20,7 +20,7 @@ export function DesignForm({ design }: { design?: Design }) {
           <input name="name" required minLength={2} maxLength={80} defaultValue={design?.name} className={adminInput} />
         </L>
         <L label="Descripción">
-          <textarea name="description" defaultValue={design?.description} className={adminInput + " h-24 py-2"} />
+          <textarea name="description" maxLength={4000} defaultValue={design?.description} className={adminInput.replace("h-11", "").replace("md:h-10", "") + " h-28 resize-y py-2"} />
         </L>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <L label="Forma">

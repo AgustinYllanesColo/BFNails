@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MAKEUP_CATEGORIES, MAKEUP_FORMS, normalizeShades, normalizeVideoUrl, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, MAKEUP_FORMS, normalizeMedia, normalizeShades, normalizeVideoUrl, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
 
 /** Campo vacío del formulario = sin definir (no 0). */
 const blank = (v: unknown) => (v === "" || v == null ? undefined : v);
@@ -7,7 +7,7 @@ const optInt = (max: number) => z.preprocess(blank, z.coerce.number().int().min(
 const optStr = (max: number) => z.preprocess(blank, z.string().trim().max(max).optional());
 
 /** Límites del formulario de maquillaje (los inputs del admin usan los mismos). */
-export const MAKEUP_LIMITS = { name: 80, brand: 60, description: 200, price: 1_000_000, stock: 9999 } as const;
+export const MAKEUP_LIMITS = { name: 80, brand: 60, description: 1000, details: 4000, price: 1_000_000, stock: 9999 } as const;
 
 const makeupSchema = z
   .object({
@@ -15,6 +15,9 @@ const makeupSchema = z
     name: z.string().trim().min(2).max(MAKEUP_LIMITS.name),
     brand: optStr(MAKEUP_LIMITS.brand),
     description: optStr(MAKEUP_LIMITS.description),
+    details: optStr(MAKEUP_LIMITS.details),
+    // fotos y videos ya subidos, uno por línea y en el orden elegido (los manda el uploader del admin)
+    media: z.preprocess((v) => normalizeMedia(v), z.array(z.string()).optional()),
     category: z.enum(MAKEUP_CATEGORIES.map((c) => c.id) as [MakeupCategory, ...MakeupCategory[]]),
     form: z.preprocess(blank, z.enum(MAKEUP_FORMS).optional()),
     price: z.coerce.number().int().min(0).max(MAKEUP_LIMITS.price),

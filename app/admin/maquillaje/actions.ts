@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { uploadDesignImage } from "@/lib/admin/catalog";
 import { getAllMakeup, writeContent } from "@/lib/data/content-repo";
 import { resetMakeupSold } from "@/lib/data/makeup-stock";
-import { makeupForSave, type MakeupProduct } from "@/lib/data/makeup";
+import { isVideoUrl, makeupForSave, type MakeupProduct } from "@/lib/data/makeup";
 import { parseComboIncludes, parseMakeupForm } from "@/lib/admin/makeup-form";
 import { slugify } from "@/lib/format";
 import { applyQuickEdits, parseQuickEdits } from "@/lib/admin/quick-edit";
@@ -38,6 +38,19 @@ function posterFrom(formData: FormData): string | undefined {
   }
 }
 
+/**
+ * Galería del formulario (fotos y videos ya subidos, en orden): la primera foto es la portada y el primer video es el
+ * que corre en la tarjeta. Si solo hay videos, la portada es el cuadro fijo que sacó el navegador del primero.
+ */
+function mediaFields(media: string[] | undefined, formData: FormData, prev?: MakeupProduct): Pick<MakeupProduct, "media" | "image" | "video"> {
+  const list = media ?? [];
+  const firstImage = list.find((u) => !isVideoUrl(u));
+  const video = list.find((u) => isVideoUrl(u));
+  // un cuadro fijo guardado antes (no está en la galería) sigue sirviendo mientras el video siga
+  const prevPoster = prev?.image && !prev.media?.includes(prev.image) && prev.video === video ? prev.image : undefined;
+  return { media: list.length ? list : undefined, image: firstImage ?? (video ? (posterFrom(formData) ?? prevPoster) : undefined), video };
+}
+
 export async function saveMakeup(formData: FormData) {
   await requireAdmin();
   const parsed = parseMakeupForm(formData);
@@ -58,9 +71,11 @@ export async function saveMakeup(formData: FormData) {
     // combo: qué trae se elige en el formulario y no tiene stock propio (ver CLAUDE.md)
     includes: isCombo ? parseComboIncludes(formData, all) : undefined,
     stock: isCombo ? undefined : d.stock,
-    // el video llega ya subido (el navegador lo achica y lo sube a Blob): acá viaja solo su dirección; vacío = sin video
-    video: d.video,
-    image: (await imageFrom(formData, prev?.image)) ?? posterFrom(formData),
+    ...(formData.has("media") ? mediaFields(d.media, formData, prev) : {
+      // el video llega ya subido (el navegador lo achica y lo sube a Blob): acá viaja solo su dirección; vacío = sin video
+      video: d.video,
+      image: (await imageFrom(formData, prev?.image)) ?? posterFrom(formData),
+    }),
     featured: formData.get("featured") === "on",
     isNew: formData.get("isNew") === "on",
     active: formData.get("active") === "on",

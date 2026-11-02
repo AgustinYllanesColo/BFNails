@@ -116,7 +116,7 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
 
           <Card title="Notas (solo las ves vos)">
             <form action={setNotes.bind(null, order.id)} className="space-y-3">
-              <textarea name="notes" defaultValue={order.notes ?? ""} className={adminInput + " h-24 py-2"} />
+              <textarea name="notes" maxLength={1000} defaultValue={order.notes ?? ""} className={adminInput.replace("h-11", "").replace("md:h-10", "") + " h-24 resize-y py-2"} />
               <SubmitButton ghost>Guardar notas</SubmitButton>
             </form>
           </Card>

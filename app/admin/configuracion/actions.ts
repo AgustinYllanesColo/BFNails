@@ -20,8 +20,8 @@ export async function saveSettings(formData: FormData) {
 
   const zones = ["caba", "gba", "bsas", "interior"] as const;
   const shipping: ShippingTable = {
-    pickup: { label: "Retiro en estación", description: z.string().trim().max(200).parse(g("pickupDescription")) },
-    moto: { enabled: g("motoEnabled") === "on", cost: num.parse(g("motoCost")), description: z.string().trim().max(200).parse(g("motoDescription")) },
+    pickup: { label: "Retiro en estación", description: z.string().trim().max(600).parse(g("pickupDescription")) },
+    moto: { enabled: g("motoEnabled") === "on", cost: num.parse(g("motoCost")), description: z.string().trim().max(600).parse(g("motoDescription")) },
     correo: Object.fromEntries(
       zones.map((z) => [z, { domicilio: num.parse(g(`${z}:domicilio`)), sucursal: num.parse(g(`${z}:sucursal`)), etaDays: [num.parse(g(`${z}:etaMin`)), num.parse(g(`${z}:etaMax`))] as [number, number] }]),
     ) as ShippingTable["correo"],

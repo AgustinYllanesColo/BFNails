@@ -67,6 +67,13 @@ export type MakeupProduct = {
    * solo, en bucle. `image` queda como cuadro fijo (mientras carga, en los stickers chicos y con movimiento reducido).
    */
   video?: string;
+  /**
+   * Fotos y videos del producto en el orden elegido en el admin: es la galería de la vista ampliada. La primera foto
+   * pasa a `image` (portada) y el primer video a `video` (el que corre en la tarjeta). Vacío = solo `image`/`video`.
+   */
+  media?: string[];
+  /** Descripción para la vista ampliada: corta y sencilla (para qué sirve, cómo se usa). */
+  details?: string;
   /** Color del producto para el dibujo provisorio. */
   hex?: string;
   /** Tonos disponibles (ej. "02", "Nude 4"). Si hay, la clienta elige uno antes de sumarlo. */
@@ -220,6 +227,37 @@ export function normalizeVideoUrl(v: unknown): string | undefined {
   return t;
 }
 
+/** Un video de la galería (se reconoce por la extensión). El resto de `media` son fotos. */
+export function isVideoUrl(url: string): boolean {
+  return /\.(mp4|webm|mov|m4v)(?:[?#]|$)/i.test(url);
+}
+
+/** Máximo de fotos y videos por producto. */
+export const MAKEUP_MEDIA_MAX = 12;
+
+/**
+ * Lista de fotos y videos limpia y en orden: solo direcciones de la tienda (`/…`) o https, sin repetidos y con tope.
+ * Los videos tienen que pasar `normalizeVideoUrl`. Acepta una lista o el texto del formulario (una por línea).
+ */
+export function normalizeMedia(value: unknown): string[] | undefined {
+  const raw = typeof value === "string" ? value.split("\n") : Array.isArray(value) ? value : [];
+  const out: string[] = [];
+  for (const v of raw) {
+    if (typeof v !== "string") continue;
+    const t = v.trim();
+    if (!t || t.length > 500 || out.includes(t)) continue;
+    if (isVideoUrl(t) ? !normalizeVideoUrl(t) : !/^(\/(?!\/)|https:\/\/)[^\s"'<>]+$/.test(t)) continue;
+    out.push(t);
+  }
+  return out.length ? out.slice(0, MAKEUP_MEDIA_MAX) : undefined;
+}
+
+/** Fotos y videos para la galería, en orden. Sin `media` (productos viejos o de fábrica): la foto y el video que tenga. */
+export function makeupMedia(p: Pick<MakeupProduct, "media" | "image" | "video">): string[] {
+  if (p.media?.length) return p.media;
+  return [p.image, p.video].filter((u): u is string => Boolean(u));
+}
+
 /**
  * Lo guardado en `settings.makeup` puede venir de una versión anterior (sin campos nuevos) o roto.
  * Devuelve null si no es una lista (se usa el valor por defecto); si es una lista, completa lo que falta
@@ -249,6 +287,8 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
       stock: isNat(r.stock) ? r.stock : undefined,
       image: optStr(r.image) ?? shipped(r.id, "image", r),
       video: normalizeVideoUrl(r.video) ?? shipped(r.id, "video", r),
+      media: normalizeMedia(r.media),
+      details: optStr(r.details),
       hex: optStr(r.hex),
       shades: normalizeShades(r.shades),
       includes: normalizeIncludes(r.includes),

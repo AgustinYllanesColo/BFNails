@@ -6,6 +6,9 @@ import {
   makeupLineName,
   normalizeShades,
   normalizeMakeupList,
+  normalizeMedia,
+  isVideoUrl,
+  makeupMedia,
   toPublicMakeup,
   type MakeupProduct,
 } from "@/lib/data/makeup";
@@ -298,5 +301,35 @@ describe("fotos y videos que vienen con la tienda", () => {
   it("lo que se cargó desde el admin gana sobre lo de la tienda", () => {
     const [m] = normalizeMakeupList([{ ...guardado, image: "https://x.public.blob.vercel-storage.com/a.webp" }])!;
     expect(m.image).toBe("https://x.public.blob.vercel-storage.com/a.webp");
+  });
+});
+
+describe("galería de fotos y videos del maquillaje", () => {
+  const foto = "https://x.public.blob.vercel-storage.com/maquillaje/a.webp";
+  const foto2 = "https://x.public.blob.vercel-storage.com/maquillaje/b.jpg";
+  const video = "https://x.public.blob.vercel-storage.com/maquillaje/c.mp4";
+
+  it("reconoce los videos por la extensión", () => {
+    expect(isVideoUrl(video)).toBe(true);
+    expect(isVideoUrl(video + "?v=1")).toBe(true);
+    expect(isVideoUrl(foto)).toBe(false);
+  });
+
+  it("respeta el orden, saca repetidos y lo que no es una dirección válida", () => {
+    expect(normalizeMedia([video, foto2, foto, foto, "javascript:alert(1)", 3, "//otro.com/x.jpg"])).toEqual([video, foto2, foto]);
+    expect(normalizeMedia(`${foto}\n\n${video}\n`)).toEqual([foto, video]);
+    expect(normalizeMedia([])).toBeUndefined();
+  });
+
+  it("sin galería, se usa la foto y el video que tenga el producto", () => {
+    expect(makeupMedia({ image: foto, video })).toEqual([foto, video]);
+    expect(makeupMedia({ image: foto, video, media: [video, foto2] })).toEqual([video, foto2]);
+    expect(makeupMedia({})).toEqual([]);
+  });
+
+  it("normalizeMakeupList guarda la galería y la descripción ampliada", () => {
+    const [m] = normalizeMakeupList([{ id: "a", name: "Labial", category: "labios", price: 100, media: [video, foto], details: "Dura todo el día." }])!;
+    expect(m.media).toEqual([video, foto]);
+    expect(m.details).toBe("Dura todo el día.");
   });
 });

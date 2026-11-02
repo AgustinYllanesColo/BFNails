@@ -37,7 +37,7 @@ export function PromoForm({ promo }: { promo?: Promo }) {
           </Field>
         </div>
         <Field label="Texto corto" hint="Opcional.">
-          <input name="text" maxLength={160} defaultValue={promo?.text} className={adminInput} />
+          <input name="text" maxLength={400} defaultValue={promo?.text} className={adminInput} />
         </Field>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <Field label="Precio promo">
