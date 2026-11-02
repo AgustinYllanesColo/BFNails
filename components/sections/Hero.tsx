@@ -9,6 +9,7 @@ import { useOffscreenPause } from "@/components/motion/useOffscreenPause";
 import { Button } from "@/components/ui/Button";
 import { MakeupVisual } from "@/components/makeup/MakeupArt";
 import type { MakeupProduct } from "@/lib/data/makeup";
+import { MAKEUP_EN_OBRA } from "@/lib/site";
 
 /**
  * Hero: el logo real de BF Studio, grande y centrado, sobre un halo cálido, con fotos reales de sets
@@ -201,7 +202,9 @@ function RotatingWord({ inView }: { inView: RefObject<boolean> }) {
  * las fotos de uñas: salen de atrás del logo y flotan. Decorativos.
  */
 function MakeupStickers({ makeup }: { makeup: MakeupProduct[] }) {
-  const STICKER_PRODUCTS = MAKEUP_STICKERS.map((s) => ({ ...s, product: makeup.find((m) => m.id === s.id) })).filter(
+  // en obra van solo los combos (tienen foto): cada lugar toma uno distinto
+  const ids = MAKEUP_EN_OBRA ? ["combo-2", "combo-3", "combo-1"] : MAKEUP_STICKERS.map((s) => s.id);
+  const STICKER_PRODUCTS = MAKEUP_STICKERS.map((s, i) => ({ ...s, product: makeup.find((m) => m.id === ids[i]) })).filter(
     (s): s is typeof s & { product: MakeupProduct } => Boolean(s.product),
   );
   return (

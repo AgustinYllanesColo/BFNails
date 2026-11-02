@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
 import { uploadDesignImage } from "@/lib/admin/catalog";
 import { getAllCharms, getAllMakeup, getAllPromos, getKit, writeContent } from "@/lib/data/content-repo";
+import { resetMakeupSold } from "@/lib/data/makeup-stock";
 import type { Charm, Promo } from "@/lib/data/content";
 import type { MakeupProduct } from "@/lib/data/makeup";
 import { parseMakeupForm } from "@/lib/admin/makeup-form";
@@ -115,12 +116,16 @@ export async function saveMakeup(formData: FormData) {
     // la forma y el código del proveedor no se editan: se conservan (los nuevos eligen forma al crearse)
     form: prev?.form ?? d.form ?? "labial",
     code: prev?.code,
+    // lo que trae un combo no se edita desde el formulario: se conserva
+    includes: prev?.includes,
     image: await imageFrom(formData, "maquillaje", prev?.image),
     featured: formData.get("featured") === "on",
     isNew: formData.get("isNew") === "on",
     active: formData.get("active") === "on",
   };
+  // se guarda el stock real (cargado − vendido), así que lo vendido vuelve a cero
   await writeContent("makeup", prev ? all.map((m) => (m.id === id ? product : m)) : [product, ...all]);
+  await resetMakeupSold();
   refresh();
 }
 
@@ -129,6 +134,7 @@ export async function deleteMakeup(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await writeContent("makeup", (await getAllMakeup()).filter((m) => m.id !== id));
+  await resetMakeupSold();
   refresh();
 }
 

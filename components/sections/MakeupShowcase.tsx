@@ -4,6 +4,7 @@ import { MakeupCard } from "@/components/makeup/MakeupCard";
 import { Heading } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { MAKEUP_DOOR_PICKS } from "./Doors";
+import { MAKEUP_EN_OBRA } from "@/lib/site";
 
 /**
  * La línea nueva, en su propio mundo (fondo rubor): título, una intro corta, accesos directos a cada categoría y los
@@ -11,9 +12,12 @@ import { MAKEUP_DOOR_PICKS } from "./Doors";
  */
 export function MakeupShowcase({ products: featured, all }: { products: MakeupProduct[]; all: MakeupProduct[] }) {
   // solo las categorías que tienen algo (Combos aparece cuando se carga el primero)
-  const categories = MAKEUP_CATEGORIES.filter((c) => all.some((p) => p.category === c.id));
+  // en obra solo se muestran los combos (lo único con foto) y sin accesos a categorías que todavía no se ven
+  const categories = MAKEUP_EN_OBRA ? [] : MAKEUP_CATEGORIES.filter((c) => all.some((p) => p.category === c.id));
   // Los que ya están en la puerta de Maquillaje no se repiten acá (salvo que sean los únicos destacados).
-  const fresh = featured.filter((p) => !MAKEUP_DOOR_PICKS.includes(p.id));
+  const fresh = MAKEUP_EN_OBRA
+    ? all.filter((p) => p.category === "combos")
+    : featured.filter((p) => !MAKEUP_DOOR_PICKS.includes(p.id));
   const products = fresh.length > 0 ? fresh : featured;
   if (products.length === 0) return null;
   return (

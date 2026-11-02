@@ -42,3 +42,9 @@ export const nav: NavItem[] = [
   { href: "/medidas", label: "Medidas" },
   { href: "/faq", label: "Preguntas" },
 ];
+
+/**
+ * Maquillaje "en obra": mientras se sacan las fotos de los productos sueltos, /maquillaje y la home muestran solo los
+ * combos (que ya tienen foto) con una cinta de obra, y el resto se pide por WhatsApp. Al tener las fotos, poner en false.
+ */
+export const MAKEUP_EN_OBRA = true;

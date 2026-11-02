@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { MakeupProduct } from "@/lib/data/makeup";
 import { MakeupVisual } from "@/components/makeup/MakeupArt";
+import { MAKEUP_EN_OBRA } from "@/lib/site";
 
 /**
  * Las dos tiendas, apenas termina el hero: Maquillaje (mundo rubor, con el dibujo de cada producto) y Uñas (mundo
@@ -33,7 +34,8 @@ const FAN = [
 ];
 
 function MakeupDoor({ makeup }: { makeup: MakeupProduct[] }) {
-  const picks = MAKEUP_DOOR_PICKS.map((id) => makeup.find((m) => m.id === id)).filter((m): m is MakeupProduct => Boolean(m));
+  const doorIds = MAKEUP_EN_OBRA ? ["combo-2", "combo-1", "combo-3"] : MAKEUP_DOOR_PICKS;
+  const picks = doorIds.map((id) => makeup.find((m) => m.id === id)).filter((m): m is MakeupProduct => Boolean(m));
   // si Brenda borró alguno de estos, completa con los primeros que haya (mejor si no están destacados)
   const rest = [...makeup.filter((m) => !m.featured), ...makeup.filter((m) => m.featured)];
   const stickers = [...picks, ...rest.filter((m) => !picks.includes(m))].slice(0, 3);

@@ -2,6 +2,7 @@ import "server-only";
 import type { Order } from "@/lib/types";
 import { getPayment } from "@/lib/mercadopago";
 import { getOrderByNumber, markOrderPaid, updateOrder } from "./orders";
+import { syncMakeupOnStatus } from "./makeup-stock";
 import { sendWhatsapp, whatsappNotifyEnabled } from "@/lib/whatsapp-notify";
 import { siteConfig } from "@/lib/site";
 import { formatARS } from "@/lib/format";
@@ -52,6 +53,8 @@ export async function reconcilePayment(paymentId: string): Promise<ReconcileResu
       return { order };
     }
     const paid = await markOrderPaid(order.id, id);
+    // pagó un pedido que estaba cancelado (sus unidades habían vuelto al stock): se vuelven a descontar
+    if (paid) await syncMakeupOnStatus(order.items, order.status, "pagado");
     return paid ? { order: paid, justPaid: paid } : { order };
   }
 
@@ -59,6 +62,7 @@ export async function reconcilePayment(paymentId: string): Promise<ReconcileResu
   if ((payment.status === "refunded" || payment.status === "charged_back") && SHIPPED_OR_PAID.includes(order.status)) {
     const note = `⚠️ Mercado Pago: el pago ${id} quedó "${payment.status === "refunded" ? "devuelto" : "contracargo"}". Se canceló el pedido.`;
     const updated = await updateOrder(order.id, { status: "cancelado", notes: [order.notes, note].filter(Boolean).join("\n") });
+    if (updated) await syncMakeupOnStatus(order.items, order.status, "cancelado");
     await alertBrenda(order, note);
     return { order: updated ?? order };
   }

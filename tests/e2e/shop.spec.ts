@@ -72,19 +72,16 @@ test("efectivo solo se habilita con retiro o moto", async ({ page }) => {
   await expect(cash).toBeDisabled();
 });
 
-test("maquillaje: filtrar por labios, sumar al carrito y verlo en el carrito", async ({ page }) => {
+test("maquillaje (en obra): se ven los combos, se suma uno al carrito y avisa lo que viene", async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto("/maquillaje", { waitUntil: "networkidle" });
   await expect(page.getByRole("heading", { level: 1, name: /Catálogo de maquillaje/ })).toBeVisible();
-  await page.getByRole("button", { name: /^Labios/ }).click();
-  await expect(page).toHaveURL(/cat=labios/);
-  await expect(page.getByText("Lip liner").first()).toBeVisible();
-  await expect(page.getByText("Base líquida")).toHaveCount(0);
-  await page.getByRole("button", { name: /Sumar al carrito\s?: Lip liner$/ }).click();
+  await expect(page.getByRole("heading", { name: "Lo que viene" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Pedir por WhatsApp/ })).toBeVisible();
+  await page.getByRole("button", { name: /Sumar al carrito\s?: Combo 3$/ }).click();
   await expect(page.getByRole("link", { name: /Carrito, 1 producto/ })).toBeVisible();
   await page.goto("/carrito", { waitUntil: "networkidle" });
-  await expect(page.getByText("Lip liner").first()).toBeVisible();
-  await expect(page.getByText(/Maquillaje · \$\s?1\.900 c\/u/).first()).toBeVisible();
+  await expect(page.getByText("Combo 3").first()).toBeVisible();
   expect(errors).toEqual([]);
 });
 

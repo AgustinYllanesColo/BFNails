@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { checkoutSchema, normalizeWhatsapp } from "@/lib/checkout";
 import { getDesign } from "@/lib/data/repo";
 import { getBuilderConfig, getSettings } from "@/lib/data/settings";
+import { makeupLinesOf, releaseMakeup, reserveMakeup } from "@/lib/data/makeup-stock";
 import { checkMakeupLines, makeupLineName } from "@/lib/data/makeup";
 import { quoteSelection, designVariantPrice, fourForThree } from "@/lib/pricing";
 import { quoteFromTable } from "@/lib/shipping/table";
@@ -206,7 +207,18 @@ export async function POST(req: Request) {
     needsConfirmation,
   };
 
-  let order = await createOrder(draft);
+  // el maquillaje se descuenta del stock ahora, con la fila bloqueada: si otra clienta se llevó la última unidad
+  // mientras tanto, este pedido no se crea
+  const makeupOrdered = makeupLinesOf(items);
+  const stockError = await reserveMakeup(makeupOrdered);
+  if (stockError) return NextResponse.json({ error: stockError }, { status: 409 });
+  let order: Awaited<ReturnType<typeof createOrder>>;
+  try {
+    order = await createOrder(draft);
+  } catch (err) {
+    await releaseMakeup(makeupOrdered).catch((e) => console.error("[checkout] no se pudo devolver el stock", e));
+    throw err;
+  }
   const url = publicOrderUrl(order);
   // Mail con el número de pedido a la clienta y aviso a Brenda, después de responder: un mail lento no puede trabar la
   // compra (la clienta reintentaba y quedaban pedidos repetidos). Si falla, el pedido sigue igual.

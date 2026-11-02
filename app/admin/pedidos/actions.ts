@@ -8,6 +8,7 @@ import { getOrderById, publicOrderUrl, updateOrder } from "@/lib/data/orders";
 import { createPreference, mpEnabled } from "@/lib/mercadopago";
 import { mpSurcharge, type OrderStatus } from "@/lib/types";
 import { notifyOrderPaid } from "@/lib/data/notify";
+import { syncMakeupOnStatus } from "@/lib/data/makeup-stock";
 
 const STATUSES: OrderStatus[] = ["a_confirmar", "pendiente_pago", "pagado", "en_produccion", "listo", "enviado", "entregado", "cancelado"];
 
@@ -16,6 +17,8 @@ export async function setOrderStatus(id: string, status: OrderStatus) {
   if (!STATUSES.includes(status)) throw new Error("Estado inválido");
   const before = await getOrderById(id);
   const updated = await updateOrder(id, { status });
+  // cancelado: el maquillaje vuelve al stock; si se reactiva, se vuelve a descontar
+  if (updated && before) await syncMakeupOnStatus(before.items, before.status, status);
   // Brenda confirma una transferencia o un efectivo: mismo aviso que cuando acredita Mercado Pago
   if (updated && status === "pagado" && before && (before.status === "pendiente_pago" || before.status === "a_confirmar")) after(() => notifyOrderPaid(updated));
   revalidatePath(`/admin/pedidos/${id}`);

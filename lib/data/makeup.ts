@@ -72,6 +72,11 @@ export type MakeupProduct = {
   featured?: boolean;
   /** Recién llegado: lleva la etiqueta "Nuevo". */
   isNew?: boolean;
+  /**
+   * Combos: qué productos sueltos lleva. Al venderse descuenta su stock, y el combo se ve agotado cuando falta alguno.
+   * Lo que no está a la venta suelto (las brochas del set) no se cuenta.
+   */
+  includes?: { id: string; qty: number }[];
   active: boolean;
 };
 
@@ -119,6 +124,14 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
     price: 17900,
     priceBefore: 20600,
     image: "/maquillaje/combo-1.webp",
+    includes: [
+      { id: "rubor-crema-magic-color", qty: 1 },
+      { id: "mascara-amarilla-pink21", qty: 1 },
+      { id: "base-liquida-ruby", qty: 1 },
+      { id: "labial-matte-barra", qty: 1 },
+      { id: "delineador-labio", qty: 1 },
+      { id: "delineador-ojos", qty: 1 },
+    ],
     hex: "#f6c3d6",
     featured: true,
     isNew: true,
@@ -133,6 +146,13 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
     price: 13700,
     priceBefore: 15800,
     image: "/maquillaje/combo-2.webp",
+    includes: [
+      { id: "delineador-pink21-x12", qty: 1 },
+      { id: "mascara-pestanas", qty: 1 },
+      { id: "rubor-magico-rimera-quince", qty: 1 },
+      { id: "lapiz-labial-lip-contour", qty: 1 },
+      { id: "lip-gloss-brillo", qty: 1 },
+    ],
     hex: "#c9a0dc",
     featured: true,
     isNew: true,
@@ -146,6 +166,12 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
     price: 8200,
     priceBefore: 9400,
     image: "/maquillaje/combo-3.webp",
+    includes: [
+      { id: "delineador-pink21-x12", qty: 1 },
+      { id: "brocha-city", qty: 1 },
+      { id: "mascara-sky-high", qty: 1 },
+      { id: "polvo-cejas-pink21", qty: 1 },
+    ],
     hex: "#e6a9b8",
     featured: true,
     isNew: true,
@@ -203,6 +229,7 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
       image: optStr(r.image),
       hex: optStr(r.hex),
       shades: normalizeShades(r.shades),
+      includes: normalizeIncludes(r.includes),
       code: optStr(r.code),
       featured: r.featured === true,
       isNew: r.isNew === true,
@@ -262,6 +289,80 @@ export function checkMakeupLines(lines: { makeupId: string; qty: number; shade?:
       return product.stock != null && product.stock <= 20
         ? `De ${product.name} ${units(product.stock)}. Bajá la cantidad en el carrito.`
         : `De ${product.name} se pueden pedir hasta ${max} unidades. Bajá la cantidad en el carrito.`;
+  }
+  // los combos comparten productos con los sueltos (y entre sí): se mira lo que se lleva en total de cada uno
+  const short = makeupShortage(makeupDemand(lines, all), all);
+  if (short) {
+    if (short.left === 0) return `${short.product.name} se agotó (va suelto o en un combo de tu carrito). Sacalo del carrito para seguir.`;
+    return `De ${short.product.name} ${units(short.left)} (va suelto o en un combo de tu carrito). Bajá la cantidad en el carrito.`;
+  }
+  return null;
+}
+
+function normalizeIncludes(value: unknown): MakeupProduct["includes"] {
+  if (!Array.isArray(value)) return undefined;
+  const out = value.flatMap((v) => {
+    const r = v as Record<string, unknown> | null;
+    return r && typeof r.id === "string" && r.id && isNat(r.qty) && r.qty > 0 ? [{ id: r.id, qty: r.qty }] : [];
+  });
+  return out.length ? out : undefined;
+}
+
+/* ---------- Stock ---------- */
+
+/** Unidades vendidas por producto que todavía no se descontaron del stock cargado (puede ser negativo: devoluciones). */
+export type MakeupSold = Record<string, number>;
+
+/**
+ * Cuánto se lleva de cada producto suelto un conjunto de líneas: los combos se abren en lo que traen.
+ * Un combo sin `includes` se cuenta como producto propio.
+ */
+export function makeupDemand(lines: { makeupId: string; qty: number }[], all: MakeupProduct[]): Map<string, number> {
+  const out = new Map<string, number>();
+  const add = (id: string, n: number) => out.set(id, (out.get(id) ?? 0) + n);
+  for (const l of lines) {
+    const product = all.find((m) => m.id === l.makeupId);
+    if (product?.includes?.length) for (const c of product.includes) add(c.id, c.qty * l.qty);
+    else add(l.makeupId, l.qty);
+  }
+  return out;
+}
+
+/**
+ * Stock real: el cargado menos lo vendido. Un combo queda con el stock del producto que menos le alcanza
+ * (sin control si ninguno de los que trae lo tiene).
+ */
+export function applyMakeupSold(all: MakeupProduct[], sold: MakeupSold): MakeupProduct[] {
+  const loose = all.map((m) => (m.stock == null || !sold[m.id] ? m : { ...m, stock: Math.max(0, m.stock - sold[m.id]) }));
+  return loose.map((m) => {
+    if (!m.includes?.length) return m;
+    let stock: number | undefined;
+    for (const c of m.includes) {
+      const part = loose.find((x) => x.id === c.id);
+      if (!part || part.stock == null) continue;
+      const fits = part.active ? Math.floor(part.stock / c.qty) : 0;
+      stock = stock == null ? fits : Math.min(stock, fits);
+    }
+    return stock == null ? m : { ...m, stock };
+  });
+}
+
+/** Lo vendido después de sumar (sign 1, un pedido) o devolver (sign -1, un pedido cancelado) una demanda. */
+export function addMakeupSold(sold: MakeupSold, demand: Map<string, number>, sign: 1 | -1): MakeupSold {
+  const out = { ...sold };
+  for (const [id, n] of demand) {
+    const v = (out[id] ?? 0) + sign * n;
+    if (v === 0) delete out[id];
+    else out[id] = v;
+  }
+  return out;
+}
+
+/** Primer producto (con stock controlado) del que no alcanzan las unidades para esta demanda, o null. */
+export function makeupShortage(demand: Map<string, number>, all: MakeupProduct[]): { product: MakeupProduct; left: number } | null {
+  for (const [id, n] of demand) {
+    const product = all.find((m) => m.id === id);
+    if (product && product.stock != null && n > product.stock) return { product, left: product.stock };
   }
   return null;
 }

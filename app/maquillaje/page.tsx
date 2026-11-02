@@ -3,7 +3,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getMakeup } from "@/lib/data/content-repo";
 import { MakeupGrid } from "@/components/makeup/MakeupGrid";
-import { MakeupArt } from "@/components/makeup/MakeupArt";
+import { MakeupVisual } from "@/components/makeup/MakeupArt";
+import { EnObraTape } from "@/components/makeup/EnObraTape";
+import { MAKEUP_CATEGORIES } from "@/lib/data/makeup";
+import { MAKEUP_EN_OBRA } from "@/lib/site";
+import { waLink } from "@/lib/whatsapp";
 import { Heading } from "@/components/ui/Section";
 import { cn } from "@/lib/format";
 import { MakeupJsonLd } from "@/components/seo/MakeupJsonLd";
@@ -32,8 +36,13 @@ function pickHero(all: Awaited<ReturnType<typeof getMakeup>>) {
 const TILT = ["-rotate-6 translate-y-4", "rotate-3 -translate-y-2 z-10", "rotate-[8deg] translate-y-6"];
 
 export default async function MaquillajePage() {
-  const products = await getMakeup();
-  const hero = pickHero(products);
+  const all = await getMakeup();
+  // en obra: solo lo que ya tiene foto (los combos); lo demás se pide por WhatsApp hasta tener las fotos
+  const products = MAKEUP_EN_OBRA ? all.filter((m) => m.category === "combos") : all;
+  const coming = MAKEUP_EN_OBRA
+    ? MAKEUP_CATEGORIES.filter((c) => c.id !== "combos" && all.some((m) => m.category === c.id))
+    : [];
+  const hero = MAKEUP_EN_OBRA ? products.slice(0, 3) : pickHero(products);
 
   return (
     <div className="pb-24">
@@ -60,7 +69,7 @@ export default async function MaquillajePage() {
                   )}
                 >
                   <div className="bg-blush-soft relative aspect-[4/5] overflow-hidden rounded-lg shadow-[0_18px_40px_-20px_rgba(142,31,61,0.55)] ring-4 ring-white">
-                    <MakeupArt product={p} />
+                    <MakeupVisual product={p} sizes="190px" />
                   </div>
                 </div>
               ))}
@@ -68,12 +77,37 @@ export default async function MaquillajePage() {
           )}
         </div>
       </section>
+      {MAKEUP_EN_OBRA && <EnObraTape className="-mt-6 md:-mt-8" />}
 
       <div className="container-x mt-6 md:mt-14">
         <h2 className="sr-only">Productos</h2>
         <Suspense fallback={null}>
           <MakeupGrid products={products} />
         </Suspense>
+
+        {coming.length > 0 && (
+          <section aria-labelledby="pronto-t" className="bg-blush-soft text-lip mt-12 rounded-[24px] px-6 py-8 md:px-10 md:py-10">
+            <h2 id="pronto-t" className="font-title text-2xl md:text-3xl">
+              Lo que viene
+            </h2>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {coming.map((c) => (
+                <li key={c.id} className="rounded-pill ring-lip/15 bg-white px-4 py-2 text-[15px] font-semibold ring-1">
+                  {c.label}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 max-w-[52ch]">Estamos sacando las fotos de cada producto. Si querés algo ya, pedímelo por WhatsApp.</p>
+            <a
+              href={waLink("Hola Bren! Vi el maquillaje en la web y quiero consultar 🐱")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-pill bg-lip text-cream mt-5 inline-flex h-12 items-center gap-2 px-6 font-semibold transition-transform duration-150 active:scale-[0.97]"
+            >
+              Pedir por WhatsApp
+            </a>
+          </section>
+        )}
 
 
         <Link
