@@ -49,5 +49,7 @@ export async function getMakeup(): Promise<MakeupProduct[]> {
 export async function getFeaturedMakeup(limit = 6): Promise<MakeupProduct[]> {
   const all = await getMakeup();
   const featured = all.filter((m) => m.featured);
-  return (featured.length ? featured : all).slice(0, limit);
+  // los combos van primero: son lo que más conviene mostrar
+  const list = featured.length ? featured : all;
+  return [...list.filter((m) => m.category === "combos"), ...list.filter((m) => m.category !== "combos")].slice(0, limit);
 }
