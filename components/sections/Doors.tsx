@@ -52,7 +52,9 @@ function MakeupDoor({ makeup }: { makeup: MakeupProduct[] }) {
       <div>
         <h2 className="font-display text-[clamp(3rem,7vw,5.25rem)] leading-[0.95]">Maquillaje</h2>
         <p className="mt-3 max-w-[30ch] text-[17px] leading-snug font-semibold">
-          {makeup.length} productos para rostro, ojos, cejas y labios, y las brochas para aplicarlos.
+          {MAKEUP_EN_OBRA
+            ? "Combos listos para llevar. Muy pronto, todo para rostro, ojos y labios."
+            : `${makeup.length} productos para rostro, ojos, cejas y labios, y las brochas para aplicarlos.`}
         </p>
       </div>
 
