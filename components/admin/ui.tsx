@@ -51,9 +51,40 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
   return <Badge tone={STATUS_TONE[status]}>{ORDER_STATUS_LABEL[status]}</Badge>;
 }
 
+/** Campos: 16 px en el celular (con menos, el iPhone hace zoom al tocarlos) y 44 px de alto para el dedo. */
 export const adminInput =
-  "h-10 w-full rounded-md border border-cream-ink bg-white px-3 text-sm focus:border-bordo focus:outline-none focus:ring-2 focus:ring-bordo/15";
+  "h-11 w-full rounded-md border border-cream-ink bg-white px-3 text-base tabular-nums focus:border-bordo focus:outline-none focus:ring-2 focus:ring-bordo/15 md:h-10 md:text-sm";
 export const adminBtn =
-  "inline-flex h-10 items-center justify-center rounded-pill bg-bordo px-4 text-sm font-semibold text-cream hover:bg-bordo-soft disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-pill bg-bordo px-5 text-[15px] font-semibold text-cream transition-colors duration-150 hover:bg-bordo-soft active:scale-[0.98] disabled:opacity-50 md:min-h-10 md:text-sm";
 export const adminBtnGhost =
-  "inline-flex h-10 items-center justify-center rounded-pill px-4 text-sm font-semibold text-bordo ring-2 ring-inset ring-bordo hover:bg-bordo hover:text-cream disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-pill px-5 text-[15px] font-semibold text-bordo ring-2 ring-inset ring-bordo transition-colors duration-150 hover:bg-bordo hover:text-cream active:scale-[0.98] disabled:opacity-50 md:min-h-10 md:text-sm";
+/** Casillero con su texto: toda la fila se toca. */
+export const adminCheck = "flex min-h-11 items-center gap-2.5 text-[15px] md:min-h-9 md:text-sm [&_input]:size-5 [&_input]:accent-bordo";
+
+/** Campo con etiqueta y, si hace falta, una ayuda corta debajo. */
+export function Field({ label, hint, children, className }: { label: string; hint?: React.ReactNode; children: React.ReactNode; className?: string }) {
+  return (
+    <label className={cn("block", className)}>
+      <span className="mb-1 block text-sm font-semibold text-ink">{label}</span>
+      {children}
+      {hint && <span className="mt-1 block text-xs text-ink-soft">{hint}</span>}
+    </label>
+  );
+}
+
+/** Aviso arriba de la página (guardado, error, atención). */
+export function Notice({ tone = "ok", children }: { tone?: "ok" | "warn" | "error"; children: React.ReactNode }) {
+  return (
+    <p
+      role={tone === "error" ? "alert" : "status"}
+      className={cn(
+        "mb-4 rounded-md p-3 text-sm font-semibold ring-1",
+        tone === "ok" && "bg-emerald-50 text-emerald-900 ring-emerald-700/30",
+        tone === "warn" && "bg-yellow/30 text-ink ring-yellow/60",
+        tone === "error" && "bg-red/10 text-red ring-red/30",
+      )}
+    >
+      {children}
+    </p>
+  );
+}

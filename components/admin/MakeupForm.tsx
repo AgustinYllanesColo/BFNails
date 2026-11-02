@@ -5,18 +5,9 @@ import Image from "next/image";
 import { MAKEUP_CATEGORIES, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
 import { IMAGE_TYPES, MAKEUP_LIMITS } from "@/lib/admin/makeup-form";
 import { VideoUploader } from "@/components/admin/VideoUploader";
-import { Card, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
+import { Card, Field as L, adminCheck, adminInput } from "@/components/admin/ui";
+import { SubmitButton } from "@/components/admin/SubmitButton";
 import { deleteMakeup, saveMakeup } from "@/app/admin/maquillaje/actions";
-
-function L({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-bold tracking-wider text-ink-soft uppercase">{label}</span>
-      {children}
-      {hint && <span className="mt-1 block text-xs text-ink-soft">{hint}</span>}
-    </label>
-  );
-}
 
 /**
  * Producto de maquillaje (o combo) en su propia página del admin, como un diseño del catálogo de uñas.
@@ -112,32 +103,25 @@ export function MakeupForm({ product, loose }: { product?: MakeupProduct; loose:
       </Card>
 
       <Card title="Dónde se ve">
-        <div className="flex flex-wrap gap-4 text-sm">
-          <label className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-x-6">
+          <label className={adminCheck}>
             <input type="checkbox" name="active" defaultChecked={product?.active ?? true} /> Disponible en la tienda
           </label>
-          <label className="flex items-center gap-2">
+          <label className={adminCheck}>
             <input type="checkbox" name="featured" defaultChecked={product?.featured ?? false} /> Destacado en la home
           </label>
-          <label className="flex items-center gap-2">
+          <label className={adminCheck}>
             <input type="checkbox" name="isNew" defaultChecked={product?.isNew ?? true} /> Etiqueta &quot;Nuevo&quot;
           </label>
         </div>
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        <button className={adminBtn}>{product ? "Guardar" : "Agregar producto"}</button>
+        <SubmitButton>{product ? "Guardar" : "Agregar"}</SubmitButton>
         {product && (
-          <button
-            formAction={deleteMakeup}
-            formNoValidate
-            className={adminBtnGhost}
-            onClick={(e) => {
-              if (!confirm(`¿Borrar "${product.name}"? No se puede deshacer.`)) e.preventDefault();
-            }}
-          >
+          <SubmitButton ghost formAction={deleteMakeup} confirmText={`¿Borrar "${product.name}"? No se puede deshacer.`}>
             Borrar
-          </button>
+          </SubmitButton>
         )}
       </div>
     </form>

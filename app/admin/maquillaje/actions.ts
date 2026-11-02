@@ -9,6 +9,7 @@ import { resetMakeupSold } from "@/lib/data/makeup-stock";
 import { makeupForSave, type MakeupProduct } from "@/lib/data/makeup";
 import { parseComboIncludes, parseMakeupForm } from "@/lib/admin/makeup-form";
 import { slugify } from "@/lib/format";
+import { applyQuickEdits, parseQuickEdits } from "@/lib/admin/quick-edit";
 
 function refresh() {
   revalidatePath("/");
@@ -80,4 +81,14 @@ export async function deleteMakeup(formData: FormData) {
     refresh();
   }
   redirect("/admin/maquillaje");
+}
+
+/** Carga rápida desde la lista: precio, precio antes, stock y visible de muchos a la vez (los combos no llevan stock). */
+export async function saveMakeupQuick(formData: FormData) {
+  await requireAdmin();
+  const all = await getAllMakeup();
+  await writeContent("makeup", makeupForSave(applyQuickEdits(all, parseQuickEdits(formData), { stock: true })));
+  // lo guardado ya es el stock real
+  await resetMakeupSold();
+  refresh();
 }

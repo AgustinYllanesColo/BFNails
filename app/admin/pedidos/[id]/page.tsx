@@ -6,7 +6,8 @@ import { formatARS } from "@/lib/format";
 import { adminMessages, describeItem, waLink } from "@/lib/whatsapp";
 import { builderLink } from "@/lib/share";
 import { ORDER_STATUS_LABEL, PAYMENT_LABEL, orderSurcharge, type OrderStatus } from "@/lib/types";
-import { Card, PageTitle, StatusBadge, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
+import { Card, Field, PageTitle, StatusBadge, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
+import { SubmitButton } from "@/components/admin/SubmitButton";
 import { confirmPrice, setNotes, setOrderStatus, setTracking } from "../actions";
 import { StatusButtons } from "@/components/admin/StatusButtons";
 
@@ -41,7 +42,7 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
-          <Card title="Items">
+          <Card title="Qué pidió">
             <pre className="font-sans text-sm whitespace-pre-wrap">{order.items.map((i) => describeItem(i, { link: false })).join("\n\n")}</pre>
             {order.items.some((i) => i.kind === "custom") && (
               <p className="mt-3 flex flex-wrap gap-3 text-sm">
@@ -95,30 +96,28 @@ export default async function PedidoAdminPage({ params }: { params: Promise<{ id
                 Este pedido tiene notas libres. Fijá el total (con envío incluido, sin recargo) y pasa a pendiente de pago. Si eligió Mercado Pago se suma el 10% y se genera el link.
               </p>
               <form action={confirmPrice.bind(null, order.id)} className="flex flex-wrap items-end gap-3">
-                <label className="text-sm">
-                  <span className="mb-1 block text-xs font-bold tracking-wider text-ink-soft uppercase">Total final</span>
-                  <input name="total" type="number" defaultValue={order.total} min={0} step={100} className={adminInput + " w-40"} required />
-                </label>
-                <button className={adminBtn}>Confirmar y avisar</button>
+                <Field label="Total final" className="w-44">
+                  <input name="total" type="number" inputMode="numeric" defaultValue={order.total} min={0} step={1} className={adminInput} required />
+                </Field>
+                <SubmitButton>Confirmar precio</SubmitButton>
               </form>
             </Card>
           )}
 
           <Card title="Estado">
             <StatusButtons id={order.id} current={order.status} action={setOrderStatus} labels={ORDER_STATUS_LABEL as Record<OrderStatus, string>} />
-            <form action={setTracking.bind(null, order.id)} className="mt-4 flex flex-wrap items-end gap-3">
-              <label className="text-sm">
-                <span className="mb-1 block text-xs font-bold tracking-wider text-ink-soft uppercase">Tracking Correo Argentino</span>
-                <input name="tracking" defaultValue={order.tracking ?? ""} className={adminInput + " w-64"} placeholder="Ej: AB123456789AR" />
-              </label>
-              <button className={adminBtnGhost}>Guardar</button>
+            <form action={setTracking.bind(null, order.id)} className="mt-5 flex border-t border-bordo/10 pt-4 flex-wrap items-end gap-3">
+              <Field label="Código de seguimiento (Correo Argentino)" className="w-full max-w-xs">
+                <input name="tracking" defaultValue={order.tracking ?? ""} autoCapitalize="characters" className={adminInput} placeholder="Ej: AB123456789AR" />
+              </Field>
+              <SubmitButton ghost>Guardar código</SubmitButton>
             </form>
           </Card>
 
-          <Card title="Notas internas">
+          <Card title="Notas (solo las ves vos)">
             <form action={setNotes.bind(null, order.id)} className="space-y-3">
               <textarea name="notes" defaultValue={order.notes ?? ""} className={adminInput + " h-24 py-2"} />
-              <button className={adminBtnGhost}>Guardar notas</button>
+              <SubmitButton ghost>Guardar notas</SubmitButton>
             </form>
           </Card>
         </div>

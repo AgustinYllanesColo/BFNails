@@ -39,6 +39,19 @@ export async function upsertDesign(input: DesignInput, originalSlug?: string) {
   return slug;
 }
 
+/** Carga rápida desde la lista: precio, precio antes y visible de varios diseños. */
+export async function updateDesignsQuick(rows: Array<{ slug: string; price?: number; priceBefore?: number; active: boolean }>) {
+  const db = requireDb();
+  for (const r of rows) {
+    const set: Partial<typeof designs.$inferInsert> = { active: r.active, updatedAt: new Date() };
+    if (r.price != null) {
+      set.price = r.price;
+      set.priceBefore = r.priceBefore != null && r.priceBefore > r.price ? r.priceBefore : null;
+    }
+    await db.update(designs).set(set).where(eq(designs.slug, r.slug));
+  }
+}
+
 export async function deleteDesign(slug: string) {
   const db = requireDb();
   await db.delete(designs).where(eq(designs.slug, slug));
