@@ -37,8 +37,11 @@ const TILT = ["-rotate-6 translate-y-4", "rotate-3 -translate-y-2 z-10", "rotate
 
 export default async function MaquillajePage() {
   const all = await getMakeup();
-  // en obra: solo lo que ya tiene foto (los combos); lo demás se pide por WhatsApp hasta tener las fotos
-  const products = MAKEUP_EN_OBRA ? all.filter((m) => m.category === "combos") : all;
+  // en obra: solo lo que ya tiene foto o video (los combos primero, después los sueltos que ya la tienen, como el polvo
+  // para cejas); lo demás se pide por WhatsApp hasta tener las fotos
+  const products = MAKEUP_EN_OBRA
+    ? [...all.filter((m) => m.category === "combos"), ...all.filter((m) => m.category !== "combos" && (m.image || m.video))]
+    : all;
   const coming = MAKEUP_EN_OBRA
     ? MAKEUP_CATEGORIES.filter((c) => c.id !== "combos" && all.some((m) => m.category === c.id))
     : [];

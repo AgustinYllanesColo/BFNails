@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from "react";
 import type { Design } from "@/lib/types";
-import { adminBtn, adminBtnGhost, adminInput } from "./ui";
+import { COMPLEXITY_LABEL } from "@/lib/data/catalog";
+import { Field as L, adminBtn, adminBtnGhost, adminCheck, adminInput } from "./ui";
 import { PhotoUploader } from "./PhotoUploader";
 import { saveDesign, removeDesign, type DesignFormState } from "@/app/admin/catalogo/actions";
 
@@ -13,23 +14,20 @@ export function DesignForm({ design }: { design?: Design }) {
     <form action={action} className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div className="space-y-4 rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10">
         {design && <input type="hidden" name="originalSlug" value={design.slug} />}
-        <div className="grid gap-4 md:grid-cols-2">
-          <L label="Nombre">
-            <input name="name" required defaultValue={design?.name} className={adminInput} />
-          </L>
-          <L label="Slug (URL)">
-            <input name="slug" defaultValue={design?.slug} placeholder="se genera del nombre" className={adminInput} />
-          </L>
-        </div>
+        {/* la dirección del diseño se arma sola con el nombre; al editar se conserva para no romper links */}
+        {design && <input type="hidden" name="slug" value={design.slug} />}
+        <L label="Nombre">
+          <input name="name" required minLength={2} maxLength={80} defaultValue={design?.name} className={adminInput} />
+        </L>
         <L label="Descripción">
           <textarea name="description" defaultValue={design?.description} className={adminInput + " h-24 py-2"} />
         </L>
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <L label="Forma">
             <select name="shape" defaultValue={design?.shape ?? "almendra"} className={adminInput}>
               {["almendra", "ovalada", "cuadrada", "coffin", "stiletto"].map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {s === "xl" ? "XL" : s.charAt(0).toUpperCase() + s.slice(1)}
                 </option>
               ))}
             </select>
@@ -38,7 +36,7 @@ export function DesignForm({ design }: { design?: Design }) {
             <select name="length" defaultValue={design?.length ?? "medio"} className={adminInput}>
               {["corto", "medio", "largo", "xl"].map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {s === "xl" ? "XL" : s.charAt(0).toUpperCase() + s.slice(1)}
                 </option>
               ))}
             </select>
@@ -47,49 +45,60 @@ export function DesignForm({ design }: { design?: Design }) {
             <select name="finish" defaultValue={design?.finish ?? "glossy"} className={adminInput}>
               {["glossy", "mate", "cromado"].map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {s === "xl" ? "XL" : s.charAt(0).toUpperCase() + s.slice(1)}
                 </option>
               ))}
             </select>
           </L>
-          <L label="Nivel (1–4)">
-            <input name="complexity" type="number" min={1} max={4} defaultValue={design?.complexity ?? 1} className={adminInput} />
+          <L label="Nivel">
+            <select name="complexity" defaultValue={design?.complexity ?? 1} className={adminInput}>
+              {([1, 2, 3, 4] as const).map((n) => (
+                <option key={n} value={n}>
+                  {COMPLEXITY_LABEL[n]}
+                </option>
+              ))}
+            </select>
           </L>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <L label="Precio (ARS)">
-            <input name="price" type="number" min={0} step={100} required defaultValue={design?.price} className={adminInput} />
+        <div className="grid grid-cols-2 gap-4">
+          <L label="Precio">
+            <input name="price" type="number" inputMode="numeric" min={0} step={1} required defaultValue={design?.price} className={adminInput} />
           </L>
-          <L label="Precio anterior (tachado, oferta)">
-            <input name="priceBefore" type="number" min={0} step={100} defaultValue={design?.priceBefore ?? ""} className={adminInput} placeholder="vacío = sin oferta" />
-          </L>
-          <L label="Tags (coma; &quot;stock&quot; = entrega inmediata, &quot;talle M&quot; = en qué talle está)">
-            <input name="tags" defaultValue={design?.tags.join(", ")} className={adminInput} placeholder="francesita, minimal" />
-          </L>
-          <L label="Colores hex (coma)">
-            <input name="colors" defaultValue={design?.colors?.join(", ")} className={adminInput} placeholder="#e8c4b0, #ffffff" />
+          <L label="Precio antes" hint="Se ve tachado. Vacío = sin oferta.">
+            <input name="priceBefore" type="number" inputMode="numeric" min={0} step={1} defaultValue={design?.priceBefore ?? ""} className={adminInput} />
           </L>
         </div>
-        <div className="flex flex-wrap gap-6 text-sm">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" name="featured" defaultChecked={design?.featured} /> Destacado en la home
-          </label>
-          <label className="flex items-center gap-2">
+        <L label="Palabras para el filtro" hint={<>Separadas por coma. Poné <b>stock</b> si está para entrega inmediata y <b>talle M</b> (o el que sea) para decir en qué talle está.</>}>
+          <input name="tags" defaultValue={design?.tags.join(", ")} className={adminInput} placeholder="francesita, minimal" />
+        </L>
+        <div className="flex flex-wrap gap-x-6">
+          <label className={adminCheck}>
             <input type="checkbox" name="active" defaultChecked={design?.active ?? true} /> Visible en el catálogo
           </label>
-          <label className="flex items-center gap-2">
-            Orden <input name="sort" type="number" defaultValue={design?.sort ?? 0} className={adminInput + " w-20"} />
+          <label className={adminCheck}>
+            <input type="checkbox" name="featured" defaultChecked={design?.featured} /> Destacado en la home
           </label>
         </div>
+        <details className="rounded-md bg-cream-deep/40 px-3 py-2 text-sm">
+          <summary className="min-h-9 cursor-pointer py-2 font-semibold text-ink-soft">Más opciones</summary>
+          <div className="grid gap-4 pb-2 md:grid-cols-[1fr_120px]">
+            <L label="Colores del diseño" hint="Códigos de color separados por coma (para el armador). Si no sabés, dejalo como está.">
+              <input name="colors" defaultValue={design?.colors?.join(", ")} className={adminInput} placeholder="#e8c4b0, #ffffff" />
+            </L>
+            <L label="Orden" hint="Más bajo = más arriba.">
+              <input name="sort" type="number" inputMode="numeric" defaultValue={design?.sort ?? 0} className={adminInput} />
+            </L>
+          </div>
+        </details>
       </div>
 
       <div className="space-y-4">
         <div className="rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10">
-          <p className="mb-2 text-xs font-bold tracking-wider text-ink-soft uppercase">Fotos</p>
+          <p className="mb-2 text-sm font-semibold">Fotos</p>
           <PhotoUploader name="images" initial={design?.images ?? []} folder={design?.slug ?? "disenos"} onBusyChange={setUploading} />
-          <p className="mt-2 text-[11px] text-ink-soft">Ideal: cuadradas, buena luz. La primera es la portada; con las flechas cambiás el orden.</p>
+          <p className="mt-2 text-xs text-ink-soft">Ideal: cuadradas, buena luz. La primera es la portada; con las flechas cambiás el orden.</p>
         </div>
-        {state?.error && <p className="rounded bg-red/10 p-3 text-sm text-red">{state.error}</p>}
+        {state?.error && <p role="alert" className="rounded bg-red/10 p-3 text-sm text-red">{state.error}</p>}
         <div className="flex flex-wrap gap-2">
           <button className={adminBtn} disabled={pending || uploading}>
             {pending ? "Guardando…" : uploading ? "Subiendo fotos…" : "Guardar"}
@@ -102,14 +111,5 @@ export function DesignForm({ design }: { design?: Design }) {
         </div>
       </div>
     </form>
-  );
-}
-
-function L({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block text-sm">
-      <span className="mb-1 block text-xs font-bold tracking-wider text-ink-soft uppercase">{label}</span>
-      {children}
-    </label>
   );
 }

@@ -2,7 +2,8 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { hasDb } from "@/lib/db/client";
 import { getSettings } from "@/lib/data/settings";
 import { ZONE_LABEL, type ShippingZone } from "@/lib/shipping/table";
-import { Card, PageTitle, adminBtn, adminInput, tableClass } from "@/components/admin/ui";
+import { Card, Field as L, Notice, PageTitle, adminCheck, adminInput } from "@/components/admin/ui";
+import { SubmitButton } from "@/components/admin/SubmitButton";
 import { saveSettings } from "./actions";
 import { mpEnabled } from "@/lib/mercadopago";
 import { supabaseConfigured } from "@/lib/supabase/server";
@@ -25,26 +26,14 @@ export default async function ConfiguracionPage() {
 
   return (
     <>
-      <PageTitle title="Configuración">Precios, contacto y tarifas de envío. {!hasDb() && "Sin base de datos no se guarda."}</PageTitle>
-      <form action={saveSettings} className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <PageTitle title="Configuración">Tu WhatsApp, los datos para transferir y lo que cobrás de envío.</PageTitle>
+      {!hasDb() && <Notice tone="warn">Sin base de datos: los cambios no se guardan.</Notice>}
+      <form action={saveSettings} className="max-w-4xl">
         <div className="space-y-6">
-          <Card title="Precios y costos">
-            <div className="grid gap-4 md:grid-cols-3">
-              <L label="Precio base del set">
-                <input name="basePrice" type="number" step={100} defaultValue={s.basePrice} className={adminInput} />
-              </L>
-              <L label="Valor hora de Bren">
-                <input name="hourlyRate" type="number" step={100} defaultValue={s.hourlyRate} className={adminInput} />
-              </L>
-              <L label="Margen objetivo (%)">
-                <input name="targetMargin" type="number" min={0} max={95} defaultValue={Math.round(s.targetMargin * 100)} className={adminInput} />
-              </L>
-            </div>
-          </Card>
           <Card title="Contacto y pago">
             <div className="grid gap-4 md:grid-cols-3">
-              <L label="WhatsApp (549 + área + número)">
-                <input name="whatsapp" defaultValue={s.whatsapp} className={adminInput} placeholder="5491155551234" />
+              <L label="Tu WhatsApp" hint="549 + código de área + número, sin espacios.">
+                <input name="whatsapp" inputMode="numeric" defaultValue={s.whatsapp} className={adminInput} placeholder="5491155551234" />
               </L>
               <L label="Alias para transferencias">
                 <input name="transferAlias" defaultValue={s.transferAlias} className={adminInput} />
@@ -56,56 +45,66 @@ export default async function ConfiguracionPage() {
           </Card>
           <Card title="Entregas y envíos">
             <div className="grid gap-4 md:grid-cols-2">
-              <L label="Retiro en estación: texto">
+              <L label="Retiro: qué dice" hint="Dónde y cómo se retira.">
                 <input name="pickupDescription" defaultValue={s.shipping.pickup.description} className={adminInput} />
               </L>
-              <div className="grid grid-cols-[auto_1fr_1fr] items-end gap-3">
-                <label className="flex items-center gap-2 pb-2 text-sm">
-                  <input type="checkbox" name="motoEnabled" defaultChecked={s.shipping.moto.enabled} /> Moto
+              <div className="space-y-3">
+                <label className={adminCheck}>
+                  <input type="checkbox" name="motoEnabled" defaultChecked={s.shipping.moto.enabled} /> Ofrezco envío en moto
                 </label>
-                <L label="Precio moto">
-                  <input name="motoCost" type="number" step={100} defaultValue={s.shipping.moto.cost} className={adminInput} />
-                </L>
-                <L label="Texto moto">
-                  <input name="motoDescription" defaultValue={s.shipping.moto.description} className={adminInput} />
-                </L>
+                <div className="grid grid-cols-[120px_1fr] gap-3">
+                  <L label="Precio moto">
+                    <input name="motoCost" type="number" inputMode="numeric" min={0} step={1} defaultValue={s.shipping.moto.cost} className={adminInput} />
+                  </L>
+                  <L label="Moto: qué dice">
+                    <input name="motoDescription" defaultValue={s.shipping.moto.description} className={adminInput} />
+                  </L>
+                </div>
               </div>
             </div>
-            <p className="mt-5 mb-2 text-xs font-bold tracking-wider text-ink-soft uppercase">Correo Argentino por zona (cotizá en MiCorreo y cargá acá)</p>
-            <table className={tableClass}>
-              <thead>
-                <tr>
-                  <th>Zona</th>
-                  <th>A domicilio</th>
-                  <th>A sucursal</th>
-                  <th>Días (min–máx)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {zones.map((z) => (
-                  <tr key={z}>
-                    <td className="font-semibold">{ZONE_LABEL[z]}</td>
-                    <td>
-                      <input name={`${z}:domicilio`} type="number" step={100} defaultValue={s.shipping.correo[z].domicilio} className={adminInput + " w-32"} />
-                    </td>
-                    <td>
-                      <input name={`${z}:sucursal`} type="number" step={100} defaultValue={s.shipping.correo[z].sucursal} className={adminInput + " w-32"} />
-                    </td>
-                    <td className="flex gap-2">
-                      <input name={`${z}:etaMin`} type="number" defaultValue={s.shipping.correo[z].etaDays[0]} className={adminInput + " w-16"} />
-                      <input name={`${z}:etaMax`} type="number" defaultValue={s.shipping.correo[z].etaDays[1]} className={adminInput + " w-16"} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <h3 className="mt-6 font-semibold">Correo Argentino por zona</h3>
+            <p className="mb-3 text-sm text-ink-soft">Cotizá en MiCorreo y cargá lo que sale. Los días son cuánto tarda en llegar (desde–hasta).</p>
+            <div className="divide-y divide-bordo/10">
+              {zones.map((z) => (
+                <fieldset key={z} className="grid grid-cols-2 gap-3 py-3 md:grid-cols-[1.2fr_1fr_1fr_0.6fr_0.6fr] md:items-end">
+                  <legend className="col-span-2 mb-1 font-semibold md:float-left md:col-span-1 md:mb-0 md:self-center">{ZONE_LABEL[z]}</legend>
+                  <L label="A domicilio">
+                    <input name={`${z}:domicilio`} type="number" inputMode="numeric" min={0} step={1} defaultValue={s.shipping.correo[z].domicilio} className={adminInput} />
+                  </L>
+                  <L label="A sucursal">
+                    <input name={`${z}:sucursal`} type="number" inputMode="numeric" min={0} step={1} defaultValue={s.shipping.correo[z].sucursal} className={adminInput} />
+                  </L>
+                  <L label="Días desde">
+                    <input name={`${z}:etaMin`} type="number" inputMode="numeric" min={0} defaultValue={s.shipping.correo[z].etaDays[0]} className={adminInput} />
+                  </L>
+                  <L label="hasta">
+                    <input name={`${z}:etaMax`} type="number" inputMode="numeric" min={0} defaultValue={s.shipping.correo[z].etaDays[1]} className={adminInput} />
+                  </L>
+                </fieldset>
+              ))}
+            </div>
             {s.shipping.updatedAt && <p className="mt-2 text-xs text-ink-soft">Última actualización: {new Date(s.shipping.updatedAt).toLocaleDateString("es-AR")}</p>}
           </Card>
-          <button className={adminBtn} disabled={!hasDb()}>
-            Guardar configuración
-          </button>
+          <Card title="Precios y costos">
+            <div className="grid gap-4 md:grid-cols-3">
+              <L label="Precio base del set" hint="Lo mismo que en Precios del armador.">
+                <input name="basePrice" type="number" inputMode="numeric" min={0} step={1} defaultValue={s.basePrice} className={adminInput} />
+              </L>
+              <L label="Tu valor hora" hint="Para calcular costos.">
+                <input name="hourlyRate" type="number" inputMode="numeric" min={0} step={1} defaultValue={s.hourlyRate} className={adminInput} />
+              </L>
+              <L label="Ganancia buscada (%)" hint="Para el precio sugerido en Costos.">
+                <input name="targetMargin" type="number" inputMode="numeric" min={0} max={95} defaultValue={Math.round(s.targetMargin * 100)} className={adminInput} />
+              </L>
+            </div>
+          </Card>
+          <div className="sticky bottom-0 z-10 -mx-4 border-t border-bordo/10 bg-cream/95 px-4 py-3 backdrop-blur md:mx-0 md:rounded-lg md:px-0">
+            <SubmitButton>Guardar configuración</SubmitButton>
+          </div>
         </div>
-        <Card title="Integraciones">
+        <details className="mt-8 rounded-lg bg-white/60 p-4 ring-1 ring-bordo/10">
+          <summary className="min-h-9 cursor-pointer font-semibold text-ink-soft">Estado técnico (para Tomás)</summary>
+          <div className="mt-3">
           <ul className="space-y-2 text-sm">
             {env.map(([label, ok]) => (
               <li key={label} className="flex items-center justify-between">
@@ -115,17 +114,9 @@ export default async function ConfiguracionPage() {
             ))}
           </ul>
           <p className="mt-4 text-xs text-ink-soft">Se configuran con variables de entorno en Vercel (ver .env.example en el repo).</p>
-        </Card>
+          </div>
+        </details>
       </form>
     </>
-  );
-}
-
-function L({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block text-sm">
-      <span className="mb-1 block text-xs font-bold tracking-wider text-ink-soft uppercase">{label}</span>
-      {children}
-    </label>
   );
 }

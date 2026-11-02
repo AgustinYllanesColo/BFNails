@@ -3,7 +3,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { getAdminSession } from "@/lib/admin/auth";
 
 /**
- * Firma las subidas de fotos del admin directo del navegador a Vercel Blob. Las fotos no pasan por el servidor
+ * Firma las subidas de fotos (y videos de maquillaje, ya achicados en el navegador) del admin directo del navegador a Vercel Blob. Las fotos no pasan por el servidor
  * (ahí el límite es ~4 MB por request), así que se pueden subir varias a la vez y en paralelo.
  */
 export async function POST(request: Request) {
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       onBeforeGenerateToken: async () => {
         if (!(await getAdminSession())) throw new Error("Tenés que entrar al panel para subir fotos.");
         return {
-          allowedContentTypes: ["image/*"],
+          allowedContentTypes: ["image/*", "video/mp4", "video/webm"],
           maximumSizeInBytes: 25 * 1024 * 1024,
           addRandomSuffix: true,
           cacheControlMaxAge: 60 * 60 * 24 * 365,

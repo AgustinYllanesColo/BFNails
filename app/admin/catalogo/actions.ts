@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
-import { deleteDesign, upsertDesign } from "@/lib/admin/catalog";
+import { deleteDesign, updateDesignsQuick, upsertDesign } from "@/lib/admin/catalog";
+import { parseQuickEdits } from "@/lib/admin/quick-edit";
 import { slugify } from "@/lib/format";
 
 const schema = z.object({
@@ -59,14 +60,23 @@ export async function saveDesign(_prev: DesignFormState, formData: FormData): Pr
     );
   } catch (e) {
     const msg = String((e as { cause?: { message?: string } }).cause?.message ?? (e as Error).message);
-    if (/duplicate key|unique/i.test(msg)) return { error: `Ya hay un diseño con la URL "${slug}". Cambiá el nombre o el slug.` };
+    if (/duplicate key|unique/i.test(msg)) return { error: `Ya hay un diseño con la URL "${slug}". Cambiale el nombre.` };
     return { error: (e as Error).message };
   }
   revalidatePath("/catalogo");
   revalidatePath(`/catalogo/${slug}`);
   revalidatePath("/");
   revalidatePath("/admin/catalogo");
-  redirect(`/admin/catalogo/${slug}`);
+  redirect(`/admin/catalogo/${slug}?guardado=1`);
+}
+
+/** Carga rápida desde la lista de uñas: precio, precio antes y visible de muchos diseños a la vez. */
+export async function saveDesignsQuick(formData: FormData) {
+  await requireAdmin();
+  await updateDesignsQuick([...parseQuickEdits(formData)].map(([slug, e]) => ({ slug, ...e })));
+  revalidatePath("/catalogo", "layout");
+  revalidatePath("/");
+  revalidatePath("/admin/catalogo");
 }
 
 export async function removeDesign(slug: string) {

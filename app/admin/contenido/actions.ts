@@ -1,15 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/auth";
 import { uploadDesignImage } from "@/lib/admin/catalog";
-import { getAllCharms, getAllMakeup, getAllPromos, getKit, writeContent } from "@/lib/data/content-repo";
-import { resetMakeupSold } from "@/lib/data/makeup-stock";
-import type { Charm, Promo } from "@/lib/data/content";
-import type { MakeupProduct } from "@/lib/data/makeup";
-import { parseMakeupForm } from "@/lib/admin/makeup-form";
+import { getAllCharms, getAllPromos, getKit, writeContent } from "@/lib/data/content-repo";
+import { CHARM_CATEGORIES, type Charm, type Promo } from "@/lib/data/content";
+
+const CHARM_CATEGORY_IDS = CHARM_CATEGORIES.map((c) => c.id) as [Charm["category"] & string, ...(Charm["category"] & string)[]];
 import { slugify } from "@/lib/format";
+import { applyQuickEdits, parseQuickEdits } from "@/lib/admin/quick-edit";
 
 function refresh() {
   revalidatePath("/");
@@ -17,7 +18,7 @@ function refresh() {
   revalidatePath("/dijes");
   revalidatePath("/disena");
   revalidatePath("/maquillaje");
-  revalidatePath("/admin/contenido");
+  revalidatePath("/admin", "layout");
 }
 
 const optNum = z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().int().min(0).optional());
@@ -73,7 +74,7 @@ const charmSchema = z.object({
   id: optStr(80),
   name: z.string().trim().min(2).max(60),
   price: z.coerce.number().int().min(0).max(1_000_000),
-  hex: optStr(9),
+  category: z.preprocess((v) => (v === "" || v == null ? undefined : v), z.enum(CHARM_CATEGORY_IDS).optional()),
 });
 
 export async function saveCharm(formData: FormData) {
@@ -83,13 +84,26 @@ export async function saveCharm(formData: FormData) {
   const prev = all.find((c) => c.id === d.id);
   const id = prev?.id ?? `${slugify(d.name)}-${Date.now().toString(36)}`;
   const charm: Charm = {
+    ...prev,
     ...d,
     id,
-    category: prev?.category,
+    // el color era para el dibujo provisorio: no se pide, se conserva
+    hex: prev?.hex,
+    category: d.category ?? prev?.category,
     image: await imageFrom(formData, "dijes", prev?.image),
     active: formData.get("active") === "on",
   };
   await writeContent("charms", prev ? all.map((c) => (c.id === id ? charm : c)) : [...all, charm]);
+  refresh();
+  redirect(`/admin/dijes/${encodeURIComponent(id)}?guardado=1`);
+}
+
+/** Carga rápida desde la lista de dijes: precio y visible de muchos a la vez. */
+export async function saveCharmsQuick(formData: FormData) {
+  await requireAdmin();
+  const all = await getAllCharms();
+  // los dijes no tienen "precio antes": el campo no se muestra y queda vacío
+  await writeContent("charms", applyQuickEdits(all, parseQuickEdits(formData), {}));
   refresh();
 }
 
@@ -98,44 +112,7 @@ export async function deleteCharm(formData: FormData) {
   const id = String(formData.get("id"));
   await writeContent("charms", (await getAllCharms()).filter((c) => c.id !== id));
   refresh();
-}
-
-/* ---------- Maquillaje ---------- */
-
-export async function saveMakeup(formData: FormData) {
-  await requireAdmin();
-  const parsed = parseMakeupForm(formData);
-  if (!parsed.success) throw new Error("Revisá los datos del producto: " + parsed.error.issues.map((i) => i.path.join(".")).join(", "));
-  const d = parsed.data;
-  const all = await getAllMakeup();
-  const prev = all.find((m) => m.id === d.id);
-  const id = prev?.id ?? `${slugify(d.name)}-${Date.now().toString(36)}`;
-  const product: MakeupProduct = {
-    ...d,
-    id,
-    // la forma y el código del proveedor no se editan: se conservan (los nuevos eligen forma al crearse)
-    form: prev?.form ?? d.form ?? "labial",
-    code: prev?.code,
-    // lo que trae un combo no se edita desde el formulario: se conserva
-    includes: prev?.includes,
-    image: await imageFrom(formData, "maquillaje", prev?.image),
-    featured: formData.get("featured") === "on",
-    isNew: formData.get("isNew") === "on",
-    active: formData.get("active") === "on",
-  };
-  // se guarda el stock real (cargado − vendido), así que lo vendido vuelve a cero
-  await writeContent("makeup", prev ? all.map((m) => (m.id === id ? product : m)) : [product, ...all]);
-  await resetMakeupSold();
-  refresh();
-}
-
-export async function deleteMakeup(formData: FormData) {
-  await requireAdmin();
-  const id = String(formData.get("id") ?? "");
-  if (!id) return;
-  await writeContent("makeup", (await getAllMakeup()).filter((m) => m.id !== id));
-  await resetMakeupSold();
-  refresh();
+  redirect("/admin/dijes");
 }
 
 /* ---------- Kit ---------- */
@@ -143,15 +120,14 @@ export async function deleteMakeup(formData: FormData) {
 export async function saveKit(formData: FormData) {
   await requireAdmin();
   const prev = await getKit();
-  const items = String(formData.get("items") ?? "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
+  // un renglón por cosa que trae el kit: nombre y, si hace falta, un detalle; los renglones vacíos no cuentan
+  const names = formData.getAll("itemName").map((v) => String(v).trim());
+  const details = formData.getAll("itemDetail").map((v) => String(v).trim());
+  const items = names
+    .map((name, i) => ({ name: name.slice(0, 80), detail: details[i]?.slice(0, 120) || undefined }))
+    .filter((it) => it.name)
     .slice(0, 20)
-    .map((l) => {
-      const [name, detail] = l.split("|").map((x) => x.trim());
-      return detail ? { name, detail } : { name };
-    });
+    .map((it) => (it.detail ? it : { name: it.name }));
   const remove = formData.getAll("removeImages").map(String);
   const images = prev.images.filter((src) => !remove.includes(src));
   for (const f of formData.getAll("newImages")) {

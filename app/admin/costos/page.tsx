@@ -50,7 +50,7 @@ export default async function CostosPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Costo del set base" value={baseCost ? formatARS(baseCost.total) : "sin receta"} hint={baseCost ? `${formatARS(baseCost.materials)} insumos + ${formatARS(baseCost.labor)} tiempo` : "Cargá la receta 'base'"} />
         <Stat label="Precio base" value={formatARS(baseQuote.total)} hint={baseCost ? `margen ${Math.round(((baseQuote.total - baseCost.total) / baseQuote.total) * 100)}%` : undefined} />
-        <Stat label="Margen promedio" value={avgMargin != null ? `${Math.round(avgMargin * 100)}%` : "–"} hint={`objetivo ${Math.round(settings.targetMargin * 100)}%`} />
+        <Stat label="Ganancia promedio" value={avgMargin != null ? `${Math.round(avgMargin * 100)}%` : "–"} hint={`objetivo ${Math.round(settings.targetMargin * 100)}%`} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -61,9 +61,9 @@ export default async function CostosPage() {
                 <tr>
                   <th>Ítem</th>
                   <th>Precio</th>
-                  <th>Costo</th>
-                  <th>Min.</th>
-                  <th>Margen</th>
+                  <th className="hidden sm:table-cell">Costo</th>
+                  <th className="hidden sm:table-cell">Minutos</th>
+                  <th>Ganancia</th>
                   <th>Precio sugerido</th>
                 </tr>
               </thead>
@@ -75,11 +75,10 @@ export default async function CostosPage() {
                     <tr key={r.target}>
                       <td>
                         <span className="font-semibold">{r.label}</span>
-                        <div className="text-[11px] text-ink-soft">{r.target}</div>
                       </td>
                       <td>{formatARS(r.price)}</td>
-                      <td>{r.cost != null ? formatARS(r.cost) : <span className="text-xs text-ink-soft">sin receta</span>}</td>
-                      <td>{r.minutes || "–"}</td>
+                      <td className="hidden sm:table-cell">{r.cost != null ? formatARS(r.cost) : <span className="text-xs text-ink-soft">sin receta</span>}</td>
+                      <td className="hidden sm:table-cell">{r.minutes || "–"}</td>
                       <td>
                         {r.margin != null ? (
                           <span className={ok ? "font-bold text-emerald-700" : "font-bold text-red"}>{Math.round(r.margin * 100)}%</span>

@@ -66,6 +66,7 @@ export function MakeupCard({ product, priority, tilt: tiltProp }: { product: Mak
         <MakeupVisual
           product={product}
           priority={priority}
+          video
           className={
             soldOut
               ? "opacity-60 saturate-50"

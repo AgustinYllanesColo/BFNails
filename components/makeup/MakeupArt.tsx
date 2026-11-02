@@ -2,6 +2,7 @@ import { useId } from "react";
 import Image from "next/image";
 import type { MakeupForm, MakeupProduct } from "@/lib/data/makeup";
 import { cn } from "@/lib/format";
+import { MakeupVideo } from "./MakeupVideo";
 
 /**
  * Dibujo del producto mientras no haya foto: una "calcomanía" del envase según su forma, pintada con el color
@@ -829,12 +830,15 @@ export function MakeupVisual({
   priority,
   className,
   alt = "",
+  video,
 }: {
   product: MakeupProduct;
   sizes?: string;
   priority?: boolean;
   className?: string;
   alt?: string;
+  /** Si el producto tiene video, corre sobre la foto. Solo en la tarjeta del catálogo: los stickers chicos van con la foto. */
+  video?: boolean;
 }) {
   return (
     <div className={cn("ring-bordo/5 relative aspect-[4/5] overflow-hidden rounded-lg ring-1", product.image ? "bg-cream-deep" : "bg-blush", className)}>
@@ -853,6 +857,7 @@ export function MakeupVisual({
       ) : (
         <MakeupArt product={product} label={alt || undefined} />
       )}
+      {video && product.video && <MakeupVideo src={product.video} poster={product.image} />}
     </div>
   );
 }

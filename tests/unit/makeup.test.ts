@@ -13,7 +13,8 @@ import { maxQtyFor } from "@/lib/types";
 import type { Order } from "@/lib/types";
 import { adminMessages, hasNailSet } from "@/lib/whatsapp";
 import { customerPaidMail } from "@/lib/mail-templates";
-import { parseMakeupForm, validateImageFile } from "@/lib/admin/makeup-form";
+import { parseMakeupForm, parseComboIncludes, validateImageFile } from "@/lib/admin/makeup-form";
+import { applyMakeupSold, makeupForSave } from "@/lib/data/makeup";
 
 const base: MakeupProduct = {
   id: "rubor",
@@ -208,5 +209,94 @@ describe("tonos de maquillaje", () => {
 
   it("los tonos guardados sobreviven a la normalización", () => {
     expect(normalizeMakeupList([withShades])![0].shades).toEqual(["14", "17", "19", "23", "24"]);
+  });
+});
+
+describe("video del producto", () => {
+  it("conserva un video de la tienda o de https y descarta lo que no es un video", () => {
+    const row = { id: "x", name: "X", category: "cejas", price: 100 };
+    const list = normalizeMakeupList([
+      { ...row, id: "a", video: "/maquillaje/polvo-cejas-pink21.mp4" },
+      { ...row, id: "b", video: "https://cdn.example.com/v/demo.webm" },
+      { ...row, id: "c", video: "javascript:alert(1)" },
+      { ...row, id: "d", video: "/maquillaje/foto.webp" },
+      { ...row, id: "e", video: "//otro.com/demo.mp4" },
+    ])!;
+    expect(list.map((m) => m.video)).toEqual([
+      "/maquillaje/polvo-cejas-pink21.mp4",
+      "https://cdn.example.com/v/demo.webm",
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  it("el formulario del admin acepta el link del video y vacío lo saca", () => {
+    const fd = (video: string) => {
+      const f = new FormData();
+      for (const [k, v] of Object.entries({ name: "Polvo", category: "cejas", price: "3500", video })) f.set(k, v);
+      return f;
+    };
+    expect(parseMakeupForm(fd(" /maquillaje/demo.mp4 ")).data?.video).toBe("/maquillaje/demo.mp4");
+    expect(parseMakeupForm(fd("")).data?.video).toBeUndefined();
+    expect(parseMakeupForm(fd("javascript:alert(1)")).success).toBe(false);
+  });
+
+  it("el polvo para cejas Pink21 trae su video y una foto fija", () => {
+    const cejas = DEFAULT_MAKEUP.find((m) => m.id === "polvo-cejas-pink21")!;
+    expect(cejas.video).toBe("/maquillaje/polvo-cejas-pink21.mp4");
+    expect(cejas.image).toBe("/maquillaje/polvo-cejas-pink21.webp");
+  });
+});
+
+describe("combos armados desde el admin", () => {
+  const suelto = (id: string, stock: number): MakeupProduct => ({ ...base, id, name: id, stock });
+  const all = [suelto("rubor", 5), suelto("mascara", 2), { ...base, id: "combo-x", name: "Combo X", category: "combos" as const, form: "combo" as const, includes: [{ id: "rubor", qty: 1 }] }];
+
+  it("lee qué trae el combo: solo productos sueltos que existen, con cantidad mayor a cero", () => {
+    const f = new FormData();
+    f.set("inc_rubor", "1");
+    f.set("inc_mascara", "2");
+    f.set("inc_no-existe", "1");
+    f.set("inc_combo-x", "1");
+    f.set("inc_lapiz", "0");
+    expect(parseComboIncludes(f, all)).toEqual([
+      { id: "rubor", qty: 1 },
+      { id: "mascara", qty: 2 },
+    ]);
+  });
+
+  it("armar un combo no descuenta ni reserva el stock de lo que trae", () => {
+    const [rubor] = applyMakeupSold(all, {});
+    expect(rubor.stock).toBe(5);
+  });
+
+  it("los combos se guardan sin stock propio (solo se descuenta lo que trae cuando se vende)", () => {
+    const shown = applyMakeupSold(all, {});
+    expect(shown.find((m) => m.id === "combo-x")?.stock).toBe(5);
+    const saved = makeupForSave(shown);
+    expect(saved.find((m) => m.id === "combo-x")?.stock).toBeUndefined();
+    expect(saved.find((m) => m.id === "rubor")?.stock).toBe(5);
+  });
+});
+
+describe("fotos y videos que vienen con la tienda", () => {
+  const guardado = { id: "polvo-cejas-pink21", name: "Polvo para cejas", category: "cejas", price: 3500 };
+
+  it("un producto guardado antes de tener foto o video toma los de la tienda", () => {
+    const [m] = normalizeMakeupList([guardado])!;
+    expect(m.image).toBe("/maquillaje/polvo-cejas-pink21.webp");
+    expect(m.video).toBe("/maquillaje/polvo-cejas-pink21.mp4");
+  });
+
+  it("si se quitaron desde el admin, no vuelven", () => {
+    const [m] = normalizeMakeupList(makeupForSave([{ ...base, id: "polvo-cejas-pink21", category: "cejas" }]))!;
+    expect(m.image).toBeUndefined();
+    expect(m.video).toBeUndefined();
+  });
+
+  it("lo que se cargó desde el admin gana sobre lo de la tienda", () => {
+    const [m] = normalizeMakeupList([{ ...guardado, image: "https://x.public.blob.vercel-storage.com/a.webp" }])!;
+    expect(m.image).toBe("https://x.public.blob.vercel-storage.com/a.webp");
   });
 });
