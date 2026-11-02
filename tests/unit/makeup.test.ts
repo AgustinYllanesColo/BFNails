@@ -6,6 +6,9 @@ import {
   makeupLineName,
   normalizeShades,
   normalizeMakeupList,
+  normalizeMedia,
+  isVideoUrl,
+  makeupMedia,
   toPublicMakeup,
   type MakeupProduct,
 } from "@/lib/data/makeup";
@@ -208,5 +211,39 @@ describe("tonos de maquillaje", () => {
 
   it("los tonos guardados sobreviven a la normalización", () => {
     expect(normalizeMakeupList([withShades])![0].shades).toEqual(["14", "17", "19", "23", "24"]);
+  });
+});
+
+describe("fotos y videos del maquillaje", () => {
+  const foto = "https://x.public.blob.vercel-storage.com/maquillaje/a.webp";
+  const foto2 = "https://x.public.blob.vercel-storage.com/maquillaje/b.jpg";
+  const video = "https://x.public.blob.vercel-storage.com/maquillaje/c.mp4";
+
+  it("reconoce los videos por la extensión", () => {
+    expect(isVideoUrl(video)).toBe(true);
+    expect(isVideoUrl(video + "?v=1")).toBe(true);
+    expect(isVideoUrl("https://x/y.MOV")).toBe(true);
+    expect(isVideoUrl(foto)).toBe(false);
+  });
+
+  it("respeta el orden y la portada es la primera foto (aunque antes haya un video)", () => {
+    expect(normalizeMedia([video, foto2, foto])).toEqual({ media: [video, foto2, foto], image: foto2 });
+  });
+
+  it("los productos viejos con una sola foto la pasan a la lista", () => {
+    expect(normalizeMedia(undefined, foto)).toEqual({ media: [foto], image: foto });
+    expect(normalizeMedia([], undefined)).toEqual({ media: undefined, image: undefined });
+  });
+
+  it("descarta lo que no es una URL y los repetidos", () => {
+    expect(normalizeMedia([foto, "javascript:alert(1)", 3, foto, ""]).media).toEqual([foto]);
+  });
+
+  it("normalizeMakeupList guarda fotos, videos y la descripción ampliada", () => {
+    const [m] = normalizeMakeupList([{ id: "a", name: "Labial", category: "labios", price: 100, media: [video, foto], details: "Dura todo el día." }])!;
+    expect(m.media).toEqual([video, foto]);
+    expect(m.image).toBe(foto);
+    expect(m.details).toBe("Dura todo el día.");
+    expect(makeupMedia({ image: foto })).toEqual([foto]);
   });
 });

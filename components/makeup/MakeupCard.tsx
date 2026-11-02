@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import type { MakeupProduct } from "@/lib/data/makeup";
 import { cn, formatARS } from "@/lib/format";
 import { Badge } from "@/components/ui/Badge";
 import { MakeupVisual } from "./MakeupArt";
 import { AddMakeupToCart } from "./AddMakeupToCart";
+import { MakeupDetail } from "./MakeupDetail";
 
 /**
  * Inclinación chica y fija para cada producto (de -1,5° a 1,5°, nunca 0), sacada del id: la misma tarjeta queda
@@ -18,6 +22,7 @@ export function makeupTilt(id: string) {
 /**
  * Tarjeta de maquillaje: dibujo o foto en 4:5, etiquetas, marca, nombre, dos líneas y precio, con botón para sumar.
  * Con `tilt`, el dibujo queda apenas inclinado y se endereza al pasar el mouse (o al enfocar la tarjeta).
+ * Tocar la foto o el nombre abre la vista ampliada (fotos y videos en grande, con la descripción).
  */
 export function MakeupCard({ product, priority, tilt: tiltProp }: { product: MakeupProduct; priority?: boolean; tilt?: number }) {
   // las fotos van derechas, como las tarjetas de uñas; la inclinación es solo para los dibujos provisorios
@@ -25,6 +30,8 @@ export function MakeupCard({ product, priority, tilt: tiltProp }: { product: Mak
   const soldOut = product.stock === 0;
   const few = product.stock === 1;
   const sale = product.priceBefore != null && product.priceBefore > product.price;
+  const [open, setOpen] = useState(false);
+  const more = (product.media?.length ?? 0) > 1;
 
   // Hasta dos etiquetas, la más útil primero: agotado / últimas, oferta, nuevo.
   const badges = [
@@ -63,21 +70,43 @@ export function MakeupCard({ product, priority, tilt: tiltProp }: { product: Mak
         )}
         style={tilt != null ? ({ "--tilt": `${tilt}deg` } as React.CSSProperties) : undefined}
       >
-        <MakeupVisual
-          product={product}
-          priority={priority}
-          className={
-            soldOut
-              ? "opacity-60 saturate-50"
-              : "transition-transform duration-300 ease-[var(--ease-out-expo)] motion-safe:group-hover:-translate-y-1"
-          }
-        />
-        {badges.length > 0 && <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">{badges}</div>}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          className="focus-visible:outline-bordo block w-full cursor-zoom-in rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <span className="sr-only">Ver {product.name} en grande</span>
+          <MakeupVisual
+            product={product}
+            priority={priority}
+            className={
+              soldOut
+                ? "opacity-60 saturate-50"
+                : "transition-transform duration-300 ease-[var(--ease-out-expo)] motion-safe:group-hover:-translate-y-1"
+            }
+          />
+        </button>
+        {badges.length > 0 && <div className="pointer-events-none absolute top-3 left-3 flex flex-wrap gap-1.5">{badges}</div>}
+        {/* aviso de que se puede ampliar: siempre en el celu (no hay hover), al pasar el mouse en la compu */}
+        <span
+          aria-hidden
+          className="text-ink pointer-events-none absolute right-2.5 bottom-2.5 inline-flex h-8 items-center gap-1 rounded-full bg-white/90 px-2.5 text-[11px] font-bold shadow-sm transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="M16 16l4 4M11 8.5v5M8.5 11h5" />
+          </svg>
+          {more ? `+${product.media!.length - 1}` : "Ver"}
+        </span>
       </div>
       <div className="mt-3 flex flex-1 flex-col">
         {/* nombres largos del admin: se parten donde haga falta y no pasan de tres renglones (el completo queda en el title) */}
         <h3 className="text-ink line-clamp-3 text-[17px] leading-tight font-bold tracking-tight text-pretty [overflow-wrap:anywhere]" title={product.name}>
-          {product.name}
+          {/* el nombre también abre la vista ampliada; para el lector ya está el botón de la foto */}
+          <button type="button" tabIndex={-1} onClick={() => setOpen(true)} className="hover:text-lip text-left transition-colors">
+            {product.name}
+          </button>
         </h3>
         {(product.brand || product.description) && (
           <p className={cn("text-ink-soft mt-1 text-[13px] leading-snug [overflow-wrap:anywhere]", product.category !== "combos" && "line-clamp-2")} title={product.description}>
@@ -100,6 +129,7 @@ export function MakeupCard({ product, priority, tilt: tiltProp }: { product: Mak
           <AddMakeupToCart product={product} />
         </div>
       </div>
+      <MakeupDetail product={product} open={open} onClose={() => setOpen(false)} />
     </article>
   );
 }

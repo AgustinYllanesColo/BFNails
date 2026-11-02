@@ -60,8 +60,15 @@ export type MakeupProduct = {
   priceBefore?: number;
   /** Unidades disponibles. 0 = agotado (se ve, pero no se puede sumar). Vacío = sin control de stock. */
   stock?: number;
-  /** Foto real (fondo liso). Mientras falte, se dibuja el producto con `form` y `hex`. */
+  /** Foto de portada (la primera foto de `media`). Mientras falte, se dibuja el producto con `form` y `hex`. */
   image?: string;
+  /**
+   * Fotos y videos del producto, en el orden en que se ven en la vista ampliada (se ordenan desde el admin).
+   * Los videos se reconocen por la extensión (ver `isVideoUrl`).
+   */
+  media?: string[];
+  /** Descripción para la vista ampliada: corta y sencilla (para qué sirve, cómo se usa). */
+  details?: string;
   /** Color del producto para el dibujo provisorio. */
   hex?: string;
   /** Tonos disponibles (ej. "02", "Nude 4"). Si hay, la clienta elige uno antes de sumarlo. */
@@ -198,6 +205,31 @@ export function toPublicMakeup(m: MakeupProduct): MakeupProduct {
   return rest;
 }
 
+/** Un video subido desde el admin (mp4, webm o mov). El resto de los archivos de `media` son fotos. */
+export function isVideoUrl(url: string): boolean {
+  return /\.(mp4|webm|mov|m4v)(?:[?#]|$)/i.test(url);
+}
+
+/**
+ * Ordena fotos y videos y saca la portada: la primera foto de la lista. Los productos viejos (solo `image`)
+ * pasan a tener esa foto como único elemento.
+ */
+export function normalizeMedia(value: unknown, image?: string): { media?: string[]; image?: string } {
+  const list = Array.isArray(value)
+    ? value.filter((u): u is string => typeof u === "string" && /^(https:\/\/|\/)/.test(u.trim())).map((u) => u.trim())
+    : [];
+  const media = [...new Set(list.length ? list : image ? [image] : [])].slice(0, MAKEUP_MEDIA_MAX);
+  return { media: media.length ? media : undefined, image: media.find((u) => !isVideoUrl(u)) };
+}
+
+/** Fotos y videos en orden; los productos sin `media` (los de fábrica) muestran su foto, si tienen. */
+export function makeupMedia(p: Pick<MakeupProduct, "media" | "image">): string[] {
+  return p.media?.length ? p.media : p.image ? [p.image] : [];
+}
+
+/** Máximo de fotos y videos por producto. */
+export const MAKEUP_MEDIA_MAX = 12;
+
 const CATEGORY_IDS = new Set<string>(MAKEUP_CATEGORIES.map((c) => c.id));
 const FORM_IDS = new Set<string>(MAKEUP_FORMS);
 const isNat = (v: unknown): v is number => typeof v === "number" && Number.isInteger(v) && v >= 0;
@@ -226,7 +258,8 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
       price: r.price,
       priceBefore: isNat(r.priceBefore) && r.priceBefore > r.price ? r.priceBefore : undefined,
       stock: isNat(r.stock) ? r.stock : undefined,
-      image: optStr(r.image),
+      ...normalizeMedia(r.media, optStr(r.image)),
+      details: optStr(r.details),
       hex: optStr(r.hex),
       shades: normalizeShades(r.shades),
       includes: normalizeIncludes(r.includes),

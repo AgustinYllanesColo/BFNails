@@ -3,7 +3,8 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { hasDb } from "@/lib/db/client";
 import { getAllCharms, getAllMakeup, getAllPromos, getKit } from "@/lib/data/content-repo";
 import type { Charm, Promo } from "@/lib/data/content";
-import { MAKEUP_CATEGORIES, MAKEUP_FORMS, type MakeupForm, type MakeupProduct } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, MAKEUP_FORMS, MAKEUP_MEDIA_MAX, makeupMedia, type MakeupForm, type MakeupProduct } from "@/lib/data/makeup";
+import { MakeupMediaField } from "@/components/admin/MakeupMediaField";
 import { IMAGE_TYPES, MAKEUP_LIMITS } from "@/lib/admin/makeup-form";
 import { Card, PageTitle, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
 import { PromoCard } from "@/components/sections/Promos";
@@ -275,9 +276,23 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
             </select>
           </L>
         </div>
-        <L label="Descripción (una línea)">
+        <L label="Descripción (una línea, va en la tarjeta)">
           <input name="description" maxLength={MAKEUP_LIMITS.description} defaultValue={product?.description} className={adminInput} />
         </L>
+        <L label="Descripción ampliada (se ve al tocar el producto: corta y sencilla)">
+          <textarea
+            name="details"
+            maxLength={MAKEUP_LIMITS.details}
+            rows={3}
+            placeholder="Para qué sirve, cómo se aplica, cuánto dura…"
+            defaultValue={product?.details}
+            className={adminInput + " h-24 py-2"}
+          />
+        </L>
+        <div>
+          <span className="mb-1 block text-xs font-bold tracking-wider text-ink-soft uppercase">Fotos y videos</span>
+          <MakeupMediaField initial={product ? makeupMedia(product) : []} max={MAKEUP_MEDIA_MAX} />
+        </div>
         <L label="Tonos disponibles (separados por coma; vacío = sin tonos)">
           <input name="shades" maxLength={400} placeholder="02, 04, 06" defaultValue={product?.shades?.join(", ")} className={adminInput} />
         </L>
@@ -307,12 +322,6 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <input type="file" name="image" accept={IMAGE_TYPES.join(",")} aria-label="Foto del producto" />
-          {product?.image && (
-            <label className="flex items-center gap-1">
-              <input type="checkbox" name="removeImage" /> quitar foto
-            </label>
-          )}
           <label className="flex items-center gap-1">
             <input type="checkbox" name="active" defaultChecked={product?.active ?? true} /> Disponible
           </label>

@@ -9,6 +9,7 @@ import { resetMakeupSold } from "@/lib/data/makeup-stock";
 import type { Charm, Promo } from "@/lib/data/content";
 import type { MakeupProduct } from "@/lib/data/makeup";
 import { parseMakeupForm } from "@/lib/admin/makeup-form";
+import { normalizeMedia } from "@/lib/data/makeup";
 import { slugify } from "@/lib/format";
 
 function refresh() {
@@ -118,7 +119,8 @@ export async function saveMakeup(formData: FormData) {
     code: prev?.code,
     // lo que trae un combo no se edita desde el formulario: se conserva
     includes: prev?.includes,
-    image: await imageFrom(formData, "maquillaje", prev?.image),
+    // la portada es la primera foto de la lista (las fotos y videos se suben desde el navegador)
+    ...normalizeMedia(d.media),
     featured: formData.get("featured") === "on",
     isNew: formData.get("isNew") === "on",
     active: formData.get("active") === "on",
