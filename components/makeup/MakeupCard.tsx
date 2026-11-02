@@ -19,7 +19,9 @@ export function makeupTilt(id: string) {
  * Tarjeta de maquillaje: dibujo o foto en 4:5, etiquetas, marca, nombre, dos líneas y precio, con botón para sumar.
  * Con `tilt`, el dibujo queda apenas inclinado y se endereza al pasar el mouse (o al enfocar la tarjeta).
  */
-export function MakeupCard({ product, priority, tilt }: { product: MakeupProduct; priority?: boolean; tilt?: number }) {
+export function MakeupCard({ product, priority, tilt: tiltProp }: { product: MakeupProduct; priority?: boolean; tilt?: number }) {
+  // las fotos van derechas, como las tarjetas de uñas; la inclinación es solo para los dibujos provisorios
+  const tilt = product.image ? undefined : tiltProp;
   const soldOut = product.stock === 0;
   const few = product.stock === 1;
   const sale = product.priceBefore != null && product.priceBefore > product.price;

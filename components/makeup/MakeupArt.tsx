@@ -837,20 +837,19 @@ export function MakeupVisual({
   alt?: string;
 }) {
   return (
-    <div className={cn("bg-blush ring-lip/5 relative aspect-[4/5] overflow-hidden rounded-lg ring-1", className)}>
+    <div className={cn("ring-bordo/5 relative aspect-[4/5] overflow-hidden rounded-lg ring-1", product.image ? "bg-cream-deep" : "bg-blush", className)}>
       {product.image ? (
-        <div className="bg-blush-soft absolute inset-0">
-          <Image
-            src={product.image}
-            alt={alt}
-            fill
-            sizes={sizes}
-            preload={priority}
-            loading={priority ? "eager" : undefined}
-            quality={90}
-            className="object-contain p-[8%]"
-          />
-        </div>
+        // foto real de borde a borde, como las de uñas (antes iba achicada dentro de una placa rosa y parecía un recuadro)
+        <Image
+          src={product.image}
+          alt={alt}
+          fill
+          sizes={sizes}
+          preload={priority}
+          loading={priority ? "eager" : undefined}
+          quality={90}
+          className="object-cover"
+        />
       ) : (
         <MakeupArt product={product} label={alt || undefined} />
       )}
