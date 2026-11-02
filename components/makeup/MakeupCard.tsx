@@ -78,7 +78,7 @@ export function MakeupCard({ product, priority, tilt }: { product: MakeupProduct
           {product.name}
         </h3>
         {(product.brand || product.description) && (
-          <p className="text-ink-soft mt-1 line-clamp-2 text-[13px] leading-snug [overflow-wrap:anywhere]" title={product.description}>
+          <p className={cn("text-ink-soft mt-1 text-[13px] leading-snug [overflow-wrap:anywhere]", product.category !== "combos" && "line-clamp-2")} title={product.description}>
             {product.brand && <span className="text-lip font-semibold">{product.brand}</span>}
             {product.brand && product.description && " · "}
             {product.description}

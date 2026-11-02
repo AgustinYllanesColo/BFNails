@@ -106,8 +106,23 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
   p({ id: "lapiz-labial-lip-contour", name: "Lápiz labial Lip Contour", description: "Contorno y relleno en un mismo lápiz.", category: "labios", form: "lapiz", price: 2300, stock: 3, hex: "#c98a84", code: "TEI8235" }),
   p({ id: "lip-liner", name: "Lip liner", description: "Perfilador de labios.", category: "labios", form: "lapiz", price: 1900, stock: 2, hex: "#6b1d33", code: "CS7029" }),
   p({ id: "delineador-labio", name: "Delineador de labio", description: "Perfila y evita que el labial se corra.", category: "labios", form: "lapiz", price: 1200, stock: 6, hex: "#b14e36", code: "DH-2207-C" }),
+  // Combos (se arman por pedido: sin stock propio)
+  p({
+    id: "combo-1",
+    name: "Combo 1",
+    description:
+      "Rubor en crema Magic Color, máscara amarilla Pink21, base líquida Ruby, labial matte en barra, delineador de labio, delineador para ojos y 2 brochas.",
+    category: "combos",
+    form: "combo",
+    price: 17900,
+    priceBefore: 20600,
+    hex: "#f6c3d6",
+    featured: true,
+    isNew: true,
+  }),
   // Brochas
-  p({ id: "set-brochas", name: "Set de brochas", description: "Las brochas básicas para rostro y ojos.", category: "brochas", form: "brochas", price: 6000, stock: 1, hex: "#e7c2cf", code: "BC1080" }),
+  // Fuera de venta: 2 de sus 10 brochas van en el Combo 1
+  { ...p({ id: "set-brochas", name: "Set de brochas", description: "Las brochas básicas para rostro y ojos.", category: "brochas", form: "brochas", price: 6000, stock: 1, hex: "#e7c2cf", code: "BC1080" }), active: false },
   p({ id: "brocha-city", name: "Brocha City", description: "Brocha suave para polvo y rubor.", category: "brochas", form: "brocha", price: 1200, stock: 4, hex: "#4a0e0e", code: "FB-20W-79" }),
 ];
 
