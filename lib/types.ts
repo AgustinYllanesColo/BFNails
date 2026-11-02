@@ -19,6 +19,7 @@ export type Design = {
   featured?: boolean;
   active?: boolean;
   colors?: string[]; // paleta para placeholder y filtros
+  sort?: number; // orden en el catálogo (menor primero)
 };
 
 export type StandardSize = "S" | "M" | "L";
@@ -117,7 +118,33 @@ export type CartItem =
       image?: string;
       unitPrice: number;
       qty: number;
+    }
+  | {
+      /** Producto de maquillaje: se cobra por unidad y no lleva medidas. */
+      id: string;
+      kind: "makeup";
+      makeupId: string;
+      /** Tono elegido, si el producto tiene tonos (el nombre ya lo incluye). */
+      shade?: string;
+      name: string;
+      image?: string;
+      unitPrice: number;
+      qty: number;
+      /** Tope de unidades según el stock que había al sumarlo (el servidor lo vuelve a validar). */
+      maxQty?: number;
     };
+
+/** Ítems que no son un set de uñas (no llevan medidas). */
+export function isLooseItem(item: CartItem): item is Extract<CartItem, { kind: "charm" | "makeup" }> {
+  return item.kind === "charm" || item.kind === "makeup";
+}
+
+/** Cantidad máxima de una fila del carrito: 50 dijes, 20 de maquillaje (o el stock conocido), 10 sets. */
+export function maxQtyFor(item: CartItem): number {
+  if (item.kind === "charm") return 50;
+  if (item.kind === "makeup") return Math.max(1, Math.min(20, item.maxQty ?? 20));
+  return 10;
+}
 
 export type DeliveryMethod = "retiro" | "moto" | "correo_domicilio" | "correo_sucursal";
 export type PaymentMethod = "mercadopago" | "transferencia" | "efectivo";

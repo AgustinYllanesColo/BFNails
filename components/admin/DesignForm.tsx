@@ -1,13 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
-import Image from "next/image";
+import { useActionState, useState } from "react";
 import type { Design } from "@/lib/types";
 import { adminBtn, adminBtnGhost, adminInput } from "./ui";
+import { PhotoUploader } from "./PhotoUploader";
 import { saveDesign, removeDesign, type DesignFormState } from "@/app/admin/catalogo/actions";
 
 export function DesignForm({ design }: { design?: Design }) {
   const [state, action, pending] = useActionState<DesignFormState, FormData>(saveDesign, undefined);
+  const [uploading, setUploading] = useState(false);
   return (
     <form action={action} className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div className="space-y-4 rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10">
@@ -77,7 +78,7 @@ export function DesignForm({ design }: { design?: Design }) {
             <input type="checkbox" name="active" defaultChecked={design?.active ?? true} /> Visible en el catálogo
           </label>
           <label className="flex items-center gap-2">
-            Orden <input name="sort" type="number" defaultValue={0} className={adminInput + " w-20"} />
+            Orden <input name="sort" type="number" defaultValue={design?.sort ?? 0} className={adminInput + " w-20"} />
           </label>
         </div>
       </div>
@@ -85,29 +86,13 @@ export function DesignForm({ design }: { design?: Design }) {
       <div className="space-y-4">
         <div className="rounded-lg bg-white/80 p-5 ring-1 ring-bordo/10">
           <p className="mb-2 text-xs font-bold tracking-wider text-ink-soft uppercase">Fotos</p>
-          {design?.images.length ? (
-            <div className="mb-3 grid grid-cols-3 gap-2">
-              {design.images.map((src) => (
-                <div key={src} className="relative aspect-square overflow-hidden rounded-md bg-cream-deep">
-                  <Image src={src} alt="" fill sizes="100px" className="object-cover" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mb-3 text-xs text-ink-soft">Sin fotos: se muestra un placeholder con los colores.</p>
-          )}
-          <L label="URLs actuales (una por línea; borrá para quitar)">
-            <textarea name="images" defaultValue={design?.images.join("\n")} className={adminInput + " h-20 py-2 text-xs"} />
-          </L>
-          <L label="Subir nuevas">
-            <input type="file" name="newImages" accept="image/*" multiple className="text-sm" />
-          </L>
-          <p className="mt-2 text-[11px] text-ink-soft">Ideal: cuadradas, 1200×1200, buena luz. La primera es la portada.</p>
+          <PhotoUploader name="images" initial={design?.images ?? []} folder={design?.slug ?? "disenos"} onBusyChange={setUploading} />
+          <p className="mt-2 text-[11px] text-ink-soft">Ideal: cuadradas, buena luz. La primera es la portada; con las flechas cambiás el orden.</p>
         </div>
         {state?.error && <p className="rounded bg-red/10 p-3 text-sm text-red">{state.error}</p>}
         <div className="flex flex-wrap gap-2">
-          <button className={adminBtn} disabled={pending}>
-            {pending ? "Guardando…" : "Guardar"}
+          <button className={adminBtn} disabled={pending || uploading}>
+            {pending ? "Guardando…" : uploading ? "Subiendo fotos…" : "Guardar"}
           </button>
           {design && (
             <button type="button" className={adminBtnGhost + " ring-red text-red hover:bg-red"} onClick={() => confirm(`¿Borrar "${design.name}"?`) && removeDesign(design.slug)}>

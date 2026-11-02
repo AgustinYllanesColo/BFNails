@@ -34,6 +34,9 @@ export function describeItem(item: CartItem, opts: { link?: boolean } = {}): str
   if (item.kind === "charm") {
     return `• Dije ${item.name} x${item.qty} (suelto, ${formatARS(item.unitPrice)} c/u) – ${formatARS(item.unitPrice * item.qty)}`;
   }
+  if (item.kind === "makeup") {
+    return `• Maquillaje ${item.name} x${item.qty} (${formatARS(item.unitPrice)} c/u) – ${formatARS(item.unitPrice * item.qty)}`;
+  }
   const sizes = describeSizes(item.sizes);
   if (item.kind === "design") {
     const variant =
@@ -110,14 +113,21 @@ export function orderConfirmationMessage(order: Order, orderUrl: string): string
   ].join("\n");
 }
 
+/** true si el pedido lleva algún set de uñas (los dijes sueltos y el maquillaje no se fabrican). */
+export function hasNailSet(o: Pick<Order, "items">): boolean {
+  return o.items.some((i) => i.kind === "design" || i.kind === "custom");
+}
+
 /** Mensajes que Brenda le manda a la clienta desde el admin. */
 export const adminMessages = {
   precioConfirmado: (o: Order, payUrl: string) =>
     `Hola ${o.customer.name}! Ya revisé tu pedido ${o.number} 🐱 El precio final es ${formatARS(o.total)}. Podés pagarlo acá: ${payUrl}`,
   pagoRecibido: (o: Order) =>
-    `Hola ${o.customer.name}! Recibí el pago de tu pedido ${o.number} ✨ Ya me pongo a hacer tus uñas. Te aviso cuando estén listas.`,
+    hasNailSet(o)
+      ? `Hola ${o.customer.name}! Recibí el pago de tu pedido ${o.number} ✨ Ya me pongo a hacer tus uñas. Te aviso cuando estén listas.`
+      : `Hola ${o.customer.name}! Recibí el pago de tu pedido ${o.number} ✨ Ya lo preparo y te aviso cuando esté listo.`,
   listo: (o: Order) =>
-    `Hola ${o.customer.name}! Tu set ${o.number} está listo 💅 ${
+    `Hola ${o.customer.name}! ${hasNailSet(o) ? `Tu set ${o.number} está listo 💅` : `Tu pedido ${o.number} está listo ✨`} ${
       o.delivery.method === "retiro"
         ? "¿Cuándo te queda bien para coordinar la entrega en la estación?"
         : o.delivery.method === "moto"

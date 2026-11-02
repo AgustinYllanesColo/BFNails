@@ -7,29 +7,37 @@ import { useCart } from "@/lib/store/cart";
 import { formatARS } from "@/lib/format";
 import { describeSizes } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/Button";
-import type { CartItem } from "@/lib/types";
+import { isLooseItem, maxQtyFor, type CartItem } from "@/lib/types";
 import { Receipt, type ReceiptLine } from "@/components/ui/Receipt";
 import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
+import { fourForThree } from "@/lib/pricing";
 
-export function CartView() {
+export function CartView({ promo4x3 }: { promo4x3?: boolean }) {
   const { items, remove, setQty } = useCart();
   const mounted = useHydrated();
   if (!mounted) return <div className="h-40" />;
 
-  const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const gross = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const promoDiscount = promo4x3 ? fourForThree(items.map((i) => ({ key: i.id, kind: i.kind, unitPrice: i.unitPrice, qty: i.qty }))).discount : 0;
+  const subtotal = gross - promoDiscount;
+  const catalogSets = items.filter((i) => i.kind === "design").reduce((a, i) => a + i.qty, 0);
   const needsConfirmation = items.some((i) => i.kind === "custom" && i.quote.needsConfirmation);
-  const sets = items.filter((i) => i.kind !== "charm").reduce((a, i) => a + i.qty, 0);
+  const sets = items.filter((i) => !isLooseItem(i)).reduce((a, i) => a + i.qty, 0);
   const dijes = items.filter((i) => i.kind === "charm").reduce((a, i) => a + i.qty, 0);
+  const maquillaje = items.filter((i) => i.kind === "makeup").reduce((a, i) => a + i.qty, 0);
 
   if (items.length === 0) {
     return (
       <div className="bg-cream-deep rounded-lg p-12 text-center">
         <p className="font-title text-3xl">Todavía no hay nada acá</p>
-        <p className="text-ink-soft mt-2">Elegí un set del catálogo, armá el tuyo o sumá dijes sueltos.</p>
+        <p className="text-ink-soft mt-2">Elegí un set del catálogo, armá el tuyo, sumá dijes sueltos o maquillaje.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button href="/catalogo">Ver catálogo</Button>
           <Button href="/disena" variant="secondary">
             Diseñá tu set
+          </Button>
+          <Button href="/maquillaje" variant="secondary">
+            Ver maquillaje
           </Button>
         </div>
       </div>
@@ -51,7 +59,11 @@ export function CartView() {
             >
               <div className="bg-cream-deep relative size-24 shrink-0 overflow-hidden rounded-md">
                 {item.kind !== "custom" && item.image ? (
-                  <Image src={item.image} alt="" fill sizes="96px" className={item.kind === "charm" ? "object-contain p-2" : "object-cover"} />
+                  <Image src={item.image} alt="" fill sizes="96px" className={isLooseItem(item) ? "object-contain p-2" : "object-cover"} />
+                ) : item.kind === "makeup" ? (
+                  <div className="grid h-full place-items-center">
+                    <span className="bg-blush-soft size-12 rounded-md" aria-hidden />
+                  </div>
                 ) : (
                   <div className="font-title text-bordo grid h-full place-items-center text-3xl">
                     ✦
@@ -62,7 +74,11 @@ export function CartView() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-title text-xl leading-tight">{item.name}</p>
-                    <p className="text-ink-soft text-xs">{item.kind === "charm" ? `Dije suelto · ${formatARS(item.unitPrice)} c/u` : describeSizes(item.sizes)}</p>
+                    <p className="text-ink-soft text-xs">{item.kind === "charm"
+                        ? `Dije suelto · ${formatARS(item.unitPrice)} c/u`
+                        : item.kind === "makeup"
+                          ? `Maquillaje · ${formatARS(item.unitPrice)} c/u`
+                          : describeSizes(item.sizes)}</p>
                     <ItemDetails item={item} />
                   </div>
                   <button
@@ -79,12 +95,13 @@ export function CartView() {
                     <button
                       type="button"
                       onClick={() => setQty(item.id, item.qty - 1)}
-                      className="size-9 font-bold transition-transform active:scale-75"
-                      aria-label="Menos"
+                      disabled={item.qty <= 1}
+                      className="size-9 font-bold transition-transform active:scale-75 disabled:opacity-30 disabled:active:scale-100"
+                      aria-label={`Una menos de ${item.name}`}
                     >
                       −
                     </button>
-                    <span className="relative inline-block h-5 w-6 overflow-hidden text-center text-sm font-semibold">
+                    <span className="relative inline-block h-5 w-6 overflow-hidden text-center text-sm font-semibold" aria-hidden>
                       <AnimatePresence initial={false} mode="popLayout">
                         <motion.span
                           key={item.qty}
@@ -98,11 +115,14 @@ export function CartView() {
                         </motion.span>
                       </AnimatePresence>
                     </span>
+                    <span className="sr-only" aria-live="polite">{`Cantidad: ${item.qty}`}</span>
                     <button
                       type="button"
                       onClick={() => setQty(item.id, item.qty + 1)}
-                      className="size-9 font-bold transition-transform active:scale-75"
-                      aria-label="Más"
+                      disabled={item.qty >= maxQtyFor(item)}
+                      title={item.qty >= maxQtyFor(item) ? (item.kind === "makeup" && item.maxQty != null ? "No hay más en stock" : "Llegaste al máximo por pedido") : undefined}
+                      className="size-9 font-bold transition-transform active:scale-75 disabled:opacity-30 disabled:active:scale-100"
+                      aria-label={`Una más de ${item.name}`}
                     >
                       +
                     </button>
@@ -129,6 +149,7 @@ export function CartView() {
               label: `${i.name} ×${i.qty}`,
               value: formatARS(i.unitPrice * i.qty),
             })),
+            ...(promoDiscount > 0 ? [{ kind: "row", id: "4x3", label: "promo 4x3 (1 de regalo c/4)", value: `−${formatARS(promoDiscount)}`, tone: "accent" } as ReceiptLine] : []),
             { kind: "rule", id: "r1" },
             { kind: "row", id: "sub", label: "subtotal", value: formatARS(subtotal) },
             { kind: "row", id: "envio", label: "envío", value: "al pagar", tone: "muted" },
@@ -148,6 +169,8 @@ export function CartView() {
                 ]
               : []),
             ...(dijes > 0 ? [{ kind: "row", id: "dijes", label: "dijes sueltos", value: String(dijes) } as ReceiptLine] : []),
+            ...(maquillaje > 0 ? [{ kind: "row", id: "maquillaje", label: "maquillaje", value: String(maquillaje) } as ReceiptLine] : []),
+            ...(promo4x3 && catalogSets % 4 === 3 ? [{ kind: "text", id: "4x3-hint", text: "✦ sumá 1 set más del catálogo y el más barato es de regalo (4x3)" } as ReceiptLine] : []),
             ...(needsConfirmation
               ? [
                   {
@@ -178,7 +201,7 @@ export function CartView() {
 }
 
 function ItemDetails({ item }: { item: CartItem }) {
-  if (item.kind === "charm") return null;
+  if (isLooseItem(item)) return null;
   if (item.kind === "design") {
     if (!item.shape && !item.length) return null;
     return (

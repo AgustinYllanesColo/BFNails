@@ -1,6 +1,6 @@
 import "server-only";
 import type { Order } from "@/lib/types";
-import { PAYMENT_LABEL } from "@/lib/types";
+import { PAYMENT_LABEL, isLooseItem } from "@/lib/types";
 import { formatARS } from "@/lib/format";
 import { siteConfig } from "@/lib/site";
 import { mailEnabled, notifyEmails, sendMail } from "@/lib/mail";
@@ -40,8 +40,9 @@ function prettyPhone(wa: string): string {
 function itemLines(order: Order): string {
   return order.items
     .map((i) => {
+      if (i.kind === "makeup") return `💄 ${i.qty}× ${i.name}`;
       const name = i.kind === "custom" ? "Set a medida" : i.kind === "charm" ? `Dije ${i.name}` : i.name;
-      const size = i.kind !== "charm" && i.sizes.mode === "standard" ? ` · talle ${i.sizes.size}` : i.kind !== "charm" && i.sizes.mode === "custom" ? " · medida personalizada" : "";
+      const size = isLooseItem(i) ? "" : i.sizes.mode === "standard" ? ` · talle ${i.sizes.size}` : i.sizes.mode === "custom" ? " · medida personalizada" : "";
       return `💅 ${i.qty}× ${name}${size}`;
     })
     .join("\n");

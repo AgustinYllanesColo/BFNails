@@ -2,6 +2,26 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // las fotos del catálogo suben directo a Blob; esto cubre las de promos, dijes, kit y maquillaje que pasan por el
+  // action (el validador acepta hasta 8 MB; 10 MB deja lugar al multipart)
+  experimental: {
+    serverActions: { bodySizeLimit: "10mb" },
+    // Sin caché de Turbopack en el build: en Vercel se restauró la de un deploy viejo y salió el CSS de antes
+    // (sin los colores del maquillaje). Cada build compila de cero.
+    turbopackFileSystemCacheForBuild: false,
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [{ source: "/talles", destination: "/medidas", permanent: true }];
   },
@@ -14,6 +34,7 @@ const nextConfig: NextConfig = {
     localPatterns: [{ pathname: "/api/placeholder", search: "" }, { pathname: "/**" }],
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
+      { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },

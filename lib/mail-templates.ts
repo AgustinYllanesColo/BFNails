@@ -2,7 +2,7 @@ import type { CartItem, Order, OrderStatus } from "@/lib/types";
 import { PAYMENT_LABEL } from "@/lib/types";
 import { formatARS } from "@/lib/format";
 import { siteConfig } from "@/lib/site";
-import { describeItem, describeSizes } from "@/lib/whatsapp";
+import { describeItem, describeSizes, hasNailSet } from "@/lib/whatsapp";
 import { LENGTH_LABEL, SHAPE_LABEL } from "@/lib/data/catalog";
 
 /**
@@ -49,12 +49,14 @@ function itemRow(item: CartItem): string {
   const image = item.kind !== "custom" && item.image ? abs(item.image) : null;
   const thumb = image
     ? `<img src="${esc(image)}" width="64" height="80" alt="" style="display:block;width:64px;height:80px;object-fit:cover;border-radius:10px;border:1px solid ${C.creamInk}">`
-    : `<div style="width:64px;height:80px;border-radius:10px;background:${C.creamDeep};border:1px solid ${C.creamInk};text-align:center;line-height:80px;font-size:26px">💅</div>`;
+    : `<div style="width:64px;height:80px;border-radius:10px;background:${C.creamDeep};border:1px solid ${C.creamInk};text-align:center;line-height:80px;font-size:26px">${item.kind === "makeup" ? "💄" : "💅"}</div>`;
   const name = item.kind === "custom" ? "Set a medida" : item.kind === "charm" ? `Dije ${item.name}` : item.name;
   const detail =
     item.kind === "charm"
       ? "Suelto, sin set"
-      : item.kind === "design"
+      : item.kind === "makeup"
+        ? `Maquillaje · ${formatARS(item.unitPrice)} c/u`
+        : item.kind === "design"
         ? [item.shape && SHAPE_LABEL[item.shape], item.length && LENGTH_LABEL[item.length], describeSizes(item.sizes)].filter(Boolean).join(" · ")
         : describeSizes(item.sizes);
   // el set a medida lleva su receta completa (lo que describe el WhatsApp), sin el link 3D
@@ -200,7 +202,9 @@ export function customerCreatedMail(order: Order, url: string) {
 
 export function customerPaidMail(order: Order, url: string) {
   const name = first(order);
-  const msg = "Recibí el pago y tu set ya está en marcha. Te aviso por WhatsApp cuando esté listo para entregar o enviar.";
+  const msg = hasNailSet(order)
+    ? "Recibí el pago y tu set ya está en marcha. Te aviso por WhatsApp cuando esté listo para entregar o enviar."
+    : "Recibí el pago y ya preparo tu pedido. Te aviso por WhatsApp cuando esté listo para entregar o enviar.";
   return {
     subject: `Pago confirmado · pedido ${order.number} en marcha`,
     text: [`Hola ${name}! ${msg}`, "", summaryText(order), "", `Seguilo acá: ${url}`].join("\n"),

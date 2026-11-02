@@ -14,6 +14,11 @@
   --leopard: #c9a063;
   --leopard-dark: #8a5a2b;
   --white: #fffdf8;
+  /* Maquillaje: rosa rubor (superficies), rosa intenso (acentos) y labial (texto/acción sobre rosa) */
+  --blush: #f6c3d6;
+  --blush-soft: #fbe3ec;
+  --rose: #d9466f;
+  --lip: #8e1f3d;
 
   --radius-sm: 10px;
   --radius: 18px;
@@ -49,6 +54,10 @@
   --color-leopard: var(--leopard);
   --color-leopard-dark: var(--leopard-dark);
   --color-white: var(--white);
+  --color-blush: var(--blush);
+  --color-blush-soft: var(--blush-soft);
+  --color-rose: var(--rose);
+  --color-lip: var(--lip);
 
   --font-display: var(--font-display), "Shrikhand", Georgia, serif;
   --font-sans: var(--font-sans), "Space Grotesk", system-ui, sans-serif;
@@ -450,4 +459,59 @@ html.has-cursor .cursor-root {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
   }
+}
+
+/* ---------- Home: las dos tiendas (puertas Maquillaje / Uñas) ---------- */
+/* Cada sticker tiene su posición de reposo (--x/--y/--r) y, con mouse, se abre en abanico (--hx/--hy/--hr). */
+.door {
+  transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.door:active {
+  transform: scale(0.985);
+}
+.door:focus-visible {
+  outline: 3px solid var(--bordo);
+  outline-offset: 4px;
+}
+.door-sticker {
+  transform: translate3d(var(--x, 0), var(--y, 0), 0) rotate(var(--r, 0deg));
+  transition: transform 650ms var(--ease-out-expo);
+}
+.door-arrow {
+  transition: transform 400ms var(--ease-out-expo);
+}
+@media (hover: hover) and (pointer: fine) {
+  .door:hover .door-sticker {
+    transform: translate3d(var(--hx, 0), var(--hy, 0), 0) rotate(var(--hr, 0deg));
+  }
+  .door:hover .door-arrow {
+    transform: translateX(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .door,
+  .door-sticker,
+  .door-arrow {
+    transition: none;
+  }
+}
+
+/* ---------- Home: tacto y animaciones fuera de pantalla ---------- */
+/* Sin el destello gris/azul del navegador al tocar: cada control tiene su propio :active. manipulation saca la
+   espera del doble toque (zoom) en links y botones. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+a,
+button,
+summary,
+label,
+[role="button"] {
+  touch-action: manipulation;
+}
+/* Bloques con animaciones en bucle (hero, cintas): useOffscreenPause marca data-paused cuando no se ven y se congelan,
+   así el compositor no sigue moviendo capas que nadie mira. */
+[data-paused="true"],
+[data-paused="true"] * {
+  animation-play-state: paused !important;
 }

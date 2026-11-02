@@ -23,12 +23,14 @@ export const DEFAULT_SHIPPING_TABLE: ShippingTable = {
     cost: 3500,
     description: "Escalada, Lomas, Banfield y Lanús. De $3.500 a $4.500 según la zona; te lo confirmo por WhatsApp.",
   },
-  // Valores de referencia (a cargar con los reales desde el admin)
+  // Tarifas de lista de MiCorreo, Paquete Clásico hasta 500 g (caja 20×15×8), consultadas el 28/10/2026 desde CP 1826.
+  // CABA, GBA y provincia pagan lo mismo; "interior" toma lo más caro (Salta/Ushuaia: $7.357 / $10.396) para no cobrar
+  // de menos (Rosario y Córdoba en realidad salen como Buenos Aires, Mendoza y Neuquén $7.118 / $10.335).
   correo: {
-    caba: { domicilio: 6500, sucursal: 5200, etaDays: [2, 4] },
-    gba: { domicilio: 6500, sucursal: 5200, etaDays: [2, 4] },
-    bsas: { domicilio: 8200, sucursal: 6800, etaDays: [3, 6] },
-    interior: { domicilio: 9900, sucursal: 8200, etaDays: [4, 8] },
+    caba: { domicilio: 9500, sucursal: 6500, etaDays: [2, 5] },
+    gba: { domicilio: 9500, sucursal: 6500, etaDays: [2, 5] },
+    bsas: { domicilio: 9500, sucursal: 6500, etaDays: [2, 5] },
+    interior: { domicilio: 10400, sucursal: 7400, etaDays: [3, 7] },
   },
 };
 
@@ -46,11 +48,16 @@ export function zoneForPostalCode(raw: string): ShippingZone | null {
   const cp = Number(digits);
   if (cp >= 1000 && cp <= 1499) return "caba";
   if (cp >= 1500 && cp <= 1999) return "gba";
-  if ((cp >= 2000 && cp <= 2999) || (cp >= 6000 && cp <= 8499)) {
-    // Santa Fe (2000–2999, 3000-3099 parcialmente) y Córdoba (5000) no son BsAs; simplificación:
-    if (cp >= 2000 && cp <= 2999) return cp >= 2700 ? "bsas" : "interior";
-    return "bsas";
-  }
+  // Provincia de Buenos Aires. Quedan afuera los rangos vecinos de otras provincias: 2000–2699 (Santa Fe, Córdoba),
+  // 6100–6399 (sur de Santa Fe y Córdoba, La Pampa) y 8200 en adelante (La Pampa, Neuquén, Río Negro).
+  const bsas: [number, number][] = [
+    [2700, 2999],
+    [6000, 6099],
+    [6400, 6799],
+    [7000, 7699],
+    [8000, 8199],
+  ];
+  if (bsas.some(([a, b]) => cp >= a && cp <= b)) return "bsas";
   return "interior";
 }
 

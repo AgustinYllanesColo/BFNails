@@ -26,7 +26,7 @@ test("armador: el precio sube al sumar técnicas y el set va al carrito", async 
   await page.getByRole("button", { name: /^Francesita/ }).click();
   await expect(page.getByText("Color de la punta")).toBeVisible();
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
-  await expect(page.getByRole("link", { name: /Carrito, 1 set/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Carrito, 1 producto/ })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -70,4 +70,23 @@ test("efectivo solo se habilita con retiro o moto", async ({ page }) => {
   await page.getByLabel("Código postal").fill("1824");
   await page.getByRole("button", { name: /Correo Argentino a sucursal/ }).click();
   await expect(cash).toBeDisabled();
+});
+
+test("maquillaje (en obra): se ven los combos, se suma uno al carrito y avisa lo que viene", async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto("/maquillaje", { waitUntil: "networkidle" });
+  await expect(page.getByRole("heading", { level: 1, name: /Catálogo de maquillaje/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lo que viene" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Pedir por WhatsApp/ })).toBeVisible();
+  await page.getByRole("button", { name: /Sumar al carrito\s?: Combo 3$/ }).click();
+  await expect(page.getByRole("link", { name: /Carrito, 1 producto/ })).toBeVisible();
+  await page.goto("/carrito", { waitUntil: "networkidle" });
+  await expect(page.getByText("Combo 3").first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("menú: Maquillaje va primero y lleva a su catálogo", async ({ page }) => {
+  await page.goto("/", { waitUntil: "networkidle" });
+  await page.getByRole("link", { name: /Ver maquillaje/ }).first().click();
+  await expect(page).toHaveURL(/\/maquillaje/);
 });

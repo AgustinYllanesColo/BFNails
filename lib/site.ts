@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "BF Nails Studio",
   shortName: "BF Nails",
   description:
-    "Uñas press-on personalizadas, con kit de colocación. Remedios de Escalada, Lanús, Banfield, Lomas y envíos a todo el país.",
+    "Uñas press-on personalizadas con kit de colocación y maquillaje para el día a día. Remedios de Escalada, Lanús, Banfield, Lomas y envíos a todo el país.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "5491128253431",
   instagram: "https://instagram.com/bf.nailstudio_",
@@ -31,10 +31,20 @@ export const siteConfig = {
  */
 export const CHARMS_ENABLED = true;
 
-export const nav = [
-  { href: "/catalogo", label: "Catálogo" },
+/** `highlight`: el botón que se destaca en el menú (el maquillaje, mientras sea lo nuevo). */
+export type NavItem = { href: string; label: string; highlight?: string };
+
+export const nav: NavItem[] = [
+  { href: "/maquillaje", label: "Maquillaje", highlight: "Nuevo" },
+  { href: "/catalogo", label: "Uñas" },
   { href: "/disena", label: "Diseñá tu set" },
   ...(CHARMS_ENABLED ? [{ href: "/dijes", label: "Dijes" }] : []),
   { href: "/medidas", label: "Medidas" },
   { href: "/faq", label: "Preguntas" },
 ];
+
+/**
+ * Maquillaje "en obra": mientras se sacan las fotos de los productos sueltos, /maquillaje y la home muestran solo los
+ * combos (que ya tienen foto) con una cinta de obra, y el resto se pide por WhatsApp. Al tener las fotos, poner en false.
+ */
+export const MAKEUP_EN_OBRA = true;

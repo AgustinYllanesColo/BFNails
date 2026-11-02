@@ -15,7 +15,7 @@ export function CartButton() {
       href="/carrito"
       data-cart-button
       className="relative grid size-11 place-items-center rounded-pill bg-cream-deep text-bordo ring-1 ring-bordo/10 transition-colors hover:bg-bordo hover:text-cream"
-      aria-label={`Carrito, ${n} ${n === 1 ? "set" : "sets"}`}
+      aria-label={`Carrito, ${n} ${n === 1 ? "producto" : "productos"}`}
       data-cursor="carrito"
     >
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

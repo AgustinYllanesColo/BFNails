@@ -30,7 +30,7 @@ const sans = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} · Press-on personalizadas`,
+    default: `${siteConfig.name} · Uñas press-on y maquillaje`,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -40,7 +40,13 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [{ url: "/brand/logo-nails.webp", width: 960, height: 580 }],
+    images: [{ url: "/brand/logo-nails.webp", width: 960, height: 580, alt: siteConfig.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: ["/brand/logo-nails.webp"],
   },
   icons: { icon: "/brand/kitty-icon.png" },
 };

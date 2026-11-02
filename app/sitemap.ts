@@ -1,6 +1,5 @@
-import { CHARMS_ENABLED } from "@/lib/site";
 import type { MetadataRoute } from "next";
-import { siteConfig } from "@/lib/site";
+import { CHARMS_ENABLED, siteConfig } from "@/lib/site";
 import { getDesigns } from "@/lib/data/repo";
 
 // Se regenera como máximo cada 5 minutos; el admin además revalida al guardar.
@@ -11,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const designs = await getDesigns();
   return [
     { url: base, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/maquillaje`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/catalogo`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/disena`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/medidas`, changeFrequency: "monthly", priority: 0.6 },
