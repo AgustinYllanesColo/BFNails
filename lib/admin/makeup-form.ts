@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MAKEUP_CATEGORIES, MAKEUP_FORMS, normalizeShades, normalizeVideoUrl, type MakeupCategory } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, MAKEUP_FORMS, normalizeShades, normalizeVideoUrl, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
 
 /** Campo vacío del formulario = sin definir (no 0). */
 const blank = (v: unknown) => (v === "" || v == null ? undefined : v);
@@ -34,6 +34,23 @@ export type MakeupFormData = z.infer<typeof makeupSchema>;
 
 export function parseMakeupForm(formData: FormData) {
   return makeupSchema.safeParse(Object.fromEntries(formData.entries()));
+}
+
+/**
+ * Qué trae un combo, según los casilleros `inc_<id>` del formulario (cantidad de cada producto). Solo cuentan productos
+ * sueltos que existen y con cantidad mayor a cero. Vacío = undefined.
+ */
+export function parseComboIncludes(formData: FormData, all: MakeupProduct[]): MakeupProduct["includes"] {
+  const out: { id: string; qty: number }[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (!key.startsWith("inc_")) continue;
+    const id = key.slice(4);
+    const qty = Number(value);
+    const product = all.find((m) => m.id === id);
+    if (!product || product.category === "combos" || !Number.isInteger(qty) || qty <= 0 || qty > 20) continue;
+    out.push({ id, qty });
+  }
+  return out.length ? out : undefined;
 }
 
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"] as const;

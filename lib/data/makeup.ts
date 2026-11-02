@@ -78,8 +78,9 @@ export type MakeupProduct = {
   /** Recién llegado: lleva la etiqueta "Nuevo". */
   isNew?: boolean;
   /**
-   * Combos: qué productos sueltos lleva. Al venderse descuenta su stock, y el combo se ve agotado cuando falta alguno.
-   * Lo que no está a la venta suelto (las brochas del set) no se cuenta.
+   * Combos: qué productos sueltos lleva. El combo es solo una oferta: no tiene stock propio y armarlo no reserva nada.
+   * Solo si se vende el combo se descuenta lo que trae; si se vende un suelto, baja ese y el combo se ve agotado cuando
+   * ya no alcanza algo. Lo que no está a la venta suelto (las brochas del set) no se cuenta.
    */
   includes?: { id: string; qty: number }[];
   active: boolean;
@@ -362,6 +363,14 @@ export function applyMakeupSold(all: MakeupProduct[], sold: MakeupSold): MakeupP
     }
     return stock == null ? m : { ...m, stock };
   });
+}
+
+/**
+ * Lo que se guarda desde el admin: el stock real de los sueltos, y los combos sin stock propio (el que se muestra sale
+ * siempre de lo que trae; guardarlo dejaría un número viejo pegado al combo).
+ */
+export function makeupForSave(list: MakeupProduct[]): MakeupProduct[] {
+  return list.map((m) => (m.category === "combos" ? { ...m, stock: undefined } : m));
 }
 
 /** Lo vendido después de sumar (sign 1, un pedido) o devolver (sign -1, un pedido cancelado) una demanda. */

@@ -13,7 +13,8 @@ import { maxQtyFor } from "@/lib/types";
 import type { Order } from "@/lib/types";
 import { adminMessages, hasNailSet } from "@/lib/whatsapp";
 import { customerPaidMail } from "@/lib/mail-templates";
-import { parseMakeupForm, validateImageFile } from "@/lib/admin/makeup-form";
+import { parseMakeupForm, parseComboIncludes, validateImageFile } from "@/lib/admin/makeup-form";
+import { applyMakeupSold, makeupForSave } from "@/lib/data/makeup";
 
 const base: MakeupProduct = {
   id: "rubor",
@@ -245,5 +246,36 @@ describe("video del producto", () => {
     const cejas = DEFAULT_MAKEUP.find((m) => m.id === "polvo-cejas-pink21")!;
     expect(cejas.video).toBe("/maquillaje/polvo-cejas-pink21.mp4");
     expect(cejas.image).toBe("/maquillaje/polvo-cejas-pink21.webp");
+  });
+});
+
+describe("combos armados desde el admin", () => {
+  const suelto = (id: string, stock: number): MakeupProduct => ({ ...base, id, name: id, stock });
+  const all = [suelto("rubor", 5), suelto("mascara", 2), { ...base, id: "combo-x", name: "Combo X", category: "combos" as const, form: "combo" as const, includes: [{ id: "rubor", qty: 1 }] }];
+
+  it("lee qué trae el combo: solo productos sueltos que existen, con cantidad mayor a cero", () => {
+    const f = new FormData();
+    f.set("inc_rubor", "1");
+    f.set("inc_mascara", "2");
+    f.set("inc_no-existe", "1");
+    f.set("inc_combo-x", "1");
+    f.set("inc_lapiz", "0");
+    expect(parseComboIncludes(f, all)).toEqual([
+      { id: "rubor", qty: 1 },
+      { id: "mascara", qty: 2 },
+    ]);
+  });
+
+  it("armar un combo no descuenta ni reserva el stock de lo que trae", () => {
+    const [rubor] = applyMakeupSold(all, {});
+    expect(rubor.stock).toBe(5);
+  });
+
+  it("los combos se guardan sin stock propio (solo se descuenta lo que trae cuando se vende)", () => {
+    const shown = applyMakeupSold(all, {});
+    expect(shown.find((m) => m.id === "combo-x")?.stock).toBe(5);
+    const saved = makeupForSave(shown);
+    expect(saved.find((m) => m.id === "combo-x")?.stock).toBeUndefined();
+    expect(saved.find((m) => m.id === "rubor")?.stock).toBe(5);
   });
 });

@@ -7,8 +7,8 @@ import { uploadDesignImage } from "@/lib/admin/catalog";
 import { getAllCharms, getAllMakeup, getAllPromos, getKit, writeContent } from "@/lib/data/content-repo";
 import { resetMakeupSold } from "@/lib/data/makeup-stock";
 import type { Charm, Promo } from "@/lib/data/content";
-import type { MakeupProduct } from "@/lib/data/makeup";
-import { parseMakeupForm } from "@/lib/admin/makeup-form";
+import { makeupForSave, type MakeupProduct } from "@/lib/data/makeup";
+import { parseComboIncludes, parseMakeupForm } from "@/lib/admin/makeup-form";
 import { slugify } from "@/lib/format";
 
 function refresh() {
@@ -28,6 +28,20 @@ async function imageFrom(formData: FormData, folder: string, current?: string): 
   const f = formData.get("image");
   if (f instanceof File && f.size > 0) return uploadDesignImage(f, folder);
   return current;
+}
+
+/**
+ * Cuadro fijo sacado del video en el navegador (ya subido a Blob): se usa como foto solo si el producto no tiene una.
+ * Se acepta únicamente una dirección del Blob de la tienda.
+ */
+function posterFrom(formData: FormData): string | undefined {
+  const v = String(formData.get("videoPoster") ?? "");
+  try {
+    const u = new URL(v);
+    return u.protocol === "https:" && u.hostname.endsWith(".public.blob.vercel-storage.com") ? v : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /* ---------- Promos ---------- */
@@ -116,15 +130,18 @@ export async function saveMakeup(formData: FormData) {
     // la forma y el código del proveedor no se editan: se conservan (los nuevos eligen forma al crearse)
     form: prev?.form ?? d.form ?? "labial",
     code: prev?.code,
-    // lo que trae un combo no se edita desde el formulario: se conserva
-    includes: prev?.includes,
-    image: await imageFrom(formData, "maquillaje", prev?.image),
+    // combo: qué trae se elige en el formulario y no tiene stock propio (ver CLAUDE.md)
+    includes: d.category === "combos" ? parseComboIncludes(formData, all) : undefined,
+    stock: d.category === "combos" ? undefined : d.stock,
+    // el video llega ya subido (el navegador lo achica y lo sube a Blob): acá viaja solo su dirección; vacío = sin video
+    video: d.video,
+    image: (await imageFrom(formData, "maquillaje", prev?.image)) ?? posterFrom(formData),
     featured: formData.get("featured") === "on",
     isNew: formData.get("isNew") === "on",
     active: formData.get("active") === "on",
   };
   // se guarda el stock real (cargado − vendido), así que lo vendido vuelve a cero
-  await writeContent("makeup", prev ? all.map((m) => (m.id === id ? product : m)) : [product, ...all]);
+  await writeContent("makeup", makeupForSave(prev ? all.map((m) => (m.id === id ? product : m)) : [product, ...all]));
   await resetMakeupSold();
   refresh();
 }
@@ -133,7 +150,7 @@ export async function deleteMakeup(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  await writeContent("makeup", (await getAllMakeup()).filter((m) => m.id !== id));
+  await writeContent("makeup", makeupForSave((await getAllMakeup()).filter((m) => m.id !== id)));
   await resetMakeupSold();
   refresh();
 }

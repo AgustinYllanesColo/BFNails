@@ -5,6 +5,7 @@ import { getAllCharms, getAllMakeup, getAllPromos, getKit } from "@/lib/data/con
 import type { Charm, Promo } from "@/lib/data/content";
 import { MAKEUP_CATEGORIES, MAKEUP_FORMS, type MakeupForm, type MakeupProduct } from "@/lib/data/makeup";
 import { IMAGE_TYPES, MAKEUP_LIMITS } from "@/lib/admin/makeup-form";
+import { VideoUploader } from "@/components/admin/VideoUploader";
 import { Card, PageTitle, adminBtn, adminBtnGhost, adminInput } from "@/components/admin/ui";
 import { PromoCard } from "@/components/sections/Promos";
 import { deleteCharm, deleteMakeup, deletePromo, saveCharm, saveKit, saveMakeup, savePromo } from "./actions";
@@ -43,6 +44,8 @@ const MAKEUP_FORM_LABEL: Record<MakeupForm, string> = {
 export default async function ContenidoPage() {
   await requireAdmin();
   const [promos, makeup, charms, kit] = await Promise.all([getAllPromos(), getAllMakeup(), getAllCharms(), getKit()]);
+  // productos sueltos: lo que se puede poner adentro de un combo
+  const loose = makeup.filter((m) => m.category !== "combos");
   return (
     <>
       <PageTitle title="Promos, maquillaje, dijes y kit">
@@ -78,9 +81,9 @@ export default async function ContenidoPage() {
             ven en /maquillaje; los destacados, también en la home.
           </p>
           <div className="space-y-3">
-            <MakeupForm />
+            <MakeupForm loose={loose} />
             {makeup.map((m) => (
-              <MakeupForm key={m.id} product={m} />
+              <MakeupForm key={m.id} product={m} loose={loose} />
             ))}
           </div>
         </Card>
@@ -245,7 +248,8 @@ function CharmForm({ charm }: { charm?: Charm }) {
   );
 }
 
-function MakeupForm({ product }: { product?: MakeupProduct }) {
+function MakeupForm({ product, loose }: { product?: MakeupProduct; loose: MakeupProduct[] }) {
+  const isCombo = product?.category === "combos";
   return (
     <form action={saveMakeup} className="grid gap-3 rounded-lg border border-bordo/10 p-3 md:grid-cols-[64px_1fr]">
       {product && <input type="hidden" name="id" value={product.id} />}
@@ -278,9 +282,6 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
         <L label="Descripción (una línea)">
           <input name="description" maxLength={MAKEUP_LIMITS.description} defaultValue={product?.description} className={adminInput} />
         </L>
-        <L label="Video (link .mp4 o .webm; vacío = sin video). La foto queda como cuadro fijo">
-          <input name="video" maxLength={500} placeholder="/maquillaje/producto.mp4" defaultValue={product?.video} className={adminInput} />
-        </L>
         <L label="Tonos disponibles (separados por coma; vacío = sin tonos)">
           <input name="shades" maxLength={400} placeholder="02, 04, 06" defaultValue={product?.shades?.join(", ")} className={adminInput} />
         </L>
@@ -291,9 +292,11 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
           <L label="Precio antes">
             <input name="priceBefore" type="number" min={0} max={MAKEUP_LIMITS.price} step={1} defaultValue={product?.priceBefore} className={adminInput} />
           </L>
-          <L label="Stock">
-            <input name="stock" type="number" min={0} max={MAKEUP_LIMITS.stock} step={1} defaultValue={product?.stock} className={adminInput} />
-          </L>
+          {!isCombo && (
+            <L label={product ? "Stock" : "Stock (no va en combos)"}>
+              <input name="stock" type="number" min={0} max={MAKEUP_LIMITS.stock} step={1} defaultValue={product?.stock} className={adminInput} />
+            </L>
+          )}
           <L label="Color">
             <input name="hex" type="color" defaultValue={product?.hex ?? "#d9667c"} className={adminInput + " p-1"} />
           </L>
@@ -309,8 +312,13 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
             </L>
           )}
         </div>
+        {(isCombo || !product) && <ComboIncludes product={product} loose={loose} />}
+        <VideoUploader initial={product?.video} hasImage={Boolean(product?.image)} />
         <div className="flex flex-wrap items-center gap-3 text-xs">
-          <input type="file" name="image" accept={IMAGE_TYPES.join(",")} aria-label="Foto del producto" />
+          <label className="rounded-pill inline-flex cursor-pointer items-center gap-1.5 bg-white px-3 py-2 font-semibold ring-1 ring-bordo/20 has-[input:focus-visible]:ring-2">
+            <input type="file" name="image" accept={IMAGE_TYPES.join(",")} className="sr-only" />
+            {product?.image ? "Cambiar foto" : "Subir foto"}
+          </label>
           {product?.image && (
             <label className="flex items-center gap-1">
               <input type="checkbox" name="removeImage" /> quitar foto
@@ -346,5 +354,49 @@ function L({ label, children }: { label: string; children: React.ReactNode }) {
       <span className="mb-1 block text-xs font-bold tracking-wider text-ink-soft uppercase">{label}</span>
       {children}
     </label>
+  );
+}
+
+/**
+ * Qué trae un combo: la cantidad de cada producto suelto (vacío o 0 = no lo trae). El combo es solo una oferta: no tiene
+ * stock propio y no reserva nada; solo cuando se vende se descuenta lo que trae (ver CLAUDE.md).
+ */
+function ComboIncludes({ product, loose }: { product?: MakeupProduct; loose: MakeupProduct[] }) {
+  const qty = (id: string) => product?.includes?.find((c) => c.id === id)?.qty;
+  const count = product?.includes?.length ?? 0;
+  return (
+    <details open={Boolean(product)} className="rounded-md bg-cream-deep/60 p-3 text-sm">
+      <summary className="cursor-pointer font-semibold">
+        {product ? `Qué trae el combo (${count} ${count === 1 ? "producto" : "productos"})` : "Si es un combo: qué trae"}
+      </summary>
+      <p className="mt-2 text-xs text-ink-soft">
+        Poné cuántos lleva de cada uno. El combo no tiene stock propio: armarlo no descuenta nada; si se vende, se descuenta
+        lo que trae, y se ve agotado cuando algo de adentro se termina.
+      </p>
+      <ul className="mt-3 grid gap-x-4 gap-y-1.5 sm:grid-cols-2">
+        {loose.map((m) => (
+          <li key={m.id} className="flex items-center gap-2">
+            <span className="w-16 shrink-0">
+            <input
+              name={`inc_${m.id}`}
+              type="number"
+              min={0}
+              max={20}
+              step={1}
+              defaultValue={qty(m.id)}
+              aria-label={`Cantidad de ${m.name}${m.brand ? ` ${m.brand}` : ""}`}
+              className={adminInput + " px-2 py-1 text-center"}
+            />
+            </span>
+            <span className="min-w-0 leading-tight [overflow-wrap:anywhere]">
+              {m.name}
+              {m.brand && <span className="text-ink-soft"> · {m.brand}</span>}
+              {m.shades && <span className="text-ink-soft"> · tonos {m.shades.join(", ")}</span>}
+              {!m.active && <span className="text-ink-soft"> (no disponible)</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
