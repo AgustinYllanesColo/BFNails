@@ -62,6 +62,11 @@ export type MakeupProduct = {
   stock?: number;
   /** Foto real (fondo liso). Mientras falte, se dibuja el producto con `form` y `hex`. */
   image?: string;
+  /**
+   * Video corto del producto (MP4 H.264 sin sonido, vertical): en la tarjeta del catálogo reemplaza a la foto y corre
+   * solo, en bucle. `image` queda como cuadro fijo (mientras carga, en los stickers chicos y con movimiento reducido).
+   */
+  video?: string;
   /** Color del producto para el dibujo provisorio. */
   hex?: string;
   /** Tonos disponibles (ej. "02", "Nude 4"). Si hay, la clienta elige uno antes de sumarlo. */
@@ -103,7 +108,7 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
   p({ id: "pestanas-50d-naez", name: "Pestañas 50D", brand: "Naez", description: "Pestañas postizas de mucho volumen.", category: "pestanas", form: "pestanas", price: 5600, stock: 2, hex: "#1d1a1a", code: "DD2870" }),
   p({ id: "pestanas-racimo-eyelash-bond", name: "Pestañas en racimo", brand: "Eyelash Bond", description: "Racimos para armar el volumen a tu gusto.", category: "pestanas", form: "racimo", price: 14000, stock: 1, hex: "#1d1a1a", code: "DD3402" }),
   // Cejas
-  p({ id: "polvo-cejas-pink21", name: "Polvo para cejas", brand: "Pink21", description: "Cuatro tonos para rellenar y definir.", category: "cejas", form: "duo-cejas", price: 3500, stock: 7, hex: "#7a5643", code: "CS6850" }),
+  p({ id: "polvo-cejas-pink21", name: "Polvo para cejas", brand: "Pink21", description: "Cuatro tonos para rellenar y definir.", category: "cejas", form: "duo-cejas", price: 3500, stock: 7, hex: "#7a5643", image: "/maquillaje/polvo-cejas-pink21.webp", video: "/maquillaje/polvo-cejas-pink21.mp4", code: "CS6850" }),
   p({ id: "gel-cejas-pink21", name: "Gel para cejas", brand: "Pink21", description: "Peina y fija las cejas todo el día.", category: "cejas", form: "gel", price: 3500, stock: 3, hex: "#c9b8a8", code: "CS6418" }),
   // Labios
   p({ id: "lip-gloss-brillo", name: "Lip gloss con brillo", brand: "Pink21", description: "Brillo jugoso con destellos.", category: "labios", form: "gloss", price: 3800, stock: 2, hex: "#f08fb0", shades: ["03"], code: "CS6696", featured: true }),
@@ -204,6 +209,17 @@ const isNat = (v: unknown): v is number => typeof v === "number" && Number.isInt
 const optStr = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
 
 /**
+ * Link de video aceptado: un archivo de la tienda (`/maquillaje/x.mp4`) o uno https, terminado en .mp4 o .webm.
+ * Cualquier otra cosa (otro protocolo, `//host`, una foto) se descarta. Devuelve el link limpio o undefined.
+ */
+export function normalizeVideoUrl(v: unknown): string | undefined {
+  if (typeof v !== "string") return undefined;
+  const t = v.trim();
+  if (t.length > 500 || !/^(\/(?!\/)|https:\/\/)[^\s"'<>]+\.(mp4|webm)(\?[^\s"'<>]*)?$/i.test(t)) return undefined;
+  return t;
+}
+
+/**
  * Lo guardado en `settings.makeup` puede venir de una versión anterior (sin campos nuevos) o roto.
  * Devuelve null si no es una lista (se usa el valor por defecto); si es una lista, completa lo que falta
  * y descarta las filas que no se pueden vender (sin id, nombre, categoría válida o precio).
@@ -227,6 +243,7 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
       priceBefore: isNat(r.priceBefore) && r.priceBefore > r.price ? r.priceBefore : undefined,
       stock: isNat(r.stock) ? r.stock : undefined,
       image: optStr(r.image),
+      video: normalizeVideoUrl(r.video),
       hex: optStr(r.hex),
       shades: normalizeShades(r.shades),
       includes: normalizeIncludes(r.includes),

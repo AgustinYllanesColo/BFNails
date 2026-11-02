@@ -78,6 +78,11 @@ test("maquillaje (en obra): se ven los combos, se suma uno al carrito y avisa lo
   await expect(page.getByRole("heading", { level: 1, name: /Catálogo de maquillaje/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lo que viene" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Pedir por WhatsApp/ })).toBeVisible();
+  // los sueltos que ya tienen foto o video también se ven: el polvo para cejas, con su video corriendo sin sonido
+  const cejas = page.locator("#polvo-cejas-pink21");
+  await cejas.scrollIntoViewIfNeeded();
+  await expect(cejas.locator("video")).toHaveAttribute("src", "/maquillaje/polvo-cejas-pink21.mp4");
+  await expect.poll(() => cejas.locator("video").evaluate((v: HTMLVideoElement) => v.muted && !v.paused)).toBe(true);
   await page.getByRole("button", { name: /Sumar al carrito\s?: Combo 3$/ }).click();
   await expect(page.getByRole("link", { name: /Carrito, 1 producto/ })).toBeVisible();
   await page.goto("/carrito", { waitUntil: "networkidle" });

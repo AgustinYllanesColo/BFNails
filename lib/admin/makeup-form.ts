@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MAKEUP_CATEGORIES, MAKEUP_FORMS, normalizeShades, type MakeupCategory } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, MAKEUP_FORMS, normalizeShades, normalizeVideoUrl, type MakeupCategory } from "@/lib/data/makeup";
 
 /** Campo vacío del formulario = sin definir (no 0). */
 const blank = (v: unknown) => (v === "" || v == null ? undefined : v);
@@ -24,6 +24,8 @@ const makeupSchema = z
     hex: z.preprocess(blank, z.string().regex(/^#[0-9a-fA-F]{6}$/).optional()),
     // separados por coma: "02, 04, 06"
     shades: z.preprocess((v) => normalizeShades(v), z.array(z.string()).optional()),
+    // link del video (archivo de la tienda o https, .mp4/.webm); vacío = sin video. Uno inválido no se guarda en silencio.
+    video: z.preprocess((v) => (typeof v === "string" && !v.trim() ? undefined : v), z.string().trim().refine((v) => normalizeVideoUrl(v) != null, "Video: usá un link .mp4 o .webm").optional()),
   })
   // un "precio antes" que no es mayor al precio no es una oferta: se descarta
   .transform((d) => ({ ...d, priceBefore: d.priceBefore != null && d.priceBefore > d.price ? d.priceBefore : undefined }));

@@ -278,6 +278,9 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
         <L label="Descripción (una línea)">
           <input name="description" maxLength={MAKEUP_LIMITS.description} defaultValue={product?.description} className={adminInput} />
         </L>
+        <L label="Video (link .mp4 o .webm; vacío = sin video). La foto queda como cuadro fijo">
+          <input name="video" maxLength={500} placeholder="/maquillaje/producto.mp4" defaultValue={product?.video} className={adminInput} />
+        </L>
         <L label="Tonos disponibles (separados por coma; vacío = sin tonos)">
           <input name="shades" maxLength={400} placeholder="02, 04, 06" defaultValue={product?.shades?.join(", ")} className={adminInput} />
         </L>

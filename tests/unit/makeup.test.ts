@@ -210,3 +210,40 @@ describe("tonos de maquillaje", () => {
     expect(normalizeMakeupList([withShades])![0].shades).toEqual(["14", "17", "19", "23", "24"]);
   });
 });
+
+describe("video del producto", () => {
+  it("conserva un video de la tienda o de https y descarta lo que no es un video", () => {
+    const row = { id: "x", name: "X", category: "cejas", price: 100 };
+    const list = normalizeMakeupList([
+      { ...row, id: "a", video: "/maquillaje/polvo-cejas-pink21.mp4" },
+      { ...row, id: "b", video: "https://cdn.example.com/v/demo.webm" },
+      { ...row, id: "c", video: "javascript:alert(1)" },
+      { ...row, id: "d", video: "/maquillaje/foto.webp" },
+      { ...row, id: "e", video: "//otro.com/demo.mp4" },
+    ])!;
+    expect(list.map((m) => m.video)).toEqual([
+      "/maquillaje/polvo-cejas-pink21.mp4",
+      "https://cdn.example.com/v/demo.webm",
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  it("el formulario del admin acepta el link del video y vacío lo saca", () => {
+    const fd = (video: string) => {
+      const f = new FormData();
+      for (const [k, v] of Object.entries({ name: "Polvo", category: "cejas", price: "3500", video })) f.set(k, v);
+      return f;
+    };
+    expect(parseMakeupForm(fd(" /maquillaje/demo.mp4 ")).data?.video).toBe("/maquillaje/demo.mp4");
+    expect(parseMakeupForm(fd("")).data?.video).toBeUndefined();
+    expect(parseMakeupForm(fd("javascript:alert(1)")).success).toBe(false);
+  });
+
+  it("el polvo para cejas Pink21 trae su video y una foto fija", () => {
+    const cejas = DEFAULT_MAKEUP.find((m) => m.id === "polvo-cejas-pink21")!;
+    expect(cejas.video).toBe("/maquillaje/polvo-cejas-pink21.mp4");
+    expect(cejas.image).toBe("/maquillaje/polvo-cejas-pink21.webp");
+  });
+});
