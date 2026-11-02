@@ -1,6 +1,6 @@
 /**
  * Maquillaje: productos de reventa (compra mayorista en Bella Central, 01/11). Se guardan como JSON en `settings`
- * (clave `makeup`) y se editan desde Admin → Promos, dijes y kit → Maquillaje. Este archivo solo tiene tipos y valores
+ * (clave `makeup`) y se editan desde Admin → Maquillaje (/admin/maquillaje). Este archivo solo tiene tipos y valores
  * por defecto, así lo pueden importar el cliente y el servidor.
  *
  * Precios provisorios: el doble del costo, redondeado a $100 hacia arriba. Se reemplazan por la lista final de Brenda.

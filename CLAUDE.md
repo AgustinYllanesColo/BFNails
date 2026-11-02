@@ -9,7 +9,7 @@
 - No volver a preguntarle esto a Tomás: ya lo explicó varias veces.
 
 ## Admin
-- Todo lo de maquillaje se tiene que poder cargar desde el admin (/admin/contenido), sin links ni pasos técnicos:
+- Todo lo de maquillaje se tiene que poder cargar desde el admin, en su propia sección (/admin/maquillaje, como el catálogo de uñas), sin links ni pasos técnicos:
   fotos y videos se suben como archivo. Los videos se achican en el navegador antes de subirse.
 - La forma del dibujo no importa (van fotos). El código de proveedor lo administra Claude a partir de los tickets
   de compra (lib/data/makeup.ts), no Brenda.
