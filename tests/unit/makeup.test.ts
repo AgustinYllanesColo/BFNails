@@ -279,3 +279,24 @@ describe("combos armados desde el admin", () => {
     expect(saved.find((m) => m.id === "rubor")?.stock).toBe(5);
   });
 });
+
+describe("fotos y videos que vienen con la tienda", () => {
+  const guardado = { id: "polvo-cejas-pink21", name: "Polvo para cejas", category: "cejas", price: 3500 };
+
+  it("un producto guardado antes de tener foto o video toma los de la tienda", () => {
+    const [m] = normalizeMakeupList([guardado])!;
+    expect(m.image).toBe("/maquillaje/polvo-cejas-pink21.webp");
+    expect(m.video).toBe("/maquillaje/polvo-cejas-pink21.mp4");
+  });
+
+  it("si se quitaron desde el admin, no vuelven", () => {
+    const [m] = normalizeMakeupList(makeupForSave([{ ...base, id: "polvo-cejas-pink21", category: "cejas" }]))!;
+    expect(m.image).toBeUndefined();
+    expect(m.video).toBeUndefined();
+  });
+
+  it("lo que se cargó desde el admin gana sobre lo de la tienda", () => {
+    const [m] = normalizeMakeupList([{ ...guardado, image: "https://x.public.blob.vercel-storage.com/a.webp" }])!;
+    expect(m.image).toBe("https://x.public.blob.vercel-storage.com/a.webp");
+  });
+});

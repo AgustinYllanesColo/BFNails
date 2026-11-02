@@ -227,6 +227,10 @@ export function normalizeVideoUrl(v: unknown): string | undefined {
  */
 export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
   if (!Array.isArray(value)) return null;
+  // foto y video que vienen con la tienda (public/maquillaje): los toma un producto guardado que nunca tuvo ese campo.
+  // Lo guardado desde el admin siempre trae los dos campos (null = se quitó a propósito), así que eso se respeta.
+  const shipped = (id: string, key: "image" | "video", r: Record<string, unknown>) =>
+    key in r ? undefined : DEFAULT_MAKEUP.find((m) => m.id === id)?.[key];
   const out: MakeupProduct[] = [];
   for (const raw of value) {
     if (!raw || typeof raw !== "object") continue;
@@ -243,8 +247,8 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
       price: r.price,
       priceBefore: isNat(r.priceBefore) && r.priceBefore > r.price ? r.priceBefore : undefined,
       stock: isNat(r.stock) ? r.stock : undefined,
-      image: optStr(r.image),
-      video: normalizeVideoUrl(r.video),
+      image: optStr(r.image) ?? shipped(r.id, "image", r),
+      video: normalizeVideoUrl(r.video) ?? shipped(r.id, "video", r),
       hex: optStr(r.hex),
       shades: normalizeShades(r.shades),
       includes: normalizeIncludes(r.includes),
@@ -370,7 +374,13 @@ export function applyMakeupSold(all: MakeupProduct[], sold: MakeupSold): MakeupP
  * siempre de lo que trae; guardarlo dejaría un número viejo pegado al combo).
  */
 export function makeupForSave(list: MakeupProduct[]): MakeupProduct[] {
-  return list.map((m) => (m.category === "combos" ? { ...m, stock: undefined } : m));
+  return list.map((m) => ({
+    ...m,
+    stock: m.category === "combos" ? undefined : m.stock,
+    // null (y no undefined, que JSON borra): "sin foto / sin video" a propósito, así no vuelven los de la tienda
+    image: m.image ?? (null as unknown as undefined),
+    video: m.video ?? (null as unknown as undefined),
+  }));
 }
 
 /** Lo vendido después de sumar (sign 1, un pedido) o devolver (sign -1, un pedido cancelado) una demanda. */
