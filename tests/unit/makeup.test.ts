@@ -3,6 +3,8 @@ import {
   DEFAULT_MAKEUP,
   MAKEUP_FORMS,
   checkMakeupLines,
+  makeupLineName,
+  normalizeShades,
   normalizeMakeupList,
   toPublicMakeup,
   type MakeupProduct,
@@ -171,5 +173,40 @@ describe("mensajes de un pedido solo de maquillaje", () => {
     expect(hasNailSet(withSet)).toBe(true);
     expect(adminMessages.pagoRecibido(withSet)).toMatch(/uñas/);
     expect(adminMessages.listo(withSet)).toMatch(/Tu set/);
+  });
+});
+
+describe("tonos de maquillaje", () => {
+  const withShades = { ...DEFAULT_MAKEUP.find((m) => m.id === "delineador-labio")!, stock: 10 };
+
+  it("normaliza la lista: recorta, saca vacíos y repetidos, acepta texto con comas", () => {
+    expect(normalizeShades(" 02, 04 ,,02, 06 ")).toEqual(["02", "04", "06"]);
+    expect(normalizeShades(["Nude 4", "", "Nude 4"])).toEqual(["Nude 4"]);
+    expect(normalizeShades("")).toBeUndefined();
+    expect(normalizeShades(42)).toBeUndefined();
+  });
+
+  it("el nombre de la línea lleva el tono", () => {
+    expect(makeupLineName("Delineador de labio", "17")).toBe("Delineador de labio · tono 17");
+    expect(makeupLineName("Brocha")).toBe("Brocha");
+  });
+
+  it("exige un tono válido cuando el producto tiene tonos", () => {
+    expect(checkMakeupLines([{ makeupId: withShades.id, qty: 1 }], [withShades])).toMatch(/Elegí el tono/);
+    expect(checkMakeupLines([{ makeupId: withShades.id, qty: 1, shade: "99" }], [withShades])).toMatch(/tono 99/);
+    expect(checkMakeupLines([{ makeupId: withShades.id, qty: 1, shade: "17" }], [withShades])).toBeNull();
+  });
+
+  it("el stock se comparte entre tonos", () => {
+    const two = { ...withShades, stock: 2 };
+    const lines = [
+      { makeupId: two.id, qty: 2, shade: "14" },
+      { makeupId: two.id, qty: 1, shade: "17" },
+    ];
+    expect(checkMakeupLines(lines, [two])).toMatch(/quedan 2/);
+  });
+
+  it("los tonos guardados sobreviven a la normalización", () => {
+    expect(normalizeMakeupList([withShades])![0].shades).toEqual(["14", "17", "19", "23", "24"]);
   });
 });

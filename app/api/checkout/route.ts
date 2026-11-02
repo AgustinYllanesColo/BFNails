@@ -2,7 +2,7 @@ import { NextResponse, after } from "next/server";
 import { checkoutSchema, normalizeWhatsapp } from "@/lib/checkout";
 import { getDesign } from "@/lib/data/repo";
 import { getBuilderConfig, getSettings } from "@/lib/data/settings";
-import { checkMakeupLines } from "@/lib/data/makeup";
+import { checkMakeupLines, makeupLineName } from "@/lib/data/makeup";
 import { quoteSelection, designVariantPrice, fourForThree } from "@/lib/pricing";
 import { quoteFromTable } from "@/lib/shipping/table";
 import { quoteShipping } from "@/lib/shipping";
@@ -93,11 +93,14 @@ export async function POST(req: Request) {
     } else if (it.kind === "makeup") {
       // checkMakeupLines ya validó que existe, está activo y alcanza el stock
       const product = makeup.find((m) => m.id === it.makeupId && m.active)!;
+      // el tono solo cuenta si el producto tiene tonos (checkMakeupLines ya validó que sea uno de ellos)
+      const shade = product.shades?.length ? it.shade : undefined;
       items.push({
         id: crypto.randomUUID(),
         kind: "makeup",
         makeupId: product.id,
-        name: product.name,
+        shade,
+        name: makeupLineName(product.name, shade),
         image: product.image,
         unitPrice: product.price,
         qty: it.qty,

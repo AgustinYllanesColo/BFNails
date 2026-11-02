@@ -63,6 +63,7 @@ export const cartItemSchema = z.discriminatedUnion("kind", [
     kind: z.literal("makeup"),
     ref: z.string().max(40).optional(),
     makeupId: z.string().min(1).max(80),
+    shade: z.string().trim().min(1).max(30).optional(),
     qty: z.number().int().min(1).max(20),
   }),
 ]);

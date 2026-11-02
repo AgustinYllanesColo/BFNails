@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MAKEUP_CATEGORIES, MAKEUP_FORMS, type MakeupCategory } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, MAKEUP_FORMS, normalizeShades, type MakeupCategory } from "@/lib/data/makeup";
 
 /** Campo vacío del formulario = sin definir (no 0). */
 const blank = (v: unknown) => (v === "" || v == null ? undefined : v);
@@ -22,6 +22,8 @@ const makeupSchema = z
     stock: optInt(MAKEUP_LIMITS.stock),
     // va a un `style`: solo un color hex
     hex: z.preprocess(blank, z.string().regex(/^#[0-9a-fA-F]{6}$/).optional()),
+    // separados por coma: "02, 04, 06"
+    shades: z.preprocess((v) => normalizeShades(v), z.array(z.string()).optional()),
   })
   // un "precio antes" que no es mayor al precio no es una oferta: se descarta
   .transform((d) => ({ ...d, priceBefore: d.priceBefore != null && d.priceBefore > d.price ? d.priceBefore : undefined }));

@@ -117,7 +117,7 @@ export function CheckoutForm({ transfer, mp, disabled, promo4x3 }: Props) {
               : i.kind === "charm"
                 ? { kind: "charm", ref: i.id, charmId: i.charmId, qty: i.qty }
                 : i.kind === "makeup"
-                  ? { kind: "makeup", ref: i.id, makeupId: i.makeupId, qty: i.qty }
+                  ? { kind: "makeup", ref: i.id, makeupId: i.makeupId, shade: i.shade, qty: i.qty }
                   : { kind: "custom", ref: i.id, selection: i.selection, qty: i.qty, sizes: i.sizes },
           ),
           expectedTotal: total,

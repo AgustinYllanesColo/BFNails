@@ -124,6 +124,8 @@ export type CartItem =
       id: string;
       kind: "makeup";
       makeupId: string;
+      /** Tono elegido, si el producto tiene tonos (el nombre ya lo incluye). */
+      shade?: string;
       name: string;
       image?: string;
       unitPrice: number;

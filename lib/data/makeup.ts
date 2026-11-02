@@ -64,6 +64,8 @@ export type MakeupProduct = {
   image?: string;
   /** Color del producto para el dibujo provisorio. */
   hex?: string;
+  /** Tonos disponibles (ej. "02", "Nude 4"). Si hay, la clienta elige uno antes de sumarlo. */
+  shades?: string[];
   /** Código del proveedor, para Brenda. */
   code?: string;
   /** Destacado en la home. */
@@ -77,14 +79,14 @@ const p = (x: Omit<MakeupProduct, "active" | "isNew"> & { isNew?: boolean }): Ma
 
 export const DEFAULT_MAKEUP: MakeupProduct[] = [
   // Rostro
-  p({ id: "base-liquida-ruby", name: "Base líquida Soft Matt", brand: "Ruby Rose", description: "Cobertura pareja y liviana para todos los días.", category: "rostro", form: "base", price: 5200, stock: 2, hex: "#e2b48f", code: "HB-8050", featured: true }),
-  p({ id: "polvo-compacto-pink21", name: "Polvo compacto", brand: "Pink21", description: "Sella la base y saca el brillo.", category: "rostro", form: "polvo", price: 5900, stock: 2, hex: "#e3b896", code: "CS4716" }),
+  p({ id: "base-liquida-ruby", name: "Base líquida Soft Matt", brand: "Ruby Rose", description: "Cobertura pareja y liviana para todos los días.", category: "rostro", form: "base", price: 5200, stock: 2, hex: "#e2b48f", shades: ["Bege 4", "Nude 4"], code: "HB-8050", featured: true }),
+  p({ id: "polvo-compacto-pink21", name: "Polvo compacto Perfect Finish", brand: "Pink21", description: "Sella la base y saca el brillo.", category: "rostro", form: "polvo", price: 5900, stock: 2, hex: "#e3b896", shades: ["05", "06"], code: "CS4716" }),
   p({ id: "polvo-volati", name: "Polvo suelto", brand: "Volati", description: "Polvo para sellar y difuminar.", category: "rostro", form: "suelto", price: 6400, stock: 3, hex: "#f4dcc6", code: "TEI8009" }),
   p({ id: "rubor-crema-magic-color", name: "Rubor en crema", brand: "Magic Color", description: "Se aplica con los dedos y se funde con la piel.", category: "rostro", form: "rubor", price: 3400, stock: 5, hex: "#e5848f", code: "CS5167", featured: true }),
   p({ id: "rubor-magico-rimera-quince", name: "Rubor mágico", brand: "Rimera Quince", description: "Cambia de tono con la piel.", category: "rostro", form: "rubor-barra", price: 3900, stock: 3, hex: "#ee6f8e", code: "RQ33" }),
   p({ id: "iluminador-barra-rimera-quince", name: "Iluminador en barra", brand: "Rimera Quince", description: "Brillo en pómulos, nariz y arco de cupido.", category: "rostro", form: "barra", price: 4400, stock: 2, hex: "#f3d9a4", code: "RQ34", featured: true }),
   // Ojos
-  p({ id: "delineador-ojos", name: "Delineador para ojos", description: "Trazo negro, intenso y preciso.", category: "ojos", form: "delineador", price: 2200, stock: 4, hex: "#1d1a1a", code: "CS7030" }),
+  p({ id: "delineador-ojos", name: "Delineador Perfect Finish", brand: "Pink21", description: "Trazo intenso y preciso.", category: "ojos", form: "delineador", price: 2200, stock: 4, hex: "#1d1a1a", shades: ["02", "05"], code: "CS7030" }),
   p({ id: "delineador-liquido-lapiz-2en1", name: "Delineador líquido + lápiz 2 en 1", brand: "Rimera Quince", description: "Un lado líquido para el rabito y un lado lápiz.", category: "ojos", form: "doble", price: 3800, stock: 3, hex: "#6d2a4e", code: "RQ08" }),
   p({ id: "delineador-pink21-x12", name: "Lápiz delineador", brand: "Pink21", description: "Negro, con sacapuntas en la tapa. Precio por unidad.", category: "ojos", form: "lapiz", price: 1100, stock: 12, hex: "#1d1a1a", code: "CS3420" }),
   p({ id: "perfilador-naez-x3", name: "Perfiladores ×3", brand: "Naez", description: "Set de 3 lápices perfiladores.", category: "ojos", form: "set-lapices", price: 1300, stock: 5, hex: "#6b4430", code: "DD2996" }),
@@ -101,11 +103,11 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
   // Labios
   p({ id: "lip-gloss-brillo", name: "Lip gloss con brillo", description: "Brillo jugoso con destellos.", category: "labios", form: "gloss", price: 3800, stock: 2, hex: "#f08fb0", code: "CS6696", featured: true }),
   p({ id: "lip-gloss-brillo-2", name: "Lip gloss con brillo · tono 2", description: "Brillo con destellos, en tono coral.", category: "labios", form: "gloss", price: 3300, stock: 1, hex: "#f2705e", code: "CS6695" }),
-  p({ id: "lip-glaze-super-stay-matte", name: "Lip glaze Super Stay Matte", description: "Labial líquido mate de larga duración.", category: "labios", form: "gloss", price: 3400, stock: 3, hex: "#7d1a2e", code: "TEI8469" }),
-  p({ id: "labial-matte-barra", name: "Labial matte en barra", description: "Color pleno y acabado mate.", category: "labios", form: "labial", price: 3300, stock: 2, hex: "#c42b3c", code: "TEI8560" }),
-  p({ id: "lapiz-labial-lip-contour", name: "Lápiz labial Lip Contour", description: "Contorno y relleno en un mismo lápiz.", category: "labios", form: "lapiz", price: 2300, stock: 3, hex: "#c98a84", code: "TEI8235" }),
+  p({ id: "lip-glaze-super-stay-matte", name: "Lip glaze Super Stay Matte", brand: "TEI", description: "Labial líquido mate de larga duración.", category: "labios", form: "gloss", price: 3400, stock: 3, hex: "#7d1a2e", shades: ["02", "04", "06"], code: "TEI8469" }),
+  p({ id: "labial-matte-barra", name: "Labial matte en barra", brand: "TEI", description: "Color pleno y acabado mate.", category: "labios", form: "labial", price: 3300, stock: 2, hex: "#c42b3c", shades: ["01", "02"], code: "TEI8560" }),
+  p({ id: "lapiz-labial-lip-contour", name: "Lápiz labial Lip Contour", brand: "TEI", description: "Contorno y relleno en un mismo lápiz.", category: "labios", form: "lapiz", price: 2300, stock: 3, hex: "#c98a84", shades: ["#11", "#12"], code: "TEI8235" }),
   p({ id: "lip-liner", name: "Lip liner", description: "Perfilador de labios.", category: "labios", form: "lapiz", price: 1900, stock: 2, hex: "#6b1d33", code: "CS7029" }),
-  p({ id: "delineador-labio", name: "Delineador de labio", description: "Perfila y evita que el labial se corra.", category: "labios", form: "lapiz", price: 1200, stock: 6, hex: "#b14e36", code: "DH-2207-C" }),
+  p({ id: "delineador-labio", name: "Delineador de labio", brand: "Miss Demi", description: "Perfila y evita que el labial se corra.", category: "labios", form: "lapiz", price: 1200, stock: 6, hex: "#b14e36", shades: ["14", "17", "19", "23", "24"], code: "DH-2207-C" }),
   // Combos (se arman por pedido: sin stock propio)
   p({
     id: "combo-1",
@@ -200,6 +202,7 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
       stock: isNat(r.stock) ? r.stock : undefined,
       image: optStr(r.image),
       hex: optStr(r.hex),
+      shades: normalizeShades(r.shades),
       code: optStr(r.code),
       featured: r.featured === true,
       isNew: r.isNew === true,
@@ -209,6 +212,23 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
   return out;
 }
 
+/** Lista de tonos limpia: textos cortos, sin vacíos ni repetidos, hasta 30. Vacía = sin tonos. */
+export function normalizeShades(value: unknown): string[] | undefined {
+  const raw = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+  const out: string[] = [];
+  for (const v of raw) {
+    if (typeof v !== "string") continue;
+    const t = v.trim().slice(0, 30);
+    if (t && !out.includes(t)) out.push(t);
+  }
+  return out.length ? out.slice(0, 30) : undefined;
+}
+
+/** Nombre de la línea del pedido con el tono elegido (así lo leen el carrito, el WhatsApp, los mails y MP). */
+export function makeupLineName(name: string, shade?: string): string {
+  return shade ? `${name} · tono ${shade}` : name;
+}
+
 const units = (n: number) => `${n === 1 ? "queda" : "quedan"} ${n} ${n === 1 ? "unidad" : "unidades"}`;
 
 /**
@@ -216,7 +236,16 @@ const units = (n: number) => `${n === 1 ? "queda" : "quedan"} ${n} ${n === 1 ? "
  * para poder nombrarlos). Suma las filas repetidas del mismo producto antes de comparar con el stock.
  * Devuelve el mensaje de error para la clienta, o null si está todo bien.
  */
-export function checkMakeupLines(lines: { makeupId: string; qty: number }[], all: MakeupProduct[]): string | null {
+export function checkMakeupLines(lines: { makeupId: string; qty: number; shade?: string }[], all: MakeupProduct[]): string | null {
+  for (const l of lines) {
+    const product = all.find((m) => m.id === l.makeupId);
+    if (!product?.active) continue; // lo informa el control de abajo
+    if (product.shades?.length) {
+      if (!l.shade) return `Elegí el tono de ${product.name} (sacalo del carrito y volvé a sumarlo).`;
+      if (!product.shades.includes(l.shade))
+        return `El tono ${l.shade} de ${product.name} ya no está disponible. Sacalo del carrito y elegí otro.`;
+    }
+  }
   const totals = new Map<string, number>();
   for (const l of lines) totals.set(l.makeupId, (totals.get(l.makeupId) ?? 0) + l.qty);
   for (const [id, qty] of totals) {

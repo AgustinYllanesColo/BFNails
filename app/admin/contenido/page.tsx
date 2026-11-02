@@ -278,6 +278,9 @@ function MakeupForm({ product }: { product?: MakeupProduct }) {
         <L label="Descripción (una línea)">
           <input name="description" maxLength={MAKEUP_LIMITS.description} defaultValue={product?.description} className={adminInput} />
         </L>
+        <L label="Tonos disponibles (separados por coma; vacío = sin tonos)">
+          <input name="shades" maxLength={400} placeholder="02, 04, 06" defaultValue={product?.shades?.join(", ")} className={adminInput} />
+        </L>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           <L label="Precio c/u">
             <input name="price" type="number" min={0} max={MAKEUP_LIMITS.price} step={1} required defaultValue={product?.price} className={adminInput} />

@@ -34,7 +34,7 @@ export const useCart = create<CartState>()(
           }
           // lo mismo con el maquillaje (el tope por stock lo pone quien agrega; el servidor lo vuelve a validar)
           if (item.kind === "makeup") {
-            const same = s.items.find((i) => i.kind === "makeup" && i.makeupId === item.makeupId);
+            const same = s.items.find((i) => i.kind === "makeup" && i.makeupId === item.makeupId && i.shade === item.shade);
             if (same)
               return {
                 items: s.items.map((i) => {
