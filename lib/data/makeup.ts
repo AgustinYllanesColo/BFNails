@@ -197,6 +197,43 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
   p({ id: "brocha-city", name: "Brocha", brand: "City Girl", description: "Brocha suave para polvo y rubor.", category: "brochas", form: "brocha", price: 1200, stock: 4, hex: "#4a0e0e", code: "FB-20W-79" }),
 ];
 
+/** Palabras que se suelen sumar al nombre de una marca y no la cambian ("Tei cosmética" es "Tei"). */
+const BRAND_TAIL = /(?:-(?:cosmetica|cosmeticas|cosmeticos|cosmetics|cosmetic|makeup|make-up|beauty|maquillaje))+$/;
+
+/**
+ * Clave de la marca para agrupar en el filtro y la URL: sin mayúsculas ni acentos y sin "cosmética", "makeup", etc.
+ * Así "TEI", "Tei" y "Tei Cosmética" son la misma marca.
+ */
+export function brandKey(brand: string | undefined): string {
+  const s = (brand ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  return s.replace(BRAND_TAIL, "") || s;
+}
+
+/**
+ * Marcas sin repetir, con el nombre que más se usa (si empatan, el más corto) y cuántos productos tiene cada una.
+ */
+export function makeupBrands(products: Pick<MakeupProduct, "brand">[]): { key: string; label: string; count: number }[] {
+  const map = new Map<string, { names: Map<string, number>; count: number }>();
+  for (const p of products) {
+    const name = p.brand?.trim();
+    if (!name) continue;
+    const key = brandKey(name);
+    const b = map.get(key) ?? { names: new Map(), count: 0 };
+    b.count++;
+    b.names.set(name, (b.names.get(name) ?? 0) + 1);
+    map.set(key, b);
+  }
+  return [...map].map(([key, b]) => {
+    const label = [...b.names].sort((x, y) => y[1] - x[1] || x[0].length - y[0].length)[0][0];
+    return { key, label, count: b.count };
+  });
+}
+
 export function makeupInStock(m: MakeupProduct): boolean {
   return m.stock == null || m.stock > 0;
 }

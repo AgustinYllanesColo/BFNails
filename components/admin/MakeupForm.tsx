@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MAKEUP_CATEGORIES, MAKEUP_MEDIA_MAX, makeupMedia, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, MAKEUP_MEDIA_MAX, makeupBrands, makeupMedia, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
 import { MAKEUP_LIMITS } from "@/lib/admin/makeup-form";
 import { MakeupMediaField } from "@/components/admin/MakeupMediaField";
 import { Card, Field as L, adminCheck, adminInput } from "@/components/admin/ui";
@@ -27,7 +27,13 @@ export function MakeupForm({ product, loose }: { product?: MakeupProduct; loose:
             <input name="name" required minLength={2} maxLength={MAKEUP_LIMITS.name} defaultValue={product?.name} className={adminInput} />
           </L>
           <L label="Marca">
-            <input name="brand" maxLength={MAKEUP_LIMITS.brand} defaultValue={product?.brand} className={adminInput} />
+            {/* sugiere las marcas ya cargadas, así no queda la misma escrita de dos formas */}
+            <input name="brand" list="makeup-brands" maxLength={MAKEUP_LIMITS.brand} defaultValue={product?.brand} className={adminInput} />
+            <datalist id="makeup-brands">
+              {makeupBrands(loose).map((b) => (
+                <option key={b.key} value={b.label} />
+              ))}
+            </datalist>
           </L>
           <L label="Categoría">
             <select name="category" value={category} onChange={(e) => setCategory(e.target.value as MakeupCategory)} className={adminInput}>
