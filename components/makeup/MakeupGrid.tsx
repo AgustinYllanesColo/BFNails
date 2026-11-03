@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { MAKEUP_CATEGORIES, brandKey, makeupBrands, makeupInStock, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, makeupBrands, makeupInStock, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
 import { Chip } from "@/components/ui/Chip";
 import { MakeupCard, makeupTilt } from "./MakeupCard";
 
@@ -32,12 +32,19 @@ export function MakeupGrid({ products }: { products: MakeupProduct[] }) {
 
   // Marcas cargadas, sin repetir aunque estén escritas distinto ("TEI" y "Tei cosmética" son una), con cuántos
   // productos tiene cada una en la categoría elegida.
-  const brands = useMemo(() => {
-    const inCat = makeupBrands(products.filter((p) => !cat || p.category === cat));
-    return makeupBrands(products)
-      .map((b) => ({ slug: b.key, label: b.label, all: b.count, inCat: inCat.find((c) => c.key === b.key)?.count ?? 0 }))
-      .sort((a, b) => a.label.localeCompare(b.label, "es"));
-  }, [products, cat]);
+  const { list: allBrands, keyOf: brandKey } = useMemo(() => makeupBrands(products), [products]);
+  const brands = useMemo(
+    () =>
+      allBrands
+        .map((b) => ({
+          slug: b.key,
+          label: b.label,
+          all: b.count,
+          inCat: products.filter((p) => (!cat || p.category === cat) && p.brand?.trim() && brandKey(p.brand) === b.key).length,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label, "es")),
+    [allBrands, brandKey, products, cat],
+  );
   const rawBrand = params.get("marca");
   const brand = brands.find((b) => b.slug === rawBrand) ?? null;
 
@@ -87,7 +94,7 @@ export function MakeupGrid({ products }: { products: MakeupProduct[] }) {
   const visible = useMemo(() => {
     const list = products.filter((p) => (!cat || p.category === cat) && (!brand || brandKey(p.brand) === brand.slug));
     return [...list].sort((a, b) => Number(makeupInStock(b)) - Number(makeupInStock(a)));
-  }, [products, cat, brand]);
+  }, [products, cat, brand, brandKey]);
   // marcas con algo en la categoría elegida (la elegida queda siempre, para poder sacarla)
   const brandChips = brands.filter((b) => b.inCat > 0 || b.slug === brand?.slug);
 

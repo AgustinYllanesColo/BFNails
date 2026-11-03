@@ -354,16 +354,30 @@ describe("marcas del filtro", () => {
     expect(brandKey("Tei cosmética")).toBe("tei");
     expect(brandKey(" Tei Cosmetics ")).toBe("tei");
     expect(brandKey("Pink21")).toBe("pink21");
-    expect(brandKey("Magic Color")).toBe("magic-color");
+    expect(brandKey("Pink 21")).toBe("pink21");
+    expect(brandKey("Magic Color")).toBe("magiccolor");
     // si la marca es solo esa palabra, queda como está
     expect(brandKey("Beauty")).toBe("beauty");
   });
 
   it("agrupa y usa el nombre más usado", () => {
-    const list = makeupBrands([{ brand: "TEI" }, { brand: "TEI" }, { brand: "Tei cosmética" }, { brand: "Pink21" }, {}]);
+    const { list, keyOf } = makeupBrands([
+      { brand: "TEI" },
+      { brand: "TEI" },
+      { brand: "Tei cosmética" },
+      { brand: "Pink21" },
+      { brand: "Pink21" },
+      { brand: "Pink 21" },
+      { brand: "Pink21 2 en 1" },
+      { brand: "Ruby Rose" },
+      {},
+    ]);
     expect(list).toEqual([
       { key: "tei", label: "TEI", count: 3 },
-      { key: "pink21", label: "Pink21", count: 1 },
+      { key: "pink21", label: "Pink21", count: 4 },
+      { key: "rubyrose", label: "Ruby Rose", count: 1 },
     ]);
+    expect(keyOf("Pink21 2 en 1")).toBe("pink21");
+    expect(keyOf("Tei cosmética")).toBe("tei");
   });
 });

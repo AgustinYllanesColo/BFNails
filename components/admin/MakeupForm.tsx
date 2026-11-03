@@ -30,7 +30,7 @@ export function MakeupForm({ product, loose }: { product?: MakeupProduct; loose:
             {/* sugiere las marcas ya cargadas, así no queda la misma escrita de dos formas */}
             <input name="brand" list="makeup-brands" maxLength={MAKEUP_LIMITS.brand} defaultValue={product?.brand} className={adminInput} />
             <datalist id="makeup-brands">
-              {makeupBrands(loose).map((b) => (
+              {makeupBrands(loose).list.map((b) => (
                 <option key={b.key} value={b.label} />
               ))}
             </datalist>

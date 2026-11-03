@@ -200,38 +200,73 @@ export const DEFAULT_MAKEUP: MakeupProduct[] = [
 /** Palabras que se suelen sumar al nombre de una marca y no la cambian ("Tei cosmética" es "Tei"). */
 const BRAND_TAIL = /(?:-(?:cosmetica|cosmeticas|cosmeticos|cosmetics|cosmetic|makeup|make-up|beauty|maquillaje))+$/;
 
-/**
- * Clave de la marca para agrupar en el filtro y la URL: sin mayúsculas ni acentos y sin "cosmética", "makeup", etc.
- * Así "TEI", "Tei" y "Tei Cosmética" son la misma marca.
- */
-export function brandKey(brand: string | undefined): string {
+/** Palabras de la marca: sin mayúsculas, acentos ni signos, y sin "cosmética", "makeup", etc. al final. */
+function brandWords(brand: string | undefined): string[] {
   const s = (brand ?? "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  return s.replace(BRAND_TAIL, "") || s;
+  return (s.replace(BRAND_TAIL, "") || s).split("-").filter(Boolean);
+}
+
+/**
+ * Clave de la marca para agrupar en el filtro y la URL: "TEI", "Tei cosmética" → "tei"; "Pink 21", "Pink21" → "pink21".
+ */
+export function brandKey(brand: string | undefined): string {
+  return brandWords(brand).join("");
 }
 
 /**
  * Marcas sin repetir, con el nombre que más se usa (si empatan, el más corto) y cuántos productos tiene cada una.
+ * Una marca con algo de más al final ("Pink21 2 en 1") se suma a la que ya existe ("Pink21").
+ * `keyOf` da la marca (clave) en la que quedó cada producto, para filtrar.
  */
-export function makeupBrands(products: Pick<MakeupProduct, "brand">[]): { key: string; label: string; count: number }[] {
-  const map = new Map<string, { names: Map<string, number>; count: number }>();
+export function makeupBrands(products: Pick<MakeupProduct, "brand">[]): {
+  list: { key: string; label: string; count: number }[];
+  keyOf: (brand: string | undefined) => string;
+} {
+  const words = new Map<string, string[]>();
+  for (const p of products) {
+    const name = p.brand?.trim();
+    if (name) words.set(brandKey(name), brandWords(name));
+  }
+  // las claves más cortas primero: una más larga que empieza con otra (palabra por palabra) va con esa
+  const keys = [...words.keys()].sort((a, b) => a.length - b.length);
+  const parent = new Map<string, string>();
+  for (const k of keys) {
+    const w = words.get(k)!;
+    let to = k;
+    for (let i = 1; i < w.length; i++) {
+      const prefix = w.slice(0, i).join("");
+      if (parent.has(prefix)) {
+        to = parent.get(prefix)!;
+        break;
+      }
+    }
+    parent.set(k, to);
+  }
+  const keyOf = (brand: string | undefined) => {
+    const k = brandKey(brand);
+    return parent.get(k) ?? k;
+  };
+  const groups = new Map<string, { names: Map<string, number>; count: number }>();
   for (const p of products) {
     const name = p.brand?.trim();
     if (!name) continue;
-    const key = brandKey(name);
-    const b = map.get(key) ?? { names: new Map(), count: 0 };
-    b.count++;
-    b.names.set(name, (b.names.get(name) ?? 0) + 1);
-    map.set(key, b);
+    const key = keyOf(name);
+    const g = groups.get(key) ?? { names: new Map(), count: 0 };
+    g.count++;
+    // el nombre que se muestra sale solo de los que son exactamente esa marca (no de "Pink21 2 en 1")
+    if (brandKey(name) === key) g.names.set(name, (g.names.get(name) ?? 0) + 1);
+    groups.set(key, g);
   }
-  return [...map].map(([key, b]) => {
-    const label = [...b.names].sort((x, y) => y[1] - x[1] || x[0].length - y[0].length)[0][0];
-    return { key, label, count: b.count };
+  const list = [...groups].map(([key, g]) => {
+    const label = [...g.names].sort((x, y) => y[1] - x[1] || x[0].length - y[0].length)[0][0];
+    return { key, label, count: g.count };
   });
+  return { list, keyOf };
 }
 
 export function makeupInStock(m: MakeupProduct): boolean {
