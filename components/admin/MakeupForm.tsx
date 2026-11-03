@@ -87,10 +87,14 @@ export function MakeupForm({ product, loose }: { product?: MakeupProduct; loose:
 
       <Card title="Fotos y videos">
         <p className="mb-3 text-sm text-ink-soft">
-          Subí todas las que quieras (fotos y videos). La primera foto es la portada de la tarjeta y el primer video corre en
-          la tarjeta. En la vista en grande se ven todas, en este orden.
+          Subí todas las que quieras (fotos y videos). La portada es la foto que se ve en la tarjeta del catálogo: para
+          cambiarla, tocá «Hacer portada» en otra foto. Los videos van detrás de la portada en la vista en grande.
         </p>
         <MakeupMediaField initial={product ? makeupMedia(product) : []} max={MAKEUP_MEDIA_MAX} />
+        <label className={adminCheck + " mt-3"}>
+          <input type="checkbox" name="videoOnCard" defaultChecked={product?.videoOnCard ?? false} /> Mostrar el video en la
+          tarjeta del catálogo en vez de la foto de portada
+        </label>
       </Card>
 
       <Card title="Dónde se ve">

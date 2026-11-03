@@ -63,10 +63,12 @@ export type MakeupProduct = {
   /** Foto real (fondo liso). Mientras falte, se dibuja el producto con `form` y `hex`. */
   image?: string;
   /**
-   * Video corto del producto (MP4 H.264 sin sonido, vertical): en la tarjeta del catálogo reemplaza a la foto y corre
-   * solo, en bucle. `image` queda como cuadro fijo (mientras carga, en los stickers chicos y con movimiento reducido).
+   * Video corto del producto (MP4 H.264 sin sonido, vertical). Va en la galería de la vista ampliada, detrás de la
+   * portada. Solo con `videoOnCard` corre en la tarjeta del catálogo en lugar de la foto.
    */
   video?: string;
+  /** El video corre en la tarjeta del catálogo en lugar de la foto de portada (se elige en el admin). */
+  videoOnCard?: boolean;
   /**
    * Fotos y videos del producto en el orden elegido en el admin: es la galería de la vista ampliada. La primera foto
    * pasa a `image` (portada) y el primer video a `video` (el que corre en la tarjeta). Vacío = solo `image`/`video`.
@@ -252,9 +254,18 @@ export function normalizeMedia(value: unknown): string[] | undefined {
   return out.length ? out.slice(0, MAKEUP_MEDIA_MAX) : undefined;
 }
 
-/** Fotos y videos para la galería, en orden. Sin `media` (productos viejos o de fábrica): la foto y el video que tenga. */
+/** Pone la portada (la primera foto) adelante de todo: los videos quedan detrás de la foto, nunca de entrada. */
+export function coverFirst(list: string[]): string[] {
+  const cover = list.find((u) => !isVideoUrl(u));
+  return cover ? [cover, ...list.filter((u) => u !== cover)] : list;
+}
+
+/**
+ * Fotos y videos para la galería, con la portada primero y los videos detrás. Sin `media` (productos viejos o de
+ * fábrica): la foto y el video que tenga.
+ */
 export function makeupMedia(p: Pick<MakeupProduct, "media" | "image" | "video">): string[] {
-  if (p.media?.length) return p.media;
+  if (p.media?.length) return coverFirst(p.media);
   return [p.image, p.video].filter((u): u is string => Boolean(u));
 }
 
@@ -288,6 +299,7 @@ export function normalizeMakeupList(value: unknown): MakeupProduct[] | null {
       image: optStr(r.image) ?? shipped(r.id, "image", r),
       video: normalizeVideoUrl(r.video) ?? shipped(r.id, "video", r),
       media: normalizeMedia(r.media),
+      videoOnCard: r.videoOnCard === true || undefined,
       details: optStr(r.details),
       hex: optStr(r.hex),
       shades: normalizeShades(r.shades),

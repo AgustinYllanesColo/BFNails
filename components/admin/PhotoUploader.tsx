@@ -27,10 +27,17 @@ async function shrink(file: File): Promise<Blob> {
   }
 }
 
+/** La portada (la primera foto) va siempre adelante: un video nunca queda de entrada. */
+function coverFirst<T extends { video: boolean }>(list: T[]): T[] {
+  const i = list.findIndex((p) => !p.video);
+  return i > 0 ? [list[i], ...list.slice(0, i), ...list.slice(i + 1)] : list;
+}
+
 /**
  * Fotos (y, con `allowVideo`, videos) de una publicación: elegís o arrastrás varias de una, se suben todas en paralelo
  * y quedan en orden. El orden se cambia arrastrando una miniatura sobre otra o con las flechas; la primera foto es la
- * portada. Las URLs viajan al server action en un input oculto `name`, una por línea.
+ * portada y siempre va primera (los videos quedan detrás). Con "Hacer portada" cualquier foto pasa adelante.
+ * Las URLs viajan al server action en un input oculto `name`, una por línea.
  */
 export function PhotoUploader({
   name,
@@ -48,7 +55,7 @@ export function PhotoUploader({
   max?: number;
 }) {
   const [photos, setPhotos] = useState<Photo[]>(() =>
-    initial.map((url) => ({ id: url, url, preview: url, progress: 100, video: VIDEO_RE.test(url) })),
+    coverFirst(initial.map((url) => ({ id: url, url, preview: url, progress: 100, video: VIDEO_RE.test(url) }))),
   );
   const [dragging, setDragging] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
@@ -70,7 +77,7 @@ export function PhotoUploader({
       const video = f.type.startsWith("video/") || VIDEO_RE.test(f.name);
       return { file: f, photo: { id: crypto.randomUUID(), preview: URL.createObjectURL(f), progress: 0, video } as Photo };
     });
-    setPhotos((cur) => [...cur, ...added.map((a) => a.photo)]);
+    setPhotos((cur) => coverFirst([...cur, ...added.map((a) => a.photo)]));
     // todas a la vez
     for (const { file, photo } of added) {
       (async () => {
@@ -112,7 +119,7 @@ export function PhotoUploader({
   }
 
   function remove(id: string) {
-    setPhotos((list) => list.filter((p) => p.id !== id));
+    setPhotos((list) => coverFirst(list.filter((p) => p.id !== id)));
   }
   function moveTo(id: string, to: number) {
     setPhotos((list) => {
@@ -121,7 +128,7 @@ export function PhotoUploader({
       const next = [...list];
       const [item] = next.splice(i, 1);
       next.splice(to, 0, item);
-      return next;
+      return coverFirst(next);
     });
   }
 
@@ -183,6 +190,15 @@ export function PhotoUploader({
                   ✕
                 </button>
               </div>
+              {p.url && !p.video && p.id !== cover && (
+                <button
+                  type="button"
+                  onClick={() => moveTo(p.id, 0)}
+                  className="bg-bordo text-cream absolute inset-x-1 bottom-9 rounded-full px-2 py-1 text-[10px] font-bold shadow"
+                >
+                  Hacer portada
+                </button>
+              )}
               {p.url && photos.length > 1 && (
                 <div className="absolute right-1 bottom-1 left-1 flex justify-between">
                   <button type="button" disabled={i === 0} onClick={() => moveTo(p.id, i - 1)} className="grid size-7 place-items-center rounded-full bg-white/90 text-xs shadow disabled:opacity-0" aria-label={`Mover ${i + 1} antes`}>
@@ -197,7 +213,7 @@ export function PhotoUploader({
           ))}
         </ol>
       )}
-      {photos.length > 1 && <p className="text-ink-soft -mt-1 mb-3 text-xs">Para cambiar el orden, arrastrá una miniatura o usá las flechas. La primera foto es la portada.</p>}
+      {photos.length > 1 && <p className="text-ink-soft -mt-1 mb-3 text-xs">Para cambiar el orden, arrastrá una miniatura o usá las flechas. La portada siempre va primera y los videos detrás; para cambiarla, tocá «Hacer portada» en otra foto.</p>}
       {!full && (
         <button
           type="button"
