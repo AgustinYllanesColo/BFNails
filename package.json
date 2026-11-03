@@ -18,7 +18,8 @@
     "format": "prettier --write .",
     "db:seed:sql": "tsx scripts/seed-sql.ts",
     "test:e2e:prod": "PW_BASE_URL=https://bf-nails.vercel.app playwright test",
-    "visual:capture": "node scripts/visual/capture.mjs"
+    "visual:capture": "node scripts/visual/capture.mjs",
+    "video:reel": "node scripts/video/reel.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

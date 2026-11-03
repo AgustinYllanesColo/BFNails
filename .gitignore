@@ -46,3 +46,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 .preview
+out/
+docs/redes/*.mp4
+docs/redes/*.jpg
