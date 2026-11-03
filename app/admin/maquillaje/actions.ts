@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/admin/auth";
 import { uploadDesignImage } from "@/lib/admin/catalog";
 import { getAllMakeup, writeContent } from "@/lib/data/content-repo";
 import { resetMakeupSold } from "@/lib/data/makeup-stock";
-import { isVideoUrl, makeupForSave, type MakeupProduct } from "@/lib/data/makeup";
+import { coverFirst, isVideoUrl, makeupForSave, type MakeupProduct } from "@/lib/data/makeup";
 import { parseComboIncludes, parseMakeupForm } from "@/lib/admin/makeup-form";
 import { slugify } from "@/lib/format";
 import { applyQuickEdits, parseQuickEdits } from "@/lib/admin/quick-edit";
@@ -39,8 +39,8 @@ function posterFrom(formData: FormData): string | undefined {
 }
 
 /**
- * Galería del formulario (fotos y videos ya subidos, en orden): la primera foto es la portada y el primer video es el
- * que corre en la tarjeta. Si solo hay videos, la portada es el cuadro fijo que sacó el navegador del primero.
+ * Galería del formulario (fotos y videos ya subidos, en orden): la primera foto es la portada (se guarda primera, con
+ * los videos detrás) y el primer video es el del producto (en la tarjeta solo si se marca "video en la tarjeta"). Si solo hay videos, la portada es el cuadro fijo que sacó el navegador del primero.
  */
 function mediaFields(media: string[] | undefined, formData: FormData, prev?: MakeupProduct): Pick<MakeupProduct, "media" | "image" | "video"> {
   const list = media ?? [];
@@ -48,7 +48,7 @@ function mediaFields(media: string[] | undefined, formData: FormData, prev?: Mak
   const video = list.find((u) => isVideoUrl(u));
   // un cuadro fijo guardado antes (no está en la galería) sigue sirviendo mientras el video siga
   const prevPoster = prev?.image && !prev.media?.includes(prev.image) && prev.video === video ? prev.image : undefined;
-  return { media: list.length ? list : undefined, image: firstImage ?? (video ? (posterFrom(formData) ?? prevPoster) : undefined), video };
+  return { media: list.length ? coverFirst(list) : undefined, image: firstImage ?? (video ? (posterFrom(formData) ?? prevPoster) : undefined), video };
 }
 
 export async function saveMakeup(formData: FormData) {
@@ -77,6 +77,8 @@ export async function saveMakeup(formData: FormData) {
       image: (await imageFrom(formData, prev?.image)) ?? posterFrom(formData),
     }),
     featured: formData.get("featured") === "on",
+    // por defecto la portada es la foto; el video va en la tarjeta solo si se marca
+    videoOnCard: formData.get("videoOnCard") === "on" || undefined,
     isNew: formData.get("isNew") === "on",
     active: formData.get("active") === "on",
   };

@@ -837,7 +837,10 @@ export function MakeupVisual({
   priority?: boolean;
   className?: string;
   alt?: string;
-  /** Si el producto tiene video, corre sobre la foto. Solo en la tarjeta del catálogo: los stickers chicos van con la foto. */
+  /**
+   * Tarjeta del catálogo: si el producto lo pide (`videoOnCard`) o no tiene foto, el video corre sobre la portada.
+   * Si no, la portada es la foto y el video queda para la vista ampliada. Los stickers chicos van siempre con la foto.
+   */
   video?: boolean;
 }) {
   return (
@@ -857,7 +860,7 @@ export function MakeupVisual({
       ) : (
         <MakeupArt product={product} label={alt || undefined} />
       )}
-      {video && product.video && <MakeupVideo src={product.video} poster={product.image} />}
+      {video && product.video && (product.videoOnCard || !product.image) && <MakeupVideo src={product.video} poster={product.image} />}
     </div>
   );
 }

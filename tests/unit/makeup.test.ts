@@ -323,7 +323,9 @@ describe("galería de fotos y videos del maquillaje", () => {
 
   it("sin galería, se usa la foto y el video que tenga el producto", () => {
     expect(makeupMedia({ image: foto, video })).toEqual([foto, video]);
-    expect(makeupMedia({ image: foto, video, media: [video, foto2] })).toEqual([video, foto2]);
+    // la portada (primera foto) va adelante: el video queda detrás
+    expect(makeupMedia({ image: foto, video, media: [video, foto2] })).toEqual([foto2, video]);
+    expect(makeupMedia({ media: [video] })).toEqual([video]);
     expect(makeupMedia({})).toEqual([]);
   });
 
@@ -331,5 +333,15 @@ describe("galería de fotos y videos del maquillaje", () => {
     const [m] = normalizeMakeupList([{ id: "a", name: "Labial", category: "labios", price: 100, media: [video, foto], details: "Dura todo el día." }])!;
     expect(m.media).toEqual([video, foto]);
     expect(m.details).toBe("Dura todo el día.");
+    expect(m.videoOnCard).toBeUndefined();
+  });
+
+  it("el video va en la tarjeta solo si se eligió en el admin", () => {
+    const [a, b] = normalizeMakeupList([
+      { id: "a", name: "Polvo", category: "cejas", price: 100, video, videoOnCard: true },
+      { id: "b", name: "Polvo", category: "cejas", price: 100, video },
+    ])!;
+    expect(a.videoOnCard).toBe(true);
+    expect(b.videoOnCard).toBeUndefined();
   });
 });
