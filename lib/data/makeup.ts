@@ -210,21 +210,30 @@ export function isVideoUrl(url: string): boolean {
   return /\.(mp4|webm|mov|m4v)(?:[?#]|$)/i.test(url);
 }
 
+/** Pone la portada (la primera foto) adelante de todo: los videos quedan detrás de la foto, nunca de entrada. */
+function coverFirst(list: string[]): string[] {
+  const cover = list.find((u) => !isVideoUrl(u));
+  return cover ? [cover, ...list.filter((u) => u !== cover)] : list;
+}
+
 /**
- * Ordena fotos y videos y saca la portada: la primera foto de la lista. Los productos viejos (solo `image`)
- * pasan a tener esa foto como único elemento.
+ * Ordena fotos y videos y saca la portada: la primera foto de la lista, que queda primera aunque haya videos antes.
+ * Los productos viejos (solo `image`) pasan a tener esa foto como único elemento.
  */
 export function normalizeMedia(value: unknown, image?: string): { media?: string[]; image?: string } {
   const list = Array.isArray(value)
     ? value.filter((u): u is string => typeof u === "string" && /^(https:\/\/|\/)/.test(u.trim())).map((u) => u.trim())
     : [];
-  const media = [...new Set(list.length ? list : image ? [image] : [])].slice(0, MAKEUP_MEDIA_MAX);
+  const media = coverFirst([...new Set(list.length ? list : image ? [image] : [])].slice(0, MAKEUP_MEDIA_MAX));
   return { media: media.length ? media : undefined, image: media.find((u) => !isVideoUrl(u)) };
 }
 
-/** Fotos y videos en orden; los productos sin `media` (los de fábrica) muestran su foto, si tienen. */
+/**
+ * Fotos y videos en orden, con la portada primero (los guardados antes con un video adelante también se ven así);
+ * los productos sin `media` (los de fábrica) muestran su foto, si tienen.
+ */
 export function makeupMedia(p: Pick<MakeupProduct, "media" | "image">): string[] {
-  return p.media?.length ? p.media : p.image ? [p.image] : [];
+  return p.media?.length ? coverFirst(p.media) : p.image ? [p.image] : [];
 }
 
 /** Máximo de fotos y videos por producto. */

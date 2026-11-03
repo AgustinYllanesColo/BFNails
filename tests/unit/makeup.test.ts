@@ -226,8 +226,17 @@ describe("fotos y videos del maquillaje", () => {
     expect(isVideoUrl(foto)).toBe(false);
   });
 
-  it("respeta el orden y la portada es la primera foto (aunque antes haya un video)", () => {
-    expect(normalizeMedia([video, foto2, foto])).toEqual({ media: [video, foto2, foto], image: foto2 });
+  it("la portada es la primera foto y va adelante: el video queda detrás", () => {
+    expect(normalizeMedia([video, foto2, foto])).toEqual({ media: [foto2, video, foto], image: foto2 });
+    expect(normalizeMedia([foto, video, foto2])).toEqual({ media: [foto, video, foto2], image: foto });
+  });
+
+  it("solo videos: quedan en su orden y no hay portada", () => {
+    expect(normalizeMedia([video])).toEqual({ media: [video], image: undefined });
+  });
+
+  it("los guardados con un video adelante se muestran con la portada primero", () => {
+    expect(makeupMedia({ media: [video, foto], image: foto })).toEqual([foto, video]);
   });
 
   it("los productos viejos con una sola foto la pasan a la lista", () => {
@@ -241,7 +250,7 @@ describe("fotos y videos del maquillaje", () => {
 
   it("normalizeMakeupList guarda fotos, videos y la descripción ampliada", () => {
     const [m] = normalizeMakeupList([{ id: "a", name: "Labial", category: "labios", price: 100, media: [video, foto], details: "Dura todo el día." }])!;
-    expect(m.media).toEqual([video, foto]);
+    expect(m.media).toEqual([foto, video]);
     expect(m.image).toBe(foto);
     expect(m.details).toBe("Dura todo el día.");
     expect(makeupMedia({ image: foto })).toEqual([foto]);
