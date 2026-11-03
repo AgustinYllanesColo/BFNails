@@ -9,6 +9,8 @@ import {
   normalizeMedia,
   isVideoUrl,
   makeupMedia,
+  brandKey,
+  makeupBrands,
   toPublicMakeup,
   type MakeupProduct,
 } from "@/lib/data/makeup";
@@ -343,5 +345,25 @@ describe("galería de fotos y videos del maquillaje", () => {
     ])!;
     expect(a.videoOnCard).toBe(true);
     expect(b.videoOnCard).toBeUndefined();
+  });
+});
+
+describe("marcas del filtro", () => {
+  it("la misma marca escrita distinto es una sola", () => {
+    expect(brandKey("TEI")).toBe("tei");
+    expect(brandKey("Tei cosmética")).toBe("tei");
+    expect(brandKey(" Tei Cosmetics ")).toBe("tei");
+    expect(brandKey("Pink21")).toBe("pink21");
+    expect(brandKey("Magic Color")).toBe("magic-color");
+    // si la marca es solo esa palabra, queda como está
+    expect(brandKey("Beauty")).toBe("beauty");
+  });
+
+  it("agrupa y usa el nombre más usado", () => {
+    const list = makeupBrands([{ brand: "TEI" }, { brand: "TEI" }, { brand: "Tei cosmética" }, { brand: "Pink21" }, {}]);
+    expect(list).toEqual([
+      { key: "tei", label: "TEI", count: 3 },
+      { key: "pink21", label: "Pink21", count: 1 },
+    ]);
   });
 });

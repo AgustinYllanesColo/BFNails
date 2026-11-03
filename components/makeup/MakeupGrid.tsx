@@ -3,9 +3,8 @@
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { MAKEUP_CATEGORIES, makeupInStock, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
+import { MAKEUP_CATEGORIES, brandKey, makeupBrands, makeupInStock, type MakeupCategory, type MakeupProduct } from "@/lib/data/makeup";
 import { Chip } from "@/components/ui/Chip";
-import { slugify } from "@/lib/format";
 import { MakeupCard, makeupTilt } from "./MakeupCard";
 
 /** Chips del filtro: 44 px de alto para el dedo, foco visible (el Chip base no trae) y sin quedar bajo la barra. */
@@ -31,19 +30,13 @@ export function MakeupGrid({ products }: { products: MakeupProduct[] }) {
   const cat = present.some((c) => c.id === raw) ? (raw as MakeupCategory) : null;
   const catLabel = present.find((c) => c.id === cat)?.label;
 
-  // Marcas cargadas (sin repetir por mayúsculas), con cuántos productos tiene cada una en la categoría elegida.
+  // Marcas cargadas, sin repetir aunque estén escritas distinto ("TEI" y "Tei cosmética" son una), con cuántos
+  // productos tiene cada una en la categoría elegida.
   const brands = useMemo(() => {
-    const map = new Map<string, { slug: string; label: string; all: number; inCat: number }>();
-    for (const p of products) {
-      const label = p.brand?.trim();
-      if (!label) continue;
-      const slug = slugify(label);
-      const b = map.get(slug) ?? { slug, label, all: 0, inCat: 0 };
-      b.all++;
-      if (!cat || p.category === cat) b.inCat++;
-      map.set(slug, b);
-    }
-    return [...map.values()].sort((a, b) => a.label.localeCompare(b.label, "es"));
+    const inCat = makeupBrands(products.filter((p) => !cat || p.category === cat));
+    return makeupBrands(products)
+      .map((b) => ({ slug: b.key, label: b.label, all: b.count, inCat: inCat.find((c) => c.key === b.key)?.count ?? 0 }))
+      .sort((a, b) => a.label.localeCompare(b.label, "es"));
   }, [products, cat]);
   const rawBrand = params.get("marca");
   const brand = brands.find((b) => b.slug === rawBrand) ?? null;
@@ -70,7 +63,7 @@ export function MakeupGrid({ products }: { products: MakeupProduct[] }) {
       const current = q.get("cat");
       const marca = q.get("marca");
       const hiddenByCat = current && hit && hit.category !== current;
-      const hiddenByBrand = marca && hit && slugify(hit.brand ?? "") !== marca;
+      const hiddenByBrand = marca && hit && brandKey(hit.brand) !== marca;
       if (!hit || (!hiddenByCat && !hiddenByBrand)) return;
       pending.current = id;
       // se sacan los dos filtros de una (el que no lo esconde también: así no queda una grilla rara)
@@ -92,7 +85,7 @@ export function MakeupGrid({ products }: { products: MakeupProduct[] }) {
 
   // Los que hay primero; los agotados quedan al final de su categoría.
   const visible = useMemo(() => {
-    const list = products.filter((p) => (!cat || p.category === cat) && (!brand || slugify(p.brand ?? "") === brand.slug));
+    const list = products.filter((p) => (!cat || p.category === cat) && (!brand || brandKey(p.brand) === brand.slug));
     return [...list].sort((a, b) => Number(makeupInStock(b)) - Number(makeupInStock(a)));
   }, [products, cat, brand]);
   // marcas con algo en la categoría elegida (la elegida queda siempre, para poder sacarla)
